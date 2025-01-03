@@ -1,3 +1,10 @@
+# Accessories:
+ - TESmart HDMI terminal plug connector 
+ - Gscart/Gcomp EXT push-pin connector
+<img width="319" alt="TESmart_nocut" src="https://github.com/user-attachments/assets/067b3f78-6c55-4959-a7aa-3bc9e30e1dc6" />
+<img width="401" alt="gscart_pogo" src="https://github.com/user-attachments/assets/fbb2f061-c1cd-48d1-9a30-2cd8f43bb06a" />
+
+--------------
 # Serial Adapters for the Donut Dongle
 
 #### First one out the gate is the YC2VGA shorty.
