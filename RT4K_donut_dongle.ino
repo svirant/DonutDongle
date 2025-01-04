@@ -583,23 +583,14 @@ void readExtron2(){
     // For Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMaxtrix
     if(einput2.substring(0,2) == "In" && voutMatrix[eoutput2.toInt()+32]){
       if(einput2 != "In0 " && einput2 != "In00"){ // much easier method for switch 2 since ALL inputs will respond with SVS commands regardless of SVS option above
-        Serial.print(F("SVS NEW INPUT="));
-        if(einput2.substring(3,4) == " ")
-          Serial.print(einput2.substring(2,3).toInt()+100);
-        else
-          Serial.print(einput2.substring(2,4).toInt()+100);
-        Serial.println(F("\r"));
-        delay(1000);
-        Serial.print(F("SVS CURRENT INPUT="));
-        if(einput2.substring(3,4) == " ")
-          Serial.print(einput2.substring(2,3).toInt()+100);
-        else
-          Serial.print(einput2.substring(2,4).toInt()+100);
-        Serial.println(F("\r"));
-        }
+        if(einput2.substring(3,4) == " ") 
+          sendSVS(einput2.substring(2,3).toInt()+100);
+        else 
+          sendSVS(einput2.substring(2,4).toInt()+100);
+      }
 
         previnput2 = einput2;
-      }
+    }
 
     // for TESmart HDMI switch on Extron sw2 Port
     if(ecapbytes2[4] == 17){
@@ -745,7 +736,7 @@ void readGscart2(){
       }
       else if(!(gscart2 ^ B00010000)){
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x26,2);  // RT4K profile 11
-        
+
         if(SVS==2)Serial.println(F("remote prof11\r"));
         else sendSVS(211);
       }
@@ -1146,12 +1137,12 @@ void sendSVS(int num){
   Serial.println(F("\r"));
 }
 
-void sendSVS(String stringnum){
+void sendSVS(String num){
   Serial.print(F("SVS NEW INPUT="));
-  Serial.print(stringnum);
+  Serial.print(num);
   Serial.println(F("\r"));
   delay(1000);
   Serial.print(F("SVS CURRENT INPUT="));
-  Serial.print(stringnum);
+  Serial.print(num);
   Serial.println(F("\r"));
 }
