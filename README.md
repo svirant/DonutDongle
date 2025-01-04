@@ -47,7 +47,7 @@ Arduino Nano based hub that connects your current console switching setup with t
 
   - or **2x** DB9 Male to 3.5mm Male Serial RS232 Cable 6feet: [Amazon](https://www.amazon.com/LIANSHU-DC3-5mm-Serial-RS232-Cable/dp/B07G2ZL3SL/)
   
-  - Must be wired as so: [DB9 Male Pin 5 -> Sleeve, DB9 Male Pin 2 -> Tip, DB9 Male Pin 3 -> Ring](https://github.com/user-attachments/assets/4660ba77-eace-4b76-b169-7ea5f80491f9)
+  - "MUST" be wired as so: [DB9 Male Pin 5 -> Sleeve, DB9 Male Pin 2 -> Tip, DB9 Male Pin 3 -> Ring](https://github.com/user-attachments/assets/4660ba77-eace-4b76-b169-7ea5f80491f9)
  
 
 
