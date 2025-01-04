@@ -4,6 +4,9 @@
 <img width="319" alt="TESmart_nocut" src="https://github.com/user-attachments/assets/067b3f78-6c55-4959-a7aa-3bc9e30e1dc6" />
 <img width="401" alt="gscart_pogo" src="https://github.com/user-attachments/assets/fbb2f061-c1cd-48d1-9a30-2cd8f43bb06a" />
 
+### (Optional) DB9 to 3.5mm TRS wiring diagram
+<img width="800" alt="DB9_to_TRS_wiring" src="https://github.com/user-attachments/assets/4660ba77-eace-4b76-b169-7ea5f80491f9" />
+
 --------------
 # Serial Adapters for the Donut Dongle
 
