@@ -16,6 +16,8 @@ NPN Transistor,1,Q1,,2N3904,,https://www.aliexpress.us/item/3256806623522970.htm
 2.54mm Pitch Single Row Female 15P PCB socket Board Pin Header Connector Strip Pinheader,2,,1x15 pin female header,,,https://www.aliexpress.us/item/3256801232229618.html,
 M2 standoff (6mm height is fine),4,,M2,,,https://www.aliexpress.us/item/3256805852352006.html,
 2 Port DB9 RS232 Serial Port Bracket To IDC 10Pin Male Female Header Ribbon Cable Connector,1,,DB9 to 2x5 pin header,,,https://www.aliexpress.us/item/3256807472891897.html,
+or... DB9 Male to DC3.5mm Male Serial RS232 Cable 6feet DB9 Male to 3.5mm Serial Cable L= 6FT Black,2,,DB9 to 3.5mm,,,,https://www.amazon.com/LIANSHU-DC3-5mm-Serial-RS232-Cable/dp/B07G2ZL3SL/
+"(any DB9 to 3.5mm cable that is Pin 5 -> Sleeve (Gnd), Pin 2 -> Tip (Tx) , Pin 3 -> Ring (Rx) )",,,,,,,
 ,,,,,,,
 Digikey shared list:,https://www.digikey.com/en/mylists/list/53XEHTQZJK,,,,,,
 AliExpress shared list:,https://www.aliexpress.com/p/wish-manage/share.html?smbPageCode=wishlist-amp&spreadId=09A40E28BA67E42DE9AF29A70E7238263DE305046632ABE9A0D5E1C5C4589AD9,,,,,,
