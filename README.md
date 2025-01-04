@@ -24,6 +24,12 @@ Arduino Nano based hub that connects your current console switching setup with t
 * **1x   (Q1)** 2N3904 NPN Transistor: [AliExpress](https://www.aliexpress.us/item/3256806623522970.html)
   
 * **2x** 2.54mm Pitch Single Row Female 15P Header Strip: [AliExpress](https://www.aliexpress.us/item/3256801232229618.html)
+
+* **1x** [for TESmart HDMI] Any 3.5mm / aux / stereo / trs / cable: [AliExpress](https://www.aliexpress.us/item/2255799962255486.html)
+
+* **1x** [for GscartSW/GCompSW] 2x4 Pin Double Row 2.54 Pitch Angled Box Header: [AliExpress](https://www.aliexpress.us/item/3256805177947724.html?) (Color: RIGHT ANGLE TYPE, Pins: 10PCS DC3 8Pin)
+
+* **1 or 2x** [for GscartSW/GCompSW] 2x4 Pin Female Header Ribbon Cable Connector: [AliExpress](https://www.aliexpress.us/item/3256804576275377.html?) (Pins: 2x4Pin, Color: Any length)
   
 * **1x** [for Extron] 2 Port DB9 to 2x5 Pin Female Header Ribbon Cable Connector: [AliExpress](https://www.aliexpress.us/item/3256807472891897.html)
 
