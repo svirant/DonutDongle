@@ -298,139 +298,85 @@ void readExtron1(){
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
 
         if(SVS==0)Serial.println(F("remote prof1\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=1\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=1\r"));
-        }
+        else sendSVS(1);
       }
       else if(einput == "In2 " || einput == "In02"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x07,2); // RT4K profile 2
 
         if(SVS==0)Serial.println(F("remote prof2\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=2\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=2\r"));
-        }
+        else sendSVS(2);
       }
       else if(einput == "In3 " || einput == "In03"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x03,2); // RT4K profile 3
 
         if(SVS==0)Serial.println(F("remote prof3\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=3\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=3\r"));
-        }
+        else sendSVS(3);
       }
       else if(einput == "In4 " || einput == "In04"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x0A,2); // RT4K profile 4
 
         if(SVS==0)Serial.println(F("remote prof4\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=4\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=4\r"));
-        }
+        else sendSVS(4);
       }
       else if(einput == "In5 " || einput == "In05"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x06,2); // RT4K profile 5
 
         if(SVS==0)Serial.println(F("remote prof5\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=5\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=5\r"));
-        }
+        else sendSVS(5);
       }
       else if(einput == "In6 " || einput == "In06"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x02,2); // RT4K profile 6
 
         if(SVS==0)Serial.println(F("remote prof6\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=6\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=6\r"));
-        }
+        else sendSVS(6);
       }
       else if(einput == "In7 " || einput == "In07"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x09,2); // RT4K profile 7
 
         if(SVS==0)Serial.println(F("remote prof7\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=7\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=7\r"));
-        }
+        else sendSVS(7);
       }
       else if(einput == "In8 " || einput == "In08"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x05,2); // RT4K profile 8
 
         if(SVS==0)Serial.println(F("remote prof8\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=8\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=8\r"));
-        }
+        else sendSVS(8);
       }
       else if(einput == "In9 " || einput == "In09"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x01,2); // RT4K profile 9
 
         if(SVS==0)Serial.println(F("remote prof9\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=9\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=9\r"));
-        }
+        else sendSVS(9);
       }
       else if(einput == "In10"){
         if((RT5Xir == 1) && !DP0){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x25,2); // RT4K profile 10
 
         if(SVS==0)Serial.println(F("remote prof10\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=10\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=10\r"));
-        }
+        else sendSVS(10);
       }
       else if(einput == "In11"){
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x26,2); // RT4K profile 11
 
         if(SVS==0)Serial.println(F("remote prof11\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=11\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=11\r"));
-        }
+        else sendSVS(11);
       }
       else if(einput == "In12"){
         if((RT4Kir == 1) && !DP0)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
 
         if((SVS==0 && !DP0))Serial.println(F("remote prof12\r")); // okay to use this profile if DP0 is set to false
-        else{
-          Serial.println(F("SVS NEW INPUT=12\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=12\r"));
-        }
+        else sendSVS(12);
       }
       else if(einput != "In0 " && einput != "In00" && einput2 != "In0 " && einput2 != "In00"){ // for inputs 13-99 (SVS only)
-        Serial.print(F("SVS NEW INPUT="));
-        Serial.print(einput.substring(2,4));
-        Serial.println(F("\r"));
-        delay(1000);
-        Serial.print(F("SVS CURRENT INPUT="));
-        Serial.print(einput.substring(2,4));
-        Serial.println(F("\r"));
+        sendSVS(einput.substring(2,4));
       }
 
       previnput = einput;
@@ -444,139 +390,85 @@ void readExtron1(){
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
 
         if(SVS==0)Serial.println(F("remote prof1\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=1\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=1\r"));
-        }
+        else sendSVS(1);
       }
       else if(ecapbytes[6] == 23){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x07,2); // RT4K profile 2
 
         if(SVS==0)Serial.println(F("remote prof2\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=2\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=2\r"));
-        }
+        else sendSVS(2);
       }
       else if(ecapbytes[6] == 24){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x03,2); // RT4K profile 3
 
         if(SVS==0)Serial.println(F("remote prof3\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=3\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=3\r"));
-        }
+        else sendSVS(3);
       }
       else if(ecapbytes[6] == 25){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x0A,2); // RT4K profile 4
 
         if(SVS==0)Serial.println(F("remote prof4\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=4\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=4\r"));
-        }
+        else sendSVS(4);
       }
       else if(ecapbytes[6] == 26){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x06,2); // RT4K profile 5
 
         if(SVS==0)Serial.println(F("remote prof5\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=5\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=5\r"));
-        }
+        else sendSVS(5);
       }
       else if(ecapbytes[6] == 27){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x02,2); // RT4K profile 6
 
         if(SVS==0)Serial.println(F("remote prof6\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=6\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=6\r"));
-        }
+        else sendSVS(6);
       }
       else if(ecapbytes[6] == 28){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x09,2); // RT4K profile 7
 
         if(SVS==0)Serial.println(F("remote prof7\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=7\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=7\r"));
-        }
+        else sendSVS(7);
       }
       else if(ecapbytes[6] == 29){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x05,2); // RT4K profile 8
 
         if(SVS==0)Serial.println(F("remote prof8\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=8\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=8\r"));
-        }
+        else sendSVS(8);
       }
       else if(ecapbytes[6] == 30){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x01,2); // RT4K profile 9
 
         if(SVS==0)Serial.println(F("remote prof9\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=9\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=9\r"));
-        }
+        else sendSVS(9);
       }
       else if(ecapbytes[6] == 31){
         if((RT5Xir == 1) && !DP0){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x25,2); // RT4K profile 10
 
         if(SVS==0)Serial.println(F("remote prof10\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=10\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=10\r"));
-        }
+        else sendSVS(10);
       }
       else if(ecapbytes[6] == 32){
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x26,2); // RT4K profile 11
 
         if(SVS==0)Serial.println(F("remote prof11\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=11\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=11\r"));
-        }
+        else sendSVS(11);
       }
       else if(ecapbytes[6] == 33){
         if((RT4Kir == 1) && !DP0)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
 
         if(SVS==0 && !DP0)Serial.println(F("remote prof12\r")); // okay to use this profile if DP0 is set to false
-        else{
-          Serial.println(F("SVS NEW INPUT=12\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=12\r"));
-        }
+        else sendSVS(12);
       }
       else if(ecapbytes[6] > 33 && ecapbytes[6] < 38){
-      Serial.print(F("SVS NEW INPUT="));
-      Serial.print(ecapbytes[6] - 21);
-      Serial.println(F("\r"));
-      delay(1000);
-      Serial.print(F("SVS CURRENT INPUT="));
-      Serial.print(ecapbytes[6] - 21);
-      Serial.println(F("\r"));
+        sendSVS(ecapbytes[6] - 21);
       }
     }
 
@@ -590,14 +482,9 @@ void readExtron1(){
       if(ecap == "remote prof10"){
           if((RT5Xir == 1) && !DP0){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x25,2); // RT4K profile 10
-          if(SVS == 0){
-            Serial.println(F("remote prof10\r"));
-          }
-          else{
-            Serial.println(F("SVS NEW INPUT=10\r"));
-            delay(1000);
-            Serial.println(F("SVS CURRENT INPUT=10\r"));
-          }
+
+          if(SVS == 0) Serial.println(F("remote prof10\r"));
+          else sendSVS(10);
       }
       else if(ecap == "remote prof12"){
           delay(1);
@@ -605,110 +492,65 @@ void readExtron1(){
       else if(ecap.substring(0,12) == "remote prof1"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
-          if(SVS == 0){
-            Serial.println(F("remote prof1\r"));
-          }
-          else{
-            Serial.println(F("SVS NEW INPUT=1\r"));
-            delay(1000);
-            Serial.println(F("SVS CURRENT INPUT=1\r"));
-          }
+
+          if(SVS == 0) Serial.println(F("remote prof1\r"));
+          else sendSVS(1);
       }
       else if(ecap.substring(0,12) == "remote prof2"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x07,2); // RT4K profile 2
-          if(SVS == 0){
-            Serial.println(F("remote prof2\r"));
-          }
-          else{
-            Serial.println(F("SVS NEW INPUT=2\r"));
-            delay(1000);
-            Serial.println(F("SVS CURRENT INPUT=2\r"));
-          }
+
+          if(SVS == 0) Serial.println(F("remote prof2\r"));
+          else sendSVS(2);
       }
       else if(ecap.substring(0,12) == "remote prof3"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x03,2); // RT4K profile 3
-          if(SVS == 0){
-            Serial.println(F("remote prof3\r"));
-          }
-          else{
-            Serial.println(F("SVS NEW INPUT=3\r"));
-            delay(1000);
-            Serial.println(F("SVS CURRENT INPUT=3\r"));
-          }
+
+          if(SVS == 0) Serial.println(F("remote prof3\r"));
+          else sendSVS(3);
       }
       else if(ecap.substring(0,12) == "remote prof4"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x0A,2); // RT4K profile 4
-          if(SVS == 0){
-            Serial.println(F("remote prof4\r"));
-          }
-          else{
-            Serial.println(F("SVS NEW INPUT=4\r"));
-            delay(1000);
-            Serial.println(F("SVS CURRENT INPUT=4\r"));
-          }
+
+          if(SVS == 0) Serial.println(F("remote prof4\r"));
+          else sendSVS(4);
       }
       else if(ecap.substring(0,12) == "remote prof5"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x06,2); // RT4K profile 5
-          if(SVS == 0){
-            Serial.println(F("remote prof5\r"));
-          }
-          else{
-            Serial.println(F("SVS NEW INPUT=5\r"));
-            delay(1000);
-            Serial.println(F("SVS CURRENT INPUT=5\r"));
-          }
+
+          if(SVS == 0) Serial.println(F("remote prof5\r"));
+          else sendSVS(5);
       }
       else if(ecap.substring(0,12) == "remote prof6"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x02,2); // RT4K profile 6
-          if(SVS == 0){
-            Serial.println(F("remote prof6\r"));
-          }
-          else{
-            Serial.println(F("SVS NEW INPUT=6\r"));
-            delay(1000);
-            Serial.println(F("SVS CURRENT INPUT=6\r"));
-          }
+
+          if(SVS == 0) Serial.println(F("remote prof6\r"));
+          else sendSVS(6);
       }
       else if(ecap.substring(0,12) == "remote prof7"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x09,2); // RT4K profile 7
-          if(SVS == 0){
-            Serial.println(F("remote prof7\r"));
-          }
-          else{
-            Serial.println(F("SVS NEW INPUT=7\r"));
-            delay(1000);
-            Serial.println(F("SVS CURRENT INPUT=7\r"));
-          }
+
+          if(SVS == 0) Serial.println(F("remote prof7\r"));
+          else sendSVS(7);
       }
       else if(ecap.substring(0,12) == "remote prof8"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x05,2); // RT4K profile 8
-          if(SVS == 0){
-            Serial.println(F("remote prof8\r"));
-          }
-          else{
-            Serial.println(F("SVS NEW INPUT=8\r"));
-            delay(1000);
-            Serial.println(F("SVS CURRENT INPUT=8\r"));
-          }
+
+          if(SVS == 0) Serial.println(F("remote prof8\r"));
+          else sendSVS(8);
       }
       else if(ecap.substring(0,12) == "remote prof9"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x01,2); // RT4K profile 9
-          if(SVS == 0){
-            Serial.println(F("remote prof9\r"));
-          }
-          else{
-            Serial.println(F("SVS NEW INPUT=9\r"));
-            delay(1000);
-            Serial.println(F("SVS CURRENT INPUT=9\r"));
-          }
+
+          if(SVS == 0) Serial.println(F("remote prof9\r"));
+          else sendSVS(9);
       }
 
     }
@@ -762,13 +604,7 @@ void readExtron2(){
     // for TESmart HDMI switch on Extron sw2 Port
     if(ecapbytes2[4] == 17){
       if(ecapbytes2[6] > 21 && ecapbytes2[6] < 38){
-        Serial.print(F("SVS NEW INPUT="));
-        Serial.print(ecapbytes2[6] + 79);
-        Serial.println(F("\r"));
-        delay(1000);
-        Serial.print(F("SVS CURRENT INPUT="));
-        Serial.print(ecapbytes2[6] + 79);
-        Serial.println(F("\r"));
+        sendSVS(ecapbytes2[6] + 79);
       }
     }
 
@@ -779,60 +615,17 @@ void readExtron2(){
 
     // for Otaku Games Scart Switch
     if(ecap2.substring(0,6) == "remote"){
-      if(ecap2 == "remote prof10"){
-          Serial.println(F("SVS NEW INPUT=110\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=110\r"));
-      }
-      else if(ecap2 == "remote prof12"){
-          delay(1);
-      }
-      else if(ecap2.substring(0,12) == "remote prof1"){
-          Serial.println(F("SVS NEW INPUT=101\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=101\r"));
-      }
-      else if(ecap2.substring(0,12) == "remote prof2"){
-          Serial.println(F("SVS NEW INPUT=102\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=102\r"));
-      }
-      else if(ecap2.substring(0,12) == "remote prof3"){
-          Serial.println(F("SVS NEW INPUT=103\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=103\r"));
-      }
-      else if(ecap2.substring(0,12) == "remote prof4"){
-          Serial.println(F("SVS NEW INPUT=104\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=104\r"));
-      }
-      else if(ecap2.substring(0,12) == "remote prof5"){
-          Serial.println(F("SVS NEW INPUT=105\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=105\r"));
-      }
-      else if(ecap2.substring(0,12) == "remote prof6"){
-          Serial.println(F("SVS NEW INPUT=106\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=106\r"));
-      }
-      else if(ecap2.substring(0,12) == "remote prof7"){
-          Serial.println(F("SVS NEW INPUT=107\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=107\r"));
-      }
-      else if(ecap2.substring(0,12) == "remote prof8"){
-          Serial.println(F("SVS NEW INPUT=108\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=108\r"));
-      }
-      else if(ecap2.substring(0,12) == "remote prof9"){
-          Serial.println(F("SVS NEW INPUT=109\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=109\r"));
-      }
-
+      if(ecap2 == "remote prof10") sendSVS(110);
+      else if(ecap2 == "remote prof12") delay(1);
+      else if(ecap2.substring(0,12) == "remote prof1") sendSVS(101);
+      else if(ecap2.substring(0,12) == "remote prof2") sendSVS(102);
+      else if(ecap2.substring(0,12) == "remote prof3") sendSVS(103);
+      else if(ecap2.substring(0,12) == "remote prof4") sendSVS(104);
+      else if(ecap2.substring(0,12) == "remote prof5") sendSVS(105);
+      else if(ecap2.substring(0,12) == "remote prof6") sendSVS(106);
+      else if(ecap2.substring(0,12) == "remote prof7") sendSVS(107);
+      else if(ecap2.substring(0,12) == "remote prof8") sendSVS(108);
+      else if(ecap2.substring(0,12) == "remote prof9") sendSVS(109);
     }
 
 }// end of readExtron2()
@@ -861,91 +654,58 @@ void readGscart1(){
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
 
         if(SVS==2)Serial.println(F("remote prof1\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=201\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=201\r"));
-        }
+        else sendSVS(201);
       } 
       else if(!(gscart1 ^ B00000001)){
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x07,2);  // RT4K profile 2
 
         if(SVS==2)Serial.println(F("remote prof2\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=202\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=202\r"));
-        }
+        else sendSVS(202);
       }
       else if(!(gscart1 ^ B00000010)){
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x03,2);  // RT4K profile 3
 
         if(SVS==2)Serial.println(F("remote prof3\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=203\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=203\r"));
-        }
+        else sendSVS(203);
       }
       else if(!(gscart1 ^ B00000011)){
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x0A,2);  // RT4K profile 4
 
         if(SVS==2)Serial.println(F("remote prof4\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=204\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=204\r"));
-        }
+        else sendSVS(204);
       }
       else if(!(gscart1 ^ B00000100)){
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x06,2);  // RT4K profile 5
 
         if(SVS==2)Serial.println(F("remote prof5\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=205\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=205\r"));
-        }
+        else sendSVS(205);
       } 
       else if(!(gscart1 ^ B00000101)){
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x02,2);  // RT4K profile 6
 
         if(SVS==2)Serial.println(F("remote prof6\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=206\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=206\r"));
-        }
+        else sendSVS(206);
       }   
       else if(!(gscart1 ^ B00000110)){
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x09,2);  // RT4K profile 7
 
         if(SVS==2)Serial.println(F("remote prof7\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=207\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=207\r"));
-        }
+        else sendSVS(207);
       } 
       else if(!(gscart1 ^ B00000111)){
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x05,2);  // RT4K profile 8
 
         if(SVS==2)Serial.println(F("remote prof8\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=208\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=208\r"));
-        }
+        else sendSVS(208);
       }
         
-
       gscart1prev = gscart1;
     }
 } // end of readGscart1()
@@ -974,62 +734,31 @@ void readGscart2(){
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x01,2);  // RT4K profile 9
 
         if(SVS==2)Serial.println(F("remote prof9\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=209\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=209\r"));
-        }
+        else sendSVS(209);
       } 
       else if(!(gscart2 ^ B00001000)){
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x25,2);  // RT4K profile 10
 
         if(SVS==2)Serial.println(F("remote prof10\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=210\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=210\r"));
-        }
+        else sendSVS(210);
       }
       else if(!(gscart2 ^ B00010000)){
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x26,2);  // RT4K profile 11
+        
         if(SVS==2)Serial.println(F("remote prof11\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=211\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=211\r"));
-        }
+        else sendSVS(211);
       }
       else if(!(gscart2 ^ B00011000)){
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
+
         if(SVS==2)Serial.println(F("remote prof12\r"));
-        else{
-          Serial.println(F("SVS NEW INPUT=212\r"));
-          delay(1000);
-          Serial.println(F("SVS CURRENT INPUT=212\r"));
-        }
+        else sendSVS(212);
       }
-      else if(!(gscart2 ^ B00100000)){
-        Serial.println(F("SVS NEW INPUT=213\r"));
-        delay(1000);
-        Serial.println(F("SVS CURRENT INPUT=213\r"));
-      } 
-      else if(!(gscart2 ^ B00101000)){
-        Serial.println(F("SVS NEW INPUT=214\r"));
-        delay(1000);
-        Serial.println(F("SVS CURRENT INPUT=214\r"));
-      }   
-      else if(!(gscart2 ^ B00110000)){
-        Serial.println(F("SVS NEW INPUT=215\r"));
-        delay(1000);
-        Serial.println(F("SVS CURRENT INPUT=215\r"));
-      } 
-      else if(!(gscart2 ^ B00111000)){
-        Serial.println(F("SVS NEW INPUT=216\r"));
-        delay(1000);
-        Serial.println(F("SVS CURRENT INPUT=216\r"));
-      }
-        
+      else if(!(gscart2 ^ B00100000)) sendSVS(213);
+      else if(!(gscart2 ^ B00101000)) sendSVS(214);
+      else if(!(gscart2 ^ B00110000)) sendSVS(215);
+      else if(!(gscart2 ^ B00111000)) sendSVS(216);
 
       gscart2prev = gscart2;
      }
@@ -1044,11 +773,7 @@ void all_inactive_ports_check(){
       if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
 
       if(SVS==0)Serial.println(F("remote prof12\r"));
-      else{
-        Serial.println(F("SVS NEW INPUT=0\r"));
-        delay(1000);
-        Serial.println(F("SVS CURRENT INPUT=0\r"));
-      }
+      else sendSVS(0);
 
       previnput = "0";
       if(previnput2 != "discon")previnput2 = "0";
@@ -1140,88 +865,64 @@ void irRec(){
 
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && extrabuttonprof == 1){ // if AUX8 was pressed and a profile button is pressed next,
       if(ir_recv_command == 11){ // profile button 1                                                         // load "SVS" profiles 1 - 12 (profile button 1 - 12).
-          Serial.print(F("SVS NEW INPUT="));Serial.print(auxprof[0]);Serial.println(F("\r"));                // Can be changed to "ANY" SVS profile in the OPTIONS section
-          delay(1000);
-          Serial.print(F("SVS CURRENT INPUT="));Serial.print(auxprof[0]);Serial.println(F("\r"));
-          ir_recv_command = 0;
-          extrabuttonprof = 0;
+        sendSVS(auxprof[0]);                                                                               // Can be changed to "ANY" SVS profile in the OPTIONS section
+        ir_recv_command = 0;
+        extrabuttonprof = 0;
       }
       else if(ir_recv_command == 7){ // profile button 2
-          Serial.print(F("SVS NEW INPUT="));Serial.print(auxprof[1]);Serial.println(F("\r"));
-          delay(1000);
-          Serial.print(F("SVS CURRENT INPUT="));Serial.print(auxprof[1]);Serial.println(F("\r"));
-          ir_recv_command = 0;
-          extrabuttonprof = 0;
+        sendSVS(auxprof[1]);
+        ir_recv_command = 0;
+        extrabuttonprof = 0;
       }
       else if(ir_recv_command == 3){ // profile button 3
-          Serial.print(F("SVS NEW INPUT="));Serial.print(auxprof[2]);Serial.println(F("\r"));
-          delay(1000);
-          Serial.print(F("SVS CURRENT INPUT="));Serial.print(auxprof[2]);Serial.println(F("\r"));
-          ir_recv_command = 0;
-          extrabuttonprof = 0;
+        sendSVS(auxprof[2]);
+        ir_recv_command = 0;
+        extrabuttonprof = 0;
       }
       else if(ir_recv_command == 10){ // profile button 4
-          Serial.print(F("SVS NEW INPUT="));Serial.print(auxprof[3]);Serial.println(F("\r"));
-          delay(1000);
-          Serial.print(F("SVS CURRENT INPUT="));Serial.print(auxprof[3]);Serial.println(F("\r"));
-          ir_recv_command = 0;
-          extrabuttonprof = 0;
+        sendSVS(auxprof[3]);
+        ir_recv_command = 0;
+        extrabuttonprof = 0;
       }
       else if(ir_recv_command == 6){ // profile button 5
-          Serial.print(F("SVS NEW INPUT="));Serial.print(auxprof[4]);Serial.println(F("\r"));
-          delay(1000);
-          Serial.print(F("SVS CURRENT INPUT="));Serial.print(auxprof[4]);Serial.println(F("\r"));
-          ir_recv_command = 0;
-          extrabuttonprof = 0;
+        sendSVS(auxprof[4]);
+        ir_recv_command = 0;
+        extrabuttonprof = 0;
       }
       else if(ir_recv_command == 2){ // profile button 6
-          Serial.print(F("SVS NEW INPUT="));Serial.print(auxprof[5]);Serial.println(F("\r"));
-          delay(1000);
-          Serial.print(F("SVS CURRENT INPUT="));Serial.print(auxprof[5]);Serial.println(F("\r"));
-          ir_recv_command = 0;
-          extrabuttonprof = 0;
+        sendSVS(auxprof[5]);
+        ir_recv_command = 0;
+        extrabuttonprof = 0;
       }
       else if(ir_recv_command == 9){ // profile button 7
-          Serial.print(F("SVS NEW INPUT="));Serial.print(auxprof[6]);Serial.println(F("\r"));
-          delay(1000);
-          Serial.print(F("SVS CURRENT INPUT="));Serial.print(auxprof[6]);Serial.println(F("\r"));
-          ir_recv_command = 0;
-          extrabuttonprof = 0;
+        sendSVS(auxprof[6]);
+        ir_recv_command = 0;
+        extrabuttonprof = 0;
       }
       else if(ir_recv_command == 5){ // profile button 8
-          Serial.print(F("SVS NEW INPUT="));Serial.print(auxprof[7]);Serial.println(F("\r"));
-          delay(1000);
-          Serial.print(F("SVS CURRENT INPUT="));Serial.print(auxprof[7]);Serial.println(F("\r"));
-          ir_recv_command = 0;
-          extrabuttonprof = 0;
+        sendSVS(auxprof[7]);
+        ir_recv_command = 0;
+        extrabuttonprof = 0;
       }
       else if(ir_recv_command == 1){ // profile button 9
-          Serial.print(F("SVS NEW INPUT="));Serial.print(auxprof[8]);Serial.println(F("\r"));
-          delay(1000);
-          Serial.print(F("SVS CURRENT INPUT="));Serial.print(auxprof[8]);Serial.println(F("\r"));
-          ir_recv_command = 0;
-          extrabuttonprof = 0;
+        sendSVS(auxprof[8]);
+        ir_recv_command = 0;
+        extrabuttonprof = 0;
       }
       else if(ir_recv_command == 37){ // profile button 10
-          Serial.print(F("SVS NEW INPUT="));Serial.print(auxprof[9]);Serial.println(F("\r"));
-          delay(1000);
-          Serial.print(F("SVS CURRENT INPUT="));Serial.print(auxprof[9]);Serial.println(F("\r"));
-          ir_recv_command = 0;
-          extrabuttonprof = 0;
+        sendSVS(auxprof[9]);
+        ir_recv_command = 0;
+        extrabuttonprof = 0;
       }
       else if(ir_recv_command == 38){ // profile button 11
-          Serial.print(F("SVS NEW INPUT="));Serial.print(auxprof[10]);Serial.println(F("\r"));
-          delay(1000);
-          Serial.print(F("SVS CURRENT INPUT="));Serial.print(auxprof[10]);Serial.println(F("\r"));
-          ir_recv_command = 0;
-          extrabuttonprof = 0;
+        sendSVS(auxprof[10]);
+        ir_recv_command = 0;
+        extrabuttonprof = 0;
       }
       else if(ir_recv_command == 39){ // profile button 12
-          Serial.print(F("SVS NEW INPUT="));Serial.print(auxprof[11]);Serial.println(F("\r"));
-          delay(1000);
-          Serial.print(F("SVS CURRENT INPUT="));Serial.print(auxprof[11]);Serial.println(F("\r"));
-          ir_recv_command = 0;
-          extrabuttonprof = 0;
+        sendSVS(auxprof[11]);
+        ir_recv_command = 0;
+        extrabuttonprof = 0;
       }
       else if(ir_recv_command == 63){
         ir_recv_command = 0;
@@ -1238,9 +939,7 @@ void irRec(){
 
 
     if(nument == 3){
-      Serial.print(F("SVS NEW INPUT="));Serial.print(svsbutton);Serial.println(F("\r"));
-      delay(1000);
-      Serial.print(F("SVS CURRENT INPUT="));Serial.print(svsbutton);Serial.println(F("\r"));
+      sendSVS(svsbutton);
       nument = 0;
       svsbutton = "";
       extrabuttonprof = 0;
@@ -1436,3 +1135,23 @@ void irRec(){
     } // end of if(ir_recv_address)
   } // end of TinyReceiverDecode()   
 } // end of irRec()
+
+void sendSVS(int num){
+  Serial.print(F("SVS NEW INPUT="));
+  Serial.print(num);
+  Serial.println(F("\r"));
+  delay(1000);
+  Serial.print(F("SVS CURRENT INPUT="));
+  Serial.print(num);
+  Serial.println(F("\r"));
+}
+
+void sendSVS(String stringnum){
+  Serial.print(F("SVS NEW INPUT="));
+  Serial.print(stringnum);
+  Serial.println(F("\r"));
+  delay(1000);
+  Serial.print(F("SVS CURRENT INPUT="));
+  Serial.print(stringnum);
+  Serial.println(F("\r"));
+}
