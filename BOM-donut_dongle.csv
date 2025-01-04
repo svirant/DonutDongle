@@ -1,7 +1,7 @@
 Comment,Quantity,Designator,Footprint,Part#,Digikey,AliExpress,Amazon
 Donut Dongle,,,,,,,
 0.1 uf / 100nf Capacitor,4,"C1,C2,C3,C4",C_0805_2012Metric,311-1140-1-ND,https://www.digikey.com/en/products/detail/yageo/CC0805KRX7R9BB104/302874?s=N4IgTCBcDaIMwEYEFokBYAMrkDkAiIAugL5A,,
-30 Ohm Resistor,1,R1,R_0805_2012Metric,10-ERJ-P06F30R0VCT-ND,https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06J102V/525197?s=N4IgTCBcDaIAoEYB0AGA0gQQCIGEAqAtAHJYA6ALiALoC%2BQA,,
+30 Ohm Resistor,1,R1,R_0805_2012Metric,10-ERJ-P06F30R0VCT-ND,https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06J300V/525250,,
 1K Ohm Resistor,1,R2,R_0805_2012Metric,P1.0KADCT-ND,https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06J102V/525197,,
 10K Ohm Resistor,6,"R3,R4,R5,R6,R7,R8",R_0805_2012Metric,311-10KLGCT-ND,https://www.digikey.com/en/products/detail/yageo/AC0805FR-0710KL/2827834,,
 PJ-307 3.5mm Stereo Jack Socket Audio Jack Connector PCB 3F07,1,,,PJ-307,,https://www.aliexpress.us/item/2251832712518602.html,
