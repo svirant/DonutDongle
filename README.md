@@ -29,9 +29,7 @@ Arduino Nano based hub that connects your current console switching setup with t
   
 * **1x  (R1)** 30 Ohm 0805 Resistor: [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06J300V/525250)
   
-* **1x  (R2)** 1K Ohm 0805 Resistor: [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06J102V/525197)
-  
-* **6x  (R3-R8)** 10K Ohm 0805 Resistor: [Digikey](https://www.digikey.com/en/products/detail/yageo/AC0805FR-0710KL/2827834)
+* **7x  (R2-R8)** 1K Ohm 0805 Resistor: [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06J102V/525197)
 
 * **1x** Any 3.5mm / aux / stereo / trs / cable: [AliExpress](https://www.aliexpress.us/item/2255799962255486.html)
 
