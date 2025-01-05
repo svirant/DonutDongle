@@ -41,8 +41,8 @@ int bit0bprev = 0;
 int bit1bprev = 0;
 int bit2bprev = 0;
 
-float high = 1.6; // rise above this voltage for a binary 1 or ON
-float low = 1.0; // dip below this voltage for a binary 0 of OFF
+float high = 1.35; // rise above this voltage for a binary 1 or ON
+float low = 1.1; // dip below this voltage for a binary 0 of OFF
 
 
 /*
