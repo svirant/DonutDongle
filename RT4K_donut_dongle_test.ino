@@ -41,8 +41,8 @@ int bit0bprev = 0;
 int bit1bprev = 0;
 int bit2bprev = 0;
 
-float high = 1.2; // rise above this voltage for a binary 1 or ON
-float low = 1.1; // dip below this voltage for a binary 0 of OFF
+float high = 1.1; // rise above this voltage for a binary 1 or ON
+float low = 1.0; // dip below this voltage for a binary 0 of OFF
 
 
 /*
@@ -52,7 +52,7 @@ float low = 1.1; // dip below this voltage for a binary 0 of OFF
 */
 
 
-int SVS = 0; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
+int SVS = 2; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
              //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
              //     the profile being used for a console's switch input if your setup is in flux. SVS require you to rename the file itself on the SD card which is 
              //     a little more work.  Regardless, SVS profiles will need to be used for console switch inputs over 12.
@@ -284,7 +284,7 @@ readExtron2(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt s
 
 all_inactive_ports_check();
 
-delay(250);
+//delay(250);
 } /////////////////////////////////// end of void loop ////////////////////////////////////
 
 
@@ -653,8 +653,14 @@ float val2 = 0.;
 
 val0 = analogRead(apin0);
 val0 = analogRead(apin0);
+val0 = analogRead(apin0);
+val0 = analogRead(apin0);
 val1 = analogRead(apin1);
 val1 = analogRead(apin1);
+val1 = analogRead(apin1);
+val1 = analogRead(apin1);
+val2 = analogRead(apin2);
+val2 = analogRead(apin2);
 val2 = analogRead(apin2);
 val2 = analogRead(apin2);
 
@@ -680,9 +686,9 @@ else if((val2/211) <= low){
 }
 
 
-Serial.print("A0 voltage: ");Serial.print(val0/211);Serial.println("v");
-Serial.print("A1 voltage: ");Serial.print(val1/211);Serial.println("v");
-Serial.print("A2 voltage: ");Serial.print(val2/211);Serial.println("v");
+// Serial.print("A0 voltage: ");Serial.print(val0/211);Serial.println("v");
+// Serial.print("A1 voltage: ");Serial.print(val1/211);Serial.println("v");
+// Serial.print("A2 voltage: ");Serial.print(val2/211);Serial.println("v");
 // Serial.print("bit0: ");Serial.print(bit0);Serial.print(" bit0prev: ");Serial.println(bit0prev);
 // Serial.print("bit1: ");Serial.print(bit1);Serial.print(" bit1prev: ");Serial.println(bit1prev);
 // Serial.print("bit2: ");Serial.print(bit2);Serial.print(" bit2prev: ");Serial.println(bit2prev);
@@ -761,14 +767,20 @@ void readGscart2Test(){
 byte const apin3 = A3;
 byte const apin4 = A4;
 byte const apin5 = A5;
-float val0 = 0;
-float val1 = 0;
-float val2 = 0;
+float val0 = 0.;
+float val1 = 0.;
+float val2 = 0.;
 
 val0 = analogRead(apin3);
 val0 = analogRead(apin3);
+val0 = analogRead(apin3);
+val0 = analogRead(apin3);
 val1 = analogRead(apin4);
 val1 = analogRead(apin4);
+val1 = analogRead(apin4);
+val1 = analogRead(apin4);
+val2 = analogRead(apin5);
+val2 = analogRead(apin5);
 val2 = analogRead(apin5);
 val2 = analogRead(apin5);
 
