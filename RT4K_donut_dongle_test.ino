@@ -650,8 +650,6 @@ int apin2 = A2;
 float val0 = 0;
 float val1 = 0;
 float val2 = 0;
-float high = 1.6;
-float low = 1.0;
 
 
 
