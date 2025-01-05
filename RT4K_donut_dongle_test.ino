@@ -41,7 +41,7 @@ int bit0bprev = 0;
 int bit1bprev = 0;
 int bit2bprev = 0;
 
-float high = 1.35; // rise above this voltage for a binary 1 or ON
+float high = 1.2; // rise above this voltage for a binary 1 or ON
 float low = 1.1; // dip below this voltage for a binary 0 of OFF
 
 
@@ -271,12 +271,12 @@ void loop(){
 
 irRec(); // intercepts the remote's button presses and relays them through the Serial interface giving a much more responsive experience
 
-//readGscart1();
+// readGscart1();
 
 readGscart1Test();
 readGscart2Test();
 
-//readGscart2();
+// readGscart2();
 
 readExtron1(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt sw1" port
 
@@ -642,47 +642,47 @@ void readExtron2(){
 
 }// end of readExtron2()
 
-void readGscart1Test(){
+void readGscart1Test(){ // readGscart1Test
 
-int apin0 = A0;
-int apin1 = A1;
-int apin2 = A2;
-float val0 = 0;
-float val1 = 0;
-float val2 = 0;
-
-
-
+byte const apin0 = A0;
+byte const apin1 = A1;
+byte const apin2 = A2;
+float val0 = 0.;
+float val1 = 0.;
+float val2 = 0.;
 
 val0 = analogRead(apin0);
+val0 = analogRead(apin0);
+val1 = analogRead(apin1);
 val1 = analogRead(apin1);
 val2 = analogRead(apin2);
+val2 = analogRead(apin2);
 
-if((val0/210) >= high){
+if((val0/211) >= high){
   bit0 = 1;
 }
-else if((val0/210) <= low){
+else if((val0/211) <= low){
   bit0 = 0;
 }
 
-if((val1/210) >= high){
+if((val1/211) >= high){
   bit1 = 1;
 }
-else if((val1/210) <= low){
+else if((val1/211) <= low){
   bit1 = 0;
 }
 
-if((val2/210) >= high){
+if((val2/211) >= high){
   bit2 = 1;
 }
-else if((val2/210) <= low){
+else if((val2/211) <= low){
   bit2 = 0;
 }
 
 
-// Serial.print("A0 voltage: ");Serial.print(val0/210);Serial.println("v");
-// Serial.print("A1 voltage: ");Serial.print(val1/210);Serial.println("v");
-// Serial.print("A2 voltage: ");Serial.print(val2/210);Serial.println("v");
+Serial.print("A0 voltage: ");Serial.print(val0/211);Serial.println("v");
+Serial.print("A1 voltage: ");Serial.print(val1/211);Serial.println("v");
+Serial.print("A2 voltage: ");Serial.print(val2/211);Serial.println("v");
 // Serial.print("bit0: ");Serial.print(bit0);Serial.print(" bit0prev: ");Serial.println(bit0prev);
 // Serial.print("bit1: ");Serial.print(bit1);Serial.print(" bit1prev: ");Serial.println(bit1prev);
 // Serial.print("bit2: ");Serial.print(bit2);Serial.print(" bit2prev: ");Serial.println(bit2prev);
@@ -758,49 +758,48 @@ if(bit0 != bit0prev || bit1 != bit1prev || bit2 != bit2prev){
 
 void readGscart2Test(){
 
-int apin3 = A3;
-int apin4 = A4;
-int apin5 = A5;
+byte const apin3 = A3;
+byte const apin4 = A4;
+byte const apin5 = A5;
 float val0 = 0;
 float val1 = 0;
 float val2 = 0;
 
-
-
-
-
+val0 = analogRead(apin3);
 val0 = analogRead(apin3);
 val1 = analogRead(apin4);
+val1 = analogRead(apin4);
+val2 = analogRead(apin5);
 val2 = analogRead(apin5);
 
-if((val0/210) >= high){
+if((val0/211) >= high){
   bit0b = 1;
 }
-else if((val0/210) <= low){
+else if((val0/211) <= low){
   bit0b = 0;
 }
 
-if((val1/210) >= high){
+if((val1/211) >= high){
   bit1b = 1;
 }
-else if((val1/210) <= low){
+else if((val1/211) <= low){
   bit1b = 0;
 }
 
-if((val2/210) >= high){
+if((val2/211) >= high){
   bit2b = 1;
 }
-else if((val2/210) <= low){
+else if((val2/211) <= low){
   bit2b = 0;
 }
 
 
-// Serial.print("A0 voltage: ");Serial.print(val0/210);Serial.println("v");
-// Serial.print("A1 voltage: ");Serial.print(val1/210);Serial.println("v");
-// Serial.print("A2 voltage: ");Serial.print(val2/210);Serial.println("v");
-// Serial.print("bit0: ");Serial.print(bit0);Serial.print(" bit0prev: ");Serial.println(bit0prev);
-// Serial.print("bit1: ");Serial.print(bit1);Serial.print(" bit1prev: ");Serial.println(bit1prev);
-// Serial.print("bit2: ");Serial.print(bit2);Serial.print(" bit2prev: ");Serial.println(bit2prev);
+// Serial.print("A3 voltage: ");Serial.print(val0/211);Serial.println("v");
+// Serial.print("A4 voltage: ");Serial.print(val1/211);Serial.println("v");
+// Serial.print("A5 voltage: ");Serial.print(val2/211);Serial.println("v");
+// Serial.print("bit0b: ");Serial.print(bit0b);Serial.print(" bit0bprev: ");Serial.println(bit0bprev);
+// Serial.print("bit1b: ");Serial.print(bit1b);Serial.print(" bit1bprev: ");Serial.println(bit1bprev);
+// Serial.print("bit2b: ");Serial.print(bit2b);Serial.print(" bit2bprev: ");Serial.println(bit2bprev);
 
 
 
