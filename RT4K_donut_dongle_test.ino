@@ -660,7 +660,7 @@ else{
   memset(bitcount,0,sizeof(bitcount));
 }
 
-for(int i = 0; i < 3; i++){ // read in analog pin voltages, read each value 4x in a row to get a stable reading
+for(int i = 0; i < 3; i++){ // read in analog pin voltages, read each value 4x in a row to get a stable reading, if using too high of pull-down resistor
   for(int j = 0; j < 4; j++){
     val[i] = analogRead(apin[i]);
   }
@@ -672,8 +672,8 @@ for(int i = 0; i < 3; i++){ // if voltage is greater than or equal to the voltag
   }
 }
 
-if(bitcc == adssize){ // when the "adssize" number of samples has been taken, count the number of times the voltage was high for each pin, etc
-  for(int i = 0; i < 3; i++){
+if(bitcc == adssize){ // when the "adssize" number of samples has been taken, if the voltage was high for 50% of the samples set the bit to 1
+  for(int i = 0; i < 3; i++){             // if the voltage was high for less than 50% and greater than 0%, set no active input flag
     if(bitcount[i] > (adssize/2))
       bit[i] = 1;
     else if(bitcount[i] > 2)
@@ -690,7 +690,7 @@ if(bitcc == adssize){ // when the "adssize" number of samples has been taken, co
 //   Serial.print("bitcount: ");Serial.print(bitcount[0]);Serial.print(" ");Serial.print(bitcount[1]);Serial.print(" ");Serial.println(bitcount[2]);
 // }
 
-if(fpdc && (bitcc == adssize)){
+if(fpdc && (bitcc == adssize)){ // if the no active input flag is set, increment counter
   if(fpdccount > fpdccountmax) fpdccount = 0;
   else fpdccount++;
 }
@@ -698,7 +698,7 @@ else if(bitcc == adssize){
   fpdccount = 0;
 }
 
-if((fpdccount == fpdccountmax) && (fpdc != fpdcprev) && (bitcc == adssize)){
+if((fpdccount == fpdccountmax) && (fpdc != fpdcprev) && (bitcc == adssize)){ // if no active input has been detected for multiple sample sessions, load profile, or do whatever below :) 
   //if(DP0)Serial.println("Gscart1: All Scart Off\r");
   //Serial.println("Gscart1: All Scart Off\r");
   fpdcprev = fpdc;
