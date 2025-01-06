@@ -63,7 +63,7 @@ float low = 1.0; // dip below this voltage for a binary 0 of OFF
 */
 
 
-int SVS = 2; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
+int SVS = 0; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
              //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
              //     the profile being used for a console's switch input if your setup is in flux. SVS require you to rename the file itself on the SD card which is 
              //     a little more work.  Regardless, SVS profiles will need to be used for console switch inputs over 12.
@@ -675,25 +675,52 @@ val2 = analogRead(apin2);
 val2 = analogRead(apin2);
 val2 = analogRead(apin2);
 
-if((val0/211) >= high){
-  bit0 = 1;
+if(bitcc < adssize){
+  bitcc++;
 }
-else if((val0/211) <= low){
-  bit0 = 0;
+else{
+   bitcc = 1;
+   bit0count = 0;
+   bit1count = 0;
+   bit2count = 0;
+   fpdc = 0;
+}
+
+if((val0/211) >= high){
+  bit0count++;
 }
 
 if((val1/211) >= high){
-  bit1 = 1;
-}
-else if((val1/211) <= low){
-  bit1 = 0;
+  bit1count++;
 }
 
 if((val2/211) >= high){
-  bit2 = 1;
+  bit2count++;
 }
-else if((val2/211) <= low){
-  bit2 = 0;
+
+//delay(10);
+
+if(bitcc == adssize){
+  if(bit0count > (adssize/2))
+    bit0 = 1;
+  else if(bit0count > 2)
+    fpdc = 1;
+  else
+    bit0 = 0;
+  
+  if(bit1count > (adssize/2))
+    bit1 = 1;
+  else if(bit1count > 2)
+    fpdc = 1;
+  else
+    bit1 = 0;
+  
+  if(bit2count > (adssize/2))
+    bit2 = 1;
+  else if(bit2count > 2)
+    fpdc = 1;
+  else
+    bit2 = 0;  
 }
 
 
@@ -704,9 +731,12 @@ else if((val2/211) <= low){
 // Serial.print("bit1: ");Serial.print(bit1);Serial.print(" bit1prev: ");Serial.println(bit1prev);
 // Serial.print("bit2: ");Serial.print(bit2);Serial.print(" bit2prev: ");Serial.println(bit2prev);
 
+if(fpdc && (bitcc == adssize)){
+  //Serial.println("Gscart1: All Scart Off\r");
+  fpdc = 0;
+}
 
-
-if(bit0 != bit0prev || bit1 != bit1prev || bit2 != bit2prev){
+if((bit0 != bit0prev || bit1 != bit1prev || bit2 != bit2prev) && (bitcc == adssize) && !(fpdc)){
       //Detect which scart port is now active and change profile accordingly
       if((bit2 == 0) && (bit1 == 0) && (bit0 == 0)){
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
@@ -823,21 +853,21 @@ if((val2/211) >= high){
 if(bitcc2 == adssize){
   if(bit0count2 > (adssize/2))
     bit0b = 1;
-  else if((bit0count2 <= (adssize/2)) && bit0count2 > 0)
+  else if(bit0count2 > 2)
     fpdc2 = 1;
   else
     bit0b = 0;
   
   if(bit1count2 > (adssize/2))
     bit1b = 1;
-  else if((bit1count2 <= (adssize/2)) && bit1count2 > 0)
+  else if(bit1count2 > 2)
     fpdc2 = 1;
   else
     bit1b = 0;
   
   if(bit2count2 > (adssize/2))
     bit2b = 1;
-  else if((bit2count2 <= (adssize/2)) && bit2count2 > 0)
+  else if(bit2count2 > 2)
     fpdc2 = 1;
   else
     bit2b = 0;  
@@ -853,10 +883,11 @@ if(bitcc2 == adssize){
 // }
 
 if(fpdc2 && (bitcc2 == adssize)){
-  Serial.println("Gscart2: All Scart Off\r");
+  //Serial.println("Gscart2: All Scart Off\r");
   fpdc2 = 0;
 }
-else if((bit0b != bit0bprev || bit1b != bit1bprev || bit2b != bit2bprev) && (bitcc2 == adssize)){
+
+if((bit0b != bit0bprev || bit1b != bit1bprev || bit2b != bit2bprev) && (bitcc2 == adssize) && !(fpdc2)){
       //Detect which scart port is now active and change profile accordingly
       if((bit2b == 0) && (bit1b == 0) && (bit0b == 0)){
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
