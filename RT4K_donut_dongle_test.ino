@@ -46,8 +46,8 @@ int bit2count = 0;
 int bit0count2 = 0;
 int bit1count2 = 0;
 int bit2count2 = 0;
-int bitcc = 1;
-int bitcc2 = 1;
+int bitcc = 0;
+int bitcc2 = 0;
 int adssize = 20; // total number of ADC samples to take to determine duty cycle
 int fpdc = 0;
 int fpdc2 = 0;
@@ -63,7 +63,7 @@ float low = 1.0; // dip below this voltage for a binary 0 of OFF
 */
 
 
-int SVS = 2; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
+int SVS = 0; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
              //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
              //     the profile being used for a console's switch input if your setup is in flux. SVS require you to rename the file itself on the SD card which is 
              //     a little more work.  Regardless, SVS profiles will need to be used for console switch inputs over 12.
@@ -703,36 +703,37 @@ if((val2/211) >= high){
 if(bitcc == adssize){
   if(bit0count > (adssize/2))
     bit0 = 1;
+  else if(bit0count == 0)
+    bit0 = 0;
   else if(bit0count > 2)
     fpdc = 1;
-  else
-    bit0 = 0;
   
   if(bit1count > (adssize/2))
     bit1 = 1;
+  else if(bit1count == 0)
+    bit1 = 0;
   else if(bit1count > 2)
     fpdc = 1;
-  else
-    bit1 = 0;
   
   if(bit2count > (adssize/2))
     bit2 = 1;
+  else if (bit2count == 0)
+    bit2 = 0;
   else if(bit2count > 2)
-    fpdc = 1;
-  else
-    bit2 = 0;  
+    fpdc = 1;  
 }
 
 
 // Serial.print("A0 voltage: ");Serial.print(val0/211);Serial.println("v");
 // Serial.print("A1 voltage: ");Serial.print(val1/211);Serial.println("v");
 // Serial.print("A2 voltage: ");Serial.print(val2/211);Serial.println("v");
-// Serial.print("bit0: ");Serial.print(bit0);Serial.print(" bit0prev: ");Serial.println(bit0prev);
-// Serial.print("bit1: ");Serial.print(bit1);Serial.print(" bit1prev: ");Serial.println(bit1prev);
-// Serial.print("bit2: ");Serial.print(bit2);Serial.print(" bit2prev: ");Serial.println(bit2prev);
+if(bitcc == adssize){
+  //Serial.print("bitcc: ");Serial.println(bitcc);
+  Serial.print("bitcount: ");Serial.print(bit0count);Serial.print(" ");Serial.print(bit1count);Serial.print(" ");Serial.println(bit2count);
+}
 
 if(fpdc && (bitcc == adssize)){
-  //Serial.println("Gscart1: All Scart Off\r");
+  //if(DP0)Serial.println("Gscart1: All Scart Off\r");
   fpdc = 0;
 }
 
@@ -883,7 +884,7 @@ if(bitcc2 == adssize){
 // }
 
 if(fpdc2 && (bitcc2 == adssize)){
-  //Serial.println("Gscart2: All Scart Off\r");
+  //if(DP0)Serial.println("Gscart2: All Scart Off\r");
   fpdc2 = 0;
 }
 
