@@ -679,10 +679,10 @@ if(bitcc == adssize){ // when the "adssize" number of samples has been taken, co
 // Serial.print("A0 voltage: ");Serial.print(val0/211);Serial.println("v");
 // Serial.print("A1 voltage: ");Serial.print(val1/211);Serial.println("v");
 // Serial.print("A2 voltage: ");Serial.print(val2/211);Serial.println("v");
-if(bitcc == adssize){
-  //Serial.print("bitcc: ");Serial.println(bitcc);
-  Serial.print("bitcount: ");Serial.print(bitcount[0]);Serial.print(" ");Serial.print(bitcount[1]);Serial.print(" ");Serial.println(bitcount[2]);
-}
+// if(bitcc == adssize){
+//   //Serial.print("bitcc: ");Serial.println(bitcc);
+//   Serial.print("bitcount: ");Serial.print(bitcount[0]);Serial.print(" ");Serial.print(bitcount[1]);Serial.print(" ");Serial.println(bitcount[2]);
+// }
 
 if(fpdc && (bitcc == adssize)){
   //if(DP0)Serial.println("Gscart1: All Scart Off\r");
@@ -795,10 +795,10 @@ if(bitcc2 == adssize){
 // Serial.print("A3 voltage: ");Serial.print(val0/211);Serial.println("v");
 // Serial.print("A4 voltage: ");Serial.print(val1/211);Serial.println("v");
 // Serial.print("A5 voltage: ");Serial.print(val2/211);Serial.println("v");
-if(bitcc2 == adssize){
-  //Serial.print("bitcc2: ");Serial.println(bitcc2);
-  Serial.print("bitcount2: ");Serial.print(bitcount2[0]);Serial.print(" ");Serial.print(bitcount2[1]);Serial.print(" ");Serial.println(bitcount2[2]);
-}
+// if(bitcc2 == adssize){
+//   //Serial.print("bitcc2: ");Serial.println(bitcc2);
+//   Serial.print("bitcount2: ");Serial.print(bitcount2[0]);Serial.print(" ");Serial.print(bitcount2[1]);Serial.print(" ");Serial.println(bitcount2[2]);
+// }
 
 if(fpdc && (bitcc2 == adssize)){
   //if(DP0)Serial.println("Gscart2: All Scart Off\r");
