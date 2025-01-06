@@ -1267,43 +1267,43 @@ void irRec(){
       }
       else if(ir_recv_command == 11){
         Serial.println(F("remote prof1\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x92,2);delay(30);irsend.sendNEC(0xB3,0x92,2);} // RT5X profile 1 
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x92,1);delay(30);irsend.sendNEC(0xB3,0x92,1);} // RT5X profile 1 
       }
       else if(ir_recv_command == 7){
         Serial.println(F("remote prof2\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x93,2);delay(30);irsend.sendNEC(0xB3,0x93,2);} // RT5X profile 2
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x93,1);delay(30);irsend.sendNEC(0xB3,0x93,1);} // RT5X profile 2
       }
       else if(ir_recv_command == 3){
         Serial.println(F("remote prof3\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0xCC,2);delay(30);irsend.sendNEC(0xB3,0xCC,2);} // RT5X profile 3
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0xCC,1);delay(30);irsend.sendNEC(0xB3,0xCC,1);} // RT5X profile 3
       }
       else if(ir_recv_command == 10){
         Serial.println(F("remote prof4\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8E,2);delay(30);irsend.sendNEC(0xB3,0x8E,2);} // RT5X profile 4
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8E,1);delay(30);irsend.sendNEC(0xB3,0x8E,1);} // RT5X profile 4
       }
       else if(ir_recv_command == 6){
         Serial.println(F("remote prof5\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8F,2);delay(30);irsend.sendNEC(0xB3,0x8F,2);} // RT5X profile 5
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8F,1);delay(30);irsend.sendNEC(0xB3,0x8F,1);} // RT5X profile 5
       }
       else if(ir_recv_command == 2){
         Serial.println(F("remote prof6\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0xC8,2);delay(30);irsend.sendNEC(0xB3,0xC8,2);} // RT5X profile 6
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0xC8,1);delay(30);irsend.sendNEC(0xB3,0xC8,1);} // RT5X profile 6
       }
       else if(ir_recv_command == 9){
         Serial.println(F("remote prof7\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8A,2);delay(30);irsend.sendNEC(0xB3,0x8A,2);} // RT5X profile 7
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8A,1);delay(30);irsend.sendNEC(0xB3,0x8A,1);} // RT5X profile 7
       }
       else if(ir_recv_command == 5){
         Serial.println(F("remote prof8\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8B,2);delay(30);irsend.sendNEC(0xB3,0x8B,2);} // RT5X profile 8
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8B,1);delay(30);irsend.sendNEC(0xB3,0x8B,1);} // RT5X profile 8
       }
       else if(ir_recv_command == 1){
         Serial.println(F("remote prof9\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0xC4,2);delay(30);irsend.sendNEC(0xB3,0xC4,2);} // RT5X profile 9
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0xC4,1);delay(30);irsend.sendNEC(0xB3,0xC4,1);} // RT5X profile 9
       }
       else if(ir_recv_command == 37){
         Serial.println(F("remote prof10\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x87,2);delay(30);irsend.sendNEC(0xB3,0x87,2);} // RT5X profile 10
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x87,1);delay(30);irsend.sendNEC(0xB3,0x87,1);} // RT5X profile 10
       }
       else if(ir_recv_command == 38){
         Serial.println(F("remote prof11\r"));
