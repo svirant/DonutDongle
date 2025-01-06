@@ -40,6 +40,17 @@ int bit2prev = 0;
 int bit0bprev = 0;
 int bit1bprev = 0;
 int bit2bprev = 0;
+int bit0count = 0;
+int bit1count = 0;
+int bit2count = 0;
+int bit0count2 = 0;
+int bit1count2 = 0;
+int bit2count2 = 0;
+int bitcc = 1;
+int bitcc2 = 1;
+int adssize = 20; // total number of ADC samples to take to determine duty cycle
+int fpdc = 0;
+int fpdc2 = 0;
 
 float high = 1.1; // rise above this voltage for a binary 1 or ON
 float low = 1.0; // dip below this voltage for a binary 0 of OFF
@@ -284,7 +295,7 @@ readExtron2(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt s
 
 all_inactive_ports_check();
 
-//delay(250);
+//delay(140);
 } /////////////////////////////////// end of void loop ////////////////////////////////////
 
 
@@ -784,38 +795,68 @@ val2 = analogRead(apin5);
 val2 = analogRead(apin5);
 val2 = analogRead(apin5);
 
-if((val0/211) >= high){
-  bit0b = 1;
+if(bitcc2 < adssize){
+  bitcc2++;
 }
-else if((val0/211) <= low){
-  bit0b = 0;
+else{
+   bitcc2 = 1;
+   bit0count2 = 0;
+   bit1count2 = 0;
+   bit2count2 = 0;
+   fpdc2 = 0;
+}
+
+if((val0/211) >= high){
+  bit0count2++;
 }
 
 if((val1/211) >= high){
-  bit1b = 1;
-}
-else if((val1/211) <= low){
-  bit1b = 0;
+  bit1count2++;
 }
 
 if((val2/211) >= high){
-  bit2b = 1;
-}
-else if((val2/211) <= low){
-  bit2b = 0;
+  bit2count2++;
 }
 
+//delay(10);
 
+if(bitcc2 == adssize){
+  if(bit0count2 > (adssize/2))
+    bit0b = 1;
+  else if((bit0count2 <= (adssize/2)) && bit0count2 > 0)
+    fpdc2 = 1;
+  else
+    bit0b = 0;
+  
+  if(bit1count2 > (adssize/2))
+    bit1b = 1;
+  else if((bit1count2 <= (adssize/2)) && bit1count2 > 0)
+    fpdc2 = 1;
+  else
+    bit1b = 0;
+  
+  if(bit2count2 > (adssize/2))
+    bit2b = 1;
+  else if((bit2count2 <= (adssize/2)) && bit2count2 > 0)
+    fpdc2 = 1;
+  else
+    bit2b = 0;  
+}
+
+  
 // Serial.print("A3 voltage: ");Serial.print(val0/211);Serial.println("v");
 // Serial.print("A4 voltage: ");Serial.print(val1/211);Serial.println("v");
 // Serial.print("A5 voltage: ");Serial.print(val2/211);Serial.println("v");
-// Serial.print("bit0b: ");Serial.print(bit0b);Serial.print(" bit0bprev: ");Serial.println(bit0bprev);
-// Serial.print("bit1b: ");Serial.print(bit1b);Serial.print(" bit1bprev: ");Serial.println(bit1bprev);
-// Serial.print("bit2b: ");Serial.print(bit2b);Serial.print(" bit2bprev: ");Serial.println(bit2bprev);
+// if(bitcc2 == adssize){
+//   //Serial.print("bitcc2: ");Serial.println(bitcc2);
+//   Serial.print("bitcount2: ");Serial.print(bit0count2);Serial.print(" ");Serial.print(bit1count2);Serial.print(" ");Serial.println(bit2count2);
+// }
 
-
-
-if(bit0b != bit0bprev || bit1b != bit1bprev || bit2b != bit2bprev){
+if(fpdc2 && (bitcc2 == adssize)){
+  Serial.println("Gscart2: All Scart Off\r");
+  fpdc2 = 0;
+}
+else if((bit0b != bit0bprev || bit1b != bit1bprev || bit2b != bit2bprev) && (bitcc2 == adssize)){
       //Detect which scart port is now active and change profile accordingly
       if((bit2b == 0) && (bit1b == 0) && (bit0b == 0)){
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
