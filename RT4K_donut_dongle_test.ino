@@ -63,7 +63,7 @@ float low = 1.0; // dip below this voltage for a binary 0 of OFF
 */
 
 
-int SVS = 0; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
+int SVS = 2; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
              //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
              //     the profile being used for a console's switch input if your setup is in flux. SVS require you to rename the file itself on the SD card which is 
              //     a little more work.  Regardless, SVS profiles will need to be used for console switch inputs over 12.
