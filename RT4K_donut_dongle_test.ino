@@ -652,7 +652,7 @@ if(bitcc < adssize){ // take "adssize" number of samples
 }
 else{
   bitcc = 1;
-  bitcount[0],bitcount[1],bitcount[2];
+  memset(bitcount,0,sizeof(bitcount));
 }
 
 for(int i = 0; i < 3; i++){ // read in analog pin voltages, read each value 4x in a row to get a stable reading
@@ -681,7 +681,7 @@ if(bitcc == adssize){ // when the "adssize" number of samples has been taken, co
 // Serial.print("A2 voltage: ");Serial.print(val2/211);Serial.println("v");
 if(bitcc == adssize){
   //Serial.print("bitcc: ");Serial.println(bitcc);
-  Serial.print("bitcount: ");Serial.print(bitcount[2]);Serial.print(" ");Serial.print(bitcount[1]);Serial.print(" ");Serial.println(bitcount[0]);
+  Serial.print("bitcount: ");Serial.print(bitcount[0]);Serial.print(" ");Serial.print(bitcount[1]);Serial.print(" ");Serial.println(bitcount[2]);
 }
 
 if(fpdc && (bitcc == adssize)){
@@ -767,7 +767,7 @@ if(bitcc2 < adssize){
 }
 else{
   bitcc2 = 1;
-  bitcount2[0],bitcount2[1],bitcount2[2] = 0;
+  memset(bitcount2,0,sizeof(bitcount2));
 }
 
 for(int i = 0; i < 3; i++){
@@ -797,7 +797,7 @@ if(bitcc2 == adssize){
 // Serial.print("A5 voltage: ");Serial.print(val2/211);Serial.println("v");
 if(bitcc2 == adssize){
   //Serial.print("bitcc2: ");Serial.println(bitcc2);
-  Serial.print("bitcount2: ");Serial.print(bitcount2[2]);Serial.print(" ");Serial.print(bitcount2[1]);Serial.print(" ");Serial.println(bitcount2[0]);
+  Serial.print("bitcount2: ");Serial.print(bitcount2[0]);Serial.print(" ");Serial.print(bitcount2[1]);Serial.print(" ");Serial.println(bitcount2[2]);
 }
 
 if(fpdc && (bitcc2 == adssize)){
