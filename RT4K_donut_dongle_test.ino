@@ -1,4 +1,4 @@
-// RT4K Donut Dongle v0.4
+// RT4K Donut Dongle v0.5
 //
 //
 //
@@ -34,11 +34,16 @@ int bit2prev = 0;
 int bit0prev2 = 0;
 int bit1prev2 = 0;
 int bit2prev2 = 0;
+int fpdcprev = 0;
+int fpdcprev2 = 0;
 int bitcount[3] = {0,0,0};
 int bitcount2[3] = {0,0,0};
 int bitcc = 0;
 int bitcc2 = 0;
 int adssize = 20; // total number of ADC samples to take to determine duty cycle
+int fpdccount = 0;
+int fpdccount2 = 0;
+int fpdccountmax = 3;
 
 float high = 3.0; // for gscart sw1, rise above this voltage for a binary 1 or ON
 float high2 = 1.2; // for gscart sw2,  rise above this voltage for a binary 1 or ON
@@ -282,7 +287,7 @@ readExtron2(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt s
 
 all_inactive_ports_check();
 
-//delay(140);
+//delay(500);
 } /////////////////////////////////// end of void loop ////////////////////////////////////
 
 
@@ -676,16 +681,28 @@ if(bitcc == adssize){ // when the "adssize" number of samples has been taken, co
   }
 }
 
-// Serial.print("A0 voltage: ");Serial.print(val0/211);Serial.println("v");
-// Serial.print("A1 voltage: ");Serial.print(val1/211);Serial.println("v");
-// Serial.print("A2 voltage: ");Serial.print(val2/211);Serial.println("v");
+//Serial.print("A0 voltage:         ");Serial.print(val[0]/211);Serial.print("v    SC: ");Serial.print(bitcc);Serial.print("  fpdccount: ");Serial.println(fpdccount);
+// Serial.print("A0 voltage: ");Serial.print(val[0]/211);Serial.println("v");
+// Serial.print("A1 voltage: ");Serial.print(val[1]/211);Serial.println("v");
+// Serial.print("A2 voltage: ");Serial.print(val[2]/211);Serial.println("v");
 // if(bitcc == adssize){
 //   //Serial.print("bitcc: ");Serial.println(bitcc);
 //   Serial.print("bitcount: ");Serial.print(bitcount[0]);Serial.print(" ");Serial.print(bitcount[1]);Serial.print(" ");Serial.println(bitcount[2]);
 // }
 
 if(fpdc && (bitcc == adssize)){
+  if(fpdccount > fpdccountmax) fpdccount = 0;
+  else fpdccount++;
+}
+else if(bitcc == adssize){
+  fpdccount = 0;
+}
+
+if((fpdccount == fpdccountmax) && (fpdc != fpdcprev) && (bitcc == adssize)){
   //if(DP0)Serial.println("Gscart1: All Scart Off\r");
+  //Serial.println("Gscart1: All Scart Off\r");
+  fpdcprev = fpdc;
+  fpdccount = 0;
 }
 
 if((bit[2] != bit2prev || bit[1] != bit1prev || bit[0] != bit0prev) && (bitcc == adssize) && !(fpdc)){
@@ -750,6 +767,7 @@ if((bit[2] != bit2prev || bit[1] != bit1prev || bit[0] != bit0prev) && (bitcc ==
   bit2prev = bit[2];
   bit1prev = bit[1];
   bit0prev = bit[0];
+  fpdcprev = fpdc;
 
 }
 
@@ -792,17 +810,29 @@ if(bitcc2 == adssize){
 }
 
   
-// Serial.print("A3 voltage: ");Serial.print(val0/211);Serial.println("v");
-// Serial.print("A4 voltage: ");Serial.print(val1/211);Serial.println("v");
-// Serial.print("A5 voltage: ");Serial.print(val2/211);Serial.println("v");
+//Serial.print("A3 voltage:         ");Serial.print(val[0]/211);Serial.print("v    SC: ");Serial.print(bitcc2);Serial.print("  fpdccount2: ");Serial.println(fpdccount2);
+// Serial.print("A4 voltage:         ");Serial.print(val[1]/211);Serial.println("v");
+// Serial.print("A5 voltage:         ");Serial.print(val[2]/211);Serial.println("v");
 // if(bitcc2 == adssize){
 //   //Serial.print("bitcc2: ");Serial.println(bitcc2);
 //   Serial.print("bitcount2: ");Serial.print(bitcount2[0]);Serial.print(" ");Serial.print(bitcount2[1]);Serial.print(" ");Serial.println(bitcount2[2]);
 // }
 
 if(fpdc && (bitcc2 == adssize)){
-  //if(DP0)Serial.println("Gscart2: All Scart Off\r");
+  if(fpdccount2 > fpdccountmax) fpdccount2 = 0;
+  else fpdccount2++;
 }
+else if(bitcc2 == adssize){
+  fpdccount2 = 0;
+}
+
+if((fpdccount2 == fpdccountmax) && (fpdc != fpdcprev2) && (bitcc2 == adssize)){
+  //if(DP0)Serial.println("Gscart1: All Scart Off\r");
+  //Serial.println("Gscart2: All Scart Off\r");
+  fpdcprev2 = fpdc;
+  fpdccount2 = 0;
+}
+
 
 if((bit[2] != bit2prev2 || bit[1] != bit1prev2 || bit[0] != bit0prev2) && (bitcc2 == adssize) && !(fpdc)){
       //Detect which scart port is now active and change profile accordingly
@@ -840,6 +870,7 @@ if((bit[2] != bit2prev2 || bit[1] != bit1prev2 || bit[0] != bit0prev2) && (bitcc
       bit2prev2 = bit[2];
       bit1prev2 = bit[1];
       bit0prev2 = bit[0];
+      fpdcprev2 = fpdc;
 
     }
 
