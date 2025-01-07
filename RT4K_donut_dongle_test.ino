@@ -47,7 +47,7 @@ int fpdccountmax = 2;
 int allscartoff = 0;
 int allscartoff2 = 0;
 
-float high = 2.5; // for gscart sw1, rise above this voltage for a binary 1 or ON
+float high = 1.2; // for gscart sw1, rise above this voltage for a binary 1 or ON
 float high2 = 1.2; // for gscart sw2,  rise above this voltage for a binary 1 or ON
 
 /*
