@@ -43,9 +43,11 @@ int bitcc2 = 0;
 int adssize = 20; // total number of ADC samples to take to determine duty cycle
 int fpdccount = 0;
 int fpdccount2 = 0;
-int fpdccountmax = 3;
+int fpdccountmax = 2;
+int allscartoff = 0;
+int allscartoff2 = 0;
 
-float high = 3.0; // for gscart sw1, rise above this voltage for a binary 1 or ON
+float high = 2.5; // for gscart sw1, rise above this voltage for a binary 1 or ON
 float high2 = 1.2; // for gscart sw2,  rise above this voltage for a binary 1 or ON
 
 /*
@@ -652,28 +654,17 @@ int bit[3] = {0,0,0};
 float val[3] = {0,0,0};
 byte const apin[3] = {A0,A1,A2};
 
-if(bitcc < adssize){ // take "adssize" number of samples
-  bitcc++;
-}
-else{
-  bitcc = 1;
-  memset(bitcount,0,sizeof(bitcount));
-}
-
-for(int i = 0; i < 3; i++){ // read in analog pin voltages, read each value 4x in a row to get a stable reading, if using too high of pull-down resistor
+for(int i = 0; i < 3; i++){ // read in analog pin voltages, read each value 4x in a row to get a stable reading, combats if using too large of a pull-down resistor
   for(int j = 0; j < 4; j++){
     val[i] = analogRead(apin[i]);
   }
-}
-
-for(int i = 0; i < 3; i++){ // if voltage is greater than or equal to the voltage defined for a 1, increase bitcount by 1 for that analog pin
-  if((val[i]/211) >= high){
+  if((val[i]/211) >= high){ // if voltage is greater than or equal to the voltage defined for a 1, increase bitcount by 1 for that analog pin
     bitcount[i]++;
   }
 }
 
-if(bitcc == adssize){ // when the "adssize" number of samples has been taken, if the voltage was high for 50% of the samples set the bit to 1
-  for(int i = 0; i < 3; i++){             // if the voltage was high for less than 50% and greater than 0%, set no active input flag
+if(bitcc == adssize){ // when the "adssize" number of samples has been taken, if the voltage was high for greater than 50% of the samples set the bit to 1
+  for(int i = 0; i < 3; i++){             // if the voltage was high for ~5% to 50%, set an all in-active ports flag
     if(bitcount[i] > (adssize/2))
       bit[i] = 1;
     else if(bitcount[i] > 2)
@@ -681,94 +672,106 @@ if(bitcc == adssize){ // when the "adssize" number of samples has been taken, if
   }
 }
 
-//Serial.print("A0 voltage:         ");Serial.print(val[0]/211);Serial.print("v    SC: ");Serial.print(bitcc);Serial.print("  fpdccount: ");Serial.println(fpdccount);
-// Serial.print("A0 voltage: ");Serial.print(val[0]/211);Serial.println("v");
-// Serial.print("A1 voltage: ");Serial.print(val[1]/211);Serial.println("v");
-// Serial.print("A2 voltage: ");Serial.print(val[2]/211);Serial.println("v");
-// if(bitcc == adssize){
-//   //Serial.print("bitcc: ");Serial.println(bitcc);
-//   Serial.print("bitcount: ");Serial.print(bitcount[0]);Serial.print(" ");Serial.print(bitcount[1]);Serial.print(" ");Serial.println(bitcount[2]);
-// }
 
-if(fpdc && (bitcc == adssize)){ // if the no active input flag is set, increment counter
-  if(fpdccount > fpdccountmax) fpdccount = 0;
-  else fpdccount++;
-}
-else if(bitcc == adssize){
-  fpdccount = 0;
-}
-
-if((fpdccount == fpdccountmax) && (fpdc != fpdcprev) && (bitcc == adssize)){ // if no active input has been detected for multiple sample sessions, load profile, or do whatever below :) 
-  //if(DP0)Serial.println("Gscart1: All Scart Off\r");
-  //Serial.println("Gscart1: All Scart Off\r");
-  fpdcprev = fpdc;
-  fpdccount = 0;
-}
-
-if((bit[2] != bit2prev || bit[1] != bit1prev || bit[0] != bit0prev) && (bitcc == adssize) && !(fpdc)){
+if(((bit[2] != bit2prev || bit[1] != bit1prev || bit[0] != bit0prev) || (allscartoff == 1)) && (bitcc == adssize) && !(fpdc)){
   //Detect which scart port is now active and change profile accordingly
-  if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){
+  if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
     if(RT5Xir == 2){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
     if(RT4Kir == 2)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
 
     if(SVS==2)Serial.println(F("remote prof1\r"));
     else sendSVS(201);
   } 
-  else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){
+  else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){ // 0 0 1
     if(RT5Xir == 2){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
     if(RT4Kir == 2)irsend.sendNEC(0x49,0x07,2);  // RT4K profile 2
 
     if(SVS==2)Serial.println(F("remote prof2\r"));
     else sendSVS(202);
   }
-  else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){
+  else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){ // 0 1 0
     if(RT5Xir == 2){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
     if(RT4Kir == 2)irsend.sendNEC(0x49,0x03,2);  // RT4K profile 3
 
     if(SVS==2)Serial.println(F("remote prof3\r"));
     else sendSVS(203);
   }
-  else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){
+  else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
     if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
     if(RT4Kir == 2)irsend.sendNEC(0x49,0x0A,2);  // RT4K profile 4
 
     if(SVS==2)Serial.println(F("remote prof4\r"));
     else sendSVS(204);
   }
-  else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0)){
+  else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0)){ // 1 0 0
     if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
     if(RT4Kir == 2)irsend.sendNEC(0x49,0x06,2);  // RT4K profile 5
 
     if(SVS==2)Serial.println(F("remote prof5\r"));
     else sendSVS(205);
   } 
-  else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1)){
+  else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1)){ // 1 0 1
     if(RT5Xir == 2){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
     if(RT4Kir == 2)irsend.sendNEC(0x49,0x02,2);  // RT4K profile 6
 
     if(SVS==2)Serial.println(F("remote prof6\r"));
     else sendSVS(206);
   }   
-  else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0)){
+  else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0)){ // 1 1 0
     if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
     if(RT4Kir == 2)irsend.sendNEC(0x49,0x09,2);  // RT4K profile 7
 
     if(SVS==2)Serial.println(F("remote prof7\r"));
     else sendSVS(207);
   } 
-  else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1)){
+  else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1)){ // 1 1 1
     if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
     if(RT4Kir == 2)irsend.sendNEC(0x49,0x05,2);  // RT4K profile 8
 
     if(SVS==2)Serial.println(F("remote prof8\r"));
     else sendSVS(208);
   }
-    
+  
+  if(allscartoff == 1)allscartoff = 0;
   bit2prev = bit[2];
   bit1prev = bit[1];
   bit0prev = bit[0];
   fpdcprev = fpdc;
 
+}
+
+if((fpdccount == fpdccountmax) && (fpdc != fpdcprev) && (bitcc == adssize)){ // if all in-active ports has been detected for multiple sample sessions, load profile, or do whatever below :) 
+  //if(DP0)Serial.println("Gscart1: All Scart Off\r");
+  Serial.println("Gscart1: All Scart Off\r");
+  allscartoff = 1;
+  fpdcprev = fpdc;
+  fpdccount = 0;
+  bit0prev = 0;
+  bit1prev = 0;
+  bit2prev = 0;
+}
+
+if(fpdc && (bitcc == adssize)){ // if the all in-active ports flag is set, increment counter
+  if(fpdccount >= fpdccountmax) fpdccount = 0;
+  else fpdccount++;
+}
+else if(bitcc == adssize){
+  fpdccount = 0;
+}
+
+// Serial.print("A0 voltage:         ");Serial.print(val[0]/211);Serial.print("v    SC: ");Serial.print(bitcc);Serial.print("  fpdccount: ");Serial.print(fpdccount);
+// Serial.print(" fpdc: ");Serial.print(fpdc);Serial.print(" fpdcprev: ");Serial.print(fpdcprev);
+// Serial.print(" /-/ bit0: ");Serial.print(bit[0]);Serial.print(" bit0prev: ");Serial.print(bit0prev);Serial.print(" bitcount0: ");Serial.println(bitcount[0]);
+// // Serial.print(" bit2: ");Serial.print(bit[2]);Serial.print(" bit2prev: ");Serial.print(bit2prev);
+// // Serial.print(" bit1: ");Serial.print(bit[1]);Serial.print(" bit1prev: ");Serial.print(bit1prev);
+
+
+if(bitcc < adssize){ // take "adssize" number of analog -> digital sample sessions
+  bitcc++;
+}
+else{
+  bitcc = 1;
+  memset(bitcount,0,sizeof(bitcount));
 }
 
 } // end readGscart1Test()
@@ -780,21 +783,11 @@ int bit[3] = {0,0,0};
 float val[3] = {0,0,0};
 byte const apin[3] = {A3,A4,A5};
 
-if(bitcc2 < adssize){
-  bitcc2++;
-}
-else{
-  bitcc2 = 1;
-  memset(bitcount2,0,sizeof(bitcount2));
-}
 
 for(int i = 0; i < 3; i++){
   for(int j = 0; j < 4; j++){
     val[i] = analogRead(apin[i]);
   }
-}
-
-for(int i = 0; i < 3; i++){
   if((val[i]/211) >= high2){
     bitcount2[i]++;
   }
@@ -809,70 +802,79 @@ if(bitcc2 == adssize){
   }
 }
 
-  
-//Serial.print("A3 voltage:         ");Serial.print(val[0]/211);Serial.print("v    SC: ");Serial.print(bitcc2);Serial.print("  fpdccount2: ");Serial.println(fpdccount2);
-// Serial.print("A4 voltage:         ");Serial.print(val[1]/211);Serial.println("v");
-// Serial.print("A5 voltage:         ");Serial.print(val[2]/211);Serial.println("v");
-// if(bitcc2 == adssize){
-//   //Serial.print("bitcc2: ");Serial.println(bitcc2);
-//   Serial.print("bitcount2: ");Serial.print(bitcount2[0]);Serial.print(" ");Serial.print(bitcount2[1]);Serial.print(" ");Serial.println(bitcount2[2]);
-// }
-
-if(fpdc && (bitcc2 == adssize)){
-  if(fpdccount2 > fpdccountmax) fpdccount2 = 0;
-  else fpdccount2++;
-}
-else if(bitcc2 == adssize){
-  fpdccount2 = 0;
-}
-
-if((fpdccount2 == fpdccountmax) && (fpdc != fpdcprev2) && (bitcc2 == adssize)){
-  //if(DP0)Serial.println("Gscart1: All Scart Off\r");
-  //Serial.println("Gscart2: All Scart Off\r");
-  fpdcprev2 = fpdc;
-  fpdccount2 = 0;
-}
-
-
-if((bit[2] != bit2prev2 || bit[1] != bit1prev2 || bit[0] != bit0prev2) && (bitcc2 == adssize) && !(fpdc)){
+if(((bit[2] != bit2prev2 || bit[1] != bit1prev2 || bit[0] != bit0prev2) || (allscartoff2 == 1)) && (bitcc2 == adssize) && !(fpdc)){
       //Detect which scart port is now active and change profile accordingly
-      if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){
+      if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x01,2);  // RT4K profile 9
 
         if(SVS==2)Serial.println(F("remote prof9\r"));
         else sendSVS(209);
       } 
-      else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){
+      else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){ // 0 0 1
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x25,2);  // RT4K profile 10
 
         if(SVS==2)Serial.println(F("remote prof10\r"));
         else sendSVS(210);
       }
-      else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){
+      else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){ // 0 1 0
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x26,2);  // RT4K profile 11
 
         if(SVS==2)Serial.println(F("remote prof11\r"));
         else sendSVS(211);
       }
-      else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){
+      else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
 
         if(SVS==2)Serial.println(F("remote prof12\r"));
         else sendSVS(212);
       }
-      else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0))sendSVS(213);
-      else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1))sendSVS(214);
-      else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0))sendSVS(215);
-      else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1))sendSVS(216);
-        
+      else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0))sendSVS(213); // 1 0 0
+      else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1))sendSVS(214); // 1 0 1
+      else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0))sendSVS(215); // 1 1 0
+      else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1))sendSVS(216); // 1 1 1
+
+      if(allscartoff2 == 1)allscartoff2 = 0;  
       bit2prev2 = bit[2];
       bit1prev2 = bit[1];
       bit0prev2 = bit[0];
       fpdcprev2 = fpdc;
 
-    }
+}
+
+if((fpdccount2 == fpdccountmax) && (fpdc != fpdcprev2) && (bitcc2 == adssize)){ // if all in-active ports has been detected for multiple sample sessions, load profile, or do whatever below :) 
+  //if(DP0)Serial.println("Gscart1: All Scart Off\r");
+  Serial.println("Gscart2: All Scart Off\r");
+  allscartoff2 = 1;
+  fpdcprev2 = fpdc;
+  fpdccount2 = 0;
+  bit0prev2 = 0;
+  bit1prev2 = 0;
+  bit2prev2 = 0;
+}
+
+if(fpdc && (bitcc2 == adssize)){
+  if(fpdccount2 >= fpdccountmax) fpdccount2 = 0;
+  else fpdccount2++;
+}
+else if(bitcc2 == adssize){
+  fpdccount2 = 0;
+}
+  
+// Serial.print("A3 voltage:         ");Serial.print(val[0]/211);Serial.print("v    SC: ");Serial.print(bitcc2);Serial.print("  fpdccount2: ");Serial.print(fpdccount2);
+// Serial.print(" fpdc: ");Serial.print(fpdc);Serial.print(" fpdcprev2: ");Serial.print(fpdcprev2);
+// Serial.print(" /-/ bit0: ");Serial.print(bit[0]);Serial.print(" bit0prev2: ");Serial.print(bit0prev);Serial.print(" bitcount0: ");Serial.println(bitcount2[0]);
+// Serial.print(" bit2: ");Serial.print(bit[2]);Serial.print(" bit2prev: ");Serial.print(bit2prev);
+// Serial.print(" bit1: ");Serial.print(bit[1]);Serial.print(" bit1prev: ");Serial.print(bit1prev);
+
+if(bitcc2 < adssize){
+  bitcc2++;
+}
+else{
+  bitcc2 = 1;
+  memset(bitcount2,0,sizeof(bitcount2));
+}
 
 } // end readGscart2Test()
 
