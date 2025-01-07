@@ -289,7 +289,7 @@ readExtron2(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt s
 
 all_inactive_ports_check();
 
-//delay(500);
+//delay(200);
 } /////////////////////////////////// end of void loop ////////////////////////////////////
 
 
@@ -673,7 +673,7 @@ if(bitcc == adssize){ // when the "adssize" number of samples has been taken, if
 }
 
 
-if(((bit[2] != bit2prev || bit[1] != bit1prev || bit[0] != bit0prev) || (allscartoff == 1)) && (bitcc == adssize) && !(fpdc)){
+if(((bit[2] != bit2prev || bit[1] != bit1prev || bit[0] != bit0prev) || allscartoff) && (bitcc == adssize) && !(fpdc)){
   //Detect which scart port is now active and change profile accordingly
   if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
     if(RT5Xir == 2){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
@@ -732,7 +732,7 @@ if(((bit[2] != bit2prev || bit[1] != bit1prev || bit[0] != bit0prev) || (allscar
     else sendSVS(208);
   }
   
-  if(allscartoff == 1)allscartoff = 0;
+  if(allscartoff) allscartoff = 0;
   bit2prev = bit[2];
   bit1prev = bit[1];
   bit0prev = bit[0];
@@ -742,7 +742,7 @@ if(((bit[2] != bit2prev || bit[1] != bit1prev || bit[0] != bit0prev) || (allscar
 
 if((fpdccount == fpdccountmax) && (fpdc != fpdcprev) && (bitcc == adssize)){ // if all in-active ports has been detected for multiple sample sessions, load profile, or do whatever below :) 
   //if(DP0)Serial.println("Gscart1: All Scart Off\r");
-  Serial.println("Gscart1: All Scart Off\r");
+  Serial.println(F("Gscart1: All Scart Off\r"));
   allscartoff = 1;
   fpdcprev = fpdc;
   fpdccount = 0;
@@ -752,18 +752,18 @@ if((fpdccount == fpdccountmax) && (fpdc != fpdcprev) && (bitcc == adssize)){ // 
 }
 
 if(fpdc && (bitcc == adssize)){ // if the all in-active ports flag is set, increment counter
-  if(fpdccount >= fpdccountmax) fpdccount = 0;
+  if(fpdccount == fpdccountmax) fpdccount = 0;
   else fpdccount++;
 }
 else if(bitcc == adssize){
   fpdccount = 0;
 }
 
-// Serial.print("A0 voltage:         ");Serial.print(val[0]/211);Serial.print("v    SC: ");Serial.print(bitcc);Serial.print("  fpdccount: ");Serial.print(fpdccount);
-// Serial.print(" fpdc: ");Serial.print(fpdc);Serial.print(" fpdcprev: ");Serial.print(fpdcprev);
-// Serial.print(" /-/ bit0: ");Serial.print(bit[0]);Serial.print(" bit0prev: ");Serial.print(bit0prev);Serial.print(" bitcount0: ");Serial.println(bitcount[0]);
-// // Serial.print(" bit2: ");Serial.print(bit[2]);Serial.print(" bit2prev: ");Serial.print(bit2prev);
-// // Serial.print(" bit1: ");Serial.print(bit[1]);Serial.print(" bit1prev: ");Serial.print(bit1prev);
+// Serial.print(F("A0 voltage:         "));Serial.print(val[0]/211);Serial.print(F("v    SC: "));Serial.print(bitcc);Serial.print(F("  fpdccount: "));Serial.print(fpdccount);
+// Serial.print(F(" fpdc: "));Serial.print(fpdc);Serial.print(F(" fpdcprev: "));Serial.print(fpdcprev);
+// Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bit0prev: "));Serial.print(bit0prev);Serial.print(F(" bitcount0: "));Serial.println(bitcount[0]);
+// // Serial.print(F(" bit2: "));Serial.print(bit[2]);Serial.print(F(" bit2prev: "));Serial.print(bit2prev);
+// // Serial.print(F(" bit1: "));Serial.print(bit[1]);Serial.print(F(" bit1prev: "));Serial.print(bit1prev);
 
 
 if(bitcc < adssize){ // take "adssize" number of analog -> digital sample sessions
@@ -802,7 +802,7 @@ if(bitcc2 == adssize){
   }
 }
 
-if(((bit[2] != bit2prev2 || bit[1] != bit1prev2 || bit[0] != bit0prev2) || (allscartoff2 == 1)) && (bitcc2 == adssize) && !(fpdc)){
+if(((bit[2] != bit2prev2 || bit[1] != bit1prev2 || bit[0] != bit0prev2) || allscartoff2) && (bitcc2 == adssize) && !(fpdc)){
       //Detect which scart port is now active and change profile accordingly
       if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
@@ -835,7 +835,7 @@ if(((bit[2] != bit2prev2 || bit[1] != bit1prev2 || bit[0] != bit0prev2) || (alls
       else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0))sendSVS(215); // 1 1 0
       else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1))sendSVS(216); // 1 1 1
 
-      if(allscartoff2 == 1)allscartoff2 = 0;  
+      if(allscartoff2) allscartoff2 = 0;  
       bit2prev2 = bit[2];
       bit1prev2 = bit[1];
       bit0prev2 = bit[0];
@@ -845,7 +845,7 @@ if(((bit[2] != bit2prev2 || bit[1] != bit1prev2 || bit[0] != bit0prev2) || (alls
 
 if((fpdccount2 == fpdccountmax) && (fpdc != fpdcprev2) && (bitcc2 == adssize)){ // if all in-active ports has been detected for multiple sample sessions, load profile, or do whatever below :) 
   //if(DP0)Serial.println("Gscart1: All Scart Off\r");
-  Serial.println("Gscart2: All Scart Off\r");
+  Serial.println(F("Gscart2: All Scart Off\r"));
   allscartoff2 = 1;
   fpdcprev2 = fpdc;
   fpdccount2 = 0;
@@ -855,18 +855,18 @@ if((fpdccount2 == fpdccountmax) && (fpdc != fpdcprev2) && (bitcc2 == adssize)){ 
 }
 
 if(fpdc && (bitcc2 == adssize)){
-  if(fpdccount2 >= fpdccountmax) fpdccount2 = 0;
+  if(fpdccount2 == fpdccountmax) fpdccount2 = 0;
   else fpdccount2++;
 }
 else if(bitcc2 == adssize){
   fpdccount2 = 0;
 }
   
-// Serial.print("A3 voltage:         ");Serial.print(val[0]/211);Serial.print("v    SC: ");Serial.print(bitcc2);Serial.print("  fpdccount2: ");Serial.print(fpdccount2);
-// Serial.print(" fpdc: ");Serial.print(fpdc);Serial.print(" fpdcprev2: ");Serial.print(fpdcprev2);
-// Serial.print(" /-/ bit0: ");Serial.print(bit[0]);Serial.print(" bit0prev2: ");Serial.print(bit0prev);Serial.print(" bitcount0: ");Serial.println(bitcount2[0]);
-// Serial.print(" bit2: ");Serial.print(bit[2]);Serial.print(" bit2prev: ");Serial.print(bit2prev);
-// Serial.print(" bit1: ");Serial.print(bit[1]);Serial.print(" bit1prev: ");Serial.print(bit1prev);
+// Serial.print(F("A3 voltage:         "));Serial.print(val[0]/211);Serial.print(F("v    SC: "));Serial.print(bitcc2);Serial.print(F("  fpdccount2: "));Serial.print(fpdccount2);
+// Serial.print(F(" fpdc: "));Serial.print(fpdc);Serial.print(F(" fpdcprev2: "));Serial.print(fpdcprev2);
+// Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bit0prev2: "));Serial.print(bit0prev);Serial.print(" bitcount0: ");Serial.println(bitcount2[0]);
+// Serial.print(F(" bit2: "));Serial.print(bit[2]);Serial.print(F(" bit2prev: "));Serial.print(bit2prev);
+// Serial.print(F(" bit1: "));Serial.print(bit[1]);Serial.print(F(" bit1prev: "));Serial.print(bit1prev);
 
 if(bitcc2 < adssize){
   bitcc2++;
