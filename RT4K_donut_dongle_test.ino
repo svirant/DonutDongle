@@ -47,8 +47,12 @@ int fpdccountmax = 2;
 int allscartoff = 0;
 int allscartoff2 = 0;
 
-float high = 1.2; // for gscart sw1, rise above this voltage for a binary 1 or ON
-float high2 = 1.2; // for gscart sw2,  rise above this voltage for a binary 1 or ON
+// gscart / gcomp adjustment variables for port detection
+
+float high = 1.2; // for gscart sw1, rise above this voltage for a high sample
+float high2 = 1.2; // for gscart sw2,  rise above this voltage for a high sample
+int dch = 15; // at least this many high samples per "adssize" for a high bit
+int dcl = 5; // at least this many high samples per "adssize" indicate all inputs are in-active
 
 /*
 ////////////////////
@@ -663,11 +667,11 @@ for(int i = 0; i < 3; i++){ // read in analog pin voltages, read each value 4x i
   }
 }
 
-if(bitcc == adssize){ // when the "adssize" number of samples has been taken, if the voltage was high for greater than 50% of the samples set the bit to 1
-  for(int i = 0; i < 3; i++){             // if the voltage was high for ~5% to 50%, set an all in-active ports flag
-    if(bitcount[i] > (adssize/2))
+if(bitcc == adssize){              // when the "adssize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
+  for(int i = 0; i < 3; i++){      // if the voltage was high for only dcl to dch samples, set an all in-active ports flag
+    if(bitcount[i] > dch)          // how many "high" samples per adssize are required for a bit to be 1.  
       bit[i] = 1;
-    else if(bitcount[i] > 2)
+    else if(bitcount[i] > dcl)     // between dcl and dch number of "high" samples are required to set an all in-active ports flag
       fpdc = 1;
   }
 }
@@ -752,8 +756,10 @@ if((fpdccount == fpdccountmax) && (fpdc != fpdcprev) && (bitcc == adssize)){ // 
 }
 
 if(fpdc && (bitcc == adssize)){ // if the all in-active ports flag is set, increment counter
-  if(fpdccount == fpdccountmax) fpdccount = 0;
-  else fpdccount++;
+  if(fpdccount == fpdccountmax) 
+    fpdccount = 0;
+  else 
+    fpdccount++;
 }
 else if(bitcc == adssize){
   fpdccount = 0;
@@ -793,11 +799,11 @@ for(int i = 0; i < 3; i++){
   }
 }
 
-if(bitcc2 == adssize){
-  for(int i = 0; i < 3; i++){
-    if(bitcount2[i] > (adssize/2))
+if(bitcc2 == adssize){          // when the "adssize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
+  for(int i = 0; i < 3; i++){   // if the voltage was high for only dcl to dch samples, set an all in-active ports flag
+    if(bitcount2[i] > dch)      // how many "high" samples per adssize are required for a bit to be 1.  
       bit[i] = 1;
-    else if(bitcount2[i] > 2)
+    else if(bitcount2[i] > dcl)   // between dcl and dch number of "high" samples are required to set an all in-active ports flag
       fpdc = 1;
   }
 }
@@ -855,8 +861,10 @@ if((fpdccount2 == fpdccountmax) && (fpdc != fpdcprev2) && (bitcc2 == adssize)){ 
 }
 
 if(fpdc && (bitcc2 == adssize)){
-  if(fpdccount2 == fpdccountmax) fpdccount2 = 0;
-  else fpdccount2++;
+  if(fpdccount2 == fpdccountmax) 
+    fpdccount2 = 0;
+  else 
+    fpdccount2++;
 }
 else if(bitcc2 == adssize){
   fpdccount2 = 0;
@@ -868,9 +876,8 @@ else if(bitcc2 == adssize){
 // Serial.print(F(" bit2: "));Serial.print(bit[2]);Serial.print(F(" bit2prev: "));Serial.print(bit2prev);
 // Serial.print(F(" bit1: "));Serial.print(bit[1]);Serial.print(F(" bit1prev: "));Serial.print(bit1prev);
 
-if(bitcc2 < adssize){
+if(bitcc2 < adssize) 
   bitcc2++;
-}
 else{
   bitcc2 = 1;
   memset(bitcount2,0,sizeof(bitcount2));
