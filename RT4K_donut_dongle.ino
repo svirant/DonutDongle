@@ -18,9 +18,7 @@
 //    OPTIONS    //
 //////////////////
 */
-//debug
-uint8_t debugGscart1 = 0;
-uint8_t debugGscart2 = 0;
+
 
 uint8_t SVS = 0; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
              //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
@@ -757,17 +755,6 @@ else if(samcc == samsize){
 }
 
 
-if(debugGscart1){
-delay(200);
-Serial.print(F("A0 voltage:         "));Serial.print(val[0]/211);Serial.print(F("v    SC: "));Serial.print(samcc);Serial.print(F("  fpdccount: "));Serial.print(fpdccount);
-Serial.print(F(" fpdc: "));Serial.print(fpdc);Serial.print(F(" fpdcprev: "));Serial.print(fpdcprev);
-Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bitprev[0]: "));Serial.print(bitprev[0]);Serial.print(F(" highcount0: "));Serial.print(highcount[0]);
-Serial.print(F(" allgoff: "));Serial.print(allgscartoff);Serial.print(F(" allgoff2: "));Serial.println(allgscartoff2);
-// Serial.print(F("A0 voltage:         "));Serial.println(val[0]/211);
-// Serial.print(F("A1 voltage:         "));Serial.println(val[1]/211);
-// Serial.print(F("A2 voltage:         "));Serial.println(val[2]/211);
-}
-
 if(samcc < samsize) // take "samsize" number of analog -> digital conversions per period
   samcc++;
 else{
@@ -876,17 +863,6 @@ if(fpdc && (samcc2 == samsize)){
 }
 else if(samcc2 == samsize){
   fpdccount2 = 0;
-}
-
-if(debugGscart2){  
-delay(200);
-Serial.print(F("A3 voltage:         "));Serial.print(val[0]/211);Serial.print(F("v    SC: "));Serial.print(samcc2);Serial.print(F("  fpdccount2: "));Serial.print(fpdccount2);
-Serial.print(F(" fpdc: "));Serial.print(fpdc);Serial.print(F(" fpdcprev2: "));Serial.print(fpdcprev2);
-Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bitprev2[0]: "));Serial.print(bitprev2[0]);Serial.print(" highcount0: ");Serial.print(highcount2[0]);
-Serial.print(F(" allgoff: "));Serial.print(allgscartoff);Serial.print(F(" allgoff2: "));Serial.println(allgscartoff2);
-// Serial.print(F("A3 voltage:         "));Serial.println(val[0]/211);
-// Serial.print(F("A4 voltage:         "));Serial.println(val[1]/211);
-// Serial.print(F("A5 voltage:         "));Serial.println(val[2]/211);
 }
 
 
