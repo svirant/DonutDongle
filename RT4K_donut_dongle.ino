@@ -1,10 +1,11 @@
-// RT4K Donut Dongle v0.4
+// RT4K Donut Dongle v0.5
 //
 //
 //
 
-#define PORT->Group[g_APinDescription[SCL].ulPort].PINCFG[g_APinDescription[SCL].ulPin].bit.PMUXEN = 0; // set SCL pin back to GPIO
+
 #define PORT->Group[g_APinDescription[SDA].ulPort].PINCFG[g_APinDescription[SDA].ulPin].bit.PMUXEN = 0; // set SDA pin back to GPIO
+#define PORT->Group[g_APinDescription[SCL].ulPort].PINCFG[g_APinDescription[SCL].ulPin].bit.PMUXEN = 0; // set SCL pin back to GPIO
 
 #define IR_SEND_PIN 11  // Optional IR LED Emitter for RT5X compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2 // Optional IR Receiver on pin D2
@@ -22,11 +23,29 @@ IRsend irsend;
 #define rxPin 3 // sets Rx pin to D3 on Arduino
 #define txPin 4 // sets Tx pin to D4 ...
 
-uint16_t gscart1 = 0x0f; //used to store state of first gscart switch
-uint16_t gscart1prev = 0x0f; //used to store previous state of first gscart switch
-uint16_t gscart2 = 0x0f; //used to store state of second gscart switch
-uint16_t gscart2prev = 0x0f; //used to store previous state of second gscart switch
+// gscart / gcomp global variables
+uint8_t fpdcprev = 0;
+uint8_t fpdcprev2 = 0;
+uint8_t fpdccount = 0;
+uint8_t fpdccount2 = 0;
+uint8_t allgscartoff = 2;
+uint8_t allgscartoff2 = 2;
+uint8_t bitcc = 0;
+uint8_t bitcc2 = 0;
+uint8_t bitcount[3] = {0,0,0};
+uint8_t bitcount2[3] = {0,0,0};
+uint8_t bitprev[3] = {0,0,0};
+uint8_t bitprev2[3] = {0,0,0};
+byte const apin[3] = {A0,A1,A2};
+byte const apin2[3] = {A3,A4,A5};
 
+// gscart / gcomp adjustment variables for port detection
+float high = 2.5; // for gscart sw1, rise above this voltage for a high sample
+float high2 = 2.5; // for gscart sw2,  rise above this voltage for a high sample
+uint8_t dch = 15; // at least this many high samples per "adssize" for a high bit (~75% duty cycle)
+uint8_t dcl = 5; // at least this many high samples and less than "dch" per "adssize" indicate all inputs are in-active (~50% duty cycle)
+uint8_t adssize = 20; // total number of ADC samples to take to capture a period
+uint8_t fpdccountmax = 2; // number of "adssize" sessions +1 required when in the 50% duty cycle state, before a Default Profile 0 is triggered.
 
 /*
 ////////////////////
@@ -35,7 +54,7 @@ uint16_t gscart2prev = 0x0f; //used to store previous state of second gscart swi
 */
 
 
-int SVS = 0; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
+uint8_t SVS = 0; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
              //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
              //     the profile being used for a console's switch input if your setup is in flux. SVS require you to rename the file itself on the SD card which is 
              //     a little more work.  Regardless, SVS profiles will need to be used for console switch inputs over 12.
@@ -73,13 +92,13 @@ int SVS = 0; //     "Remote" profiles are profiles that are assigned to buttons 
              //     - SVS   1 -  99 for 1st Extron or TESmart
              //     - SVS 101 - 199 for 2nd Extron or TESmart
              //
-             //  ** Best to set DP0 false if using gscart due to the current detection method (not knowing if all inputs are off) **
+             //
+             //
 
 
 
 bool DP0  = false;       // (Default Profile 0) 
                          //
-                         // ** Best to set DP0 to false if using gscart due to the current detection method (not knowing if all inputs are off) **
                          //
                          // set true to load "Remote" profile 12 (if SVS=0) when all ports are in-active on 1st Extron switch (and 2nd if connected). 
                          // You can assign it to a generic HDMI profile for example.
@@ -89,13 +108,14 @@ bool DP0  = false;       // (Default Profile 0)
                          // 
                          // If SVS=1, /profile/SVS/ "S0_<user defined>.rt4" will be used instead of remote profile 12
                          //
-                         // If SVS=2, DP0 is ignored due to the current detection system for gscart (not knowing if all inputs are off)
+                         // If SVS=2, remote profile 12 will be used for gscart/gcomp
+                         //
                          //
                          // default is false // also recommended to set false to filter out unstable Extron inputs that can result in spamming the RT4K with profile changes 
                        
 
 
-uint16_t voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input changes to any/all outputs result in a profile change
+uint8_t voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input changes to any/all outputs result in a profile change
                                                    // disable specific outputs from triggering profile changes
                                                    //
                            1,  // output 1 (1 = enabled, 0 = disabled)
@@ -168,14 +188,14 @@ uint16_t voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input chang
                            
 
 
-int RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
+uint8_t RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
                      // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
                      //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
                      //     (DP0 - if enabled uses Profile 10 on the RT5X)
                      //
                      // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-10 for first 2 inputs on second)
 
-int RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
+uint8_t RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
                      // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
                      //     sends Profile 1 - 12 commands to RetroTink 4K. Must have IR LED emitter connected.
                      //     (DP0 - if enabled uses Profile 12 on the RT4K)
@@ -183,31 +203,31 @@ int RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
                      // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-12 for first 4 inputs on second)
 
 
-  uint16_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons. 
-                            // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
-                            // Press AUX8 then profile button to load. Must have IR Receiver connected and Serial connection to RT4K.
-                            // 
-                       {1,  // AUX8 + profile 1 button
-                        2,  // AUX8 + profile 2 button
-                        3,  // AUX8 + profile 3 button
-                        4,  // AUX8 + profile 4 button
-                        5,  // AUX8 + profile 5 button
-                        6,  // AUX8 + profile 6 button
-                        7,  // AUX8 + profile 7 button
-                        8,  // AUX8 + profile 8 button
-                        9,  // AUX8 + profile 9 button
-                        10, // AUX8 + profile 10 button
-                        11, // AUX8 + profile 11 button
-                        12, // AUX8 + profile 12 button
-                        };
+uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons. 
+                          // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
+                          // Press AUX8 then profile button to load. Must have IR Receiver connected and Serial connection to RT4K.
+                          // 
+                      {1,  // AUX8 + profile 1 button
+                      2,  // AUX8 + profile 2 button
+                      3,  // AUX8 + profile 3 button
+                      4,  // AUX8 + profile 4 button
+                      5,  // AUX8 + profile 5 button
+                      6,  // AUX8 + profile 6 button
+                      7,  // AUX8 + profile 7 button
+                      8,  // AUX8 + profile 8 button
+                      9,  // AUX8 + profile 9 button
+                      10, // AUX8 + profile 10 button
+                      11, // AUX8 + profile 11 button
+                      12, // AUX8 + profile 12 button
+                      };
                           
 //////////////////  
 
-
+// Extron variables
 byte ecapbytes[13]; // used to store first 13 captured bytes / messages for Extron sw1 / alt sw1                    
 String ecap; // used to store Extron status messages for 1st Extron in String format
 String einput; // used to store first 4 chars of Extron input
-String previnput; // used to keep track of previous input
+String previnput = "discon"; // used to keep track of previous input
 String eoutput; // used to store first 2 chars of Extron output
 
 byte ecapbytes2[13]; // used to store first 13 captured bytes / messages for Extron sw2 / alt sw2
@@ -220,11 +240,11 @@ SoftwareSerial extronSerial = SoftwareSerial(rxPin,txPin); // setup a software s
 AltSoftSerial extronSerial2; // setup yet another serial port for listening to Extron sw2 / alt sw2. hardcoded to pins D8 / D9
 
 // irRec() (IR Receiver) variables
-int pwrtoggle = 0; // used to toggle remote power button command (on/off) when using the optional IR Receiver
-int repeatcount = 0; // used to help emulate the repeat nature of directional button presses
-int extrabuttonprof = 0; // used to keep track of AUX8 button presses for addtional button profiles
+uint8_t pwrtoggle = 0; // used to toggle remote power button command (on/off) when using the optional IR Receiver
+uint8_t repeatcount = 0; // used to help emulate the repeat nature of directional button presses
+uint8_t extrabuttonprof = 0; // used to keep track of AUX8 button presses for addtional button profiles
 String svsbutton = ""; // used to store 3 digit SVS profile when AUX8 is double pressed
-int nument = 0; // used to keep track of how many digits have been entered for 3 digit SVS profile
+uint8_t nument = 0; // used to keep track of how many digits have been entered for 3 digit SVS profile
 
 
 
@@ -242,7 +262,6 @@ void setup(){
     extronSerial.setTimeout(150); // sets the timeout for reading / saving reads into a string
     extronSerial2.begin(9600); // set the baud rate for Extron sw2 Connection
     extronSerial2.setTimeout(150); // sets the timeout for reading / saving reads into a string for the Extron sw2 Connection
-    DDRC  &= ~B00111111; // for gscart/gcomp, Set PC0-PC5 as inputs (shown on Nano as pins A0-A5) Connected to gscart1 IN_BIT0,IN_BIT1,IN_BIT2 and gscart2 IN_BIT0,IN_BIT1,IN_BIT2
 
 } // end of setup
 
@@ -261,9 +280,9 @@ readExtron1(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt s
 
 readExtron2(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt sw2" port
 
-all_inactive_ports_check();
+all_extron_inactive_ports_check();
 
-//delay(250);
+//delay(200);
 } /////////////////////////////////// end of void loop ////////////////////////////////////
 
 
@@ -275,7 +294,7 @@ void readExtron1(){
     extronSerial.readBytes(ecapbytes,13); // read in and store only the first 13 chars for every status message received from 1st Extron SW port
     }
     ecap = String((char *)ecapbytes); // convert bytes to String for Extron switches
-    
+
 
     if(ecap.substring(0,3) == "Out"){ // store only the input and output states, some Extron devices report output first instead of input
       einput = ecap.substring(6,10);
@@ -473,9 +492,7 @@ void readExtron1(){
     }
 
     // set ecapbytes to 0 for next read
-    for(int i = 0; i < 13; i++){
-      ecapbytes[i] = 0;
-    }
+    memset(ecapbytes,0,sizeof(ecapbytes));
 
     // for Otaku Games Scart Switch
     if(ecap.substring(0,6) == "remote"){
@@ -483,7 +500,7 @@ void readExtron1(){
           if((RT5Xir == 1) && !DP0){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x25,2); // RT4K profile 10
 
-          if(SVS == 0) Serial.println(F("remote prof10\r"));
+          if(SVS==0) Serial.println(F("remote prof10\r"));
           else sendSVS(10);
       }
       else if(ecap == "remote prof12"){
@@ -493,63 +510,63 @@ void readExtron1(){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
 
-          if(SVS == 0) Serial.println(F("remote prof1\r"));
+          if(SVS==0) Serial.println(F("remote prof1\r"));
           else sendSVS(1);
       }
       else if(ecap.substring(0,12) == "remote prof2"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x07,2); // RT4K profile 2
 
-          if(SVS == 0) Serial.println(F("remote prof2\r"));
+          if(SVS==0) Serial.println(F("remote prof2\r"));
           else sendSVS(2);
       }
       else if(ecap.substring(0,12) == "remote prof3"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x03,2); // RT4K profile 3
 
-          if(SVS == 0) Serial.println(F("remote prof3\r"));
+          if(SVS==0) Serial.println(F("remote prof3\r"));
           else sendSVS(3);
       }
       else if(ecap.substring(0,12) == "remote prof4"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x0A,2); // RT4K profile 4
 
-          if(SVS == 0) Serial.println(F("remote prof4\r"));
+          if(SVS==0) Serial.println(F("remote prof4\r"));
           else sendSVS(4);
       }
       else if(ecap.substring(0,12) == "remote prof5"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x06,2); // RT4K profile 5
 
-          if(SVS == 0) Serial.println(F("remote prof5\r"));
+          if(SVS==0) Serial.println(F("remote prof5\r"));
           else sendSVS(5);
       }
       else if(ecap.substring(0,12) == "remote prof6"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x02,2); // RT4K profile 6
 
-          if(SVS == 0) Serial.println(F("remote prof6\r"));
+          if(SVS==0) Serial.println(F("remote prof6\r"));
           else sendSVS(6);
       }
       else if(ecap.substring(0,12) == "remote prof7"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x09,2); // RT4K profile 7
 
-          if(SVS == 0) Serial.println(F("remote prof7\r"));
+          if(SVS==0) Serial.println(F("remote prof7\r"));
           else sendSVS(7);
       }
       else if(ecap.substring(0,12) == "remote prof8"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x05,2); // RT4K profile 8
 
-          if(SVS == 0) Serial.println(F("remote prof8\r"));
+          if(SVS==0) Serial.println(F("remote prof8\r"));
           else sendSVS(8);
       }
       else if(ecap.substring(0,12) == "remote prof9"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x01,2); // RT4K profile 9
 
-          if(SVS == 0) Serial.println(F("remote prof9\r"));
+          if(SVS==0) Serial.println(F("remote prof9\r"));
           else sendSVS(9);
       }
 
@@ -600,7 +617,7 @@ void readExtron2(){
     }
 
     // set ecapbytes2 to 0 for next read
-    for(int i = 0; i < 13; i++){
+    for(uint8_t i = 0; i < 13; i++){
       ecapbytes2[i] = 0;
     }
 
@@ -621,8 +638,7 @@ void readExtron2(){
 
 }// end of readExtron2()
 
-
-void readGscart1(){
+void readGscart1(){ // readGscart1
 
 // https://shmups.system11.org/viewtopic.php?p=1307320#p1307320
 // gscartsw_lite EXT pinout:
@@ -635,72 +651,138 @@ void readGscart1(){
 // Pin 7: IN_BIT2
 // Pin 8: N/C
 
-    gscart1 = PINC & B00000111; // read state of pins A0,A1,A2 (IN_BIT0, IN_BIT1, IN_BIT2 for gscart sw1)
+uint8_t fpdc = 0;
+uint8_t bit[3] = {0,0,0};
+float val[3] = {0,0,0};
 
-    // has active port changed on gscart sw1?
-    if(gscart1 != gscart1prev){
-      //Detect which scart port is now active and change profile accordingly
-      if(!(gscart1 ^ B00000000)){
-        if(RT5Xir == 2){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
-        if(RT4Kir == 2)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
+for(uint8_t i = 0; i < 3; i++){ // read in analog pin voltages, read each value 4x in a row to get a stable reading, combats if using too large of a pull-down resistor
+  for(uint8_t j = 0; j < 4; j++){
+    val[i] = analogRead(apin[i]);
+  }
+  if((val[i]/211) >= high){ // if voltage is greater than or equal to the voltage defined for a 1, increase bitcount by 1 for that analog pin
+    bitcount[i]++;
+  }
+}
 
-        if(SVS==2)Serial.println(F("remote prof1\r"));
-        else sendSVS(201);
-      } 
-      else if(!(gscart1 ^ B00000001)){
-        if(RT5Xir == 2){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
-        if(RT4Kir == 2)irsend.sendNEC(0x49,0x07,2);  // RT4K profile 2
+if(bitcc == adssize){              // when the "adssize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
+  for(uint8_t i = 0; i < 3; i++){      // if the voltage was high for only dcl to dch samples, set an all in-active ports flag
+    if(bitcount[i] > dch)          // how many "high" samples per adssize are required for a bit to be 1.  
+      bit[i] = 1;
+    else if(bitcount[i] > dcl)     // between dcl and dch number of "high" samples are required to set an all in-active ports flag
+      fpdc = 1;
+  }
+}
 
-        if(SVS==2)Serial.println(F("remote prof2\r"));
-        else sendSVS(202);
-      }
-      else if(!(gscart1 ^ B00000010)){
-        if(RT5Xir == 2){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
-        if(RT4Kir == 2)irsend.sendNEC(0x49,0x03,2);  // RT4K profile 3
 
-        if(SVS==2)Serial.println(F("remote prof3\r"));
-        else sendSVS(203);
-      }
-      else if(!(gscart1 ^ B00000011)){
-        if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
-        if(RT4Kir == 2)irsend.sendNEC(0x49,0x0A,2);  // RT4K profile 4
+if(((bit[2] != bitprev[2] || bit[1] != bitprev[1] || bit[0] != bitprev[0]) || (allgscartoff == 1)) && (bitcc == adssize) && !(fpdc)){
+  //Detect which scart port is now active and change profile accordingly
+  if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
+    if(RT5Xir == 2){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
+    if(RT4Kir == 2)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
 
-        if(SVS==2)Serial.println(F("remote prof4\r"));
-        else sendSVS(204);
-      }
-      else if(!(gscart1 ^ B00000100)){
-        if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
-        if(RT4Kir == 2)irsend.sendNEC(0x49,0x06,2);  // RT4K profile 5
+    if(SVS==2)Serial.println(F("remote prof1\r"));
+    else sendSVS(201);
+  } 
+  else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){ // 0 0 1
+    if(RT5Xir == 2){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
+    if(RT4Kir == 2)irsend.sendNEC(0x49,0x07,2);  // RT4K profile 2
 
-        if(SVS==2)Serial.println(F("remote prof5\r"));
-        else sendSVS(205);
-      } 
-      else if(!(gscart1 ^ B00000101)){
-        if(RT5Xir == 2){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
-        if(RT4Kir == 2)irsend.sendNEC(0x49,0x02,2);  // RT4K profile 6
+    if(SVS==2)Serial.println(F("remote prof2\r"));
+    else sendSVS(202);
+  }
+  else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){ // 0 1 0
+    if(RT5Xir == 2){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
+    if(RT4Kir == 2)irsend.sendNEC(0x49,0x03,2);  // RT4K profile 3
 
-        if(SVS==2)Serial.println(F("remote prof6\r"));
-        else sendSVS(206);
-      }   
-      else if(!(gscart1 ^ B00000110)){
-        if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
-        if(RT4Kir == 2)irsend.sendNEC(0x49,0x09,2);  // RT4K profile 7
+    if(SVS==2)Serial.println(F("remote prof3\r"));
+    else sendSVS(203);
+  }
+  else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
+    if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
+    if(RT4Kir == 2)irsend.sendNEC(0x49,0x0A,2);  // RT4K profile 4
 
-        if(SVS==2)Serial.println(F("remote prof7\r"));
-        else sendSVS(207);
-      } 
-      else if(!(gscart1 ^ B00000111)){
-        if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
-        if(RT4Kir == 2)irsend.sendNEC(0x49,0x05,2);  // RT4K profile 8
+    if(SVS==2)Serial.println(F("remote prof4\r"));
+    else sendSVS(204);
+  }
+  else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0)){ // 1 0 0
+    if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
+    if(RT4Kir == 2)irsend.sendNEC(0x49,0x06,2);  // RT4K profile 5
 
-        if(SVS==2)Serial.println(F("remote prof8\r"));
-        else sendSVS(208);
-      }
-        
-      gscart1prev = gscart1;
-    }
-} // end of readGscart1()
+    if(SVS==2)Serial.println(F("remote prof5\r"));
+    else sendSVS(205);
+  } 
+  else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1)){ // 1 0 1
+    if(RT5Xir == 2){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
+    if(RT4Kir == 2)irsend.sendNEC(0x49,0x02,2);  // RT4K profile 6
 
+    if(SVS==2)Serial.println(F("remote prof6\r"));
+    else sendSVS(206);
+  }   
+  else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0)){ // 1 1 0
+    if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
+    if(RT4Kir == 2)irsend.sendNEC(0x49,0x09,2);  // RT4K profile 7
+
+    if(SVS==2)Serial.println(F("remote prof7\r"));
+    else sendSVS(207);
+  } 
+  else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1)){ // 1 1 1
+    if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
+    if(RT4Kir == 2)irsend.sendNEC(0x49,0x05,2);  // RT4K profile 8
+
+    if(SVS==2)Serial.println(F("remote prof8\r"));
+    else sendSVS(208);
+  }
+  
+  if(allgscartoff) allgscartoff = 0;
+  bitprev[0] = bit[0];
+  bitprev[1] = bit[1];
+  bitprev[2] = bit[2];
+  fpdcprev = fpdc;
+
+}
+
+if((fpdccount == fpdccountmax) && (fpdc != fpdcprev) && (bitcc == adssize)){ // if all in-active ports has been detected for multiple sample sessions, load profile, or do whatever below :) 
+  
+  allgscartoff = 1;
+  fpdccount = 0;
+  memset(bitprev,0,sizeof(bitprev));
+  fpdcprev = fpdc;
+
+  if(DP0 && allgscartoff2 && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") && 
+                            (previnput2 == "0" || previnput2 == "discon" || previnput2 == "In0 " || previnput2 == "In00"))){
+    if(SVS==1)sendSVS(0);
+    else if(SVS==2)Serial.println(F("remote prof12\r"));
+  }
+
+}
+
+if(fpdc && (bitcc == adssize)){ // if the all in-active ports flag is set, increment counter
+  if(fpdccount == fpdccountmax) 
+    fpdccount = 0;
+  else 
+    fpdccount++;
+}
+else if(bitcc == adssize){
+  fpdccount = 0;
+}
+
+// Serial.print(F("A0 voltage:         "));Serial.print(val[0]/211);Serial.print(F("v    SC: "));Serial.print(bitcc);Serial.print(F("  fpdccount: "));Serial.print(fpdccount);
+// Serial.print(F(" fpdc: "));Serial.print(fpdc);Serial.print(F(" fpdcprev: "));Serial.print(fpdcprev);
+// Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bitprev[0]: "));Serial.print(bitprev[0]);Serial.print(F(" bitcount0: "));Serial.print(bitcount[0]);
+// Serial.print(F(" allgoff: "));Serial.print(allgscartoff);Serial.print(F(" allgoff2: "));Serial.println(allgscartoff2);
+// Serial.print(F("A0 voltage:         "));Serial.println(val[0]/211);
+// Serial.print(F("A1 voltage:         "));Serial.println(val[1]/211);
+// Serial.print(F("A2 voltage:         "));Serial.println(val[2]/211);
+
+// take "adssize" number of analog -> digital sample sessions
+if(bitcc < adssize)
+  bitcc++;
+else{
+  bitcc = 1;
+  memset(bitcount,0,sizeof(bitcount));
+}
+
+} // end readGscart1()
 
 void readGscart2(){
 
@@ -715,56 +797,124 @@ void readGscart2(){
 // Pin 7: IN_BIT2
 // Pin 8: N/C
 
-    gscart2 = PINC & B00111000; //read state of pins A3,A4,A5 (IN_BIT0, IN_BIT1, IN_BIT2 for gscart sw2)
+uint8_t fpdc = 0;
+uint8_t bit[3] = {0,0,0};
+float val[3] = {0,0,0};
 
-    // has active port changed on gscart sw2?
-    if(gscart2 != gscart2prev){
+for(uint8_t i = 0; i < 3; i++){
+  for(uint8_t j = 0; j < 4; j++){
+    val[i] = analogRead(apin2[i]);
+  }
+  if((val[i]/211) >= high2){
+    bitcount2[i]++;
+  }
+}
+
+if(bitcc2 == adssize){          // when the "adssize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
+  for(uint8_t i = 0; i < 3; i++){   // if the voltage was high for only dcl to dch samples, set an all in-active ports flag
+    if(bitcount2[i] > dch)      // how many "high" samples per adssize are required for a bit to be 1.  
+      bit[i] = 1;
+    else if(bitcount2[i] > dcl)   // between dcl and dch number of "high" samples are required to set an all in-active ports flag
+      fpdc = 1;
+  }
+}
+
+
+if(((bit[2] != bitprev2[2] || bit[1] != bitprev2[1] || bit[0] != bitprev2[0]) || (allgscartoff2 == 1)) && (bitcc2 == adssize) && !(fpdc)){
       //Detect which scart port is now active and change profile accordingly
-      if(!(gscart2 ^ B00000000)){
+      if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x01,2);  // RT4K profile 9
 
         if(SVS==2)Serial.println(F("remote prof9\r"));
         else sendSVS(209);
       } 
-      else if(!(gscart2 ^ B00001000)){
+      else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){ // 0 0 1
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x25,2);  // RT4K profile 10
 
         if(SVS==2)Serial.println(F("remote prof10\r"));
         else sendSVS(210);
       }
-      else if(!(gscart2 ^ B00010000)){
+      else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){ // 0 1 0
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x26,2);  // RT4K profile 11
 
         if(SVS==2)Serial.println(F("remote prof11\r"));
         else sendSVS(211);
       }
-      else if(!(gscart2 ^ B00011000)){
+      else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
         if(RT4Kir == 2)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
 
         if(SVS==2)Serial.println(F("remote prof12\r"));
         else sendSVS(212);
       }
-      else if(!(gscart2 ^ B00100000)) sendSVS(213);
-      else if(!(gscart2 ^ B00101000)) sendSVS(214);
-      else if(!(gscart2 ^ B00110000)) sendSVS(215);
-      else if(!(gscart2 ^ B00111000)) sendSVS(216);
+      else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0))sendSVS(213); // 1 0 0
+      else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1))sendSVS(214); // 1 0 1
+      else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0))sendSVS(215); // 1 1 0
+      else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1))sendSVS(216); // 1 1 1
 
-      gscart2prev = gscart2;
-     }
-} // end of readGscart2()
+      if(allgscartoff2) allgscartoff2 = 0;
+      bitprev2[0] = bit[0];
+      bitprev2[1] = bit[1];
+      bitprev2[2] = bit[2];
+      fpdcprev2 = fpdc;
+
+}
+
+if((fpdccount2 == fpdccountmax) && (fpdc != fpdcprev2) && (bitcc2 == adssize)){ // if all in-active ports has been detected for multiple sample sessions, load profile, or do whatever below :) 
+  
+  allgscartoff2 = 1;
+  fpdccount2 = 0;
+  memset(bitprev2,0,sizeof(bitprev2));
+  fpdcprev2 = fpdc;
+  
+  if(DP0 && allgscartoff && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") && 
+                            (previnput2 == "0" || previnput2 == "discon" || previnput2 == "In0 " || previnput2 == "In00"))){
+    if(SVS==1)sendSVS(0);
+    else if(SVS==2)Serial.println(F("remote prof12\r"));
+  }
+
+}
+
+if(fpdc && (bitcc2 == adssize)){
+  if(fpdccount2 == fpdccountmax) 
+    fpdccount2 = 0;
+  else 
+    fpdccount2++;
+}
+else if(bitcc2 == adssize){
+  fpdccount2 = 0;
+}
+  
+// Serial.print(F("A3 voltage:         "));Serial.print(val[0]/211);Serial.print(F("v    SC: "));Serial.print(bitcc2);Serial.print(F("  fpdccount2: "));Serial.print(fpdccount2);
+// Serial.print(F(" fpdc: "));Serial.print(fpdc);Serial.print(F(" fpdcprev2: "));Serial.print(fpdcprev2);
+// Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bitprev2[0]: "));Serial.print(bitprev2[0]);Serial.print(" bitcount0: ");Serial.print(bitcount2[0]);
+// Serial.print(F(" allgoff: "));Serial.print(allgscartoff);Serial.print(F(" allgoff2: "));Serial.println(allgscartoff2);
+// Serial.print(F("A3 voltage:         "));Serial.println(val[0]/211);
+// Serial.print(F("A4 voltage:         "));Serial.println(val[1]/211);
+// Serial.print(F("A5 voltage:         "));Serial.println(val[2]/211);
 
 
-void all_inactive_ports_check(){
+if(bitcc2 < adssize) 
+  bitcc2++;
+else{
+  bitcc2 = 1;
+  memset(bitcount2,0,sizeof(bitcount2));
+}
 
-    // when both Extron switches match In0 or In00 (no active ports), a default profile can be loaded if DP0 is enabled
-    if(((previnput == "In0 " || previnput == "In00") && (previnput2 == "In0 " || previnput2 == "In00" || previnput2 == "discon")) && DP0 && voutMatrix[eoutput.toInt()] && (previnput2 == "discon" || voutMatrix[eoutput2.toInt()+32])){
+} // end readGscart2()
+
+
+void all_extron_inactive_ports_check(){
+
+    // when both Extron switches match In0 or In00 (no active ports), both gscart/gcomp are disconnected or all ports in-active, a default profile can be loaded if DP0 is enabled
+    if(((previnput == "In0 " || previnput == "In00" || previnput == "discon") && (previnput2 == "In0 " || previnput2 == "In00" || previnput2 == "discon")) && DP0 
+        && allgscartoff && allgscartoff2 && (previnput == "discon" || voutMatrix[eoutput.toInt()]) && (previnput2 == "discon" || voutMatrix[eoutput2.toInt()+32])){
       if(RT5Xir == 1){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
       if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
 
       if(SVS==0)Serial.println(F("remote prof12\r"));
-      else sendSVS(0);
+      else if(SVS==1)sendSVS(0);
 
       previnput = "0";
       if(previnput2 != "discon")previnput2 = "0";
@@ -772,14 +922,14 @@ void all_inactive_ports_check(){
     }
 
     if(previnput == "0" && previnput2.substring(0,2) == "In")previnput = "In00";  // changes previnput "0" state to "In00" when there is a newly active input on the other switch
-    if(previnput2 == "0" && previnput.substring(0,2) == "In")previnput2 = "In00"; 
+    if(previnput2 == "0" && previnput.substring(0,2) == "In")previnput2 = "In00";
 
 } // end of all_inactive_ports_check
 
 void irRec(){
 
-  int ir_recv_command = 0;
-  int ir_recv_address = 0;
+  uint8_t ir_recv_command = 0;
+  uint8_t ir_recv_address = 0;
 
   if(TinyReceiverDecode()){
 
@@ -1013,43 +1163,43 @@ void irRec(){
       }
       else if(ir_recv_command == 11){
         Serial.println(F("remote prof1\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x92,2);delay(30);irsend.sendNEC(0xB3,0x92,2);} // RT5X profile 1 
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x92,1);delay(30);irsend.sendNEC(0xB3,0x92,1);} // RT5X profile 1 
       }
       else if(ir_recv_command == 7){
         Serial.println(F("remote prof2\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x93,2);delay(30);irsend.sendNEC(0xB3,0x93,2);} // RT5X profile 2
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x93,1);delay(30);irsend.sendNEC(0xB3,0x93,1);} // RT5X profile 2
       }
       else if(ir_recv_command == 3){
         Serial.println(F("remote prof3\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0xCC,2);delay(30);irsend.sendNEC(0xB3,0xCC,2);} // RT5X profile 3
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0xCC,1);delay(30);irsend.sendNEC(0xB3,0xCC,1);} // RT5X profile 3
       }
       else if(ir_recv_command == 10){
         Serial.println(F("remote prof4\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8E,2);delay(30);irsend.sendNEC(0xB3,0x8E,2);} // RT5X profile 4
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8E,1);delay(30);irsend.sendNEC(0xB3,0x8E,1);} // RT5X profile 4
       }
       else if(ir_recv_command == 6){
         Serial.println(F("remote prof5\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8F,2);delay(30);irsend.sendNEC(0xB3,0x8F,2);} // RT5X profile 5
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8F,1);delay(30);irsend.sendNEC(0xB3,0x8F,1);} // RT5X profile 5
       }
       else if(ir_recv_command == 2){
         Serial.println(F("remote prof6\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0xC8,2);delay(30);irsend.sendNEC(0xB3,0xC8,2);} // RT5X profile 6
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0xC8,1);delay(30);irsend.sendNEC(0xB3,0xC8,1);} // RT5X profile 6
       }
       else if(ir_recv_command == 9){
         Serial.println(F("remote prof7\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8A,2);delay(30);irsend.sendNEC(0xB3,0x8A,2);} // RT5X profile 7
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8A,1);delay(30);irsend.sendNEC(0xB3,0x8A,1);} // RT5X profile 7
       }
       else if(ir_recv_command == 5){
         Serial.println(F("remote prof8\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8B,2);delay(30);irsend.sendNEC(0xB3,0x8B,2);} // RT5X profile 8
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x8B,1);delay(30);irsend.sendNEC(0xB3,0x8B,1);} // RT5X profile 8
       }
       else if(ir_recv_command == 1){
         Serial.println(F("remote prof9\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0xC4,2);delay(30);irsend.sendNEC(0xB3,0xC4,2);} // RT5X profile 9
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0xC4,1);delay(30);irsend.sendNEC(0xB3,0xC4,1);} // RT5X profile 9
       }
       else if(ir_recv_command == 37){
         Serial.println(F("remote prof10\r"));
-        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x87,2);delay(30);irsend.sendNEC(0xB3,0x87,2);} // RT5X profile 10
+        if(RT5Xir >= 1){irsend.sendNEC(0xB3,0x87,1);delay(30);irsend.sendNEC(0xB3,0x87,1);} // RT5X profile 10
       }
       else if(ir_recv_command == 38){
         Serial.println(F("remote prof11\r"));
