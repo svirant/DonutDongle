@@ -2,11 +2,8 @@
 //
 //
 //
-
-
 #define PORT->Group[g_APinDescription[SDA].ulPort].PINCFG[g_APinDescription[SDA].ulPin].bit.PMUXEN = 0; // set SDA pin back to GPIO
 #define PORT->Group[g_APinDescription[SCL].ulPort].PINCFG[g_APinDescription[SCL].ulPin].bit.PMUXEN = 0; // set SCL pin back to GPIO
-
 #define IR_SEND_PIN 11  // Optional IR LED Emitter for RT5X compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2 // Optional IR Receiver on pin D2
 
@@ -16,37 +13,6 @@
 #include <AltSoftSerial.h>  // https://github.com/PaulStoffregen/AltSoftSerial in order to have a 3rd Serial port for 2nd Extron Switch / alt sw2
                             // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
                             // Step 2 - In Arudino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
-IRsend irsend;
-
-
-// Extron sw1 / alt sw1 software serial port -> MAX3232 TTL IC
-#define rxPin 3 // sets Rx pin to D3 on Arduino
-#define txPin 4 // sets Tx pin to D4 ...
-
-// gscart / gcomp global variables
-uint8_t fpdcprev = 0;
-uint8_t fpdcprev2 = 0;
-uint8_t fpdccount = 0;
-uint8_t fpdccount2 = 0;
-uint8_t allgscartoff = 2;
-uint8_t allgscartoff2 = 2;
-uint8_t bitcc = 0;
-uint8_t bitcc2 = 0;
-uint8_t bitcount[3] = {0,0,0};
-uint8_t bitcount2[3] = {0,0,0};
-uint8_t bitprev[3] = {0,0,0};
-uint8_t bitprev2[3] = {0,0,0};
-byte const apin[3] = {A0,A1,A2};
-byte const apin2[3] = {A3,A4,A5};
-
-// gscart / gcomp adjustment variables for port detection
-float high = 1.2; // for gscart sw1, rise above this voltage for a high sample
-float high2 = 1.2; // for gscart sw2,  rise above this voltage for a high sample
-uint8_t dch = 15; // at least this many high samples per "adssize" for a high bit (~75% duty cycle)
-uint8_t dcl = 5; // at least this many high samples and less than "dch" per "adssize" indicate all inputs are in-active (~50% duty cycle)
-uint8_t adssize = 20; // total number of ADC samples to take to capture a period
-uint8_t fpdccountmax = 2; // number of "adssize" sessions +1 required when in the 50% duty cycle state, before a Default Profile 0 is triggered.
-
 /*
 ////////////////////
 //    OPTIONS    //
@@ -207,7 +173,7 @@ uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons.
                           // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
                           // Press AUX8 then profile button to load. Must have IR Receiver connected and Serial connection to RT4K.
                           // 
-                      {1,  // AUX8 + profile 1 button
+                     {1,  // AUX8 + profile 1 button
                       2,  // AUX8 + profile 2 button
                       3,  // AUX8 + profile 3 button
                       4,  // AUX8 + profile 4 button
@@ -221,9 +187,37 @@ uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons.
                       12, // AUX8 + profile 12 button
                       };
                           
-//////////////////  
+////////////////////////////////////////////////////////////////////////  
 
-// Extron variables
+// gscart / gcomp Global variables
+uint8_t fpdcprev = 0; // stores 50% duty cycle detection
+uint8_t fpdcprev2 = 0;
+uint8_t fpdccount = 0; // number of times a 50% duty cycle period has been detected
+uint8_t fpdccount2 = 0;
+uint8_t allgscartoff = 2; // 0 = at least 1 port is active, 1 = no ports are active, 2 = disconnected or not used yet
+uint8_t allgscartoff2 = 2;
+uint8_t samcc = 0; // ADC sample cycle counter
+uint8_t samcc2 = 0;
+uint8_t highcount[3] = {0,0,0}; // number of high samples recorded for bit0, bit1, bit2
+uint8_t highcount2[3] = {0,0,0};
+uint8_t bitprev[3] = {0,0,0}; // stores previous bit state
+uint8_t bitprev2[3] = {0,0,0};
+byte const apin[3] = {A0,A1,A2}; // defines analog pins used to read bit0, bit1, bit2
+byte const apin2[3] = {A3,A4,A5};
+
+// gscart / gcomp adjustment Global variables for port detection
+float high = 1.2; // for gscart sw1, rise above this voltage for a high sample
+float high2 = 1.2; // for gscart sw2,  rise above this voltage for a high sample
+uint8_t dch = 15; // at least this many high samples per "samsize" for a high bit (~75% duty cycle)
+uint8_t dcl = 5; // at least this many high samples and less than "dch" per "samsize" indicate all inputs are in-active (~50% duty cycle)
+uint8_t samsize = 20; // total number of ADC samples required to capture at least 1 period
+uint8_t fpdccountmax = 3; // number of periods required when in the 50% duty cycle state before a Default Profile 0 is triggered.
+
+// Extron sw1 / alt sw1 software serial port -> MAX3232 TTL IC
+#define rxPin 3 // sets Rx pin to D3 on Arduino
+#define txPin 4 // sets Tx pin to D4 ...
+
+// Extron Global variables
 byte ecapbytes[13]; // used to store first 13 captured bytes / messages for Extron sw1 / alt sw1                    
 String ecap; // used to store Extron status messages for 1st Extron in String format
 String einput; // used to store first 4 chars of Extron input
@@ -239,29 +233,27 @@ String eoutput2; // used to store first 2 chars of Extron output for 2nd Extron
 SoftwareSerial extronSerial = SoftwareSerial(rxPin,txPin); // setup a software serial port for listening to Extron sw1 / alt sw1 
 AltSoftSerial extronSerial2; // setup yet another serial port for listening to Extron sw2 / alt sw2. hardcoded to pins D8 / D9
 
-// irRec() (IR Receiver) variables
+// IR Global variables
 uint8_t pwrtoggle = 0; // used to toggle remote power button command (on/off) when using the optional IR Receiver
 uint8_t repeatcount = 0; // used to help emulate the repeat nature of directional button presses
 uint8_t extrabuttonprof = 0; // used to keep track of AUX8 button presses for addtional button profiles
-String svsbutton = ""; // used to store 3 digit SVS profile when AUX8 is double pressed
+String svsbutton; // used to store 3 digit SVS profile when AUX8 is double pressed
 uint8_t nument = 0; // used to keep track of how many digits have been entered for 3 digit SVS profile
-
+IRsend irsend;
 
 
 void setup(){
 
-    pinMode(rxPin,INPUT); // set pin modes for RX and TX
-    pinMode(txPin,OUTPUT);
+    pinMode(txPin,OUTPUT); // set pin mode for RX, no need for TX b/c all pins are inputs by default
     initPCIInterruptForTinyReceiver(); // for IR Receiver
     
     Serial.begin(9600); // set the baud rate for the RT4K Serial Connection
     while(!Serial){;}   // allow connection to establish before continuing
-    Serial.print(F("\r")); // if the Arduino first powers on while connected to a computer, it sends some bytes out the serial port. 
-                        // this can show up in the RT4K diag screen as garbage text. sending a carriage return allows the first input change to work correctly
+    Serial.print(F("\r")); // clear RT4K Serial buffer
     extronSerial.begin(9600); // set the baud rate for the Extron sw1 Connection
-    extronSerial.setTimeout(150); // sets the timeout for reading / saving reads into a string
+    extronSerial.setTimeout(150); // sets the timeout for reading / saving into a string
     extronSerial2.begin(9600); // set the baud rate for Extron sw2 Connection
-    extronSerial2.setTimeout(150); // sets the timeout for reading / saving reads into a string for the Extron sw2 Connection
+    extronSerial2.setTimeout(150); // sets the timeout for reading / saving into a string for the Extron sw2 Connection
 
 } // end of setup
 
@@ -651,7 +643,7 @@ void readGscart1(){ // readGscart1
 // Pin 7: IN_BIT2
 // Pin 8: N/C
 
-uint8_t fpdc = 0;
+uint8_t fpdc = 0; // 50% duty cycle was detected / all ports are in-active
 uint8_t bit[3] = {0,0,0};
 float val[3] = {0,0,0};
 
@@ -659,22 +651,22 @@ for(uint8_t i = 0; i < 3; i++){ // read in analog pin voltages, read each value 
   for(uint8_t j = 0; j < 4; j++){
     val[i] = analogRead(apin[i]);
   }
-  if((val[i]/211) >= high){ // if voltage is greater than or equal to the voltage defined for a 1, increase bitcount by 1 for that analog pin
-    bitcount[i]++;
+  if((val[i]/211) >= high){ // if voltage is greater than or equal to the voltage defined for a 1, increase highcount by 1 for that analog pin
+    highcount[i]++;
   }
 }
 
-if(bitcc == adssize){              // when the "adssize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
+if(samcc == samsize){              // when the "samsize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
   for(uint8_t i = 0; i < 3; i++){      // if the voltage was high for only dcl to dch samples, set an all in-active ports flag
-    if(bitcount[i] > dch)          // how many "high" samples per adssize are required for a bit to be 1.  
+    if(highcount[i] > dch)          // how many "high" samples per "samsize" are required for a bit to be 1.  
       bit[i] = 1;
-    else if(bitcount[i] > dcl)     // between dcl and dch number of "high" samples are required to set an all in-active ports flag
+    else if(highcount[i] > dcl)     // between dcl and dch number of "high" samples are required to set an all in-active ports flag
       fpdc = 1;
   }
 }
 
 
-if(((bit[2] != bitprev[2] || bit[1] != bitprev[1] || bit[0] != bitprev[0]) || (allgscartoff == 1)) && (bitcc == adssize) && !(fpdc)){
+if(((bit[2] != bitprev[2] || bit[1] != bitprev[1] || bit[0] != bitprev[0]) || (allgscartoff == 1)) && (samcc == samsize) && !(fpdc)){
   //Detect which scart port is now active and change profile accordingly
   if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
     if(RT5Xir == 2){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
@@ -741,7 +733,7 @@ if(((bit[2] != bitprev[2] || bit[1] != bitprev[1] || bit[0] != bitprev[0]) || (a
 
 }
 
-if((fpdccount == fpdccountmax) && (fpdc != fpdcprev) && (bitcc == adssize)){ // if all in-active ports has been detected for multiple sample sessions, load profile, or do whatever below :) 
+if((fpdccount == (fpdccountmax - 1)) && (fpdc != fpdcprev) && (samcc == samsize)){ // if all in-active ports has been detected for multiple periods
   
   allgscartoff = 1;
   fpdccount = 0;
@@ -756,30 +748,29 @@ if((fpdccount == fpdccountmax) && (fpdc != fpdcprev) && (bitcc == adssize)){ // 
 
 }
 
-if(fpdc && (bitcc == adssize)){ // if the all in-active ports flag is set, increment counter
-  if(fpdccount == fpdccountmax) 
+if(fpdc && (samcc == samsize)){ // if the all in-active ports flag is set, increment counter
+  if(fpdccount == (fpdccountmax - 1))
     fpdccount = 0;
   else 
     fpdccount++;
 }
-else if(bitcc == adssize){
+else if(samcc == samsize){
   fpdccount = 0;
 }
 
-// Serial.print(F("A0 voltage:         "));Serial.print(val[0]/211);Serial.print(F("v    SC: "));Serial.print(bitcc);Serial.print(F("  fpdccount: "));Serial.print(fpdccount);
+// Serial.print(F("A0 voltage:         "));Serial.print(val[0]/211);Serial.print(F("v    SC: "));Serial.print(samcc);Serial.print(F("  fpdccount: "));Serial.print(fpdccount);
 // Serial.print(F(" fpdc: "));Serial.print(fpdc);Serial.print(F(" fpdcprev: "));Serial.print(fpdcprev);
-// Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bitprev[0]: "));Serial.print(bitprev[0]);Serial.print(F(" bitcount0: "));Serial.print(bitcount[0]);
+// Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bitprev[0]: "));Serial.print(bitprev[0]);Serial.print(F(" highcount0: "));Serial.print(highcount[0]);
 // Serial.print(F(" allgoff: "));Serial.print(allgscartoff);Serial.print(F(" allgoff2: "));Serial.println(allgscartoff2);
 // Serial.print(F("A0 voltage:         "));Serial.println(val[0]/211);
 // Serial.print(F("A1 voltage:         "));Serial.println(val[1]/211);
 // Serial.print(F("A2 voltage:         "));Serial.println(val[2]/211);
 
-// take "adssize" number of analog -> digital sample sessions
-if(bitcc < adssize)
-  bitcc++;
+if(samcc < samsize) // take "samsize" number of analog -> digital conversions per period
+  samcc++;
 else{
-  bitcc = 1;
-  memset(bitcount,0,sizeof(bitcount));
+  samcc = 1;
+  memset(highcount,0,sizeof(highcount));
 }
 
 } // end readGscart1()
@@ -806,21 +797,21 @@ for(uint8_t i = 0; i < 3; i++){
     val[i] = analogRead(apin2[i]);
   }
   if((val[i]/211) >= high2){
-    bitcount2[i]++;
+    highcount2[i]++;
   }
 }
 
-if(bitcc2 == adssize){          // when the "adssize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
+if(samcc2 == samsize){          // when the "samsize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
   for(uint8_t i = 0; i < 3; i++){   // if the voltage was high for only dcl to dch samples, set an all in-active ports flag
-    if(bitcount2[i] > dch)      // how many "high" samples per adssize are required for a bit to be 1.  
+    if(highcount2[i] > dch)      // how many "high" samples per "samsize" are required for a bit to be 1.  
       bit[i] = 1;
-    else if(bitcount2[i] > dcl)   // between dcl and dch number of "high" samples are required to set an all in-active ports flag
+    else if(highcount2[i] > dcl)   // between dcl and dch number of "high" samples are required to set an all in-active ports flag
       fpdc = 1;
   }
 }
 
 
-if(((bit[2] != bitprev2[2] || bit[1] != bitprev2[1] || bit[0] != bitprev2[0]) || (allgscartoff2 == 1)) && (bitcc2 == adssize) && !(fpdc)){
+if(((bit[2] != bitprev2[2] || bit[1] != bitprev2[1] || bit[0] != bitprev2[0]) || (allgscartoff2 == 1)) && (samcc2 == samsize) && !(fpdc)){
       //Detect which scart port is now active and change profile accordingly
       if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
         if(RT5Xir == 2){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
@@ -861,7 +852,7 @@ if(((bit[2] != bitprev2[2] || bit[1] != bitprev2[1] || bit[0] != bitprev2[0]) ||
 
 }
 
-if((fpdccount2 == fpdccountmax) && (fpdc != fpdcprev2) && (bitcc2 == adssize)){ // if all in-active ports has been detected for multiple sample sessions, load profile, or do whatever below :) 
+if((fpdccount2 == (fpdccountmax - 1)) && (fpdc != fpdcprev2) && (samcc2 == samsize)){ // if all in-active ports has been detected for multiple periods 
   
   allgscartoff2 = 1;
   fpdccount2 = 0;
@@ -876,30 +867,30 @@ if((fpdccount2 == fpdccountmax) && (fpdc != fpdcprev2) && (bitcc2 == adssize)){ 
 
 }
 
-if(fpdc && (bitcc2 == adssize)){
-  if(fpdccount2 == fpdccountmax) 
+if(fpdc && (samcc2 == samsize)){
+  if(fpdccount2 == (fpdccountmax - 1)) 
     fpdccount2 = 0;
   else 
     fpdccount2++;
 }
-else if(bitcc2 == adssize){
+else if(samcc2 == samsize){
   fpdccount2 = 0;
 }
   
-// Serial.print(F("A3 voltage:         "));Serial.print(val[0]/211);Serial.print(F("v    SC: "));Serial.print(bitcc2);Serial.print(F("  fpdccount2: "));Serial.print(fpdccount2);
+// Serial.print(F("A3 voltage:         "));Serial.print(val[0]/211);Serial.print(F("v    SC: "));Serial.print(samcc2);Serial.print(F("  fpdccount2: "));Serial.print(fpdccount2);
 // Serial.print(F(" fpdc: "));Serial.print(fpdc);Serial.print(F(" fpdcprev2: "));Serial.print(fpdcprev2);
-// Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bitprev2[0]: "));Serial.print(bitprev2[0]);Serial.print(" bitcount0: ");Serial.print(bitcount2[0]);
+// Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bitprev2[0]: "));Serial.print(bitprev2[0]);Serial.print(" highcount0: ");Serial.print(highcount2[0]);
 // Serial.print(F(" allgoff: "));Serial.print(allgscartoff);Serial.print(F(" allgoff2: "));Serial.println(allgscartoff2);
 // Serial.print(F("A3 voltage:         "));Serial.println(val[0]/211);
 // Serial.print(F("A4 voltage:         "));Serial.println(val[1]/211);
 // Serial.print(F("A5 voltage:         "));Serial.println(val[2]/211);
 
 
-if(bitcc2 < adssize) 
-  bitcc2++;
+if(samcc2 < samsize) 
+  samcc2++;
 else{
-  bitcc2 = 1;
-  memset(bitcount2,0,sizeof(bitcount2));
+  samcc2 = 1;
+  memset(highcount2,0,sizeof(highcount2));
 }
 
 } // end readGscart2()
