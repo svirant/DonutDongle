@@ -42,10 +42,10 @@ byte const apin2[3] = {A3,A4,A5};
 // gscart / gcomp adjustment variables for port detection
 float high = 1.2; // for gscart sw1, rise above this voltage for a high sample
 float high2 = 1.2; // for gscart sw2,  rise above this voltage for a high sample
-uint8_t dch = 15; // at least this many high samples per "adssize" for a high bit
-uint8_t dcl = 5; // at least this many high samples per "adssize" indicate all inputs are in-active
-uint8_t adssize = 20; // total number of ADC samples to take to capture the duty cycle
-uint8_t fpdccountmax = 2; // number of sample sessions +1 required when in the 50% duty cycle state, before a Default Profile 0 is triggered.
+uint8_t dch = 15; // at least this many high samples per "adssize" for a high bit (~75% duty cycle)
+uint8_t dcl = 5; // at least this many high samples and less than "dch" per "adssize" indicate all inputs are in-active (~50% duty cycle)
+uint8_t adssize = 20; // total number of ADC samples to take to capture a period
+uint8_t fpdccountmax = 2; // number of "adssize" sessions +1 required when in the 50% duty cycle state, before a Default Profile 0 is triggered.
 
 /*
 ////////////////////
@@ -223,7 +223,7 @@ uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons.
                           
 //////////////////  
 
-
+// Extron variables
 byte ecapbytes[13]; // used to store first 13 captured bytes / messages for Extron sw1 / alt sw1                    
 String ecap; // used to store Extron status messages for 1st Extron in String format
 String einput; // used to store first 4 chars of Extron input
@@ -262,8 +262,6 @@ void setup(){
     extronSerial.setTimeout(150); // sets the timeout for reading / saving reads into a string
     extronSerial2.begin(9600); // set the baud rate for Extron sw2 Connection
     extronSerial2.setTimeout(150); // sets the timeout for reading / saving reads into a string for the Extron sw2 Connection
-    //DDRC  &= ~B00111111; // for gscart/gcomp, Set PC0-PC5 as inputs (shown on Nano as pins A0-A5) Connected to gscart1 IN_BIT0,IN_BIT1,IN_BIT2 and gscart2 IN_BIT0,IN_BIT1,IN_BIT2
-
 
 } // end of setup
 
@@ -296,7 +294,7 @@ void readExtron1(){
     extronSerial.readBytes(ecapbytes,13); // read in and store only the first 13 chars for every status message received from 1st Extron SW port
     }
     ecap = String((char *)ecapbytes); // convert bytes to String for Extron switches
-    
+
 
     if(ecap.substring(0,3) == "Out"){ // store only the input and output states, some Extron devices report output first instead of input
       einput = ecap.substring(6,10);
@@ -494,9 +492,7 @@ void readExtron1(){
     }
 
     // set ecapbytes to 0 for next read
-    for(uint8_t i = 0; i < 13; i++){
-      ecapbytes[i] = 0;
-    }
+    memset(ecapbytes,0,sizeof(ecapbytes));
 
     // for Otaku Games Scart Switch
     if(ecap.substring(0,6) == "remote"){
@@ -774,11 +770,13 @@ else if(bitcc == adssize){
 // Serial.print(F(" fpdc: "));Serial.print(fpdc);Serial.print(F(" fpdcprev: "));Serial.print(fpdcprev);
 // Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bitprev[0]: "));Serial.print(bitprev[0]);Serial.print(F(" bitcount0: "));Serial.print(bitcount[0]);
 // Serial.print(F(" allgoff: "));Serial.print(allgscartoff);Serial.print(F(" allgoff2: "));Serial.println(allgscartoff2);
+// Serial.print(F("A0 voltage:         "));Serial.println(val[0]/211);
+// Serial.print(F("A1 voltage:         "));Serial.println(val[1]/211);
+// Serial.print(F("A2 voltage:         "));Serial.println(val[2]/211);
 
-
-if(bitcc < adssize){ // take "adssize" number of analog -> digital sample sessions
+// take "adssize" number of analog -> digital sample sessions
+if(bitcc < adssize)
   bitcc++;
-}
 else{
   bitcc = 1;
   memset(bitcount,0,sizeof(bitcount));
@@ -892,6 +890,9 @@ else if(bitcc2 == adssize){
 // Serial.print(F(" fpdc: "));Serial.print(fpdc);Serial.print(F(" fpdcprev2: "));Serial.print(fpdcprev2);
 // Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bitprev2[0]: "));Serial.print(bitprev2[0]);Serial.print(" bitcount0: ");Serial.print(bitcount2[0]);
 // Serial.print(F(" allgoff: "));Serial.print(allgscartoff);Serial.print(F(" allgoff2: "));Serial.println(allgscartoff2);
+// Serial.print(F("A3 voltage:         "));Serial.println(val[0]/211);
+// Serial.print(F("A4 voltage:         "));Serial.println(val[1]/211);
+// Serial.print(F("A5 voltage:         "));Serial.println(val[2]/211);
 
 
 if(bitcc2 < adssize) 
