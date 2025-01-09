@@ -639,25 +639,27 @@ void readGscart1(){ // readGscart1
 // Pin 6: IN_BIT1
 // Pin 7: IN_BIT2
 // Pin 8: N/C
+//
+// Reference for no active input state: https://shmups.system11.org/viewtopic.php?t=50851&start=4976
 
-uint8_t fpdc = 0; // 50% duty cycle was detected / all ports are in-active
+uint8_t fpdc = 0; // 1 = 50% duty cycle was detected / all ports are in-active
 uint8_t bit[3] = {0,0,0};
 float val[3] = {0,0,0};
 
-for(uint8_t i = 0; i < 3; i++){ // read in analog pin voltages, read each value 4x in a row to get a stable reading, combats if using too large of a pull-down resistor
+for(uint8_t i = 0; i < 3; i++){ // read in analog pin voltages, read each pin 4x in a row to ensure an accurate read, combats if using too large of a pull-down resistor
   for(uint8_t j = 0; j < 4; j++){
     val[i] = analogRead(apin[i]);
   }
-  if((val[i]/211) >= high){ // if voltage is greater than or equal to the voltage defined for a 1, increase highcount by 1 for that analog pin
+  if((val[i]/211) >= high){ // if voltage is greater than or equal to the voltage defined for a high, increase highcount by 1 for that analog pin
     highcount[i]++;
   }
 }
 
-if(samcc == samsize){              // when the "samsize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
-  for(uint8_t i = 0; i < 3; i++){      // if the voltage was high for only dcl to dch samples, set an all in-active ports flag
-    if(highcount[i] > dch)          // how many "high" samples per "samsize" are required for a bit to be 1.  
+if(samcc == samsize){               // when the "samsize" number of samples has been taken, if the voltage was "high" for more than "dch" # of the "samsize" samples, set the bit to 1
+  for(uint8_t i = 0; i < 3; i++){
+    if(highcount[i] > dch)          // if the number of "high" samples per "samsize" are greater than "dch" set bit to 1.  
       bit[i] = 1;
-    else if(highcount[i] > dcl)     // between dcl and dch number of "high" samples are required to set an all in-active ports flag
+    else if(highcount[i] > dcl)     // if the number of "high" samples is greater than "dcl" and less than "dch" (50% high samples) the switch must be cycling inputs, therefor no active input
       fpdc = 1;
   }
 }
@@ -730,13 +732,13 @@ if(((bit[2] != bitprev[2] || bit[1] != bitprev[1] || bit[0] != bitprev[0]) || (a
 
 }
 
-if((fpdccount == (fpdccountmax - 1)) && (fpdc != fpdcprev) && (samcc == samsize)){ // if all in-active ports has been detected for multiple periods
+if((fpdccount == (fpdccountmax - 1)) && (fpdc != fpdcprev) && (samcc == samsize)){ // if no active port has been detected for fpdccountmax periods
   
   allgscartoff = 1;
   memset(bitprev,0,sizeof(bitprev));
   fpdcprev = fpdc;
 
-  if(DP0 && allgscartoff2 && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") && 
+  if(DP0 && allgscartoff2 && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") && // cross-checks Extron status
                             (previnput2 == "0" || previnput2 == "discon" || previnput2 == "In0 " || previnput2 == "In00"))){
     if(SVS==1)sendSVS(0);
     else if(SVS==2)Serial.println(F("remote prof12\r"));
@@ -744,7 +746,7 @@ if((fpdccount == (fpdccountmax - 1)) && (fpdc != fpdcprev) && (samcc == samsize)
 
 }
 
-if(fpdc && (samcc == samsize)){ // if the all in-active ports flag is set, increment counter
+if(fpdc && (samcc == samsize)){ // if no active port has been detected, loop counter until active port
   if(fpdccount == (fpdccountmax - 1))
     fpdccount = 0;
   else 
@@ -755,7 +757,7 @@ else if(samcc == samsize){
 }
 
 
-if(samcc < samsize) // take "samsize" number of analog -> digital conversions per period
+if(samcc < samsize) // increment counter until "samsize" has been reached then reset counter and "highcount"
   samcc++;
 else{
   samcc = 1;
@@ -776,6 +778,8 @@ void readGscart2(){
 // Pin 6: IN_BIT1
 // Pin 7: IN_BIT2
 // Pin 8: N/C
+//
+// Reference for no active input state: https://shmups.system11.org/viewtopic.php?t=50851&start=4976
 
 uint8_t fpdc = 0;
 uint8_t bit[3] = {0,0,0};
@@ -790,11 +794,11 @@ for(uint8_t i = 0; i < 3; i++){
   }
 }
 
-if(samcc2 == samsize){          // when the "samsize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
-  for(uint8_t i = 0; i < 3; i++){   // if the voltage was high for only dcl to dch samples, set an all in-active ports flag
-    if(highcount2[i] > dch)      // how many "high" samples per "samsize" are required for a bit to be 1.  
+if(samcc2 == samsize){              // when the "samsize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
+  for(uint8_t i = 0; i < 3; i++){   // if the voltage was high for only dcl to dch samples, set an all in-active ports flag (fpdc = 1)
+    if(highcount2[i] > dch)         // how many "high" samples per "samsize" are required for a bit to be 1.  
       bit[i] = 1;
-    else if(highcount2[i] > dcl)   // between dcl and dch number of "high" samples are required to set an all in-active ports flag
+    else if(highcount2[i] > dcl)
       fpdc = 1;
   }
 }
@@ -841,13 +845,13 @@ if(((bit[2] != bitprev2[2] || bit[1] != bitprev2[1] || bit[0] != bitprev2[0]) ||
 
 }
 
-if((fpdccount2 == (fpdccountmax - 1)) && (fpdc != fpdcprev2) && (samcc2 == samsize)){ // if all in-active ports has been detected for multiple periods 
+if((fpdccount2 == (fpdccountmax - 1)) && (fpdc != fpdcprev2) && (samcc2 == samsize)){ // if all in-active ports flag has been detected for "fpdccountmax" periods 
   
   allgscartoff2 = 1;
   memset(bitprev2,0,sizeof(bitprev2));
   fpdcprev2 = fpdc;
   
-  if(DP0 && allgscartoff && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") && 
+  if(DP0 && allgscartoff && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") &&  // cross-checks Extron status
                             (previnput2 == "0" || previnput2 == "discon" || previnput2 == "In0 " || previnput2 == "In00"))){
     if(SVS==1)sendSVS(0);
     else if(SVS==2)Serial.println(F("remote prof12\r"));
