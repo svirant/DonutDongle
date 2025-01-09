@@ -11,9 +11,9 @@ Arduino Nano based hub that connects your current console switching setup with t
 
 * **4x** PJ-320 3.5MM Headphone Jack Audio Video Female: [AliExpress](https://www.aliexpress.us/item/3256805995568762.html)
   
-* **2x** 2x5 Pin Double Row 2.54mm Pitch Straight Box Header: [AliExpress](https://www.aliexpress.us/item/2255800441397852.html)
+* **2x** 2x5 Pin Double Row 2.54mm Pitch Straight Box Header: [AliExpress](https://www.aliexpress.us/item/3256805177947724.html) (Color: STRAIGHT TYPE, Pins: 10PCS DC3-10Pin)
   
-* **2x** 2x4 Pin Double Row 2.54mm Pitch Straight Box Header: [AliExpress](https://www.aliexpress.us/item/2251801533534895.html)
+* **2x** 2x4 Pin Double Row 2.54mm Pitch Straight Box Header: [AliExpress](https://www.aliexpress.us/item/3256805177947724.html) (Color: STRAIGHT TYPE, Pins: 10PCS DC3-8Pin)
   
 * **1x** 3.5mm CHF03 1.5 Meters IR Infrared Remote Emission Cable: [AliExpress](https://www.aliexpress.us/item/3256805962345169.html)
   
