@@ -493,7 +493,7 @@ void readExtron1(){
           else sendSVS(10);
       }
       else if(ecap == "remote prof12"){
-          delay(1);
+          delay(1); // do nothing
       }
       else if(ecap.substring(0,12) == "remote prof1"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
@@ -606,14 +606,12 @@ void readExtron2(){
     }
 
     // set ecapbytes2 to 0 for next read
-    for(uint8_t i = 0; i < 13; i++){
-      ecapbytes2[i] = 0;
-    }
+    memset(ecapbytes2,0,sizeof(ecapbytes2));
 
     // for Otaku Games Scart Switch
     if(ecap2.substring(0,6) == "remote"){
       if(ecap2 == "remote prof10") sendSVS(110);
-      else if(ecap2 == "remote prof12") delay(1);
+      else if(ecap2 == "remote prof12") delay(1); // do nothing
       else if(ecap2.substring(0,12) == "remote prof1") sendSVS(101);
       else if(ecap2.substring(0,12) == "remote prof2") sendSVS(102);
       else if(ecap2.substring(0,12) == "remote prof3") sendSVS(103);
