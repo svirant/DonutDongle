@@ -53,8 +53,8 @@ uint8_t SVS = 0; //     "Remote" profiles are profiles that are assigned to butt
              // 2 - use "Remote" profiles 1-12 for gscart/gcomp switches. Remote profile 1-8 for 1st gscart switch, 9-12 for inputs 1-4 on 2nd gscart switch.
              //     inputs 5-8 on the 2nd gscart switch will use SVS profiles 213 - 216
              //
-             //     - remote profiles 1-8 for 1st gScart, 9 - 12 for first 4 inputs on 2nd gScart
-             //     - SVS 212 -  216 for remaining inputs 5 - 8 on 2nd gScart 
+             //     - remote profiles 1-8 for 1st gScart, 9 - 12 for first 4 inputs on 2nd gScart (If DP0 below is set to true - remote profile 12 is used when all ports are in-active)
+             //     - SVS 213 -  216 for remaining inputs 5 - 8 on 2nd gScart 
              //     - SVS   1 -  99 for 1st Extron or TESmart
              //     - SVS 101 - 199 for 2nd Extron or TESmart
              //
@@ -68,7 +68,7 @@ bool DP0  = false;       // (Default Profile 0)
                          //
                          // set true to load "Remote" profile 12 (if SVS=0) when all ports are in-active on 1st Extron switch (and 2nd if connected). 
                          // You can assign it to a generic HDMI profile for example.
-                         // If your device has a 12th input, SVS will be used instead. "IF" you have a 2nd Extron Switch connected, the remote profile 12
+                         // If your device has a 12th input, SVS will be used instead. "IF" you also have an active 2nd Extron Switch, remote profile 12
                          // will only load if "BOTH" switches have all in-active ports.
                          // 
                          // 
@@ -159,14 +159,14 @@ uint8_t RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
                      //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
                      //     (DP0 - if enabled uses Profile 10 on the RT5X)
                      //
-                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-10 for first 2 inputs on second)
+                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-10 for first 2 inputs on second gscart)
 
 uint8_t RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
                      // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
                      //     sends Profile 1 - 12 commands to RetroTink 4K. Must have IR LED emitter connected.
                      //     (DP0 - if enabled uses Profile 12 on the RT4K)
                      //
-                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-12 for first 4 inputs on second)
+                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-12 for first 4 inputs on second gscart)
 
 
 uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons. 
@@ -1247,7 +1247,31 @@ void irRec(){
       else if(ir_recv_command == 79){
         Serial.println(F("remote right\r"));
       }
-    } // end of if(ir_recv_address)
+    } // end of if(ir_recv_address
+    
+    if(ir_recv_address == 73 && repeatcount > 15){ // when directional buttons are held down for even longer... turbo directional mode
+      if(ir_recv_command == 24){
+        for(int i=0;i<4;i++){
+          Serial.println(F("remote up\r"));
+        }
+      }
+      else if(ir_recv_command == 16){
+        for(int i=0;i<4;i++){
+          Serial.println(F("remote down\r"));
+        }
+      }
+      else if(ir_recv_command == 87){
+        for(int i=0;i<4;i++){
+          Serial.println(F("remote left\r"));
+        }
+      }
+      else if(ir_recv_command == 79){
+        for(int i=0;i<4;i++){
+          Serial.println(F("remote right\r"));
+        }
+      }
+    } // end of turbo directional mode
+    
   } // end of TinyReceiverDecode()   
 } // end of irRec()
 
