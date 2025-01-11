@@ -1250,17 +1250,7 @@ void irRec(){
     } // end of if(ir_recv_address
     
     if(ir_recv_address == 73 && repeatcount > 15){ // when directional buttons are held down for even longer... turbo directional mode
-      if(ir_recv_command == 24){
-        for(int i=0;i<4;i++){
-          Serial.println(F("remote up\r"));
-        }
-      }
-      else if(ir_recv_command == 16){
-        for(int i=0;i<4;i++){
-          Serial.println(F("remote down\r"));
-        }
-      }
-      else if(ir_recv_command == 87){
+      if(ir_recv_command == 87){
         for(int i=0;i<4;i++){
           Serial.println(F("remote left\r"));
         }
