@@ -3,6 +3,17 @@ Arduino Nano based hub that connects your current console switching setup with t
 
 <img width="600" alt="donutdongle_v04" src="https://github.com/user-attachments/assets/57490759-f556-44dc-b4ce-beb28def27d4" />
 
+# Connections
+  - Connect 4 switches Total
+    - 2x gscart/gcomp
+    - 2x Extron, 2x TESmart, or 1 of each
+  - 1x usb-c port for power/programming (on Arduino Nano, not shown in picture below)
+  - 1x 3.5mm "TX OUT to Retrotink 4K VGA adapter" port
+  - 1x IR Emitter (optional for RT5x)
+  - 1x IR Receiver (optional for IR remote customizations and Serial relay)
+<img width="600" src="https://github.com/user-attachments/assets/9a007fa2-3c51-4658-9946-3c2afe8a4e46" />
+
+
 ## Donut Dongle Bill of Materials (BOM)
 ### [- Digikey shared list](https://www.digikey.com/en/mylists/list/53XEHTQZJK)
 ### [- AliExpress wish list](https://www.aliexpress.com/p/wish-manage/share.html?smbPageCode=wishlist-amp&spreadId=09A40E28BA67E42DE9AF29A70E7238263DE305046632ABE9A0D5E1C5C4589AD9)
