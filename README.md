@@ -23,9 +23,22 @@ Arduino Nano based hub that connects your current console switching setup with t
 ## Bill of Materials (BOM)
 ### [- Digikey shared list](https://www.digikey.com/en/mylists/list/53XEHTQZJK)
 ### [- AliExpress wish list](https://www.aliexpress.com/p/wish-manage/share.html?smbPageCode=wishlist-amp&spreadId=09A40E28BA67E42DE9AF29A70E7238263DE305046632ABE9A0D5E1C5C4589AD9)
+
+* **4x  (C1-C4)** 0.1 uf / 100nf 0805 Capacitor: [Digikey](https://www.digikey.com/en/products/detail/yageo/CC0805KRX7R9BB104/302874?s=N4IgTCBcDaIMwEYEFokBYAMrkDkAiIAugL5A)
+  
+* **1x  (R1)** 30 Ohm 0805 Resistor: [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06J300V/525250)
+  
+* **1x  (R2)** 1K Ohm 0805 Resistor: [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06J102V/525197)
+
+* **6x  (R3-R8)** 10K Ohm 0805 Resistor: [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-6ENF1002V/111474)
+
+* **1x   (Q1)** 2N3904 NPN Transistor: [AliExpress](https://www.aliexpress.us/item/3256806623522970.html)
+
+* **1x   (U1)** MAX3232 SOP-16 RS-232 Interface IC: [AliExpress](https://www.aliexpress.us/item/3256807314260762.html)
+
 * **1x** PJ-307 3.5mm Stereo Jack: [AliExpress](https://www.aliexpress.us/item/2251832712518602.html)
   - or **1x** PJ-324M 3.5mm Audio Jack Socket: [AliExpress](https://www.aliexpress.us/item/2251832685563184.html)
-
+  
 * **4x** PJ-320 3.5MM Headphone Jack Audio Video Female: [AliExpress](https://www.aliexpress.us/item/3256805995568762.html)
   
 * **2x** 2x5 Pin Double Row 2.54mm Pitch Straight Box Header: [AliExpress](https://www.aliexpress.us/item/3256805177947724.html) (Color: STRAIGHT TYPE, Pins: 10PCS DC3-10Pin)
@@ -36,19 +49,11 @@ Arduino Nano based hub that connects your current console switching setup with t
   
 * **1x** 3.5mm Infrared Remote Control Receiver Extension Cable: [AliExpress](https://www.aliexpress.us/item/2251832741040177.html)
   
-* **1x   (U1)** MAX3232 SOP-16 RS-232 Interface IC: [AliExpress](https://www.aliexpress.us/item/3256807314260762.html)
-  
-* **1x   (Q1)** 2N3904 NPN Transistor: [AliExpress](https://www.aliexpress.us/item/3256806623522970.html)
+
   
 * **2x** 2.54mm Pitch Single Row Female 15P Header Strip: [AliExpress](https://www.aliexpress.us/item/3256801232229618.html)
 
-* **4x  (C1-C4)** 0.1 uf / 100nf 0805 Capacitor: [Digikey](https://www.digikey.com/en/products/detail/yageo/CC0805KRX7R9BB104/302874?s=N4IgTCBcDaIMwEYEFokBYAMrkDkAiIAugL5A)
-  
-* **1x  (R1)** 30 Ohm 0805 Resistor: [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06J300V/525250)
-  
-* **1x  (R2)** 1K Ohm 0805 Resistor: [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06J102V/525197)
 
-* **6x  (R3-R8)** 10K Ohm 0805 Resistor: [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-6ENF1002V/111474)
 
 * **1x** Any 3.5mm / aux / stereo / trs / cable: [AliExpress](https://www.aliexpress.us/item/2255799962255486.html)
 
