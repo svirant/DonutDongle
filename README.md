@@ -24,7 +24,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
   - 1x usb-c port for power/programming (on Arduino Nano)
   - 1x 3.5mm "TX OUT to Retrotink 4K VGA adapter" port
   - 1x IR Emitter (optional for RT5x)
-  - 1x IR Receiver (optional for IR remote customizations and Serial relay)
+  - 1x IR Receiver (optional for better reception and IR remote customizations)
 <img width="600" src="https://github.com/user-attachments/assets/1cf9b456-154f-4b65-afb2-4f37d1f17784" />
 
 ----------------
