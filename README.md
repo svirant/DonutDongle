@@ -7,6 +7,15 @@
 The Donut Dongle connects to a switch in a way that allows it to see which port is active. When a port becomes active (a console powers on) the Donut Dongle sends a serial command to the RetroTink 4k (or IR signal to the RT5x) telling it to load a profile. The profiles can either be defined as remote profiles; those configured in the RT4K menu for the remote buttons. Or they can be SVS profiles which are configured on the RT4K's SDcard. <br />
 
 For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/tree/main/README.md#how-to-use) section below.
+# Supported Switches
+(current list, but not limited to)
+| **Switch**    | Supported | Notes |
+| ------------- | ------------- |------------- |
+| Extron RGBHV sw6  | yes, confirmed first hand  | 
+| TESmart 16x1 HDMI  | yes, confirmed first hand  |
+| gSCARTsw / gCOMPsw | yes, confirmed by [@niquallis](https://x.com/niquallis), thanks so much for your help! | gSCARTsw tested, but gCOMPsw has the same underlying logic
+| Extron CrossPoint, MVX, etc | if it supports SIS, should work fine, please let me know :) |
+| Otaku Games Scart 10 | coming soon, with required [mod](https://github.com/svirant/RT4k_HD15_serial_control/tree/main/Otaku%20Games%20Scart%20Switch) | modded switch works on its own, but the Donut Dongle would allow you to connect 2x to the RT4K along with up to 2x gscart/gcomp
 
 # Connections
   - Connect 4 switches Total
