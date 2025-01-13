@@ -11,7 +11,8 @@ Arduino Nano based hub that connects your current console switching setup with t
   - 1x 3.5mm "TX OUT to Retrotink 4K VGA adapter" port
   - 1x IR Emitter (optional for RT5x)
   - 1x IR Receiver (optional for IR remote customizations and Serial relay)
-<img width="600" src="https://github.com/user-attachments/assets/9a007fa2-3c51-4658-9946-3c2afe8a4e46" />
+<img width="600" src="https://github.com/user-attachments/assets/73f85671-3afb-4848-b7e2-db878f367ff8" />
+
 
 
 ## Donut Dongle Bill of Materials (BOM)
