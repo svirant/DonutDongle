@@ -13,10 +13,14 @@ Arduino Nano based hub that connects your current console switching setup with t
   - 1x IR Receiver (optional for IR remote customizations and Serial relay)
 <img width="600" src="https://github.com/user-attachments/assets/1cf9b456-154f-4b65-afb2-4f37d1f17784" />
 
+----------------
 
 
+# Assembly
+<img width="600" src="https://github.com/user-attachments/assets/d3c1c663-230e-44a4-859c-5498aa6ab3b2" />
 
-## Donut Dongle Bill of Materials (BOM)
+
+## Bill of Materials (BOM)
 ### [- Digikey shared list](https://www.digikey.com/en/mylists/list/53XEHTQZJK)
 ### [- AliExpress wish list](https://www.aliexpress.com/p/wish-manage/share.html?smbPageCode=wishlist-amp&spreadId=09A40E28BA67E42DE9AF29A70E7238263DE305046632ABE9A0D5E1C5C4589AD9)
 * **1x** PJ-307 3.5mm Stereo Jack: [AliExpress](https://www.aliexpress.us/item/2251832712518602.html)
