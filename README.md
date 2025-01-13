@@ -1,7 +1,12 @@
 # Donut Dongle
-Arduino Nano based hub that connects your current console switching setup with the RetroTink 4K and/or RetroTink 5x for Auto Profile switching
+**Arduino Nano based hub that connects your current console switching setup with the RetroTink 4K and/or RetroTink 5x for Auto Profile switching**
 
 <img width="600" alt="donutdongle_v04" src="https://github.com/user-attachments/assets/57490759-f556-44dc-b4ce-beb28def27d4" />
+<br /><br/>
+
+The Donut Dongle connects to a switch in a way that allows it to see which port is active. When a port becomes active (a console powers on) the Donut Dongle sends a serial command to the RetroTink 4k (or IR signal to the RT5x) telling it to load a profile. The profiles can either be defined as remote profiles; those configured in the RT4K menu for the remote buttons. Or they can be SVS profiles which are configured on the RT4K's SDcard. <br />
+
+For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/tree/main/README.md#how-to-use) section below.
 
 # Connections
   - Connect 4 switches Total
