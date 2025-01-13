@@ -107,14 +107,20 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
     
   - PJ-320 3.5MM Headphone Jack Audio Video Female: [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) (Color: 10PCS PJ-320)
  
-  - **2x** #4-40 x 3/4" screw (optional): [Ebay](https://www.ebay.com/itm/222577369468)
- 
+  - **2x** #4-40 x 3/4" screw (optional): [Ebay](https://www.ebay.com/itm/222577369468) <br /><br />
+  -----------
 # Programming an Arduino Nano
-I recommend the Official Arduino IDE and guide if you're unfamiliar with Arduinos.
-- https://www.arduino.cc/en/Guide
-- Some Arduino Nano's come with the Old Bootloader and won't Upload unless specified. If you get errors when trying to upload, swap to this option as a possible fix.
-  - <img width="400" alt="bootloader" src="https://github.com/user-attachments/assets/c50f4d1c-5804-4972-ad58-a645030be5cb" />
-- All .ino files used for programming are listed above
+I recommend the [Official Arduino IDE and guide](https://www.arduino.cc/en/Guide) if you're unfamiliar with Arduinos. All .ino files used for programming are listed above. The following Libraries will also need to be added in order to Compile successfully.<br />
+- **Libraries:**
+  - <IRremote.h> Available through the built-in Library Manager under "Tools" -> "Manage Libraries..."
+  - <AltSoftSerial.h>  Follow these steps to add AltSoftSerial.h
+    - Goto https://github.com/PaulStoffregen/AltSoftSerial
+    - Click the GREEN "<> Code" box and "Download ZIP"
+    - In Arudino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
+
+Some Arduino Nano's come with an Old Bootloader and won't Upload unless specified. **If you get errors** when trying to upload, swap to this option as a possible fix.
+
+<img width="400" alt="bootloader" src="https://github.com/user-attachments/assets/c50f4d1c-5804-4972-ad58-a645030be5cb" />
 
   -----------
 # How to Use
