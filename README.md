@@ -83,5 +83,7 @@ Arduino Nano based hub that connects your current console switching setup with t
   - VGA Female Connector: [AliExpress](https://www.aliexpress.us/item/3256806106796466.html) (Color: HDR15P Female 3.08)
     
   - PJ-320 3.5MM Headphone Jack Audio Video Female: [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) (Color: 10PCS PJ-320)
+ 
+  - **2x** #4-40 x 3/4" screw (optional): [Ebay](https://www.ebay.com/itm/222577369468)
 
   
