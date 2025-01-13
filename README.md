@@ -95,4 +95,181 @@ Arduino Nano based hub that connects your current console switching setup with t
  
   - **2x** #4-40 x 3/4" screw (optional): [Ebay](https://www.ebay.com/itm/222577369468)
 
-  
+  -----------
+# How to Use
+- The following is from the .ino file itself. Refer to it directly for all Options and comments.
+```
+  /*
+////////////////////
+//    OPTIONS    //
+//////////////////
+*/
+
+
+uint8_t SVS = 0; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
+             //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
+             //     the profile being used for a console's switch input if your setup is in flux. SVS require you to rename the file itself on the SD card which is 
+             //     a little more work.  Regardless, SVS profiles will need to be used for console switch inputs over 12.
+             //
+             // **** Make sure "Auto Load SVS" is "On" under the RT4K Profiles menu. A requirement for most options ****
+             //
+             // 0 - use "Remote" profiles 1-12 for up to 12 inputs on 1st Extron Switch and SVS 13 - 99 for everything over 12. Only SVS profiles are used on 2nd Extron Switch if connected.
+             //
+             //     - remote profiles 1-12 for 1st Extron or TESmart Switch (If DP0 below is set to true - remote profile 12 is used when all ports are in-active)
+             //     - SVS  12 - 99  for 1st Extron or TESmart (DP0 is true)
+             //     - SVS  13 - 99  for 1st Extron or TESmart (DP0 is false)
+             //     - SVS 101 - 199 for 2nd Extron or TESmart
+             //     - SVS 201 - 208 for 1st gScart
+             //     - SVS 209 - 216 for 2nd gScart
+             //
+             // 1 - use only "SVS" profiles.
+             //     Make sure "Auto Load SVS" is "On" under the RT4K Profiles menu
+             //     RT4K checks the /profile/SVS subfolder for profiles and need to be named: "S<input number>_<user defined>.rt4"
+             //     For example, SVS input 2 would look for a profile that is named S2_SNES…rt4
+             //     If there’s more than one profile that fits the pattern, the first match is used
+             //
+             //     - SVS   1 -  99 for 1st Extron or TESmart
+             //     - SVS 101 - 199 for 2nd Extron or TESmart
+             //     - SVS 201 - 208 for 1st gScart
+             //     - SVS 209 - 216 for 2nd gScart
+             //     - SVS   0       for DP0 option mentioned below
+             //
+             //  ** If DP0 below is set to true, create "S0_<user defined>.rt4" for when all ports are in-active. Ex: S0_DefaultHDMI.rt4
+             //
+             // 2 - use "Remote" profiles 1-12 for gscart/gcomp switches. Remote profile 1-8 for 1st gscart switch, 9-12 for inputs 1-4 on 2nd gscart switch.
+             //     inputs 5-8 on the 2nd gscart switch will use SVS profiles 213 - 216
+             //
+             //     - remote profiles 1-8 for 1st gScart, 9 - 12 for first 4 inputs on 2nd gScart (If DP0 below is set to true - remote profile 12 is used when all ports are in-active)
+             //     - SVS 213 -  216 for remaining inputs 5 - 8 on 2nd gScart 
+             //     - SVS   1 -  99 for 1st Extron or TESmart
+             //     - SVS 101 - 199 for 2nd Extron or TESmart
+             //
+             //
+             //
+
+
+
+bool DP0  = false;       // (Default Profile 0) 
+                         //
+                         //
+                         // set true to load "Remote" profile 12 (if SVS=0) when all ports are in-active on 1st Extron switch (and 2nd if connected). 
+                         // You can assign it to a generic HDMI profile for example.
+                         // If your device has a 12th input, SVS will be used instead. "IF" you also have an active 2nd Extron Switch, remote profile 12
+                         // will only load if "BOTH" switches have all in-active ports.
+                         // 
+                         // 
+                         // If SVS=1, /profile/SVS/ "S0_<user defined>.rt4" will be used instead of remote profile 12
+                         //
+                         // If SVS=2, remote profile 12 will be used for gscart/gcomp
+                         //
+                         //
+                         // default is false // also recommended to set false to filter out unstable Extron inputs that can result in spamming the RT4K with profile changes 
+                       
+
+
+uint8_t voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input changes to any/all outputs result in a profile change
+                                                   // disable specific outputs from triggering profile changes
+                                                   //
+                           1,  // output 1 (1 = enabled, 0 = disabled)
+                           1,  // output 2
+                           1,  // output 3
+                           1,  // output 4
+                           1,  // output 5
+                           1,  // output 6
+                           1,  // output 7
+                           1,  // output 8
+                           1,  // output 9
+                           1,  // output 10
+                           1,  // output 11
+                           1,  // output 12
+                           1,  // output 13
+                           1,  // output 14
+                           1,  // output 15
+                           1,  // output 16
+                           1,  // output 17
+                           1,  // output 18
+                           1,  // output 19
+                           1,  // output 20
+                           1,  // output 21
+                           1,  // output 22
+                           1,  // output 23
+                           1,  // output 24
+                           1,  // output 25
+                           1,  // output 26
+                           1,  // output 27
+                           1,  // output 28
+                           1,  // output 29
+                           1,  // output 30
+                           1,  // output 31
+                           1,  // output 32 (1 = enabled, 0 = disabled)
+                               //
+                               // ONLY USE FOR 2ND MATRIX SWITCH
+                           1,  // 2ND MATRIX SWITCH output 1 (1 = enabled, 0 = disabled)
+                           1,  // 2ND MATRIX SWITCH output 2
+                           1,  // 2ND MATRIX SWITCH output 3
+                           1,  // 2ND MATRIX SWITCH output 4
+                           1,  // 2ND MATRIX SWITCH output 5
+                           1,  // 2ND MATRIX SWITCH output 6
+                           1,  // 2ND MATRIX SWITCH output 7
+                           1,  // 2ND MATRIX SWITCH output 8
+                           1,  // 2ND MATRIX SWITCH output 9
+                           1,  // 2ND MATRIX SWITCH output 10
+                           1,  // 2ND MATRIX SWITCH output 11
+                           1,  // 2ND MATRIX SWITCH output 12
+                           1,  // 2ND MATRIX SWITCH output 13
+                           1,  // 2ND MATRIX SWITCH output 14
+                           1,  // 2ND MATRIX SWITCH output 15
+                           1,  // 2ND MATRIX SWITCH output 16
+                           1,  // 2ND MATRIX SWITCH output 17
+                           1,  // 2ND MATRIX SWITCH output 18
+                           1,  // 2ND MATRIX SWITCH output 19
+                           1,  // 2ND MATRIX SWITCH output 20
+                           1,  // 2ND MATRIX SWITCH output 21
+                           1,  // 2ND MATRIX SWITCH output 22
+                           1,  // 2ND MATRIX SWITCH output 23
+                           1,  // 2ND MATRIX SWITCH output 24
+                           1,  // 2ND MATRIX SWITCH output 25
+                           1,  // 2ND MATRIX SWITCH output 26
+                           1,  // 2ND MATRIX SWITCH output 27
+                           1,  // 2ND MATRIX SWITCH output 28
+                           1,  // 2ND MATRIX SWITCH output 29
+                           1,  // 2ND MATRIX SWITCH output 30
+                           1,  // 2ND MATRIX SWITCH output 31
+                           1,  // 2ND MATRIX SWITCH output 32 (1 = enabled, 0 = disabled)
+                           };
+                           
+
+
+uint8_t RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
+                     // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
+                     //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
+                     //     (DP0 - if enabled uses Profile 10 on the RT5X)
+                     //
+                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-10 for first 2 inputs on second gscart)
+
+uint8_t RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
+                     // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
+                     //     sends Profile 1 - 12 commands to RetroTink 4K. Must have IR LED emitter connected.
+                     //     (DP0 - if enabled uses Profile 12 on the RT4K)
+                     //
+                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-12 for first 4 inputs on second gscart)
+
+
+uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons. 
+                          // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
+                          // Press AUX8 then profile button to load. Must have IR Receiver connected and Serial connection to RT4K.
+                          // 
+                     {1,  // AUX8 + profile 1 button
+                      2,  // AUX8 + profile 2 button
+                      3,  // AUX8 + profile 3 button
+                      4,  // AUX8 + profile 4 button
+                      5,  // AUX8 + profile 5 button
+                      6,  // AUX8 + profile 6 button
+                      7,  // AUX8 + profile 7 button
+                      8,  // AUX8 + profile 8 button
+                      9,  // AUX8 + profile 9 button
+                      10, // AUX8 + profile 10 button
+                      11, // AUX8 + profile 11 button
+                      12, // AUX8 + profile 12 button
+                      };
+```
