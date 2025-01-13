@@ -6,7 +6,7 @@
 
 ### VGAPassthrough_wSerial
  - Passes signals through untouched to the VGA port.
- - Comes equiped with jackscrew "bolts" for heavier VGA cables.
+ - Designed for use with #4-40 x 3/4" jackscrew "bolts" for heavier VGA cable support.
 
 --------------
 # Accessories:
