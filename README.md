@@ -28,6 +28,12 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 <img width="600" src="https://github.com/user-attachments/assets/1cf9b456-154f-4b65-afb2-4f37d1f17784" />
 
 ----------------
+# New IR Remote Control functionality
+When using the optional IR Receiver, the IR reception of the RT4K can be been greatly enhanced. You can think of it as an IR repeater, but instead talks to the RT4K via Serial for solid communication. Since the Donut Dongle is in the middle, other remote features can be added such as:
+ - AUX8 button + profile button 1 - 12 loads SVS profiles of your choosing. By default is SVS 1 - 12
+ - AUX8 pressed twice, manually enter a SVS profile to load with the profile buttons using 1 - 9 and 10,11,12 buttons for 0. Must use 3 digits. Ex: 001 = 1, 010 = 10, etc
+
+Let me know what ideas you have, and perhaps I can add them in.
 
 
 # Assembly
