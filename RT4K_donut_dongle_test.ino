@@ -21,6 +21,7 @@
 //debug
 uint8_t debugGscart1 = 0;
 uint8_t debugGscart2 = 0;
+uint8_t debugECAPbytes = 0;
 
 uint8_t SVS = 0; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
              //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
@@ -55,8 +56,8 @@ uint8_t SVS = 0; //     "Remote" profiles are profiles that are assigned to butt
              // 2 - use "Remote" profiles 1-12 for gscart/gcomp switches. Remote profile 1-8 for 1st gscart switch, 9-12 for inputs 1-4 on 2nd gscart switch.
              //     inputs 5-8 on the 2nd gscart switch will use SVS profiles 213 - 216
              //
-             //     - remote profiles 1-8 for 1st gScart, 9 - 12 for first 4 inputs on 2nd gScart
-             //     - SVS 212 -  216 for remaining inputs 5 - 8 on 2nd gScart 
+             //     - remote profiles 1-8 for 1st gScart, 9 - 12 for first 4 inputs on 2nd gScart (If DP0 below is set to true - remote profile 12 is used when all ports are in-active)
+             //     - SVS 213 -  216 for remaining inputs 5 - 8 on 2nd gScart 
              //     - SVS   1 -  99 for 1st Extron or TESmart
              //     - SVS 101 - 199 for 2nd Extron or TESmart
              //
@@ -70,7 +71,7 @@ bool DP0  = false;       // (Default Profile 0)
                          //
                          // set true to load "Remote" profile 12 (if SVS=0) when all ports are in-active on 1st Extron switch (and 2nd if connected). 
                          // You can assign it to a generic HDMI profile for example.
-                         // If your device has a 12th input, SVS will be used instead. "IF" you have a 2nd Extron Switch connected, the remote profile 12
+                         // If your device has a 12th input, SVS will be used instead. "IF" you also have an active 2nd Extron Switch, remote profile 12
                          // will only load if "BOTH" switches have all in-active ports.
                          // 
                          // 
@@ -161,14 +162,14 @@ uint8_t RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
                      //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
                      //     (DP0 - if enabled uses Profile 10 on the RT5X)
                      //
-                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-10 for first 2 inputs on second)
+                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-10 for first 2 inputs on second gscart)
 
 uint8_t RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
                      // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
                      //     sends Profile 1 - 12 commands to RetroTink 4K. Must have IR LED emitter connected.
                      //     (DP0 - if enabled uses Profile 12 on the RT4K)
                      //
-                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-12 for first 4 inputs on second)
+                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-12 for first 4 inputs on second gscart)
 
 
 uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons. 
@@ -282,7 +283,13 @@ void readExtron1(){
     // listens to the Extron sw1 Port for changes
     // SIS Command Responses reference - Page 77 https://media.extron.com/public/download/files/userman/XP300_Matrix_B.pdf
     if(extronSerial.available() > 0){ // if there is data available for reading, read
-    extronSerial.readBytes(ecapbytes,13); // read in and store only the first 13 chars for every status message received from 1st Extron SW port
+    extronSerial.readBytes(ecapbytes,13); // read in and store only the first 13 bytes for every status message received from 1st Extron SW port
+      if(debugECAPbytes){
+        Serial.print("ecapbytes: ");
+        for(int i=0;i<13;i++){
+          Serial.print(ecapbytes[i],HEX);Serial.print(" ");
+        }Serial.println("\r");
+      } // end of debugTESmart()
     }
     ecap = String((char *)ecapbytes); // convert bytes to String for Extron switches
 
@@ -495,7 +502,7 @@ void readExtron1(){
           else sendSVS(10);
       }
       else if(ecap == "remote prof12"){
-          delay(1);
+          delay(1); // do nothing
       }
       else if(ecap.substring(0,12) == "remote prof1"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
@@ -570,7 +577,7 @@ void readExtron2(){
     
     // listens to the Extron sw2 Port for changes
     if(extronSerial2.available() > 0){ // if there is data available for reading, read
-    extronSerial2.readBytes(ecapbytes2,13); // read in and store only the first 13 chars for every status message received from 2nd Extron port
+    extronSerial2.readBytes(ecapbytes2,13); // read in and store only the first 13 bytes for every status message received from 2nd Extron port
     }
     ecap2 = String((char *)ecapbytes2);
 
@@ -608,14 +615,12 @@ void readExtron2(){
     }
 
     // set ecapbytes2 to 0 for next read
-    for(uint8_t i = 0; i < 13; i++){
-      ecapbytes2[i] = 0;
-    }
+    memset(ecapbytes2,0,sizeof(ecapbytes2));
 
     // for Otaku Games Scart Switch
     if(ecap2.substring(0,6) == "remote"){
       if(ecap2 == "remote prof10") sendSVS(110);
-      else if(ecap2 == "remote prof12") delay(1);
+      else if(ecap2 == "remote prof12") delay(1); // do nothing
       else if(ecap2.substring(0,12) == "remote prof1") sendSVS(101);
       else if(ecap2.substring(0,12) == "remote prof2") sendSVS(102);
       else if(ecap2.substring(0,12) == "remote prof3") sendSVS(103);
@@ -641,25 +646,40 @@ void readGscart1(){ // readGscart1
 // Pin 6: IN_BIT1
 // Pin 7: IN_BIT2
 // Pin 8: N/C
+//
+// Reference for no active input state: https://shmups.system11.org/viewtopic.php?t=50851&start=4976
+//
+// When no input is active, a 50% off/on cycle can be seen for each pin as it cycles through the inputs. Pin5 the fastest, Pin7 the slowest. If we can monitor each
+// pin then we can detect when there is no active input.
+//
+//        Pin7 Pin6 Pin5
+// Port1  0     0     0
+// Port2  0     0     1
+// Port3  0     1     0
+// Port4  0     1     1 
+// Port5  1     0     0
+// Port6  1     0     1
+// Port7  1     1     0
+// Port8  1     1     1
 
-uint8_t fpdc = 0; // 50% duty cycle was detected / all ports are in-active
+uint8_t fpdc = 0; // 1 = 50% duty cycle was detected / all ports are in-active
 uint8_t bit[3] = {0,0,0};
 float val[3] = {0,0,0};
 
-for(uint8_t i = 0; i < 3; i++){ // read in analog pin voltages, read each value 4x in a row to get a stable reading, combats if using too large of a pull-down resistor
+for(uint8_t i = 0; i < 3; i++){ // read in analog pin voltages, read each pin 4x in a row to ensure an accurate read, combats if using too large of a pull-down resistor
   for(uint8_t j = 0; j < 4; j++){
     val[i] = analogRead(apin[i]);
   }
-  if((val[i]/211) >= high){ // if voltage is greater than or equal to the voltage defined for a 1, increase highcount by 1 for that analog pin
+  if((val[i]/211) >= high){ // if voltage is greater than or equal to the voltage defined for a high, increase highcount by 1 for that analog pin
     highcount[i]++;
   }
 }
 
-if(samcc == samsize){              // when the "samsize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
-  for(uint8_t i = 0; i < 3; i++){      // if the voltage was high for only dcl to dch samples, set an all in-active ports flag
-    if(highcount[i] > dch)          // how many "high" samples per "samsize" are required for a bit to be 1.  
+if(samcc == samsize){               // when the "samsize" number of samples has been taken, if the voltage was "high" for more than "dch" # of the "samsize" samples, set the bit to 1
+  for(uint8_t i = 0; i < 3; i++){
+    if(highcount[i] > dch)          // if the number of "high" samples per "samsize" are greater than "dch" set bit to 1.  
       bit[i] = 1;
-    else if(highcount[i] > dcl)     // between dcl and dch number of "high" samples are required to set an all in-active ports flag
+    else if(highcount[i] > dcl)     // if the number of "high" samples is greater than "dcl" and less than "dch" (50% high samples) the switch must be cycling inputs, therefor no active input
       fpdc = 1;
   }
 }
@@ -732,13 +752,13 @@ if(((bit[2] != bitprev[2] || bit[1] != bitprev[1] || bit[0] != bitprev[0]) || (a
 
 }
 
-if((fpdccount == (fpdccountmax - 1)) && (fpdc != fpdcprev) && (samcc == samsize)){ // if all in-active ports has been detected for multiple periods
+if((fpdccount == (fpdccountmax - 1)) && (fpdc != fpdcprev) && (samcc == samsize)){ // if no active port has been detected for fpdccountmax periods
   
   allgscartoff = 1;
   memset(bitprev,0,sizeof(bitprev));
   fpdcprev = fpdc;
 
-  if(DP0 && allgscartoff2 && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") && 
+  if(DP0 && allgscartoff2 && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") && // cross-checks Extron status
                             (previnput2 == "0" || previnput2 == "discon" || previnput2 == "In0 " || previnput2 == "In00"))){
     if(SVS==1)sendSVS(0);
     else if(SVS==2)Serial.println(F("remote prof12\r"));
@@ -746,7 +766,7 @@ if((fpdccount == (fpdccountmax - 1)) && (fpdc != fpdcprev) && (samcc == samsize)
 
 }
 
-if(fpdc && (samcc == samsize)){ // if the all in-active ports flag is set, increment counter
+if(fpdc && (samcc == samsize)){ // if no active port has been detected, loop counter until active port
   if(fpdccount == (fpdccountmax - 1))
     fpdccount = 0;
   else 
@@ -756,19 +776,18 @@ else if(samcc == samsize){
   fpdccount = 0;
 }
 
-
-if(debugGscart1){
+if(debugGscart1){ // debug
 delay(200);
-Serial.print(F("A0 voltage:         "));Serial.print(val[0]/211);Serial.print(F("v    SC: "));Serial.print(samcc);Serial.print(F("  fpdccount: "));Serial.print(fpdccount);
-Serial.print(F(" fpdc: "));Serial.print(fpdc);Serial.print(F(" fpdcprev: "));Serial.print(fpdcprev);
-Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bitprev[0]: "));Serial.print(bitprev[0]);Serial.print(F(" highcount0: "));Serial.print(highcount[0]);
-Serial.print(F(" allgoff: "));Serial.print(allgscartoff);Serial.print(F(" allgoff2: "));Serial.println(allgscartoff2);
-// Serial.print(F("A0 voltage:         "));Serial.println(val[0]/211);
-// Serial.print(F("A1 voltage:         "));Serial.println(val[1]/211);
-// Serial.print(F("A2 voltage:         "));Serial.println(val[2]/211);
+// Serial.print(F("A0 voltage:         "));Serial.print(val[0]/211);Serial.print(F("v    SC: "));Serial.print(samcc);Serial.print(F("  fpdccount: "));Serial.print(fpdccount);
+// Serial.print(F(" fpdc: "));Serial.print(fpdc);Serial.print(F(" fpdcprev: "));Serial.print(fpdcprev);
+// Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bitprev[0]: "));Serial.print(bitprev[0]);Serial.print(F(" highcount0: "));Serial.print(highcount[0]);
+// Serial.print(F(" allgoff: "));Serial.print(allgscartoff);Serial.print(F(" allgoff2: "));Serial.println(allgscartoff2);
+Serial.print(F("A0 voltage:         "));Serial.println(val[0]/211);
+Serial.print(F("A1 voltage:         "));Serial.println(val[1]/211);
+Serial.print(F("A2 voltage:         "));Serial.println(val[2]/211);
 }
 
-if(samcc < samsize) // take "samsize" number of analog -> digital conversions per period
+if(samcc < samsize) // increment counter until "samsize" has been reached then reset counter and "highcount"
   samcc++;
 else{
   samcc = 1;
@@ -789,6 +808,22 @@ void readGscart2(){
 // Pin 6: IN_BIT1
 // Pin 7: IN_BIT2
 // Pin 8: N/C
+//
+// Reference for no active input state: https://shmups.system11.org/viewtopic.php?t=50851&start=4976
+//
+// When no input is active, a 50% off/on cycle can be seen for each pin as it cycles through the inputs. Pin5 the fastest, Pin7 the slowest. If we can monitor each
+// pin then we can detect when there is no active input.
+//
+//        Pin7 Pin6 Pin5
+// Port1  0     0     0
+// Port2  0     0     1
+// Port3  0     1     0
+// Port4  0     1     1 
+// Port5  1     0     0
+// Port6  1     0     1
+// Port7  1     1     0
+// Port8  1     1     1
+
 
 uint8_t fpdc = 0;
 uint8_t bit[3] = {0,0,0};
@@ -803,11 +838,11 @@ for(uint8_t i = 0; i < 3; i++){
   }
 }
 
-if(samcc2 == samsize){          // when the "samsize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
-  for(uint8_t i = 0; i < 3; i++){   // if the voltage was high for only dcl to dch samples, set an all in-active ports flag
-    if(highcount2[i] > dch)      // how many "high" samples per "samsize" are required for a bit to be 1.  
+if(samcc2 == samsize){              // when the "samsize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
+  for(uint8_t i = 0; i < 3; i++){   // if the voltage was high for only dcl to dch samples, set an all in-active ports flag (fpdc = 1)
+    if(highcount2[i] > dch)         // how many "high" samples per "samsize" are required for a bit to be 1.  
       bit[i] = 1;
-    else if(highcount2[i] > dcl)   // between dcl and dch number of "high" samples are required to set an all in-active ports flag
+    else if(highcount2[i] > dcl)
       fpdc = 1;
   }
 }
@@ -854,13 +889,13 @@ if(((bit[2] != bitprev2[2] || bit[1] != bitprev2[1] || bit[0] != bitprev2[0]) ||
 
 }
 
-if((fpdccount2 == (fpdccountmax - 1)) && (fpdc != fpdcprev2) && (samcc2 == samsize)){ // if all in-active ports has been detected for multiple periods 
+if((fpdccount2 == (fpdccountmax - 1)) && (fpdc != fpdcprev2) && (samcc2 == samsize)){ // if all in-active ports flag has been detected for "fpdccountmax" periods 
   
   allgscartoff2 = 1;
   memset(bitprev2,0,sizeof(bitprev2));
   fpdcprev2 = fpdc;
   
-  if(DP0 && allgscartoff && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") && 
+  if(DP0 && allgscartoff && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") &&  // cross-checks Extron status
                             (previnput2 == "0" || previnput2 == "discon" || previnput2 == "In0 " || previnput2 == "In00"))){
     if(SVS==1)sendSVS(0);
     else if(SVS==2)Serial.println(F("remote prof12\r"));
@@ -880,13 +915,13 @@ else if(samcc2 == samsize){
 
 if(debugGscart2){  
 delay(200);
-Serial.print(F("A3 voltage:         "));Serial.print(val[0]/211);Serial.print(F("v    SC: "));Serial.print(samcc2);Serial.print(F("  fpdccount2: "));Serial.print(fpdccount2);
-Serial.print(F(" fpdc: "));Serial.print(fpdc);Serial.print(F(" fpdcprev2: "));Serial.print(fpdcprev2);
-Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bitprev2[0]: "));Serial.print(bitprev2[0]);Serial.print(" highcount0: ");Serial.print(highcount2[0]);
-Serial.print(F(" allgoff: "));Serial.print(allgscartoff);Serial.print(F(" allgoff2: "));Serial.println(allgscartoff2);
-// Serial.print(F("A3 voltage:         "));Serial.println(val[0]/211);
-// Serial.print(F("A4 voltage:         "));Serial.println(val[1]/211);
-// Serial.print(F("A5 voltage:         "));Serial.println(val[2]/211);
+// Serial.print(F("A3 voltage:         "));Serial.print(val[0]/211);Serial.print(F("v    SC: "));Serial.print(samcc2);Serial.print(F("  fpdccount2: "));Serial.print(fpdccount2);
+// Serial.print(F(" fpdc: "));Serial.print(fpdc);Serial.print(F(" fpdcprev2: "));Serial.print(fpdcprev2);
+// Serial.print(F(" /-/ bit0: "));Serial.print(bit[0]);Serial.print(F(" bitprev2[0]: "));Serial.print(bitprev2[0]);Serial.print(" highcount0: ");Serial.print(highcount2[0]);
+// Serial.print(F(" allgoff: "));Serial.print(allgscartoff);Serial.print(F(" allgoff2: "));Serial.println(allgscartoff2);
+Serial.print(F("A3 voltage:         "));Serial.println(val[0]/211);
+Serial.print(F("A4 voltage:         "));Serial.println(val[1]/211);
+Serial.print(F("A5 voltage:         "));Serial.println(val[2]/211);
 }
 
 
@@ -932,14 +967,6 @@ void irRec(){
     ir_recv_command = TinyIRReceiverData.Command;
     ir_recv_address = TinyIRReceiverData.Address;
         
-    // printTinyReceiverResultMinimal(&Serial);
-    // Serial.print("Address=0x");Serial.print(ir_recv_address,HEX);
-    // Serial.print(" Command=0x");Serial.println(ir_recv_command,HEX);
-    // Serial.print(F("Address="));
-    // Serial.print(ir_recv_address);
-    // Serial.print(F(" Command="));
-    // Serial.println(ir_recv_command);
-
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && extrabuttonprof == 2){
       if(ir_recv_command == 11){ // profile button 1
         svsbutton += 1;
@@ -1269,7 +1296,21 @@ void irRec(){
       else if(ir_recv_command == 79){
         Serial.println(F("remote right\r"));
       }
-    } // end of if(ir_recv_address)
+    } // end of if(ir_recv_address
+    
+    if(ir_recv_address == 73 && repeatcount > 15){ // when directional buttons are held down for even longer... turbo directional mode
+      if(ir_recv_command == 87){
+        for(int i=0;i<4;i++){
+          Serial.println(F("remote left\r"));
+        }
+      }
+      else if(ir_recv_command == 79){
+        for(int i=0;i<4;i++){
+          Serial.println(F("remote right\r"));
+        }
+      }
+    } // end of turbo directional mode
+    
   } // end of TinyReceiverDecode()   
 } // end of irRec()
 
