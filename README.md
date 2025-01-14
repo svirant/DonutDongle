@@ -97,7 +97,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
     
   - PJ-320 3.5MM Headphone Jack Audio Video Female: [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) (Color: 10PCS PJ-320)
     
-  - VGA Male Connector [L717HDE15PD4CH4R-ND]: [Digikey](https://www.digikey.com/en/products/detail/amphenol-cs-commercial-products/L717HDE15PD4CH4R/4886543)
+  - VGA Male Connector [10090926-P156XLF-ND]: [Digikey](https://www.digikey.com/en/products/detail/amphenol-cs-fci/10090926-P156XLF/4570100)
  
 * **1x** VGA Passthrough w/ Serial Tap:
   
