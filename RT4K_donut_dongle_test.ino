@@ -19,9 +19,9 @@
 //////////////////
 */
 //debug
-uint8_t debugGscart1 = 0;
-uint8_t debugGscart2 = 0;
-uint8_t debugECAPbytes = 0;
+uint8_t debugGscart1 = 0; // line ~779
+uint8_t debugGscart2 = 0; // line ~916
+uint8_t debugECAPbytes = 1; // line ~287
 
 uint8_t SVS = 0; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
              //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
@@ -285,11 +285,11 @@ void readExtron1(){
     if(extronSerial.available() > 0){ // if there is data available for reading, read
     extronSerial.readBytes(ecapbytes,13); // read in and store only the first 13 bytes for every status message received from 1st Extron SW port
       if(debugECAPbytes){
-        Serial.print("ecapbytes: ");
+        Serial.print(F("ecapbytes: "));
         for(int i=0;i<13;i++){
-          Serial.print(ecapbytes[i],HEX);Serial.print(" ");
-        }Serial.println("\r");
-      } // end of debugTESmart()
+          Serial.print(ecapbytes[i],HEX);Serial.print(F(" "));
+        }Serial.println(F("\r"));
+      } // end of debugECAPbytes()
     }
     ecap = String((char *)ecapbytes); // convert bytes to String for Extron switches
 
