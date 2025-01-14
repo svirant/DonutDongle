@@ -38,6 +38,8 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 <img width="300" src="https://github.com/user-attachments/assets/bcf89beb-df88-4a14-aa0c-2fbed80bced1" />
 <img width="260" src="https://github.com/user-attachments/assets/d346a301-3aa9-43e4-b1b2-b943474cca86" />
 
+**Parts listed in [BOM](https://github.com/svirant/DonutDongle/tree/main/README.md#connection-accessories) below**
+
 ----------------
 # New IR Remote Control functionality
 When using the optional IR Receiver, the IR reception of the RT4K can be been greatly enhanced. You can think of it as an IR repeater, but instead talks to the RT4K via Serial for solid communication. Since the Donut Dongle is in the middle, other remote features can be added such as:
@@ -126,6 +128,18 @@ Let me know what ideas you have, and perhaps I can add them in.
   - PJ-320 3.5MM Headphone Jack Audio Video Female: [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) (Color: 10PCS PJ-320)
  
   - **2x** #4-40 x 3/4" screw (optional): [Ebay](https://www.ebay.com/itm/222577369468) <br /><br />
+
+  ### Connection Accessories
+
+  * **gscart/gcomp EXT connector**
+ 
+    -  2x4 Pin Double Row 2.54 Pitch Angled Box Header: [AliExpress](https://www.aliexpress.us/item/3256805177947724.html?) (Color: RIGHT ANGLE TYPE, Pins: 10PCS DC3 8Pin)
+    -  **5x** Pogo-Pin: [Digikey](https://www.digikey.com/en/products/detail/mill-max-manufacturing-corp/0906-1-15-20-75-14-11-0/1147049)
+   
+  * **TESmart connector**
+ 
+    -  PJ-320 3.5MM Headphone Jack Audio Video Female: [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) (Color: 10PCS PJ-320)
+
   -----------
 # Programming an Arduino Nano
 I recommend the [Official Arduino IDE and guide](https://www.arduino.cc/en/Guide) if you're unfamiliar with Arduinos. All .ino files used for programming are listed above. The following Libraries will also need to be added in order to Compile successfully.<br />
