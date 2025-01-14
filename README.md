@@ -27,6 +27,17 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
   - 1x IR Receiver (optional for better reception and IR remote customizations)
 <img width="600" src="https://github.com/user-attachments/assets/1cf9b456-154f-4b65-afb2-4f37d1f17784" />
 
+# Connection Acccessories
+
+**gscart/gcomp EXT connector (plug-n-plug)**<br />
+<img width="380" src="https://github.com/user-attachments/assets/dfb17d2c-a78b-49bb-987d-2413d0d521ce" />
+<img width="600" src="https://github.com/user-attachments/assets/2f959f54-02e1-4d3e-af82-bc3507be7446" /><br />
+
+**TESmart connector**<br />
+<img width="280" src="https://github.com/user-attachments/assets/dc723394-8db4-4a3c-9a07-ea1562e56f5e" />
+<img width="300" src="https://github.com/user-attachments/assets/bcf89beb-df88-4a14-aa0c-2fbed80bced1" />
+<img width="260" src="https://github.com/user-attachments/assets/d346a301-3aa9-43e4-b1b2-b943474cca86" />
+
 ----------------
 # New IR Remote Control functionality
 When using the optional IR Receiver, the IR reception of the RT4K can be been greatly enhanced. You can think of it as an IR repeater, but instead talks to the RT4K via Serial for solid communication. Since the Donut Dongle is in the middle, other remote features can be added such as:
@@ -37,7 +48,8 @@ Let me know what ideas you have, and perhaps I can add them in.
 
 
 # Assembly
-<img width="600" src="https://github.com/user-attachments/assets/d3c1c663-230e-44a4-859c-5498aa6ab3b2" />
+<img width="600" src=https://github.com/user-attachments/assets/7026ca65-a922-4ce7-ac76-78d374bdea11 />
+
 
 
 ## Bill of Materials (BOM)
