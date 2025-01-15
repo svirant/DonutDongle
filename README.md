@@ -87,9 +87,9 @@ Let me know what ideas you have, and perhaps I can add them in.
 
 * **Cables**
 
-| **Qty**    | Connector | Part |  Link  |  Notes |
+| **Qty**    | Switch Type | Part |  Link  |  Notes |
 | ------------- | ------------- |------------- |------------- |------------- |
-| 1  | **TESmart HDMI** | Any 3.5mm / aux / stereo / trs / Cable | [AliExpress](https://www.aliexpress.us/item/2255799962255486.html) | |
+| 1 or 2 | **TESmart HDMI** | Any 3.5mm / aux / stereo / trs / Cable | [AliExpress](https://www.aliexpress.us/item/2255799962255486.html) | |
 | 1 or 2 | **GscartSW/GCompSW** | 2x4 Pin Double Row 2.54 Pitch Angled Box Header | [AliExpress](https://www.aliexpress.us/item/3256805177947724.html?) | (Color: RIGHT ANGLE TYPE, Pins: 10PCS DC3 8Pin) |
 |1 or 2 | **GscartSW/GCompSW** | 2x4 Pin Female Header Ribbon Cable | [AliExpress](https://www.aliexpress.us/item/3256804576275377.html?) | (Pins: 2x4Pin, Color: Any length) |
 | 1  | **Extron** | 2 Port DB9 to 2x5 Pin Female Header Ribbon Cable | [AliExpress](https://www.aliexpress.us/item/3256807472891897.html) | |
@@ -101,36 +101,36 @@ Let me know what ideas you have, and perhaps I can add them in.
 
 * **YC2VGA w/ Serial Tap:**
 
-| **Qty**    | Designation | Part |  Link  |  Notes |
-| ------------- | ------------- |------------- |------------- |------------- |
-| 1 | | Yellow RCA Composite jack | [AliExpress](https://www.aliexpress.us/item/3256805949533421.html) | (Color: Yellow) |
-| 1 | | S-Video jack | [AliExpress](https://www.aliexpress.us/item/3256804041313042.html) | (Color: A 4Pin) |
-| 1 | | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) | (Color: 10PCS PJ-320) |
-| 1 | | VGA Male Connector [10090926-P156XLF-ND] | [Digikey](https://www.digikey.com/en/products/detail/amphenol-cs-fci/10090926-P156XLF/4570100) | |
+| **Qty**    | Part |  Link  |  Notes |
+| ------------- | ------------- |------------- |------------- |
+| 1  | Yellow RCA Composite jack | [AliExpress](https://www.aliexpress.us/item/3256805949533421.html) | (Color: Yellow) |
+| 1  | S-Video jack | [AliExpress](https://www.aliexpress.us/item/3256804041313042.html) | (Color: A 4Pin) |
+| 1  | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) | (Color: 10PCS PJ-320) |
+| 1  | VGA Male Connector [10090926-P156XLF-ND] | [Digikey](https://www.digikey.com/en/products/detail/amphenol-cs-fci/10090926-P156XLF/4570100) | |
  
 * **VGA Passthrough w/ Serial Tap:**
 
-| **Qty**    | Designation | Part |  Link  |  Notes |
-| ------------- | ------------- |------------- |------------- |------------- |
-| 1 | | VGA Male Connector [L717HDE15PD4CH4R-ND] | [Digikey](https://www.digikey.com/en/products/detail/amphenol-cs-commercial-products/L717HDE15PD4CH4R/4886543) | |
-| 1 | | VGA Female Connector | [AliExpress](https://www.aliexpress.us/item/3256806106796466.html) | (Color: HDR15P Female 3.08) |
-| 1 | | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) | (Color: 10PCS PJ-320) |
-| 2 | | #4-40 x 3/4" screw (optional) | [Ebay](https://www.ebay.com/itm/222577369468) | |
+| **Qty**    | Part |  Link  |  Notes |
+| ------------- | ------------- |------------- |------------- |
+| 1 | VGA Male Connector [L717HDE15PD4CH4R-ND] | [Digikey](https://www.digikey.com/en/products/detail/amphenol-cs-commercial-products/L717HDE15PD4CH4R/4886543) | |
+| 1 | VGA Female Connector | [AliExpress](https://www.aliexpress.us/item/3256806106796466.html) | (Color: HDR15P Female 3.08) |
+| 1 | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) | (Color: 10PCS PJ-320) |
+| 2 | #4-40 x 3/4" screw (optional) | [Ebay](https://www.ebay.com/itm/222577369468) | |
 
   ### Connection Accessories (optional)
 
   * **gscart/gcomp EXT connector**
 
-| **Qty**    | Designation | Part |  Link  |  Notes |
-| ------------- | ------------- |------------- |------------- |------------- |
-| 1 | | 2x4 Pin Double Row 2.54 Pitch Angled Box Header | [AliExpress](https://www.aliexpress.us/item/3256805177947724.html?) | (Color: RIGHT ANGLE TYPE, Pins: 10PCS DC3 8Pin) |
-| 5 | | Pogo-Pin | [Digikey](https://www.digikey.com/en/products/detail/mill-max-manufacturing-corp/0906-1-15-20-75-14-11-0/1147049) | |
+| **Qty**    | Part |  Link  |  Notes |
+| ------------- | ------------- |------------- |------------- |
+| 1 | 2x4 Pin Double Row 2.54 Pitch Angled Box Header | [AliExpress](https://www.aliexpress.us/item/3256805177947724.html?) | (Color: RIGHT ANGLE TYPE, Pins: 10PCS DC3 8Pin) |
+| 5 | Pogo-Pin | [Digikey](https://www.digikey.com/en/products/detail/mill-max-manufacturing-corp/0906-1-15-20-75-14-11-0/1147049) | |
    
   * **TESmart connector**
 
- | **Qty**    | Designation | Part |  Link  |  Notes |
-| ------------- | ------------- |------------- |------------- |------------- |
-| 1 | | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) | (Color: 10PCS PJ-320) |
+ | **Qty**    | Part |  Link  |  Notes |
+| ------------- | ------------- |------------- |------------- |
+| 1 | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) | (Color: 10PCS PJ-320) |
 
   -----------
 # Programming an Arduino Nano
