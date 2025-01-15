@@ -55,7 +55,8 @@ Let me know what ideas you have, and perhaps I can add them in.
 
 
 # Assembly
-<img width="600" src=https://github.com/user-attachments/assets/7026ca65-a922-4ce7-ac76-78d374bdea11 />
+<img width="600" src=https://github.com/user-attachments/assets/6a26a5cd-81b9-41c1-ab6f-229063efb02a />
+
 
 
 
