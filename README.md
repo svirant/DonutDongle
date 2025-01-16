@@ -29,7 +29,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 
 # Connection Acccessories
 
-**gscart/gcomp EXT connector (plug-n-plug)**<br />
+**gscart/gcomp EXT connector (plug-n-play)**<br />
 <img width="380" src="https://github.com/user-attachments/assets/dfb17d2c-a78b-49bb-987d-2413d0d521ce" />
 <img width="600" src="https://github.com/user-attachments/assets/2f959f54-02e1-4d3e-af82-bc3507be7446" /><br />
 
