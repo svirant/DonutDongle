@@ -100,7 +100,7 @@ Let me know what ideas you have, and perhaps I can add them in.
 
 ### At least 1 of the following [VGA adapters](https://github.com/svirant/DonutDongle/tree/main/Adapters) is required:
 
-* **YC2VGA w/ Serial Tap:**
+* **YC2VGA w/ Serial Tap: (enhanced s-video and composite as a bonus)**
 
 | **Qty**    | Part |  Link  |  Notes |
 | ------------- | ------------- |------------- |------------- |
