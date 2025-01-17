@@ -33,9 +33,10 @@
 //////////////////
 */
 //debug
-uint8_t debugGscart1 = 0; // line ~779
-uint8_t debugGscart2 = 0; // line ~916
-uint8_t debugECAPbytes = 1; // line ~287
+uint8_t debugGscart1 = 0; // line ~798
+uint8_t debugGscart2 = 0; // line ~935
+uint8_t debugE1CAP = 0; // line ~301
+uint8_t debugE2CAP = 0; // line ~598
 
 uint8_t SVS = 0; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
              //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
@@ -298,12 +299,15 @@ void readExtron1(){
     // SIS Command Responses reference - Page 77 https://media.extron.com/public/download/files/userman/XP300_Matrix_B.pdf
     if(extronSerial.available() > 0){ // if there is data available for reading, read
     extronSerial.readBytes(ecapbytes,13); // read in and store only the first 13 bytes for every status message received from 1st Extron SW port
-      if(debugECAPbytes){
-        Serial.print(F("ecapbytes: "));
+      if(debugE1CAP){
+        Serial.print(F("ecap HEX: "));
         for(int i=0;i<13;i++){
           Serial.print(ecapbytes[i],HEX);Serial.print(F(" "));
-        }Serial.println(F("\r"));
-      } // end of debugECAPbytes()
+        }
+        Serial.println(F("\r"));
+        ecap = String((char *)ecapbytes);
+        Serial.print(F("ecap ASCII: "));Serial.println(ecap);
+      }
     }
     ecap = String((char *)ecapbytes); // convert bytes to String for Extron switches
 
@@ -592,6 +596,15 @@ void readExtron2(){
     // listens to the Extron sw2 Port for changes
     if(extronSerial2.available() > 0){ // if there is data available for reading, read
     extronSerial2.readBytes(ecapbytes2,13); // read in and store only the first 13 bytes for every status message received from 2nd Extron port
+      if(debugE2CAP){
+        Serial.print(F("ecap2 HEX: "));
+        for(int i=0;i<13;i++){
+          Serial.print(ecapbytes2[i],HEX);Serial.print(F(" "));
+        }
+        Serial.println(F("\r"));
+        ecap2 = String((char *)ecapbytes2);
+        Serial.print(F("ecap2 ASCII: "));Serial.println(ecap2);
+      }
     }
     ecap2 = String((char *)ecapbytes2);
 
