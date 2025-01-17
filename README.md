@@ -56,9 +56,9 @@ Let me know what ideas you have, and perhaps I can add them in.
 
 # Assembly
 
-Try out the [Interactive HTML BOM](/images/ibom.html)
+Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/ibom.html))
 
-[<img width="600" src="./images/8.png" />](/images/ibom.html)
+[<img width="600" src="./images/8.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
 
 
 
