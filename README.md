@@ -1,7 +1,7 @@
 # Donut Dongle
 **Arduino Nano based hub that connects your console switching setup with the RetroTink 4K and/or RetroTink 5x for Auto Profile switching**
 
-<img width="600" alt="donutdongle_v04" src="https://github.com/user-attachments/assets/57490759-f556-44dc-b4ce-beb28def27d4" />
+<img width="600" src="/images/1.png" />
 <br /><br/>
 
 The Donut Dongle connects to a switch in a way that allows it to see which port is active. When a console powers on (auto-switching) or an input is manually selected, the Donut Dongle sends a serial command to the RetroTink 4k (or IR signal to the RT5x) telling it to load a profile. The profiles can either be defined as remote profiles; those configured in the RT4K menu for the remote buttons. Or they can be SVS profiles which are configured on the RT4K's SDcard. <br />
@@ -30,18 +30,18 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 # Connection Acccessories
 
 **gscart/gcomp EXT connector (plug-n-play)**<br />
-<img width="380" src="https://github.com/user-attachments/assets/dfb17d2c-a78b-49bb-987d-2413d0d521ce" />
-<img width="600" src="https://github.com/user-attachments/assets/2f959f54-02e1-4d3e-af82-bc3507be7446" /><br />
+<img width="380" src="/images/2.jpg" />
+<img width="600" src="/images/3.jpg" /><br />
 
 **TESmart connector**<br />
-<img width="280" src="https://github.com/user-attachments/assets/dc723394-8db4-4a3c-9a07-ea1562e56f5e" />
-<img width="300" src="https://github.com/user-attachments/assets/bcf89beb-df88-4a14-aa0c-2fbed80bced1" />
-<img width="260" src="https://github.com/user-attachments/assets/d346a301-3aa9-43e4-b1b2-b943474cca86" />
+<img width="280" src="/images/4.jpg" />
+<img width="300" src="/images/5.jpg" />
+<img width="260" src="/images/6.jpg" />
 
 **Alternate Extron connection type:**
    - **DB9 male to 3.5mm (connects to alt sw1 / alt sw2 port instead of 2x5 header)**
    - **Higher quality and much longer cord than the standard 2x5 cable**
-<img width="800" alt="DB9_to_TRS_wiring" src="https://github.com/user-attachments/assets/4660ba77-eace-4b76-b169-7ea5f80491f9" />
+<img width="800" alt="DB9_to_TRS_wiring" src="/images/7.png" />
 
 **Parts listed in [BOM](https://github.com/svirant/DonutDongle/tree/main/README.md#connection-accessories) below**
 
@@ -55,7 +55,12 @@ Let me know what ideas you have, and perhaps I can add them in.
 
 
 # Assembly
-<img width="600" src=https://github.com/user-attachments/assets/6a26a5cd-81b9-41c1-ab6f-229063efb02a />
+
+Try out the [Interactive HTML BOM](/images/ibom.html)
+
+[<img width="600" src="/images/8.png" />](/images/ibom.html)
+
+
 
 
 
@@ -85,6 +90,9 @@ Let me know what ideas you have, and perhaps I can add them in.
 | 2  | | 2.54mm Pitch Single Row Female 15P Header Strip | [AliExpress](https://www.aliexpress.us/item/3256801232229618.html) | |
 | 1  | | Any 3.5mm / aux / stereo / trs / cable | [AliExpress](https://www.aliexpress.us/item/2255799962255486.html) | |
 | 1  | | usb-c cable for Arduino power & initial programming | [AliExpress](https://www.aliexpress.us/item/3256806983355947.html) | |
+| 1  | | Arduino Nano type c | Anywhere!, Amazon, or [AliExpress](https://www.aliexpress.us/item/3256806880365712.html) | (Color: TYPE-C USB 1pcs)|
+| 1  | | 2x3 Pin Double Row 2.54mm Pitch Header | | Use the one that comes with the Arduino Nano |
+| 2  | | 2.54mm Jumper | [AliExpress](https://www.aliexpress.us/item/2255800354403384.html) | You only need 2, but this comes in a pack of 100 :-/ |
 
 * **Switch connection Cables**
 
@@ -94,7 +102,7 @@ Let me know what ideas you have, and perhaps I can add them in.
 | 1 or 2 | **GscartSW/GCompSW** | 2x4 Pin Double Row 2.54 Pitch Angled Box Header | [AliExpress](https://www.aliexpress.us/item/3256805177947724.html?) | (Color: RIGHT ANGLE TYPE, Pins: 10PCS DC3 8Pin), Solders onto EXT port. Or use the pogo-pin connector shown below.  |
 |1 or 2 | **GscartSW/GCompSW** | 2x4 Pin Female Header Ribbon Cable | [AliExpress](https://www.aliexpress.us/item/3256804576275377.html?) | (Pins: 2x4Pin, Color: Any length) |
 | 1  | **Extron** | 2 Port DB9 to 2x5 Pin Female Header Ribbon Cable | [AliExpress](https://www.aliexpress.us/item/3256807472891897.html) | |
-| | | or **2x** DB9 Male to 3.5mm Male Serial RS232 Cable 6feet | [Amazon](https://www.amazon.com/LIANSHU-DC3-5mm-Serial-RS232-Cable/dp/B07G2ZL3SL/) | "MUST" be wired as so: [DB9 Male Pin 5 -> Sleeve, DB9 Male Pin 2 -> Tip, DB9 Male Pin 3 -> Ring](https://github.com/user-attachments/assets/4660ba77-eace-4b76-b169-7ea5f80491f9) |
+| | | or **2x** DB9 Male to 3.5mm Male Serial RS232 Cable 6feet | [Amazon](https://www.amazon.com/LIANSHU-DC3-5mm-Serial-RS232-Cable/dp/B07G2ZL3SL/) | "MUST" be wired as so: [DB9 Male Pin 5 -> Sleeve, DB9 Male Pin 2 -> Tip, DB9 Male Pin 3 -> Ring](/images/7.png) |
  
 
 
@@ -145,7 +153,7 @@ I recommend the [Official Arduino IDE and guide](https://www.arduino.cc/en/Guide
 
 Some Arduino Nano's come with an Old Bootloader and won't Upload unless specified. **If you get errors** when trying to upload, swap to this option as a possible fix.
 
-<img width="400" alt="bootloader" src="https://github.com/user-attachments/assets/c50f4d1c-5804-4972-ad58-a645030be5cb" />
+<img width="400" alt="bootloader" src="/images/9.png" />
 
   -----------
 # How to Use
