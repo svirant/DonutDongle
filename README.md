@@ -15,7 +15,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 | TESmart 16x1 HDMI  | yes, confirmed first hand  |
 | gSCARTsw / gCOMPsw | yes, confirmed by [@niquallis](https://x.com/niquallis), thanks so much for your help! | gSCARTsw tested, but gCOMPsw has the same underlying logic
 | Extron CrossPoint, MVX, etc | if it supports SIS, should work fine, please let me know :) |
-| Otaku Games Scart 10 | coming soon, with required [mod](https://github.com/svirant/RT4k_HD15_serial_control/tree/main/Otaku%20Games%20Scart%20Switch) | modded switch works on its own, but the Donut Dongle would allow you to connect 2x to the RT4K along with up to 2x gscart/gcomp
+| Otaku Games Scart 10 | Jumper moved to "L" and with required [mod](https://github.com/svirant/RT4k_HD15_serial_control/tree/main/Otaku%20Games%20Scart%20Switch) | modded switch works on its own, but the Donut Dongle would allow you to connect 2x to the RT4K along with up to 2x gscart/gcomp
 
 # Connections
   - Connect 4 switches Total
