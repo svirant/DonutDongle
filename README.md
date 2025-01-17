@@ -54,6 +54,22 @@ When using the optional IR Receiver, the IR reception of the RT4K can be been gr
 Let me know what ideas you have, and perhaps I can add them in.
 
 
+# Ordering PCBs
+PCBs for this project:
+ - Donut Dongle (coming soon!)
+ - VGA Adapter (VGAPassthrough or YC2VGA)
+ - (Optional) TESmart_connector
+ - (Optional) gscart_ext_connector (works for gcomp too!)
+ 
+There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://jlcpcb.com) No affiliation. Using the gerber (.zip) files provided, it's easy to place an order. Below are some tips/guidelines:
+- 1.0mm PCB Thickness for gscart_ext_connector.zip
+- 1.6mm for all others
+- For Surface Finish, "HASL(with lead)" is fine
+- 4 Layer PCBs are the same cost as 2 Layer for the VGA Adapters. Because of that, the inner 2 layers are being used as ground planes for better EMI protection. Thanks to https://x.com/zaxour for the idea!
+- "Remove Mark" option is now free on JLCPCB. Use it!
+- All remaining default options should be fine
+- Let me know if you have any questions!
+
 # Assembly
 
 Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/ibom.html))
