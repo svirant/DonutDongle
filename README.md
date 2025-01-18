@@ -53,7 +53,7 @@ When using the optional IR Receiver, the IR reception of the RT4K can be been gr
 
 Let me know what ideas you have, and perhaps I can add them in.
 
-**Note:** For best results, block the RT4K's IR sensor on the front to avoid it from responding twice. I personally have the RT4K sitting on top of my NES and leave the flip top up to block. A peice of electrical tape might also work. Be creative!
+**Note:** For best results, block the RT4K's IR sensor on the front to avoid it from responding twice. I personally have the RT4K sitting on top of my NES and leave the flip top up to block. A piece of electrical tape might also work. Be creative!
 
 
 # Ordering PCBs
