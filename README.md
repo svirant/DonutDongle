@@ -72,7 +72,7 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 
 # Assembly
 
-Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/ibom.html))
+Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/ibom.html)
 
 [<img width="600" src="./images/8.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
 
@@ -106,7 +106,7 @@ Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/
 | 2  | H1,H2 | 2.54mm Pitch Single Row Female 15P Header Strip | [AliExpress](https://www.aliexpress.us/item/3256801232229618.html) | |
 | 1  | | Any 3.5mm / aux / stereo / trs / cable | [AliExpress](https://www.aliexpress.us/item/2255799962255486.html) | |
 | 1  | | usb-c cable for Arduino power & initial programming | [AliExpress](https://www.aliexpress.us/item/3256806983355947.html) | |
-| 1  | | Arduino Nano type c | Support [RetroRGB!](https://amzn.to/4gnHqN4) | |
+| 1  | | Arduino Nano type c | Support [RetroRGB!](https://amzn.to/4gnHqN4) | Make sure the headers and esp the 2x3 pins are not soldered. |
 | 1  | PH1 | 2x3 Pin Double Row 2.54mm Pitch Header | | Use the one that comes with the Arduino Nano |
 | 2  | | 2.54mm Jumper | [AliExpress](https://www.aliexpress.us/item/2255800354403384.html) | You only need 2, but this comes in a pack of 100 :-/ |
 
@@ -173,6 +173,8 @@ Some Arduino Nano's come with an Old Bootloader and won't Upload unless specifie
 
   -----------
 # How to Use
+- Make sure **"Auto Load SVS"** is **"On"** under the RT4K Profiles menu.  The RT4K checks the /profile/SVS subfolder for profiles and need to be named: "S\<input number>_\<user defined>.rt4"  For example, SVS input 2 would look for a profile that is named S2_SNES…rt4.  If there’s more than one profile that fits the pattern, the first match is used.
+
 - The following is from the .ino file itself. Refer to it directly for all Options and comments.
 ```
   /*
