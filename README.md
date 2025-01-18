@@ -106,7 +106,7 @@ Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/
 | 2  | H1,H2 | 2.54mm Pitch Single Row Female 15P Header Strip | [AliExpress](https://www.aliexpress.us/item/3256801232229618.html) | |
 | 1  | | Any 3.5mm / aux / stereo / trs / cable | [AliExpress](https://www.aliexpress.us/item/2255799962255486.html) | |
 | 1  | | usb-c cable for Arduino power & initial programming | [AliExpress](https://www.aliexpress.us/item/3256806983355947.html) | |
-| 1  | | Arduino Nano type c | Support [$${\textsf{\color{black}Retro\color{red}R\color{green}G\color{blue}B\color{black}!}}$$](https://amzn.to/4gnHqN4) | |
+| 1  | | Arduino Nano type c | Support [RetroRGB!](https://amzn.to/4gnHqN4) | |
 | 1  | PH1 | 2x3 Pin Double Row 2.54mm Pitch Header | | Use the one that comes with the Arduino Nano |
 | 2  | | 2.54mm Jumper | [AliExpress](https://www.aliexpress.us/item/2255800354403384.html) | You only need 2, but this comes in a pack of 100 :-/ |
 
