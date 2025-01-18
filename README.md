@@ -53,6 +53,8 @@ When using the optional IR Receiver, the IR reception of the RT4K can be been gr
 
 Let me know what ideas you have, and perhaps I can add them in.
 
+**Note:** For best results, block the RT4K's IR sensor on the front to avoid it from responding twice. I personally have the RT4K sitting on top of my NES and leave the flip top up to block. A peice of electrical tape might also work. Be creative!
+
 
 # Ordering PCBs
 PCBs for this project:
@@ -114,7 +116,7 @@ Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/
 
 | **Qty**    | Switch Type | Part |  Link  |  Notes |
 | ------------- | ------------- |------------- |------------- |------------- |
-| 1 or 2 | **TESmart HDMI** | Any 3.5mm / aux / stereo / trs / Cable | [AliExpress](https://www.aliexpress.us/item/2255799962255486.html) | |
+| 1 or 2 | **TESmart HDMI** | Any 3.5mm / aux / stereo / trs / Cable | [AliExpress](https://www.aliexpress.us/item/2255799962255486.html) | strip 1 end to expose red(Rx)/white(Tx)/gnd wires for the green screw clamp OR use the TESmart_connector shown below|
 | 1 or 2 | **GscartSW/GCompSW** | 2x4 Pin Double Row 2.54 Pitch Angled Box Header | [AliExpress](https://www.aliexpress.us/item/3256805177947724.html?) | (Color: RIGHT ANGLE TYPE, Pins: 10PCS DC3 8Pin), Solders onto EXT port. Or use the gscart_ext_connector shown below.  |
 |1 or 2 | **GscartSW/GCompSW** | 2x4 Pin Female Header Ribbon Cable | [AliExpress](https://www.aliexpress.us/item/3256804576275377.html?) | (Pins: 2x4Pin, Color: Any length) |
 | 1  | **Extron** | 2 Port DB9 to 2x5 Pin Female Header Ribbon Cable | [AliExpress](https://www.aliexpress.us/item/3256807472891897.html) | |
