@@ -57,9 +57,9 @@ Let me know what ideas you have, and perhaps I can add them in.
 # Ordering PCBs
 PCBs for this project:
  - Donut Dongle (coming soon!)
- - VGA Adapter (VGAPassthrough or YC2VGA)
- - (Optional) TESmart_connector
- - (Optional) gscart_ext_connector (works for gcomp too!)
+ - [VGA Adapter](https://github.com/svirant/DonutDongle/tree/main/Adapters) (VGAPassthrough or YC2VGA)
+ - (Optional) [TESmart_connector](https://github.com/svirant/DonutDongle/tree/main/Accessories)
+ - (Optional) [gscart_ext_connector](https://github.com/svirant/DonutDongle/tree/main/Accessories) (works for gcomp too!)
  
 There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://jlcpcb.com) No affiliation. Using the gerber (.zip) files provided, it's easy to place an order. Below are some tips/guidelines:
 - 1.0mm PCB Thickness for gscart_ext_connector.zip
@@ -115,7 +115,7 @@ Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/
 | **Qty**    | Switch Type | Part |  Link  |  Notes |
 | ------------- | ------------- |------------- |------------- |------------- |
 | 1 or 2 | **TESmart HDMI** | Any 3.5mm / aux / stereo / trs / Cable | [AliExpress](https://www.aliexpress.us/item/2255799962255486.html) | |
-| 1 or 2 | **GscartSW/GCompSW** | 2x4 Pin Double Row 2.54 Pitch Angled Box Header | [AliExpress](https://www.aliexpress.us/item/3256805177947724.html?) | (Color: RIGHT ANGLE TYPE, Pins: 10PCS DC3 8Pin), Solders onto EXT port. Or use the pogo-pin connector shown below.  |
+| 1 or 2 | **GscartSW/GCompSW** | 2x4 Pin Double Row 2.54 Pitch Angled Box Header | [AliExpress](https://www.aliexpress.us/item/3256805177947724.html?) | (Color: RIGHT ANGLE TYPE, Pins: 10PCS DC3 8Pin), Solders onto EXT port. Or use the gscart_ext_connector shown below.  |
 |1 or 2 | **GscartSW/GCompSW** | 2x4 Pin Female Header Ribbon Cable | [AliExpress](https://www.aliexpress.us/item/3256804576275377.html?) | (Pins: 2x4Pin, Color: Any length) |
 | 1  | **Extron** | 2 Port DB9 to 2x5 Pin Female Header Ribbon Cable | [AliExpress](https://www.aliexpress.us/item/3256807472891897.html) | |
 | | | or **2x** DB9 Male to 3.5mm Male Serial RS232 Cable 6feet | [Amazon](https://www.amazon.com/LIANSHU-DC3-5mm-Serial-RS232-Cable/dp/B07G2ZL3SL/) | "MUST" be wired as so: [DB9 Male Pin 5 -> Sleeve, DB9 Male Pin 2 -> Tip, DB9 Male Pin 3 -> Ring](/images/7.png) |
@@ -169,7 +169,7 @@ I recommend the [Official Arduino IDE and guide](https://www.arduino.cc/en/Guide
 
 Some Arduino Nano's come with an Old Bootloader and won't Upload unless specified. **If you get errors** when trying to upload, swap to this option as a possible fix.
 
-<img width="400" alt="bootloader" src="./images/9.png" />
+<img width="600" alt="bootloader" src="./images/9.png" />
 
   -----------
 # How to Use
