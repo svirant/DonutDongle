@@ -244,7 +244,7 @@ String einput2; // used to store first 4 chars of Extron input for 2nd Extron
 String previnput2 = "discon"; // used to keep track of previous input
 String eoutput2; // used to store first 2 chars of Extron output for 2nd Extron
 
-SoftwareSerial extronSerial = SoftwareSerial(rxPin,txPin); // setup a software serial port for listening to Extron sw1 / alt sw1 
+SoftwareSerial extronSerial = SoftwareSerial(rxPin,txPin); // setup a software serial port for listening to Extron sw1 / alt sw1
 AltSoftSerial extronSerial2; // setup yet another serial port for listening to Extron sw2 / alt sw2. hardcoded to pins D8 / D9
 
 // IR Global variables
@@ -499,15 +499,24 @@ void readExtron1(){
 
     // for Otaku Games Scart Switch
     if(ecap.substring(0,6) == "remote"){
-      if(ecap == "remote prof10"){
+      if(ecap.substring(0,13) == "remote prof10"){
           if((RT5Xir == 1) && !DP0){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x25,2); // RT4K profile 10
 
           if(SVS==0) Serial.println(F("remote prof10\r"));
           else sendSVS(10);
       }
-      else if(ecap == "remote prof12"){
-          delay(1); // do nothing
+      else if(ecap.substring(0,13) == "remote prof12"){
+        if(DP0){
+          if(RT5Xir == 1){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
+          if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
+          if(SVS == 0){
+            Serial.println(F("remote prof12\r"));
+          }
+          else if(SVS == 1){
+            sendSVS(0);
+          }
+        }
       }
       else if(ecap.substring(0,12) == "remote prof1"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
@@ -624,8 +633,19 @@ void readExtron2(){
 
     // for Otaku Games Scart Switch
     if(ecap2.substring(0,6) == "remote"){
-      if(ecap2 == "remote prof10") sendSVS(110);
-      else if(ecap2 == "remote prof12") delay(1); // do nothing
+      if(ecap2.substring(0,13) == "remote prof10") sendSVS(110);
+      else if(ecap2.substring(0,13) == "remote prof12"){
+        if(DP0){
+          if(RT5Xir == 1){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
+          if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
+          if(SVS == 0){
+            Serial.println(F("remote prof12\r"));
+          }
+          else if(SVS == 1){
+            sendSVS(0);
+          }
+        }
+      }
       else if(ecap2.substring(0,12) == "remote prof1") sendSVS(101);
       else if(ecap2.substring(0,12) == "remote prof2") sendSVS(102);
       else if(ecap2.substring(0,12) == "remote prof3") sendSVS(103);
@@ -653,6 +673,19 @@ void readGscart1(){ // readGscart1
 // Pin 8: N/C
 //
 // Reference for no active input state: https://shmups.system11.org/viewtopic.php?t=50851&start=4976
+//
+// When no input is active, a 50% off/on cycle can be seen for each pin as it cycles through the inputs. Pin5 the fastest, Pin7 the slowest. If we can monitor each
+// pin then we can detect when there is no active input.
+//
+//        Pin7 Pin6 Pin5
+// Port1  0     0     0
+// Port2  0     0     1
+// Port3  0     1     0
+// Port4  0     1     1 
+// Port5  1     0     0
+// Port6  1     0     1
+// Port7  1     1     0
+// Port8  1     1     1
 
 uint8_t fpdc = 0; // 1 = 50% duty cycle was detected / all ports are in-active
 uint8_t bit[3] = {0,0,0};
@@ -792,6 +825,20 @@ void readGscart2(){
 // Pin 8: N/C
 //
 // Reference for no active input state: https://shmups.system11.org/viewtopic.php?t=50851&start=4976
+//
+// When no input is active, a 50% off/on cycle can be seen for each pin as it cycles through the inputs. Pin5 the fastest, Pin7 the slowest. If we can monitor each
+// pin then we can detect when there is no active input.
+//
+//        Pin7 Pin6 Pin5
+// Port1  0     0     0
+// Port2  0     0     1
+// Port3  0     1     0
+// Port4  0     1     1 
+// Port5  1     0     0
+// Port6  1     0     1
+// Port7  1     1     0
+// Port8  1     1     1
+
 
 uint8_t fpdc = 0;
 uint8_t bit[3] = {0,0,0};
@@ -924,14 +971,6 @@ void irRec(){
     ir_recv_command = TinyIRReceiverData.Command;
     ir_recv_address = TinyIRReceiverData.Address;
         
-    // printTinyReceiverResultMinimal(&Serial);
-    // Serial.print("Address=0x");Serial.print(ir_recv_address,HEX);
-    // Serial.print(" Command=0x");Serial.println(ir_recv_command,HEX);
-    // Serial.print(F("Address="));
-    // Serial.print(ir_recv_address);
-    // Serial.print(F(" Command="));
-    // Serial.println(ir_recv_command);
-
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && extrabuttonprof == 2){
       if(ir_recv_command == 11){ // profile button 1
         svsbutton += 1;
