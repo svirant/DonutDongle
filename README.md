@@ -76,10 +76,7 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 
 Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/ibom.html)
 
-[<img width="600" src="./images/8.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
-
-
-
+[<img width="400" src="./images/8.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
 
 
 
@@ -92,11 +89,10 @@ Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/
 
 | **Qty**    | Designation | Part |  Link  |  Notes |
 | ------------- | ------------- |------------- |------------- |------------- |
-| 4  | C1-C4 | 0.1 uf / 100nf 0805 Capacitor| [Digikey](https://www.digikey.com/en/products/detail/yageo/CC0805KRX7R9BB104/302874?s=N4IgTCBcDaIMwEYEFokBYAMrkDkAiIAugL5A) | |
-| 1  | R1 | 30 Ohm 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06J300V/525250) | |
-| 1  | R2 | 1K Ohm 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06J102V/525197) | |
-| 7  | R3-R9 | 10K Ohm 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-6ENF1002V/111474) | |
-| 1  | R10 | 20k Ohm 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-6ENF2002V/111532) | |
+| 4  | C1-C4 | 0.1 uf / 100nf 50V X7R 0805 Capacitor| [Digikey](https://www.digikey.com/en/products/detail/yageo/CC0805KRX7R9BB104/302874?s=N4IgTCBcDaIMwEYEFokBYAMrkDkAiIAugL5A) | |
+| 1  | R1 | 30 OHM 1% 1/2W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06F30R0V/9811718) | |
+| 1  | R2 | 1K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/yageo/RC0805FR-071KL/727444) | |
+| 8  | R3-R10 | 10K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-6ENF1002V/111474) | |
 | 1  | Q1 | 2N3904 NPN Transistor | [AliExpress](https://www.aliexpress.us/item/3256806623522970.html) | |
 | 1  | U1 | MAX3232 SOP-16 RS-232 Interface IC | [AliExpress](https://www.aliexpress.us/item/3256807314260762.html) | |
 | 1  | P1 | PJ-307 3.5mm Stereo Jack | [AliExpress](https://www.aliexpress.us/item/2251832712518602.html) | |
