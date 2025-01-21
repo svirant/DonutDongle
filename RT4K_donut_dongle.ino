@@ -210,6 +210,8 @@ uint8_t fpdccount = 0; // number of times a 50% duty cycle period has been detec
 uint8_t fpdccount2 = 0;
 uint8_t allgscartoff = 2; // 0 = at least 1 port is active, 1 = no ports are active, 2 = disconnected or not used yet
 uint8_t allgscartoff2 = 2;
+uint8_t otakuoff = 2; // 0 = at least 1 port is active, 1 = no ports are active, 2 = disconnected or not used yet
+uint8_t otakuoff2 = 2;
 uint8_t samcc = 0; // ADC sample cycle counter
 uint8_t samcc2 = 0;
 uint8_t highcount[3] = {0,0,0}; // number of high samples recorded for bit0, bit1, bit2
@@ -499,6 +501,7 @@ void readExtron1(){
 
     // for Otaku Games Scart Switch
     if(ecap.substring(0,6) == "remote"){
+      otakuoff = 0;
       if(ecap.substring(0,13) == "remote prof10"){
           if((RT5Xir == 1) && !DP0){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x25,2); // RT4K profile 10
@@ -507,7 +510,9 @@ void readExtron1(){
           else sendSVS(10);
       }
       else if(ecap.substring(0,13) == "remote prof12"){
-        if(DP0){
+        otakuoff = 1;
+        if(DP0 && otakuoff2 && allgscartoff && allgscartoff2 && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") && // cross-checks gscart, otaku2, Extron status
+                            (previnput2 == "0" || previnput2 == "discon" || previnput2 == "In0 " || previnput2 == "In00"))){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
           if(SVS == 0){
@@ -581,7 +586,6 @@ void readExtron1(){
           if(SVS==0) Serial.println(F("remote prof9\r"));
           else sendSVS(9);
       }
-
     }
 
 } // end of readExtron1()
@@ -633,9 +637,12 @@ void readExtron2(){
 
     // for Otaku Games Scart Switch
     if(ecap2.substring(0,6) == "remote"){
+      otakuoff2 = 0;
       if(ecap2.substring(0,13) == "remote prof10") sendSVS(110);
       else if(ecap2.substring(0,13) == "remote prof12"){
-        if(DP0){
+        otakuoff2 = 1;
+        if(DP0 && otakuoff && allgscartoff && allgscartoff2 && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") && // cross-checks gscart, otaku, Extron status
+                            (previnput2 == "0" || previnput2 == "discon" || previnput2 == "In0 " || previnput2 == "In00"))){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
           if(SVS == 0){
@@ -783,7 +790,7 @@ if((fpdccount == (fpdccountmax - 1)) && (fpdc != fpdcprev) && (samcc == samsize)
   memset(bitprev,0,sizeof(bitprev));
   fpdcprev = fpdc;
 
-  if(DP0 && allgscartoff2 && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") && // cross-checks Extron status
+  if(DP0 && otakuoff && otakuoff2 && allgscartoff2 && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") && // cross-checks otaku, gscart2, Extron status
                             (previnput2 == "0" || previnput2 == "discon" || previnput2 == "In0 " || previnput2 == "In00"))){
     if(SVS==1)sendSVS(0);
     else if(SVS==2)Serial.println(F("remote prof12\r"));
@@ -811,7 +818,7 @@ else{
 
 } // end readGscart1()
 
-void readGscart2(){
+void readGscart2(){ // readGscart2
 
 // https://shmups.system11.org/viewtopic.php?p=1307320#p1307320
 // gscartsw_lite EXT pinout:
@@ -910,7 +917,7 @@ if((fpdccount2 == (fpdccountmax - 1)) && (fpdc != fpdcprev2) && (samcc2 == samsi
   memset(bitprev2,0,sizeof(bitprev2));
   fpdcprev2 = fpdc;
   
-  if(DP0 && allgscartoff && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") &&  // cross-checks Extron status
+  if(DP0 && allgscartoff && otakuoff && otakuoff2 && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") &&  // cross-checks gscart, otaku, Extron status
                             (previnput2 == "0" || previnput2 == "discon" || previnput2 == "In0 " || previnput2 == "In00"))){
     if(SVS==1)sendSVS(0);
     else if(SVS==2)Serial.println(F("remote prof12\r"));
@@ -940,13 +947,13 @@ else{
 
 
 void all_extron_inactive_ports_check(){
-
     // when both Extron switches match In0 or In00 (no active ports), both gscart/gcomp are disconnected or all ports in-active, a default profile can be loaded if DP0 is enabled
+    // cross-checks gscart and otaku as well
     if(((previnput == "In0 " || previnput == "In00") && (previnput2 == "In0 " || previnput2 == "In00" || previnput2 == "discon")) && DP0 
-         && allgscartoff && allgscartoff2 && voutMatrix[eoutput.toInt()] && (previnput2 == "discon" || voutMatrix[eoutput2.toInt()+32])){
+        && otakuoff && otakuoff2 && allgscartoff && allgscartoff2 && voutMatrix[eoutput.toInt()] && (previnput2 == "discon" || voutMatrix[eoutput2.toInt()+32])){
+
       if(RT5Xir == 1){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
       if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
-
 
       if(SVS==0)Serial.println(F("remote prof12\r"));
       else if(SVS==1)sendSVS(0);
