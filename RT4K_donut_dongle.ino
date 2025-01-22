@@ -287,8 +287,6 @@ readExtron1(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt s
 
 readExtron2(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt sw2" port
 
-all_extron_inactive_ports_check();
-
 } /////////////////////////////////// end of void loop ////////////////////////////////////
 
 void readExtron1(){
@@ -404,6 +402,25 @@ void readExtron1(){
       }
 
       previnput = einput;
+
+      // Exton DP0
+      // when both Extron switches match In0 or In00 (no active ports), both gscart/gcomp/otaku are disconnected or all ports in-active, a default profile can be loaded if DP0 is enabled
+      if(((einput == "In0 " || einput == "In00") && (previnput2 == "In0 " || previnput2 == "In00" || previnput2 == "discon")) && DP0 
+        && otakuoff && otakuoff2 && allgscartoff && allgscartoff2 && voutMatrix[eoutput.toInt()] && (previnput2 == "discon" || voutMatrix[eoutput2.toInt()+32])){
+
+      if(RT5Xir == 1){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
+      if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
+
+      if(SVS==0)Serial.println(F("remote prof12\r"));
+      else if(SVS==1)sendSVS(0);
+
+      previnput = "0";
+      if(previnput2 != "discon")previnput2 = "0";
+      
+      } // end of Extron DP0
+
+      if(previnput == "0" && previnput2.substring(0,2) == "In")previnput = "In00";  // changes previnput "0" state to "In00" when there is a newly active input on the other switch
+      if(previnput2 == "0" && previnput.substring(0,2) == "In")previnput2 = "In00";
 
     }
 
@@ -622,7 +639,27 @@ void readExtron2(){
           sendSVS(einput2.substring(2,4).toInt()+100);
       }
 
-        previnput2 = einput2;
+      previnput2 = einput2;
+      
+      // Extron2 DP0
+      // when both Extron switches match In0 or In00 (no active ports), both gscart/gcomp/otaku are disconnected or all ports in-active, a default profile can be loaded if DP0 is enabled
+      if(((einput2 == "In0 " || einput2 == "In00") && (previnput == "In0 " || previnput == "In00" || previnput == "discon")) && DP0 
+        && otakuoff && otakuoff2 && allgscartoff && allgscartoff2 && voutMatrix[eoutput2.toInt()+32] && (previnput == "discon" || voutMatrix[eoutput.toInt()])){
+
+      if(RT5Xir == 1){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
+      if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
+
+      if(SVS==0)Serial.println(F("remote prof12\r"));
+      else if(SVS==1)sendSVS(0);
+
+      previnput2 = "0";
+      if(previnput != "discon")previnput = "0";
+      
+      } // end of Extron2 DP0
+
+      if(previnput == "0" && previnput2.substring(0,2) == "In")previnput = "In00";  // changes previnput "0" state to "In00" when there is a newly active input on the other switch
+      if(previnput2 == "0" && previnput.substring(0,2) == "In")previnput2 = "In00";
+
     }
 
     // for TESmart HDMI switch on Extron sw2 Port
@@ -945,28 +982,6 @@ else{
 
 } // end readGscart2()
 
-
-void all_extron_inactive_ports_check(){
-    // when both Extron switches match In0 or In00 (no active ports), both gscart/gcomp are disconnected or all ports in-active, a default profile can be loaded if DP0 is enabled
-    // cross-checks gscart and otaku as well
-    if(((previnput == "In0 " || previnput == "In00") && (previnput2 == "In0 " || previnput2 == "In00" || previnput2 == "discon")) && DP0 
-        && otakuoff && otakuoff2 && allgscartoff && allgscartoff2 && voutMatrix[eoutput.toInt()] && (previnput2 == "discon" || voutMatrix[eoutput2.toInt()+32])){
-
-      if(RT5Xir == 1){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
-      if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
-
-      if(SVS==0)Serial.println(F("remote prof12\r"));
-      else if(SVS==1)sendSVS(0);
-
-      previnput = "0";
-      if(previnput2 != "discon")previnput2 = "0";
-      
-    }
-
-    if(previnput == "0" && previnput2.substring(0,2) == "In")previnput = "In00";  // changes previnput "0" state to "In00" when there is a newly active input on the other switch
-    if(previnput2 == "0" && previnput.substring(0,2) == "In")previnput2 = "In00";
-
-} // end of all_inactive_ports_check
 
 void irRec(){
 
