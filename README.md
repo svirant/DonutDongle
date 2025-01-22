@@ -13,10 +13,13 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 | ------------- | ------------- |------------- |
 | Extron RGBHV sw6  | yes, confirmed first hand  | 
 | TESmart 16x1 HDMI  | yes, confirmed first hand  |
-| gSCARTsw / gCOMPsw | yes, confirmed by [@niquallis](https://x.com/niquallis), thanks so much for your help! | gSCARTsw tested, but gCOMPsw has the same underlying logic
+| gSCARTsw / gCOMPsw | yes, confirmed by [@niquallis](https://x.com/niquallis), thanks so much for your help! | gSCARTsw tested, but gCOMPsw has the same underlying logic. **PLEASE read section below regarding protection resistors**
 | Extron CrossPoint, MVX, etc | if it supports SIS, should work fine, please let me know :) |
 | Otaku Games Scart 10 | Jumper moved to "L" and with required [mod](https://github.com/svirant/RT4k_HD15_serial_control/tree/main/Otaku%20Games%20Scart%20Switch) | modded switch works on its own, but the Donut Dongle would allow you to connect 2x to the RT4K along with up to 2x gscart/gcomp
+# gSCARTsw / gCOMPsw
+Supports vers 3.x to latest. These versions include the EXT port which is required to query port status. **Pre 5.x versions however DO NOT have EXT port protection resistors!** To remedy this, there are 6x spots on the back of the DD pcb where you can cut a trace and place them. This is to help protect the gscart/gcomp AND the Arduino from back-powering and general static discharge damage. **10K ohm 0805** will fit nicely and is what's used on 5.x versions.<br />
 
+Reference: https://shmups.system11.org/viewtopic.php?p=1453879#p1453879
 # Connections
   - Connect 4 switches Total
     - 2x gscart/gcomp
@@ -92,7 +95,7 @@ Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/
 | 4  | C1-C4 | 0.1 uf / 100nf 50V X7R 0805 Capacitor| [Digikey](https://www.digikey.com/en/products/detail/yageo/CC0805KRX7R9BB104/302874?s=N4IgTCBcDaIMwEYEFokBYAMrkDkAiIAugL5A) | |
 | 1  | R1 | 30 OHM 1% 1/2W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06F30R0V/9811718) | |
 | 1  | R2 | 1K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/yageo/RC0805FR-071KL/727444) | |
-| 8  | R3-R10 | 10K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-6ENF1002V/111474) | |
+| 8 - 14  | R3-R10 | 10K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-6ENF1002V/111474) | pre 5.x gscart/gcomp need 6 addtional on back|
 | 1  | Q1 | 2N3904 NPN Transistor | [AliExpress](https://www.aliexpress.us/item/3256806623522970.html) | |
 | 1  | U1 | MAX3232 SOP-16 RS-232 Interface IC | [AliExpress](https://www.aliexpress.us/item/3256807314260762.html) | |
 | 1  | PH1 | PJ-307 3.5mm Stereo Jack | [AliExpress](https://www.aliexpress.us/item/2251832712518602.html) | |
