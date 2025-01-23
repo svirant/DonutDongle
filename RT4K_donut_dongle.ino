@@ -182,6 +182,16 @@ uint8_t RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
                      //
                      // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-12 for first 4 inputs on second gscart)
 
+uint8_t MTVIKIir = 0;    // Must have IR "Receiver" connected to the Donut Dongle for option 1 & 2.
+                     // 0 = disables IR Receiver -> Serial Control for MT-VIKI 8 Port HDMI switch
+                     //
+                     // 1 = MT-VIKI 8 Port HDMI switch connected to "Extron sw1"
+                     //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the MT-VIKI Input over Serial.
+                     //     Sends auxprof SVS profiles listed below.
+                     //
+                     // 2 = MT-VIKI 8 Port HDMI switch connected to "Extron sw2"
+                     //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the MT-VIKI Input over Serial.
+                     //     Sends auxprof SVS profiles listed below. You can change them below to 101 - 108 to prevent SVS profile conflicts if needed.
 
 uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons. 
                           // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
@@ -256,6 +266,14 @@ uint8_t extrabuttonprof = 0; // used to keep track of AUX8 button presses for ad
 String svsbutton; // used to store 3 digit SVS profile when AUX8 is double pressed
 uint8_t nument = 0; // used to keep track of how many digits have been entered for 3 digit SVS profile
 IRsend irsend;
+byte viki1[4] = {0xA5,0x5A,0x00,0xCC};
+byte viki2[4] = {0xA5,0x5A,0x01,0xCC};
+byte viki3[4] = {0xA5,0x5A,0x02,0xCC};
+byte viki4[4] = {0xA5,0x5A,0x03,0xCC};
+byte viki5[4] = {0xA5,0x5A,0x04,0xCC};
+byte viki6[4] = {0xA5,0x5A,0x05,0xCC};
+byte viki7[4] = {0xA5,0x5A,0x06,0xCC};
+byte viki8[4] = {0xA5,0x5A,0x07,0xCC};
 
 
 void setup(){
@@ -403,7 +421,7 @@ void readExtron1(){
       else if(einput.substring(0,3) == "Rpr"){
         sendSVS(einput.substring(3,5));
       }
-      else if(einput != "In0 " && einput != "In00" && einput2 != "In0 " && einput2 != "In00"){ // for inputs 13-99 (SVS only)
+      else if(einput != "In0 " && einput != "In00"){ // for inputs 13-99 (SVS only)
         sendSVS(einput.substring(2,4));
       }
 
@@ -430,58 +448,58 @@ void readExtron1(){
 
     }
 
-    // for TESmart HDMI switch on alt sw1 Port
-    if(ecapbytes[4] == 17){
-      if(ecapbytes[6] == 22){
+    // for TESmart / MT-VIKI HDMI switch on Extron sw1 / alt sw1
+    if(ecapbytes[4] == 17 || ecapbytes[4] == 95){
+      if(ecapbytes[6] == 22 || ecapbytes[11] == 48){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
 
         if(SVS==0)Serial.println(F("remote prof1\r"));
         else sendSVS(1);
       }
-      else if(ecapbytes[6] == 23){
+      else if(ecapbytes[6] == 23 || ecapbytes[11] == 49){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x07,2); // RT4K profile 2
 
         if(SVS==0)Serial.println(F("remote prof2\r"));
         else sendSVS(2);
       }
-      else if(ecapbytes[6] == 24){
+      else if(ecapbytes[6] == 24 || ecapbytes[11] == 50){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x03,2); // RT4K profile 3
 
         if(SVS==0)Serial.println(F("remote prof3\r"));
         else sendSVS(3);
       }
-      else if(ecapbytes[6] == 25){
+      else if(ecapbytes[6] == 25 || ecapbytes[11] == 51){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x0A,2); // RT4K profile 4
 
         if(SVS==0)Serial.println(F("remote prof4\r"));
         else sendSVS(4);
       }
-      else if(ecapbytes[6] == 26){
+      else if(ecapbytes[6] == 26 || ecapbytes[11] == 52){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x06,2); // RT4K profile 5
 
         if(SVS==0)Serial.println(F("remote prof5\r"));
         else sendSVS(5);
       }
-      else if(ecapbytes[6] == 27){
+      else if(ecapbytes[6] == 27 || ecapbytes[11] == 53){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x02,2); // RT4K profile 6
 
         if(SVS==0)Serial.println(F("remote prof6\r"));
         else sendSVS(6);
       }
-      else if(ecapbytes[6] == 28){
+      else if(ecapbytes[6] == 28 || ecapbytes[11] == 54){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x09,2); // RT4K profile 7
 
         if(SVS==0)Serial.println(F("remote prof7\r"));
         else sendSVS(7);
       }
-      else if(ecapbytes[6] == 29){
+      else if(ecapbytes[6] == 29 || ecapbytes[11] == 55){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x05,2); // RT4K profile 8
 
@@ -674,11 +692,12 @@ void readExtron2(){
 
     }
 
-    // for TESmart HDMI switch on Extron sw2 Port
-    if(ecapbytes2[4] == 17){
-      if(ecapbytes2[6] > 21 && ecapbytes2[6] < 38){
-        sendSVS(ecapbytes2[6] + 79);
-      }
+    // for TESmart / MT-VIKI HDMI switch on Extron sw2 Port
+    if(ecapbytes2[4] == 17 && ecapbytes2[6] > 21 && ecapbytes2[6] < 38){ // TESmart
+      sendSVS(ecapbytes2[6] + 79);
+    }
+    else if(ecapbytes2[4] == 95 && ecapbytes2[11] > 47 && ecapbytes2[11] < 56){ // MT-VIKI 
+      sendSVS(ecapbytes2[11] + 53);
     }
 
     // set ecapbytes2 to 0 for next read
@@ -1066,42 +1085,58 @@ void irRec(){
 
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && extrabuttonprof == 1){ // if AUX8 was pressed and a profile button is pressed next,
       if(ir_recv_command == 11){ // profile button 1                                                         // load "SVS" profiles 1 - 12 (profile button 1 - 12).
-        sendSVS(auxprof[0]);                                                                               // Can be changed to "ANY" SVS profile in the OPTIONS section
+        if(MTVIKIir == 0)sendSVS(auxprof[0]);                                                               // Can be changed to "ANY" SVS profile in the OPTIONS section
+        if(MTVIKIir == 1){extronSerial.write(viki1,4);sendSVS(auxprof[0]);}
+        if(MTVIKIir == 2){extronSerial2.write(viki1,4);sendSVS(auxprof[0]);}                                                                            
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 7){ // profile button 2
-        sendSVS(auxprof[1]);
+        if(MTVIKIir == 0)sendSVS(auxprof[1]);
+        if(MTVIKIir == 1){extronSerial.write(viki2,4);sendSVS(auxprof[1]);}
+        if(MTVIKIir == 2){extronSerial2.write(viki2,4);sendSVS(auxprof[1]);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 3){ // profile button 3
-        sendSVS(auxprof[2]);
+      if(MTVIKIir == 0)sendSVS(auxprof[2]);
+        if(MTVIKIir == 1){extronSerial.write(viki3,4);sendSVS(auxprof[2]);}
+        if(MTVIKIir == 2){extronSerial2.write(viki3,4);sendSVS(auxprof[2]);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 10){ // profile button 4
-        sendSVS(auxprof[3]);
+        if(MTVIKIir == 0)sendSVS(auxprof[3]);
+        if(MTVIKIir == 1){extronSerial.write(viki4,4);sendSVS(auxprof[3]);}
+        if(MTVIKIir == 2){extronSerial2.write(viki4,4);sendSVS(auxprof[3]);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 6){ // profile button 5
-        sendSVS(auxprof[4]);
+        if(MTVIKIir == 0)sendSVS(auxprof[4]);
+        if(MTVIKIir == 1){extronSerial.write(viki5,4);sendSVS(auxprof[4]);}
+        if(MTVIKIir == 2){extronSerial2.write(viki5,4);sendSVS(auxprof[4]);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 2){ // profile button 6
-        sendSVS(auxprof[5]);
+        if(MTVIKIir == 0)sendSVS(auxprof[5]);
+        if(MTVIKIir == 1){extronSerial.write(viki6,4);sendSVS(auxprof[5]);}
+        if(MTVIKIir == 2){extronSerial2.write(viki6,4);sendSVS(auxprof[5]);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 9){ // profile button 7
-        sendSVS(auxprof[6]);
+        if(MTVIKIir == 0)sendSVS(auxprof[6]);
+        if(MTVIKIir == 1){extronSerial.write(viki7,4);sendSVS(auxprof[6]);}
+        if(MTVIKIir == 2){extronSerial2.write(viki7,4);sendSVS(auxprof[6]);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 5){ // profile button 8
-        sendSVS(auxprof[7]);
+        if(MTVIKIir == 0)sendSVS(auxprof[7]);
+        if(MTVIKIir == 1){extronSerial.write(viki8,4);sendSVS(auxprof[7]);}
+        if(MTVIKIir == 2){extronSerial2.write(viki8,4);sendSVS(auxprof[7]);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
