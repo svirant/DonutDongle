@@ -11,6 +11,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 (current list, but not limited to)
 | **Switch**    | Supported | Notes |
 | ------------- | ------------- |------------- |
+| Extron DXP 88 | yes, confirmed first hand | Preset 1 is Profile/SVS 1. On Extron sw2 port Preset 1 is SVS 101, etc|
 | Extron RGBHV sw6  | yes, confirmed first hand  | 
 | TESmart 16x1 HDMI  | yes, confirmed first hand  |
 | gSCARTsw / gCOMPsw | **version 5.x** confirmed by [@niquallis](https://x.com/niquallis), thanks so much for your help! | gSCARTsw tested, but gCOMPsw has the same underlying logic.
