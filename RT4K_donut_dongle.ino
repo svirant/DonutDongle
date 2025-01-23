@@ -272,20 +272,19 @@ void setup(){
 
 } // end of setup
 
-
 void loop(){
 
-// below are a list of functions that loop over and over to read in port changes and other misc tasks. you can disable them by commenting them out
+  // below are a list of functions that loop over and over to read in port changes and other misc tasks. you can disable them by commenting them out
 
-irRec(); // intercepts the remote's button presses and relays them through the Serial interface giving a much more responsive experience
+  irRec(); // intercepts the remote's button presses and relays them through the Serial interface giving a much more responsive experience
 
-readGscart1();
+  readGscart1();
 
-readGscart2();
+  readGscart2();
 
-readExtron1(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt sw1" port
+  readExtron1(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt sw1" port
 
-readExtron2(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt sw2" port
+  readExtron2(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt sw2" port
 
 } /////////////////////////////////// end of void loop ////////////////////////////////////
 
@@ -307,6 +306,10 @@ void readExtron1(){
       einput = ecap.substring(4,8);
       eoutput = "00";
     }
+    else if(ecap.substring(0,3) == "Rpr"){
+      einput = ecap.substring(0,5);
+      eoutput = "00";
+    }
     else{                             // less complex switches only report input status, no output status
       einput = ecap.substring(0,4);
       eoutput = "00";
@@ -314,88 +317,91 @@ void readExtron1(){
 
 
     // for Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMaxtrix
-    if(einput.substring(0,2) == "In" && voutMatrix[eoutput.toInt()]){
-      if(einput == "In1 " || einput == "In01"){
+    if((einput.substring(0,2) == "In" && voutMatrix[eoutput.toInt()]) || (einput.substring(0,3) == "Rpr")){
+      if(einput == "In1 " || einput == "In01" || einput == "Rpr01"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
 
         if(SVS==0)Serial.println(F("remote prof1\r"));
         else sendSVS(1);
       }
-      else if(einput == "In2 " || einput == "In02"){
+      else if(einput == "In2 " || einput == "In02" || einput == "Rpr02"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x07,2); // RT4K profile 2
 
         if(SVS==0)Serial.println(F("remote prof2\r"));
         else sendSVS(2);
       }
-      else if(einput == "In3 " || einput == "In03"){
+      else if(einput == "In3 " || einput == "In03" || einput == "Rpr03"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x03,2); // RT4K profile 3
 
         if(SVS==0)Serial.println(F("remote prof3\r"));
         else sendSVS(3);
       }
-      else if(einput == "In4 " || einput == "In04"){
+      else if(einput == "In4 " || einput == "In04" || einput == "Rpr04"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x0A,2); // RT4K profile 4
 
         if(SVS==0)Serial.println(F("remote prof4\r"));
         else sendSVS(4);
       }
-      else if(einput == "In5 " || einput == "In05"){
+      else if(einput == "In5 " || einput == "In05" || einput == "Rpr05"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x06,2); // RT4K profile 5
 
         if(SVS==0)Serial.println(F("remote prof5\r"));
         else sendSVS(5);
       }
-      else if(einput == "In6 " || einput == "In06"){
+      else if(einput == "In6 " || einput == "In06" || einput == "Rpr06"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x02,2); // RT4K profile 6
 
         if(SVS==0)Serial.println(F("remote prof6\r"));
         else sendSVS(6);
       }
-      else if(einput == "In7 " || einput == "In07"){
+      else if(einput == "In7 " || einput == "In07" || einput == "Rpr07"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x09,2); // RT4K profile 7
 
         if(SVS==0)Serial.println(F("remote prof7\r"));
         else sendSVS(7);
       }
-      else if(einput == "In8 " || einput == "In08"){
+      else if(einput == "In8 " || einput == "In08" || einput == "Rpr08"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x05,2); // RT4K profile 8
 
         if(SVS==0)Serial.println(F("remote prof8\r"));
         else sendSVS(8);
       }
-      else if(einput == "In9 " || einput == "In09"){
+      else if(einput == "In9 " || einput == "In09" || einput == "Rpr09"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x01,2); // RT4K profile 9
 
         if(SVS==0)Serial.println(F("remote prof9\r"));
         else sendSVS(9);
       }
-      else if(einput == "In10"){
+      else if(einput == "In10" || einput == "Rpr10"){
         if((RT5Xir == 1) && !DP0){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x25,2); // RT4K profile 10
 
         if(SVS==0)Serial.println(F("remote prof10\r"));
         else sendSVS(10);
       }
-      else if(einput == "In11"){
+      else if(einput == "In11" || einput == "Rpr11"){
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x26,2); // RT4K profile 11
 
         if(SVS==0)Serial.println(F("remote prof11\r"));
         else sendSVS(11);
       }
-      else if(einput == "In12"){
+      else if(einput == "In12" || einput == "Rpr12"){
         if((RT4Kir == 1) && !DP0)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
 
         if((SVS==0 && !DP0))Serial.println(F("remote prof12\r")); // okay to use this profile if DP0 is set to false
         else sendSVS(12);
+      }
+      else if(einput.substring(0,3) == "Rpr"){
+        sendSVS(einput.substring(3,5));
       }
       else if(einput != "In0 " && einput != "In00" && einput2 != "In0 " && einput2 != "In00"){ // for inputs 13-99 (SVS only)
         sendSVS(einput.substring(2,4));
@@ -607,7 +613,6 @@ void readExtron1(){
 
 } // end of readExtron1()
 
-
 void readExtron2(){
     
     // listens to the Extron sw2 Port for changes
@@ -624,6 +629,10 @@ void readExtron2(){
       einput2 = ecap2.substring(4,8);
       eoutput2 = "00";
     }
+    else if(ecap2.substring(0,3) == "Rpr"){
+      einput2 = ecap2.substring(0,5);
+      eoutput2 = "00";
+    }
     else{                              // less complex switches only report input status, no output status
       einput2 = ecap2.substring(0,4);
       eoutput2 = "00";
@@ -631,8 +640,11 @@ void readExtron2(){
 
 
     // For Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMaxtrix
-    if(einput2.substring(0,2) == "In" && voutMatrix[eoutput2.toInt()+32]){
-      if(einput2 != "In0 " && einput2 != "In00"){ // much easier method for switch 2 since ALL inputs will respond with SVS commands regardless of SVS option above
+    if((einput2.substring(0,2) == "In" && voutMatrix[eoutput2.toInt()+32]) || (einput2.substring(0,3) == "Rpr")){
+      if(einput2.substring(0,3) == "Rpr"){
+        sendSVS(einput2.substring(3,5).toInt()+100);
+      }
+      else if(einput2 != "In0 " && einput2 != "In00"){ // much easier method for switch 2 since ALL inputs will respond with SVS commands regardless of SVS option above
         if(einput2.substring(3,4) == " ") 
           sendSVS(einput2.substring(2,3).toInt()+100);
         else 
@@ -703,285 +715,284 @@ void readExtron2(){
 
 }// end of readExtron2()
 
-void readGscart1(){ // readGscart1
+void readGscart1(){
 
-// https://shmups.system11.org/viewtopic.php?p=1307320#p1307320
-// gscartsw_lite EXT pinout:
-// Pin 1: GND
-// Pin 2: Override
-// Pin 3: N/C
-// Pin 4: +5V
-// Pin 5: IN_BIT0
-// Pin 6: IN_BIT1
-// Pin 7: IN_BIT2
-// Pin 8: N/C
-//
-// Reference for no active input state: https://shmups.system11.org/viewtopic.php?t=50851&start=4976
-//
-// When no input is active, a 50% off/on cycle can be seen for each pin as it cycles through the inputs. Pin5 the fastest, Pin7 the slowest. If we can monitor each
-// pin then we can detect when there is no active input.
-//
-//        Pin7 Pin6 Pin5
-// Port1  0     0     0
-// Port2  0     0     1
-// Port3  0     1     0
-// Port4  0     1     1 
-// Port5  1     0     0
-// Port6  1     0     1
-// Port7  1     1     0
-// Port8  1     1     1
+  // https://shmups.system11.org/viewtopic.php?p=1307320#p1307320
+  // gscartsw_lite EXT pinout:
+  // Pin 1: GND
+  // Pin 2: Override
+  // Pin 3: N/C
+  // Pin 4: +5V
+  // Pin 5: IN_BIT0
+  // Pin 6: IN_BIT1
+  // Pin 7: IN_BIT2
+  // Pin 8: N/C
+  //
+  // Reference for no active input state: https://shmups.system11.org/viewtopic.php?t=50851&start=4976
+  //
+  // When no input is active, a 50% off/on cycle can be seen for each pin as it cycles through the inputs. Pin5 the fastest, Pin7 the slowest. If we can monitor each
+  // pin then we can detect when there is no active input.
+  //
+  //        Pin7 Pin6 Pin5
+  // Port1  0     0     0
+  // Port2  0     0     1
+  // Port3  0     1     0
+  // Port4  0     1     1 
+  // Port5  1     0     0
+  // Port6  1     0     1
+  // Port7  1     1     0
+  // Port8  1     1     1
 
-uint8_t fpdc = 0; // 1 = 50% duty cycle was detected / all ports are in-active
-uint8_t bit[3] = {0,0,0};
-float val[3] = {0,0,0};
+  uint8_t fpdc = 0; // 1 = 50% duty cycle was detected / all ports are in-active
+  uint8_t bit[3] = {0,0,0};
+  float val[3] = {0,0,0};
 
-for(uint8_t i = 0; i < 3; i++){ // read in analog pin voltages, read each pin 4x in a row to ensure an accurate read, combats if using too large of a pull-down resistor
-  for(uint8_t j = 0; j < 4; j++){
-    val[i] = analogRead(apin[i]);
-  }
-  if((val[i]/211) >= high){ // if voltage is greater than or equal to the voltage defined for a high, increase highcount by 1 for that analog pin
-    highcount[i]++;
-  }
-}
-
-if(samcc == samsize){               // when the "samsize" number of samples has been taken, if the voltage was "high" for more than "dch" # of the "samsize" samples, set the bit to 1
-  for(uint8_t i = 0; i < 3; i++){
-    if(highcount[i] > dch)          // if the number of "high" samples per "samsize" are greater than "dch" set bit to 1.  
-      bit[i] = 1;
-    else if(highcount[i] > dcl)     // if the number of "high" samples is greater than "dcl" and less than "dch" (50% high samples) the switch must be cycling inputs, therefor no active input
-      fpdc = 1;
-  }
-}
-
-
-if(((bit[2] != bitprev[2] || bit[1] != bitprev[1] || bit[0] != bitprev[0]) || (allgscartoff == 1)) && (samcc == samsize) && !(fpdc)){
-  //Detect which scart port is now active and change profile accordingly
-  if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
-    if(RT5Xir == 2){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
-    if(RT4Kir == 2)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
-
-    if(SVS==2)Serial.println(F("remote prof1\r"));
-    else sendSVS(201);
-  } 
-  else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){ // 0 0 1
-    if(RT5Xir == 2){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
-    if(RT4Kir == 2)irsend.sendNEC(0x49,0x07,2);  // RT4K profile 2
-
-    if(SVS==2)Serial.println(F("remote prof2\r"));
-    else sendSVS(202);
-  }
-  else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){ // 0 1 0
-    if(RT5Xir == 2){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
-    if(RT4Kir == 2)irsend.sendNEC(0x49,0x03,2);  // RT4K profile 3
-
-    if(SVS==2)Serial.println(F("remote prof3\r"));
-    else sendSVS(203);
-  }
-  else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
-    if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
-    if(RT4Kir == 2)irsend.sendNEC(0x49,0x0A,2);  // RT4K profile 4
-
-    if(SVS==2)Serial.println(F("remote prof4\r"));
-    else sendSVS(204);
-  }
-  else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0)){ // 1 0 0
-    if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
-    if(RT4Kir == 2)irsend.sendNEC(0x49,0x06,2);  // RT4K profile 5
-
-    if(SVS==2)Serial.println(F("remote prof5\r"));
-    else sendSVS(205);
-  } 
-  else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1)){ // 1 0 1
-    if(RT5Xir == 2){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
-    if(RT4Kir == 2)irsend.sendNEC(0x49,0x02,2);  // RT4K profile 6
-
-    if(SVS==2)Serial.println(F("remote prof6\r"));
-    else sendSVS(206);
-  }   
-  else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0)){ // 1 1 0
-    if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
-    if(RT4Kir == 2)irsend.sendNEC(0x49,0x09,2);  // RT4K profile 7
-
-    if(SVS==2)Serial.println(F("remote prof7\r"));
-    else sendSVS(207);
-  } 
-  else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1)){ // 1 1 1
-    if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
-    if(RT4Kir == 2)irsend.sendNEC(0x49,0x05,2);  // RT4K profile 8
-
-    if(SVS==2)Serial.println(F("remote prof8\r"));
-    else sendSVS(208);
-  }
-  
-  if(allgscartoff) allgscartoff = 0;
-  bitprev[0] = bit[0];
-  bitprev[1] = bit[1];
-  bitprev[2] = bit[2];
-  fpdcprev = fpdc;
-
-}
-
-if((fpdccount == (fpdccountmax - 1)) && (fpdc != fpdcprev) && (samcc == samsize)){ // if no active port has been detected for fpdccountmax periods
-  
-  allgscartoff = 1;
-  memset(bitprev,0,sizeof(bitprev));
-  fpdcprev = fpdc;
-
-  if(DP0 && otakuoff && otakuoff2 && allgscartoff2 && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") && // cross-checks otaku, gscart2, Extron status
-                            (previnput2 == "0" || previnput2 == "discon" || previnput2 == "In0 " || previnput2 == "In00"))){
-    if(SVS==1)sendSVS(0);
-    else if(SVS==2)Serial.println(F("remote prof12\r"));
+  for(uint8_t i = 0; i < 3; i++){ // read in analog pin voltages, read each pin 4x in a row to ensure an accurate read, combats if using too large of a pull-down resistor
+    for(uint8_t j = 0; j < 4; j++){
+      val[i] = analogRead(apin[i]);
+    }
+    if((val[i]/211) >= high){ // if voltage is greater than or equal to the voltage defined for a high, increase highcount by 1 for that analog pin
+      highcount[i]++;
+    }
   }
 
-}
+  if(samcc == samsize){               // when the "samsize" number of samples has been taken, if the voltage was "high" for more than "dch" # of the "samsize" samples, set the bit to 1
+    for(uint8_t i = 0; i < 3; i++){
+      if(highcount[i] > dch)          // if the number of "high" samples per "samsize" are greater than "dch" set bit to 1.  
+        bit[i] = 1;
+      else if(highcount[i] > dcl)     // if the number of "high" samples is greater than "dcl" and less than "dch" (50% high samples) the switch must be cycling inputs, therefor no active input
+        fpdc = 1;
+    }
+  }
 
-if(fpdc && (samcc == samsize)){ // if no active port has been detected, loop counter until active port
-  if(fpdccount == (fpdccountmax - 1))
+
+  if(((bit[2] != bitprev[2] || bit[1] != bitprev[1] || bit[0] != bitprev[0]) || (allgscartoff == 1)) && (samcc == samsize) && !(fpdc)){
+    //Detect which scart port is now active and change profile accordingly
+    if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
+      if(RT5Xir == 2){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
+      if(RT4Kir == 2)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
+
+      if(SVS==2)Serial.println(F("remote prof1\r"));
+      else sendSVS(201);
+    } 
+    else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){ // 0 0 1
+      if(RT5Xir == 2){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
+      if(RT4Kir == 2)irsend.sendNEC(0x49,0x07,2);  // RT4K profile 2
+
+      if(SVS==2)Serial.println(F("remote prof2\r"));
+      else sendSVS(202);
+    }
+    else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){ // 0 1 0
+      if(RT5Xir == 2){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
+      if(RT4Kir == 2)irsend.sendNEC(0x49,0x03,2);  // RT4K profile 3
+
+      if(SVS==2)Serial.println(F("remote prof3\r"));
+      else sendSVS(203);
+    }
+    else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
+      if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
+      if(RT4Kir == 2)irsend.sendNEC(0x49,0x0A,2);  // RT4K profile 4
+
+      if(SVS==2)Serial.println(F("remote prof4\r"));
+      else sendSVS(204);
+    }
+    else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0)){ // 1 0 0
+      if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
+      if(RT4Kir == 2)irsend.sendNEC(0x49,0x06,2);  // RT4K profile 5
+
+      if(SVS==2)Serial.println(F("remote prof5\r"));
+      else sendSVS(205);
+    } 
+    else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1)){ // 1 0 1
+      if(RT5Xir == 2){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
+      if(RT4Kir == 2)irsend.sendNEC(0x49,0x02,2);  // RT4K profile 6
+
+      if(SVS==2)Serial.println(F("remote prof6\r"));
+      else sendSVS(206);
+    }   
+    else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0)){ // 1 1 0
+      if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
+      if(RT4Kir == 2)irsend.sendNEC(0x49,0x09,2);  // RT4K profile 7
+
+      if(SVS==2)Serial.println(F("remote prof7\r"));
+      else sendSVS(207);
+    } 
+    else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1)){ // 1 1 1
+      if(RT5Xir == 2){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
+      if(RT4Kir == 2)irsend.sendNEC(0x49,0x05,2);  // RT4K profile 8
+
+      if(SVS==2)Serial.println(F("remote prof8\r"));
+      else sendSVS(208);
+    }
+    
+    if(allgscartoff) allgscartoff = 0;
+    bitprev[0] = bit[0];
+    bitprev[1] = bit[1];
+    bitprev[2] = bit[2];
+    fpdcprev = fpdc;
+
+  }
+
+  if((fpdccount == (fpdccountmax - 1)) && (fpdc != fpdcprev) && (samcc == samsize)){ // if no active port has been detected for fpdccountmax periods
+    
+    allgscartoff = 1;
+    memset(bitprev,0,sizeof(bitprev));
+    fpdcprev = fpdc;
+
+    if(DP0 && otakuoff && otakuoff2 && allgscartoff2 && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") && // cross-checks otaku, gscart2, Extron status
+                              (previnput2 == "0" || previnput2 == "discon" || previnput2 == "In0 " || previnput2 == "In00"))){
+      if(SVS==1)sendSVS(0);
+      else if(SVS==2)Serial.println(F("remote prof12\r"));
+    }
+
+  }
+
+  if(fpdc && (samcc == samsize)){ // if no active port has been detected, loop counter until active port
+    if(fpdccount == (fpdccountmax - 1))
+      fpdccount = 0;
+    else 
+      fpdccount++;
+  }
+  else if(samcc == samsize){
     fpdccount = 0;
-  else 
-    fpdccount++;
-}
-else if(samcc == samsize){
-  fpdccount = 0;
-}
+  }
 
 
-if(samcc < samsize) // increment counter until "samsize" has been reached then reset counter and "highcount"
-  samcc++;
-else{
-  samcc = 1;
-  memset(highcount,0,sizeof(highcount));
-}
+  if(samcc < samsize) // increment counter until "samsize" has been reached then reset counter and "highcount"
+    samcc++;
+  else{
+    samcc = 1;
+    memset(highcount,0,sizeof(highcount));
+  }
 
 } // end readGscart1()
 
-void readGscart2(){ // readGscart2
+void readGscart2(){
 
-// https://shmups.system11.org/viewtopic.php?p=1307320#p1307320
-// gscartsw_lite EXT pinout:
-// Pin 1: GND
-// Pin 2: Override
-// Pin 3: N/C
-// Pin 4: +5V
-// Pin 5: IN_BIT0
-// Pin 6: IN_BIT1
-// Pin 7: IN_BIT2
-// Pin 8: N/C
-//
-// Reference for no active input state: https://shmups.system11.org/viewtopic.php?t=50851&start=4976
-//
-// When no input is active, a 50% off/on cycle can be seen for each pin as it cycles through the inputs. Pin5 the fastest, Pin7 the slowest. If we can monitor each
-// pin then we can detect when there is no active input.
-//
-//        Pin7 Pin6 Pin5
-// Port1  0     0     0
-// Port2  0     0     1
-// Port3  0     1     0
-// Port4  0     1     1 
-// Port5  1     0     0
-// Port6  1     0     1
-// Port7  1     1     0
-// Port8  1     1     1
-
-
-uint8_t fpdc = 0;
-uint8_t bit[3] = {0,0,0};
-float val[3] = {0,0,0};
-
-for(uint8_t i = 0; i < 3; i++){
-  for(uint8_t j = 0; j < 4; j++){
-    val[i] = analogRead(apin2[i]);
-  }
-  if((val[i]/211) >= high2){
-    highcount2[i]++;
-  }
-}
-
-if(samcc2 == samsize){              // when the "samsize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
-  for(uint8_t i = 0; i < 3; i++){   // if the voltage was high for only dcl to dch samples, set an all in-active ports flag (fpdc = 1)
-    if(highcount2[i] > dch)         // how many "high" samples per "samsize" are required for a bit to be 1.  
-      bit[i] = 1;
-    else if(highcount2[i] > dcl)
-      fpdc = 1;
-  }
-}
+  // https://shmups.system11.org/viewtopic.php?p=1307320#p1307320
+  // gscartsw_lite EXT pinout:
+  // Pin 1: GND
+  // Pin 2: Override
+  // Pin 3: N/C
+  // Pin 4: +5V
+  // Pin 5: IN_BIT0
+  // Pin 6: IN_BIT1
+  // Pin 7: IN_BIT2
+  // Pin 8: N/C
+  //
+  // Reference for no active input state: https://shmups.system11.org/viewtopic.php?t=50851&start=4976
+  //
+  // When no input is active, a 50% off/on cycle can be seen for each pin as it cycles through the inputs. Pin5 the fastest, Pin7 the slowest. If we can monitor each
+  // pin then we can detect when there is no active input.
+  //
+  //        Pin7 Pin6 Pin5
+  // Port1  0     0     0
+  // Port2  0     0     1
+  // Port3  0     1     0
+  // Port4  0     1     1 
+  // Port5  1     0     0
+  // Port6  1     0     1
+  // Port7  1     1     0
+  // Port8  1     1     1
 
 
-if(((bit[2] != bitprev2[2] || bit[1] != bitprev2[1] || bit[0] != bitprev2[0]) || (allgscartoff2 == 1)) && (samcc2 == samsize) && !(fpdc)){
-      //Detect which scart port is now active and change profile accordingly
-      if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
-        if(RT5Xir == 2){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
-        if(RT4Kir == 2)irsend.sendNEC(0x49,0x01,2);  // RT4K profile 9
+  uint8_t fpdc = 0;
+  uint8_t bit[3] = {0,0,0};
+  float val[3] = {0,0,0};
 
-        if(SVS==2)Serial.println(F("remote prof9\r"));
-        else sendSVS(209);
-      } 
-      else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){ // 0 0 1
-        if(RT5Xir == 2){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
-        if(RT4Kir == 2)irsend.sendNEC(0x49,0x25,2);  // RT4K profile 10
-
-        if(SVS==2)Serial.println(F("remote prof10\r"));
-        else sendSVS(210);
-      }
-      else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){ // 0 1 0
-        if(RT4Kir == 2)irsend.sendNEC(0x49,0x26,2);  // RT4K profile 11
-
-        if(SVS==2)Serial.println(F("remote prof11\r"));
-        else sendSVS(211);
-      }
-      else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
-        if(RT4Kir == 2)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
-
-        if(SVS==2)Serial.println(F("remote prof12\r"));
-        else sendSVS(212);
-      }
-      else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0))sendSVS(213); // 1 0 0
-      else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1))sendSVS(214); // 1 0 1
-      else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0))sendSVS(215); // 1 1 0
-      else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1))sendSVS(216); // 1 1 1
-
-      if(allgscartoff2) allgscartoff2 = 0;
-      bitprev2[0] = bit[0];
-      bitprev2[1] = bit[1];
-      bitprev2[2] = bit[2];
-      fpdcprev2 = fpdc;
-
-}
-
-if((fpdccount2 == (fpdccountmax - 1)) && (fpdc != fpdcprev2) && (samcc2 == samsize)){ // if all in-active ports flag has been detected for "fpdccountmax" periods 
-  
-  allgscartoff2 = 1;
-  memset(bitprev2,0,sizeof(bitprev2));
-  fpdcprev2 = fpdc;
-  
-  if(DP0 && allgscartoff && otakuoff && otakuoff2 && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") &&  // cross-checks gscart, otaku, Extron status
-                            (previnput2 == "0" || previnput2 == "discon" || previnput2 == "In0 " || previnput2 == "In00"))){
-    if(SVS==1)sendSVS(0);
-    else if(SVS==2)Serial.println(F("remote prof12\r"));
+  for(uint8_t i = 0; i < 3; i++){
+    for(uint8_t j = 0; j < 4; j++){
+      val[i] = analogRead(apin2[i]);
+    }
+    if((val[i]/211) >= high2){
+      highcount2[i]++;
+    }
   }
 
-}
+  if(samcc2 == samsize){              // when the "samsize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
+    for(uint8_t i = 0; i < 3; i++){   // if the voltage was high for only dcl to dch samples, set an all in-active ports flag (fpdc = 1)
+      if(highcount2[i] > dch)         // how many "high" samples per "samsize" are required for a bit to be 1.  
+        bit[i] = 1;
+      else if(highcount2[i] > dcl)
+        fpdc = 1;
+    }
+  }
 
-if(fpdc && (samcc2 == samsize)){
-  if(fpdccount2 == (fpdccountmax - 1)) 
+
+  if(((bit[2] != bitprev2[2] || bit[1] != bitprev2[1] || bit[0] != bitprev2[0]) || (allgscartoff2 == 1)) && (samcc2 == samsize) && !(fpdc)){
+        //Detect which scart port is now active and change profile accordingly
+        if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
+          if(RT5Xir == 2){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
+          if(RT4Kir == 2)irsend.sendNEC(0x49,0x01,2);  // RT4K profile 9
+
+          if(SVS==2)Serial.println(F("remote prof9\r"));
+          else sendSVS(209);
+        } 
+        else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){ // 0 0 1
+          if(RT5Xir == 2){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
+          if(RT4Kir == 2)irsend.sendNEC(0x49,0x25,2);  // RT4K profile 10
+
+          if(SVS==2)Serial.println(F("remote prof10\r"));
+          else sendSVS(210);
+        }
+        else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){ // 0 1 0
+          if(RT4Kir == 2)irsend.sendNEC(0x49,0x26,2);  // RT4K profile 11
+
+          if(SVS==2)Serial.println(F("remote prof11\r"));
+          else sendSVS(211);
+        }
+        else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
+          if(RT4Kir == 2)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
+
+          if(SVS==2)Serial.println(F("remote prof12\r"));
+          else sendSVS(212);
+        }
+        else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0))sendSVS(213); // 1 0 0
+        else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1))sendSVS(214); // 1 0 1
+        else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0))sendSVS(215); // 1 1 0
+        else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1))sendSVS(216); // 1 1 1
+
+        if(allgscartoff2) allgscartoff2 = 0;
+        bitprev2[0] = bit[0];
+        bitprev2[1] = bit[1];
+        bitprev2[2] = bit[2];
+        fpdcprev2 = fpdc;
+
+  }
+
+  if((fpdccount2 == (fpdccountmax - 1)) && (fpdc != fpdcprev2) && (samcc2 == samsize)){ // if all in-active ports flag has been detected for "fpdccountmax" periods 
+    
+    allgscartoff2 = 1;
+    memset(bitprev2,0,sizeof(bitprev2));
+    fpdcprev2 = fpdc;
+    
+    if(DP0 && allgscartoff && otakuoff && otakuoff2 && ((previnput == "0" || previnput == "discon" || previnput == "In0 " || previnput == "In00") &&  // cross-checks gscart, otaku, Extron status
+                              (previnput2 == "0" || previnput2 == "discon" || previnput2 == "In0 " || previnput2 == "In00"))){
+      if(SVS==1)sendSVS(0);
+      else if(SVS==2)Serial.println(F("remote prof12\r"));
+    }
+
+  }
+
+  if(fpdc && (samcc2 == samsize)){
+    if(fpdccount2 == (fpdccountmax - 1)) 
+      fpdccount2 = 0;
+    else 
+      fpdccount2++;
+  }
+  else if(samcc2 == samsize){
     fpdccount2 = 0;
-  else 
-    fpdccount2++;
-}
-else if(samcc2 == samsize){
-  fpdccount2 = 0;
-}
+  }
 
 
-if(samcc2 < samsize) 
-  samcc2++;
-else{
-  samcc2 = 1;
-  memset(highcount2,0,sizeof(highcount2));
-}
+  if(samcc2 < samsize) 
+    samcc2++;
+  else{
+    samcc2 = 1;
+    memset(highcount2,0,sizeof(highcount2));
+  }
 
 } // end readGscart2()
-
 
 void irRec(){
 
