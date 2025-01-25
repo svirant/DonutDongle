@@ -99,8 +99,8 @@ Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/
 | 1  | R2 | 1K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/yageo/RC0805FR-071KL/727444) | |
 | 18  | R3-R20 | 10K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/stackpole-electronics-inc/RMCF0805FT10K0/1760676) | R15-R20 (unlabeled) are only for pre 5.x gscart/gcomp use, must cut traces between pads if using |
 | 1  | Q1 | 2N3904 NPN Transistor | [AliExpress](https://www.aliexpress.us/item/3256806623522970.html) | |
-| 2  | Q2,3 | BSS138 N-ch MOSFET | [AliExpress](https://www.aliexpress.us/item/3256805941001810.html) | |
 | 1  | U1 | MAX3232 SOP-16 RS-232 Interface IC | [AliExpress](https://www.aliexpress.us/item/3256807314260762.html) | |
+| 2  | U2,3 | BSS138 N-ch MOSFET | [AliExpress](https://www.aliexpress.us/item/3256805941001810.html) | |
 | 1  | PH1 | PJ-307 3.5mm Stereo Jack | [AliExpress](https://www.aliexpress.us/item/2251832712518602.html) | |
 |    | |  or **1x** PJ-324M 3.5mm Audio Jack Socket | [AliExpress](https://www.aliexpress.us/item/2251832685563184.html) | |
 | 4  | J4,J9-11 | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) | | 
