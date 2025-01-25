@@ -81,7 +81,7 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/ibom.html)
 
 [<img width="400" src="./images/8.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
-[<img width="385" src="./images/8b.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
+[<img width="382" src="./images/8b.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
 
 
 
@@ -112,8 +112,9 @@ Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/
 | 1  | | Any 3.5mm / aux / stereo / trs / cable | [AliExpress](https://www.aliexpress.us/item/2255799962255486.html) | |
 | 1  | | usb-c cable for Arduino power & initial programming | [AliExpress](https://www.aliexpress.us/item/3256806983355947.html) | |
 | 1  | | Arduino Nano type c | Support [RetroRGB!](https://amzn.to/4gnHqN4) | Make sure the headers and esp the 2x3 pins are not soldered. |
-| 1  | JP2 | 2x3 Pin Double Row 2.54mm Pitch Header | | Use the one that comes with the Arduino Nano |
-| 2  | | 2.54mm Jumper | [AliExpress](https://www.aliexpress.us/item/2255800354403384.html) | You only need 2, but this comes in a pack of 100 :-/ |
+| 1  | JP2 | 2x3 Pin Double Row 2.54mm Pitch Header | | Use the one that comes with the Arduino Nano. Jumper "H" for all switches unless instructed otherwise. |
+| 2  | JP3,4 | 1x3 Pin Single Row 2.54 Pitch Header | | Dont buy two 1x3. Find any single row header and break off two 1x3 sections. Jumper "H" for all switches unless instructed otherwise. |
+| 4  | | 2.54mm Jumper | [AliExpress](https://www.aliexpress.us/item/2255800354403384.html) | You only need 4, but this comes in a pack of 100 :-/ |
 
 * **Switch connection Cables**
 
