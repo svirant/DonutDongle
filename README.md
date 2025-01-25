@@ -54,10 +54,11 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 When using the optional IR Receiver, the IR reception of the RT4K can be been greatly enhanced. You can think of it as an IR repeater, but instead talks to the RT4K via Serial for solid communication. Since the Donut Dongle is in the middle, other remote features can be added such as:
  - AUX8 button + profile button 1 - 12 loads SVS profiles of your choosing. By default is SVS 1 - 12
  - AUX8 pressed twice, manually enter a SVS profile to load with the profile buttons using 1 - 9 and 10,11,12 buttons for 0. Must use 3 digits. Ex: 001 = 1, 010 = 10, etc
+ - MT-ViKI 8 Port HDMI switch's inputs can be changed with profile buttons 1 - 8. Must enable "MTVIKIir" in the options section of the .ino
 
 Let me know what ideas you have, and perhaps I can add them in.
 
-**Note:** For best results, block the RT4K's IR sensor on the front to avoid it from responding twice. I personally have the RT4K sitting on top of my NES and leave the flip top up to block. A piece of electrical tape might also work. Be creative!
+**Note:** To stop the RT4K from responding twice (once from the built-in IR sensor and once from the Donut Dongle), place the included "ir_remote.txt" on the root of the SDcard. This remaps the builtin IR for every button except POWER to the RT5x remote. This way you can still use the POWER button to power on the RT4K but will stop the it from responding from all other button presses via the builtin IR sensor.
 
 
 # Ordering PCBs
