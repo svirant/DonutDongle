@@ -58,7 +58,7 @@ When using the optional IR Receiver, the IR reception of the RT4K can be been gr
 
 Let me know what ideas you have, and perhaps I can add them in.
 
-**Note:** To stop the RT4K from responding twice (once from the built-in IR sensor and once from the Donut Dongle), place the included "ir_remote.txt" on the root of the SDcard. This remaps the builtin IR for every button except POWER to the RT5x remote. This way you can still use the POWER button to power on the RT4K but will stop the it from responding from all other button presses via the builtin IR sensor.
+**Note:** To stop the RT4K from responding twice (once from the built-in IR sensor and once from the Donut Dongle), place the included "ir_remote.txt" on the root of the SDcard. This remaps the builtin IR for every button except POWER to the RT5x remote. This way you can still use the POWER button to power on the RT4K but will stop it from responding from all other button presses.
 
 
 # Ordering PCBs
