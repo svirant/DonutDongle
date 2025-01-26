@@ -186,7 +186,7 @@ Some Arduino Nano's come with an Old Bootloader and won't Upload unless specifie
 
 - The following is from the .ino file itself. Refer to it directly for all Options and comments.
 ```
-  /*
+/*
 ////////////////////
 //    OPTIONS    //
 //////////////////
@@ -236,7 +236,7 @@ uint8_t SVS = 0; //     "Remote" profiles are profiles that are assigned to butt
 
 
 
-bool DP0  = false;       // (Default Profile 0) 
+bool DP0  = true;       // (Default Profile 0) 
                          //
                          //
                          // set true to load "Remote" profile 12 (if SVS=0) when all ports are in-active on 1st Extron switch (and 2nd if connected). 
@@ -341,6 +341,16 @@ uint8_t RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
                      //
                      // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-12 for first 4 inputs on second gscart)
 
+uint8_t MTVIKIir = 0;    // Must have IR "Receiver" connected to the Donut Dongle for option 1 & 2.
+                     // 0 = disables IR Receiver -> Serial Control for MT-VIKI 8 Port HDMI switch
+                     //
+                     // 1 = MT-VIKI 8 Port HDMI switch connected to "Extron sw1"
+                     //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the MT-VIKI Input over Serial.
+                     //     Sends auxprof SVS profiles listed below.
+                     //
+                     // 2 = MT-VIKI 8 Port HDMI switch connected to "Extron sw2"
+                     //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the MT-VIKI Input over Serial.
+                     //     Sends auxprof SVS profiles listed below. You can change them below to 101 - 108 to prevent SVS profile conflicts if needed.
 
 uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons. 
                           // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
