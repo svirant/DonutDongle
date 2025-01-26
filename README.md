@@ -11,7 +11,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 (current list, but not limited to)
 | **Switch**    | Supported | Notes |
 | ------------- | ------------- |------------- |
-| MT-VIKI 8 port HDMI | yes, confirmed first hand. Auto-switching Profiles work and RT4K remote can also change inputs and profiles w/ AUX8 + profile button 1 - 8.  | Front case buttons and included IR remote do not send a serial command therefor profile changes can't happen for these 2 other methods.  |
+| MT-VIKI 8 port HDMI | yes, confirmed first hand. Auto-switching Profiles work and RT4K remote can also change inputs and profiles w/ AUX8 + profile button 1 - 8.  | Front case buttons and included IR remote do not generate serial output on the switch itself therefor profile changes can't happen for these 2 other methods.  |
 | Extron DXP 88 | yes, confirmed first hand | Preset 1 is Profile/SVS 1. On Extron sw2 port Preset 1 is SVS 101, etc|
 | Extron RGBHV sw6  | yes, confirmed first hand  | 
 | TESmart 16x1 HDMI  | yes, confirmed first hand  |
