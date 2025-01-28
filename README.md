@@ -12,12 +12,12 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 | **Switch**    | Supported | Notes |
 | ------------- | ------------- |------------- |
 | MT-VIKI 8 port HDMI | yes, confirmed first hand. Auto-switching Profiles work and RT4K remote can also change inputs and profiles w/ AUX8 + profile button 1 - 8.  | Front case buttons and included IR remote do not generate serial output on the switch itself therefor profile changes can't happen for these 2 other methods.  |
+| TESmart 16x1 HDMI  | yes, confirmed first hand  ||
+| gSCARTsw / gCOMPsw | **version 5.x** confirmed by [@niquallis](https://x.com/niquallis), thanks so much for your help! | gSCARTsw tested, but gCOMPsw has the same underlying logic.|
+| Extron RGBHV sw6  | yes, confirmed first hand  | |
 | Extron DXP 88 | yes, confirmed first hand | Preset 1 is Profile/SVS 1. On Extron sw2 port Preset 1 is SVS 101, etc|
-| Extron RGBHV sw6  | yes, confirmed first hand  | 
-| TESmart 16x1 HDMI  | yes, confirmed first hand  |
-| gSCARTsw / gCOMPsw | **version 5.x** confirmed by [@niquallis](https://x.com/niquallis), thanks so much for your help! | gSCARTsw tested, but gCOMPsw has the same underlying logic.
 | Extron CrossPoint, MVX, etc | if it supports SIS, should work fine, please let me know :) |
-| Otaku Games Scart 10 | Jumper moved to "L" and with required [mod](https://github.com/svirant/RT4k_HD15_serial_control/tree/main/Otaku%20Games%20Scart%20Switch) | modded switch works on its own, but the Donut Dongle would allow you to connect 2x to the RT4K along with up to 2x gscart/gcomp
+| Otaku Games Scart 10 | Jumper moved to "L" and with required [mod](https://github.com/svirant/RT4k_HD15_serial_control/tree/main/Otaku%20Games%20Scart%20Switch) | modded switch works on its own, but the Donut Dongle would allow you to connect 2x to the RT4K along with up to 2x gscart/gcomp|
 
 <br />
 
@@ -95,13 +95,13 @@ Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/
 
 | **Qty**    | Designation | Part |  Link  |  Notes |
 | ------------- | ------------- |------------- |------------- |------------- |
-| 4  | C1-C4 | 0.1 uf / 100nf 50V X7R 0805 Capacitor| [Digikey](https://www.digikey.com/en/products/detail/yageo/CC0805KRX7R9BB104/302874?s=N4IgTCBcDaIMwEYEFokBYAMrkDkAiIAugL5A) | |
+| 5  | C1-C5 | 0.1 uf / 100nf 50V X7R 0805 Capacitor| [Digikey](https://www.digikey.com/en/products/detail/yageo/CC0805KRX7R9BB104/302874?s=N4IgTCBcDaIMwEYEFokBYAMrkDkAiIAugL5A) | |
 | 1  | R1 | 30 OHM 1% 1/2W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06F30R0V/9811718) | |
 | 1  | R2 | 1K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/yageo/RC0805FR-071KL/727444) | |
-| 15  | R3-R17 | 10K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/stackpole-electronics-inc/RMCF0805FT10K0/1760676) | R12-R17 (unlabeled) are only for pre 5.x gscart/gcomp use, must cut traces between pads if using |
+| 14  | R3-R16 | 10K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/stackpole-electronics-inc/RMCF0805FT10K0/1760676) | R12-R17 (unlabeled) are only for pre 5.x gscart/gcomp use, must cut traces between pads if using |
 | 1  | Q1 | 2N3904 NPN Transistor | [AliExpress](https://www.aliexpress.us/item/3256806623522970.html) | |
 | 1  | U1 | MAX3232 SOP-16 RS-232 Interface IC | [AliExpress](https://www.aliexpress.us/item/3256807314260762.html) | |
-| 2  | U2,3 | BSS138 N-ch MOSFET | [AliExpress](https://www.aliexpress.us/item/3256805941001810.html) | |
+| 1  | U2 | IC BUF NON-INVERT 5.5V SOT23-6 | [Digikey](https://www.digikey.com/en/products/detail/texas-instruments/SN74LVC2G07DBVR/486427) | |
 | 1  | PH1 | PJ-307 3.5mm Stereo Jack | [AliExpress](https://www.aliexpress.us/item/2251832712518602.html) | |
 |    | |  or **1x** PJ-324M 3.5mm Audio Jack Socket | [AliExpress](https://www.aliexpress.us/item/2251832685563184.html) | |
 | 4  | J4,J9-11 | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) | | 
@@ -115,7 +115,7 @@ Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/
 | 1  | | Arduino Nano type c | Support [RetroRGB!](https://amzn.to/4gnHqN4) | Make sure the headers and esp the 2x3 pins are not soldered. |
 | 1  | JP2 | 2x3 Pin Double Row 2.54mm Pitch Header | | Use the one that comes with the Arduino Nano. Jumper "H" for all switches unless instructed otherwise. |
 | 2  | JP3,4 | 1x3 Pin Single Row 2.54 Pitch Header | | Dont buy two 1x3. Find any single row header and break off two 1x3 sections. Jumper "H" for all switches unless instructed otherwise. |
-| 4  | | 2.54mm Jumper | [AliExpress](https://www.aliexpress.us/item/2255800354403384.html) | You only need 4, but this comes in a pack of 100 :-/ |
+| 4  | | 2.54mm Jumper | [AliExpress](https://www.aliexpress.us/item/2255800354403384.html) | You can also just solder blob "H". "L" jumper setting has only 1 use case atm. |
 
 * **Switch connection Cables**
 
@@ -193,7 +193,7 @@ Some Arduino Nano's come with an Old Bootloader and won't Upload unless specifie
 */
 
 
-uint8_t SVS = 0; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
+uint8_t SVS = 1; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
              //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
              //     the profile being used for a console's switch input if your setup is in flux. SVS require you to rename the file itself on the SD card which is 
              //     a little more work.  Regardless, SVS profiles will need to be used for console switch inputs over 12.
@@ -252,6 +252,20 @@ bool DP0  = false;       // (Default Profile 0)
                          //
                          // default is false // also recommended to set false to filter out unstable Extron inputs that can result in spamming the RT4K with profile changes 
                        
+
+
+////////////////////////// 
+                        // Choosing the above two options can get quite confusing (even for myself) so maybe this will help a little more:
+                        //
+                        // when DP0=0 and SVS=0, button profiles 1 - 12 are used for EXTRON sw1, and SVS for EVERYTHING else
+                        // when DP0=0 and SVS=1, SVS profiles are used for everything
+                        // when DP0=0 and SVS=2, button profiles 1 - 8 are used for GSCART sw1, 9 - 12 for GSCART sw2 (ports 1 - 4), and SVS for EVERYTHING else
+                        // when DP0=1 and SVS=0, button profiles 1 - 11 are used for EXTRON sw1 and 12 as the "default profile 0", and SVS for everything else 
+                        // when DP0=1 and SVS=1, SVS profiles for everything, and uses SVS profile 0 as the "default profile 0" 
+                        // when DP0=1 and SVS=2, button profiles 1 - 8 are used for GSCART sw1, 9 - 11 for GSCART sw2 (ports 1 -3) and 12 as the "default profile 0", and SVS for EVERYTHING else
+                        //
+//////////////////////////
+
 
 
 uint8_t voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input changes to any/all outputs result in a profile change
@@ -369,6 +383,8 @@ uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons.
                       11, // AUX8 + profile 11 button
                       12, // AUX8 + profile 12 button
                       };
+                          
+////////////////////////////////////////////////////////////////////////  
 ```
 <br />
 
