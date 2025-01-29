@@ -157,7 +157,7 @@ Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/
 | **Qty**    | Part |  Link  |  Notes |
 | ------------- | ------------- |------------- |------------- |
 | 1 | 2x4 Pin Double Row 2.54 Pitch Angled Box Header | [AliExpress](https://www.aliexpress.us/item/3256805177947724.html?) | (Color: RIGHT ANGLE TYPE, Pins: 10PCS DC3 8Pin) |
-| 5 | Pogo-Pin | [Digikey](https://www.digikey.com/en/products/detail/mill-max-manufacturing-corp/0906-1-15-20-75-14-11-0/1147049) | |
+| 6 | Pogo-Pin | [Digikey](https://www.digikey.com/en/products/detail/mill-max-manufacturing-corp/0906-1-15-20-75-14-11-0/1147049) | |
    
   * **TESmart connector**
 
