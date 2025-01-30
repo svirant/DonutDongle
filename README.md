@@ -98,8 +98,8 @@ Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/
 | 5  | C1-C5 | 0.1 uf / 100nf 50V X7R 0805 Capacitor| [Digikey](https://www.digikey.com/en/products/detail/yageo/CC0805KRX7R9BB104/302874?s=N4IgTCBcDaIMwEYEFokBYAMrkDkAiIAugL5A) | |
 | 1  | R1 | 30 OHM 1% 1/2W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06F30R0V/9811718) | |
 | 1  | R2 | 1K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/yageo/RC0805FR-071KL/727444) | |
-| 6  | R3-8 | 20K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/stackpole-electronics-inc/RMCF0603FT20K0/1760829) | |
-| 8  | R9-R16 | 10K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/stackpole-electronics-inc/RMCF0805FT10K0/1760676) | R11-R16 (unlabeled) are only for pre 5.x gscart/gcomp use, must cut traces between pads if using |
+| 9  | R3 - R10, R17 | 10K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/stackpole-electronics-inc/RMCF0805FT10K0/1760676) | |
+| 7  | R11 - R16, R18 | 20K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/stackpole-electronics-inc/RMCF0603FT20K0/1760829) | |
 | 1  | Q1 | 2N3904 NPN Transistor | [AliExpress](https://www.aliexpress.us/item/3256806623522970.html) | |
 | 1  | U1 | MAX3232 SOP-16 RS-232 Interface IC | [AliExpress](https://www.aliexpress.us/item/3256807314260762.html) | |
 | 1  | U2 | IC BUF NON-INVERT 5.5V SOT23-6 | [Digikey](https://www.digikey.com/en/products/detail/texas-instruments/SN74LVC2G07DBVR/486427) | |
@@ -387,15 +387,3 @@ uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons.
                           
 ////////////////////////////////////////////////////////////////////////  
 ```
-<br />
-
-
-
-# Experimental:
-
-## Pre 5.x gSCARTsw / gCOMPsw
-**Pre 5.x versions that have an EXT port DO NOT have 10K ohm protection resistors between it's Altera FPGA and the EXT port and can be damaged by static discharge!** <br /><br />
-Reference: https://shmups.system11.org/viewtopic.php?p=1453879#p1453879
-<br />
-
-Technically versions 3.x and 4.x support the EXT query method and if you still wanted to proceed **at your own risk!...** <br />There are 6x spots on the back of the DD pcb where you can cut a trace and place 10K ohm 0805 resistors. This does not mitigate the risk mentioned above but WILL protect the Donut Dongle from being back-powered and potential damage to it.<br /> You could also leave the traces in-tact and place these series resistors closer to the EXT port and potentially mitigate all risks listed above. Up to you!
