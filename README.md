@@ -224,7 +224,7 @@ Remote Button Profiles **1-12** are used for GSCART sw1 inputs **1-8** and GSCAR
 
 ----------------
 
-#### The following is from the .ino file itself. Refer to it directly for all Advanced Options and comments.
+The following is from the .ino file itself. Refer to it directly for all **Advanced Options**.
 ```
 /*
 ////////////////////
