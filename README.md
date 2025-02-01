@@ -181,11 +181,50 @@ Some Arduino Nano's come with an Old Bootloader and won't Upload unless specifie
 
   -----------
 # How to Use
-- Make sure **"Auto Load SVS"** is **"On"** under the RT4K Profiles menu.  The RT4K checks the /profile/SVS subfolder for profiles and need to be named: "S\<input number>_\<user defined>.rt4"  For example, SVS input 2 would look for a profile that is named S2_SNES…rt4.  If there’s more than one profile that fits the pattern, the first match is used.
+- Make sure **"Auto Load SVS"** is **"On"** under the RT4K Profiles menu.  
+- The RT4K checks the **/profile/SVS** subfolder for profiles and need to be named: **S\<input number>_\<user defined>.rt4**  For example, SVS input 2 would look for a profile that is named S2_SNES.rt4.  If there’s more than one profile that fits the pattern, the first match is used.
 
 - Check the RT4K Diagnostic Console for Serial commands being received as confirmation.
 
-- The following is from the .ino file itself. Refer to it directly for all Options and comments.
+
+## SVS Profile numbering scheme
+
+| **SVS = 1 (default)** | **Profile #** | Notes |
+|----------|----------|---------|
+| Extron sw1 | 1 -  99 | also for TESmart, MT-ViKi devices|
+| Extron sw2 | 101 - 199 | also for TESmart, MT-ViKi devices |
+| GSCART sw1 | 201 - 208 | |
+| GSCART sw2 | 209 - 216 | |
+
+Remote Button Profiles are **not** used when **SVS=1**
+
+<br />
+
+| **SVS = 0** | **Profile #** | Notes |
+|----------|----------|---------|
+| Extron sw1 | 13 -  99 | also for TESmart, MT-ViKi devices|
+| Extron sw2 | 101 - 199 | also for TESmart, MT-ViKi devices |
+| GSCART sw1 | 201 - 208 | |
+| GSCART sw2 | 209 - 216 | |
+
+Remote Button Profiles **1-12** are used for Extron sw1 when **SVS=0**
+
+<br />
+
+| **SVS = 2** | **Profile #** | Notes |
+|----------|----------|---------|
+| Extron sw1 | 1 -  99 | also for TESmart, MT-ViKi devices|
+| Extron sw2 | 101 - 199 | also for TESmart, MT-ViKi devices |
+| GSCART sw1 | N/A | |
+| GSCART sw2 | 213 - 216 | inputs 5-8 |
+
+Remote Button Profiles **1-12** are used for GSCART sw1 inputs **1-8** and GSCART sw2 inputs **1-4** when **SVS=2**
+
+<br />
+
+----------------
+
+#### The following is from the .ino file itself. Refer to it directly for all Advanced Options and comments.
 ```
 /*
 ////////////////////
