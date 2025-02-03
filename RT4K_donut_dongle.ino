@@ -1270,11 +1270,13 @@ void irRec(){
       }
       else if(ir_recv_command == 61){
         //Serial.println(F("remote aux6\r")); // aux6
-        auxgsw[1] = 1;
+        if(gctl)auxgsw[1] = 1;
+        else Serial.println(F("remote aux6\r"));
       }
       else if(ir_recv_command == 60){
         //Serial.println(F("remote aux5\r")); // aux5
-        auxgsw[0] = 1;
+        if(gctl)auxgsw[0] = 1;
+        else Serial.println(F("remote aux5\r"));
       }
       else if(ir_recv_command == 59){
         Serial.println(F("remote aux4\r"));
