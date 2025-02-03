@@ -233,6 +233,10 @@ The following is from the .ino file itself. Refer to it directly for all **Advan
 */
 
 
+int offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
+                // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with offset = 0.
+
+
 uint8_t SVS = 1; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
              //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
              //     the profile being used for a console's switch input if your setup is in flux. SVS require you to rename the file itself on the SD card which is 
@@ -242,9 +246,9 @@ uint8_t SVS = 1; //     "Remote" profiles are profiles that are assigned to butt
              //
              // 0 - use "Remote" profiles 1-12 for up to 12 inputs on 1st Extron Switch and SVS 13 - 99 for everything over 12. Only SVS profiles are used on 2nd Extron Switch if connected.
              //
-             //     - remote profiles 1-12 for 1st Extron or TESmart Switch (If DP0 below is set to true - remote profile 12 is used when all ports are in-active)
-             //     - SVS  12 - 99  for 1st Extron or TESmart (DP0 is true)
-             //     - SVS  13 - 99  for 1st Extron or TESmart (DP0 is false)
+             //     - remote profiles 1-12 for 1st Extron or TESmart Switch (If S0 below is set to true - remote profile 12 is used when all ports are in-active)
+             //     - SVS  12 - 99  for 1st Extron or TESmart (S0 is true)
+             //     - SVS  13 - 99  for 1st Extron or TESmart (S0 is false)
              //     - SVS 101 - 199 for 2nd Extron or TESmart
              //     - SVS 201 - 208 for 1st gScart
              //     - SVS 209 - 216 for 2nd gScart
@@ -252,21 +256,21 @@ uint8_t SVS = 1; //     "Remote" profiles are profiles that are assigned to butt
              // 1 - use only "SVS" profiles.
              //     Make sure "Auto Load SVS" is "On" under the RT4K Profiles menu
              //     RT4K checks the /profile/SVS subfolder for profiles and need to be named: "S<input number>_<user defined>.rt4"
-             //     For example, SVS input 2 would look for a profile that is named S2_SNES…rt4
+             //     For example, SVS input 2 would look for a profile that is named S2_SNES.rt4
              //     If there’s more than one profile that fits the pattern, the first match is used
              //
              //     - SVS   1 -  99 for 1st Extron or TESmart
              //     - SVS 101 - 199 for 2nd Extron or TESmart
              //     - SVS 201 - 208 for 1st gScart
              //     - SVS 209 - 216 for 2nd gScart
-             //     - SVS   0       for DP0 option mentioned below
+             //     - SVS   0       for S0 option mentioned below
              //
-             //  ** If DP0 below is set to true, create "S0_<user defined>.rt4" for when all ports are in-active. Ex: S0_DefaultHDMI.rt4
+             //  ** If S0 below is set to true, create "S0_<user defined>.rt4" for when all ports are in-active. Ex: S0_HDMI.rt4
              //
              // 2 - use "Remote" profiles 1-12 for gscart/gcomp switches. Remote profile 1-8 for 1st gscart switch, 9-12 for inputs 1-4 on 2nd gscart switch.
              //     inputs 5-8 on the 2nd gscart switch will use SVS profiles 213 - 216
              //
-             //     - remote profiles 1-8 for 1st gScart, 9 - 12 for first 4 inputs on 2nd gScart (If DP0 below is set to true - remote profile 12 is used when all ports are in-active)
+             //     - remote profiles 1-8 for 1st gScart, 9 - 12 for first 4 inputs on 2nd gScart (If S0 below is set to true - remote profile 12 is used when all ports are in-active)
              //     - SVS 213 -  216 for remaining inputs 5 - 8 on 2nd gScart 
              //     - SVS   1 -  99 for 1st Extron or TESmart
              //     - SVS 101 - 199 for 2nd Extron or TESmart
@@ -276,7 +280,7 @@ uint8_t SVS = 1; //     "Remote" profiles are profiles that are assigned to butt
 
 
 
-bool DP0  = false;       // (Default Profile 0) 
+bool S0  = false;        // (Profile 0) 
                          //
                          //
                          // set true to load "Remote" profile 12 (if SVS=0) when all ports are in-active on 1st Extron switch (and 2nd if connected). 
@@ -297,12 +301,12 @@ bool DP0  = false;       // (Default Profile 0)
 ////////////////////////// 
                         // Choosing the above two options can get quite confusing (even for myself) so maybe this will help a little more:
                         //
-                        // when DP0=0 and SVS=0, button profiles 1 - 12 are used for EXTRON sw1, and SVS for EVERYTHING else
-                        // when DP0=0 and SVS=1, SVS profiles are used for everything
-                        // when DP0=0 and SVS=2, button profiles 1 - 8 are used for GSCART sw1, 9 - 12 for GSCART sw2 (ports 1 - 4), and SVS for EVERYTHING else
-                        // when DP0=1 and SVS=0, button profiles 1 - 11 are used for EXTRON sw1 and 12 as the "default profile 0", and SVS for everything else 
-                        // when DP0=1 and SVS=1, SVS profiles for everything, and uses SVS profile 0 as the "default profile 0" 
-                        // when DP0=1 and SVS=2, button profiles 1 - 8 are used for GSCART sw1, 9 - 11 for GSCART sw2 (ports 1 -3) and 12 as the "default profile 0", and SVS for EVERYTHING else
+                        // when S0=0 and SVS=0, button profiles 1 - 12 are used for EXTRON sw1, and SVS for EVERYTHING else
+                        // when S0=0 and SVS=1, SVS profiles are used for everything
+                        // when S0=0 and SVS=2, button profiles 1 - 8 are used for GSCART sw1, 9 - 12 for GSCART sw2 (ports 1 - 4), and SVS for EVERYTHING else
+                        // when S0=1 and SVS=0, button profiles 1 - 11 are used for EXTRON sw1 and 12 as "Profile 0", and SVS for everything else 
+                        // when S0=1 and SVS=1, SVS profiles for everything, and uses S0_<user defined>.rt4 as "Profile 0" 
+                        // when S0=1 and SVS=2, button profiles 1 - 8 are used for GSCART sw1, 9 - 11 for GSCART sw2 (ports 1 -3) and 12 as "Profile 0", and SVS for EVERYTHING else
                         //
 //////////////////////////
 
@@ -384,14 +388,14 @@ uint8_t voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input change
 uint8_t RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
                      // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
                      //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
-                     //     (DP0 - if enabled uses Profile 10 on the RT5X)
+                     //     (S0 - if enabled uses Profile 10 on the RT5X)
                      //
                      // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-10 for first 2 inputs on second gscart)
 
 uint8_t RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
                      // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
                      //     sends Profile 1 - 12 commands to RetroTink 4K. Must have IR LED emitter connected.
-                     //     (DP0 - if enabled uses Profile 12 on the RT4K)
+                     //     (S0 - if enabled uses Profile 12 on the RT4K)
                      //
                      // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-12 for first 4 inputs on second gscart)
 
@@ -424,5 +428,5 @@ uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons.
                       12, // AUX8 + profile 12 button
                       };
                           
-////////////////////////////////////////////////////////////////////////  
+////////////////////////////////////////////////////////////////////////
 ```
