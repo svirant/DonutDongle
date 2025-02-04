@@ -12,24 +12,16 @@ Gerbers (.zip) files needed for PCB manufacturing listed above.
  - Pushon connector is nice and snug, no need for jackscrews.
  - BOM listed on Main README
 <img width="400" src="../images/10.png" />
-
-
-### VGAPassthrough_wSerial
- - 4 Layer design
- - Passes video signals through untouched to the VGA port.
- - Isolates from non-video signals (Pins 12,15)
- - Designed for use with #4-40 x 3/4" jackscrew "bolts" for heavier VGA cable support.
- - BOM listed on Main README
-<img width="384" src="../images/11.png" />
 <br />
 
 ### VGAPassthrough_wSharedSerial "shared serial bus"
-Coming Soon!
  - Passes all video AND non-video signals (Pins 12,15) which allows it to cohabitate with the [Scalable Video Switch](https://scalablevideoswitch.com)
  - 4 Layer design
  - Designed for use with #4-40 x 3/4" jackscrew "bolts" for heavier VGA cable support.
  - BOM listed on Main README
  <img width="384" src="../images/11a.png" />
+
+
 
 
 

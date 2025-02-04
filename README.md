@@ -141,7 +141,7 @@ Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/
 | 1  | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) | (Color: 10PCS PJ-320) |
 | 1  | VGA Male Connector [10090926-P156XLF-ND] | [Digikey](https://www.digikey.com/en/products/detail/amphenol-cs-fci/10090926-P156XLF/4570100) | |
  
-* **VGA Passthrough w/ Serial Tap:**
+* **VGA Passthrough w/ Shared Serial Tap:**
 
 | **Qty**    | Part |  Link  |  Notes |
 | ------------- | ------------- |------------- |------------- |
