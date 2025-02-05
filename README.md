@@ -266,7 +266,7 @@ uint8_t SVS = 1; //     "Remote" profiles are profiles that are assigned to butt
              //     - SVS 209 - 216 for 2nd gScart
              //     - SVS   0       for S0 option mentioned below
              //
-             //  ** If S0 below is set to true, create "S0_<user defined>.rt4" for when all ports are in-active. Ex: S0_HDMI.rt4
+             //  ** If S0 below is set to true, create "/profile/SVS/S0_<user defined>.rt4" for when all ports are in-active. Ex: S0_HDMI.rt4
              //
              // 2 - use "Remote" profiles 1-12 for gscart/gcomp switches. Remote profile 1-8 for 1st gscart switch, 9-12 for inputs 1-4 on 2nd gscart switch.
              //     inputs 5-8 on the 2nd gscart switch will use SVS profiles 213 - 216
@@ -283,6 +283,7 @@ uint8_t SVS = 1; //     "Remote" profiles are profiles that are assigned to butt
 
 bool S0  = false;        // (Profile 0) 
                          //
+                         //  ** Recommended to remove any /profile/SVS/S0_<user defined>.rt4 profiles and leave this option "false" if using in tandem with the Scalable Video Switch. **
                          //
                          // set true to load "Remote" profile 12 (if SVS=0) when all ports are in-active on 1st Extron switch (and 2nd if connected). 
                          // You can assign it to a generic HDMI profile for example.
@@ -428,6 +429,14 @@ uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons.
                       11, // AUX8 + profile 11 button
                       12, // AUX8 + profile 12 button
                       };
-                          
+
+uint8_t extrabuttonprof = 0; // Used to keep track of AUX8 button presses for addtional button profiles
+                             //
+                             // 0 = enabled (default)
+                             //
+                             // 3 = disabled | Useful if you want to use AUX7, AUX8 buttons to control Scalable Video Switch inputs instead. 
+                             //                
+                             //
+
 ////////////////////////////////////////////////////////////////////////
 ```
