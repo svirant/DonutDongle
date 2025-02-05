@@ -293,6 +293,7 @@ byte viki8[4] = {0xA5,0x5A,0x07,0xCC};
 // sendSVSwake global variables
 unsigned long prevTime = 0;
 unsigned long currentTime = 0;
+unsigned long prevBlinkTime = 0;
 bool SVSwake = false;
 int currentProf[2] = {1,0};
 
@@ -1599,12 +1600,20 @@ void sendSVSwake(int mil){
       prevTime = millis();
     if((currentTime - prevTime) >= mil){
       prevTime = 0;
+      prevBlinkTime = 0;
       currentTime = 0;
       SVSwake = false;
+      digitalWrite(LED_BUILTIN,LOW);
       if(currentProf[0])
         sendSVS(currentProf[1]);
       else
         sendRBP(currentProf[1]);
+    }
+    if(currentTime - prevBlinkTime >= 1000){
+      prevBlinkTime = currentTime;
+      Serial.println("Blink!");
+      if(digitalRead(LED_BUILTIN) == LOW)digitalWrite(LED_BUILTIN,HIGH);
+      else digitalWrite(LED_BUILTIN,LOW);
     }
   }
 } // end of sendSVSwake()
