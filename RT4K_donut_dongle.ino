@@ -1,5 +1,5 @@
 /*
-* RT4K Donut Dongle v0.6
+* RT4K Donut Dongle v0.7
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -83,6 +83,7 @@ uint8_t SVS = 1; //     "Remote" profiles are profiles that are assigned to butt
 
 bool S0  = false;        // (Profile 0) 
                          //
+                         //  ** Recommended to remove any /profile/SVS/S0_<user defined>.rt4 profiles and leave this option "false" if using in tandem with the Scalable Video Switch. **
                          //
                          // set true to load "Remote" profile 12 (if SVS=0) when all ports are in-active on 1st Extron switch (and 2nd if connected). 
                          // You can assign it to a generic HDMI profile for example.
@@ -228,7 +229,15 @@ uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons.
                       11, // AUX8 + profile 11 button
                       12, // AUX8 + profile 12 button
                       };
-                          
+
+uint8_t extrabuttonprof = 0; // Used to keep track of AUX8 button presses for addtional button profiles
+                             //
+                             // 0 = enabled (default)
+                             //
+                             // 3 = disabled | Useful if you want to use AUX7, AUX8 buttons to control Scalable Video Switch inputs instead. 
+                             //                
+                             //
+
 ////////////////////////////////////////////////////////////////////////
 
 
@@ -241,7 +250,7 @@ uint8_t samcc[2] = {0,0}; // ADC sample cycle counter
 uint8_t highcount[2][3] = {{0,0,0},{0,0,0}}; // number of high samples recorded for bit0, bit1, bit2
 uint8_t bitprev[2][3] = {{0,0,0},{0,0,0}}; // stores previous bit state
 byte const apin[2][3] = {{A0,A1,A2},{A3,A4,A5}}; // defines analog pins used to read bit0, bit1, bit2
-uint8_t gctl = 0; // disable gscart/gcomp override by default until all boards have voltage divider
+uint8_t gctl = 0; // disable gscart/gcomp override by default until all boards have voltage divider (or you would be sending 5v to gscart 3.3v pins)
 uint8_t auxgsw[2] = {0,0}; // gscart sw1,sw2 toggle override
 
 // gscart / gcomp adjustment Global variables for port detection
@@ -256,7 +265,7 @@ uint8_t fpdccountmax = 3; // number of periods required when in the 50% duty cyc
 #define txPin 4 // sets Extron sw1 Tx pin to D4 ...
 SoftwareSerial extronSerial = SoftwareSerial(rxPin,txPin); // setup a software serial port for listening to Extron sw1 / alt sw1
 
-// Extron sw2 / al2 sw1 software serial port -> MAX3232 TTL IC
+// Extron sw2 / alt sw2 software serial port -> MAX3232 TTL IC
 AltSoftSerial extronSerial2; // setup yet another serial port for listening to Extron sw2 / alt sw2. hardcoded to pins D8 / D9
 
 // Extron Global variables
@@ -269,7 +278,6 @@ String eoutput[2]; // used to store first 2 chars of Extron output
 // IR Global variables
 uint8_t pwrtoggle = 0; // used to toggle remote power button command (on/off) when using the optional IR Receiver
 uint8_t repeatcount = 0; // used to help emulate the repeat nature of directional button presses
-uint8_t extrabuttonprof = 0; // used to keep track of AUX8 button presses for addtional button profiles
 String svsbutton; // used to store 3 digit SVS profile when AUX8 is double pressed
 uint8_t nument = 0; // used to keep track of how many digits have been entered for 3 digit SVS profile
 IRsend irsend;
@@ -281,6 +289,12 @@ byte viki5[4] = {0xA5,0x5A,0x04,0xCC};
 byte viki6[4] = {0xA5,0x5A,0x05,0xCC};
 byte viki7[4] = {0xA5,0x5A,0x06,0xCC};
 byte viki8[4] = {0xA5,0x5A,0x07,0xCC};
+
+// sendSVSwake global variables
+unsigned long prevTime = 0;
+unsigned long currentTime = 0;
+bool SVSwake = false;
+int currentProf[2] = {1,0};
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -316,6 +330,8 @@ void loop(){
   readExtron1(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt sw1" port
 
   readExtron2(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt sw2" port
+
+  if(SVSwake)sendSVSwake(11900); // 11900 is 11.9 seconds
 
 } /////////////////////////////////// end of void loop ////////////////////////////////////
 
@@ -1263,7 +1279,8 @@ void irRec(){
       repeatcount = 0;
       if(ir_recv_command == 63){
         //Serial.println(F("remote aux8\r")); aux8
-        extrabuttonprof++;
+        if(extrabuttonprof < 3)extrabuttonprof++;
+        else Serial.println(F("remote aux8\r"));
       }
       else if(ir_recv_command == 62){
         Serial.println(F("remote aux7\r"));
@@ -1427,6 +1444,7 @@ void irRec(){
         if(pwrtoggle){
           Serial.println(F("pwr on\r"));
           pwrtoggle = 0;
+          SVSwake = true;
         }
         else{
           Serial.println(F("remote pwr\r"));
@@ -1465,31 +1483,6 @@ void irRec(){
   } // end of TinyReceiverDecode()   
 } // end of irRec()
 
-void sendSVS(int num){
-  Serial.print(F("SVS NEW INPUT="));
-  Serial.print(num + offset);
-  Serial.println(F("\r"));
-  delay(1000);
-  Serial.print(F("SVS CURRENT INPUT="));
-  Serial.print(num + offset);
-  Serial.println(F("\r"));
-}
-
-void sendSVS(String num){
-  Serial.print(F("SVS NEW INPUT="));
-  Serial.print(num.toInt() + offset);
-  Serial.println(F("\r"));
-  delay(1000);
-  Serial.print(F("SVS CURRENT INPUT="));
-  Serial.print(num.toInt() + offset);
-  Serial.println(F("\r"));
-}
-
-void sendRBP(int prof){ // send Remote Button Profile
-  Serial.print(F("remote prof"));
-  Serial.print(prof);
-  Serial.println(F("\r"));
-}
 
 void overrideGscart(uint8_t port){ // disable auto switching and allows gscart port select
   if(port <= 8){
@@ -1563,3 +1556,55 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
     }
   }
 } // end of overrideGscart()
+
+void sendSVS(int num){
+  Serial.print(F("SVS NEW INPUT="));
+  Serial.print(num + offset);
+  Serial.println(F("\r"));
+  delay(1000);
+  Serial.print(F("SVS CURRENT INPUT="));
+  Serial.print(num + offset);
+  Serial.println(F("\r"));
+  currentProf[0] = 1; // 1 is SVS profile
+  currentProf[1] = num + offset;
+}
+
+void sendSVS(String num){
+  Serial.print(F("SVS NEW INPUT="));
+  Serial.print(num.toInt() + offset);
+  Serial.println(F("\r"));
+  delay(1000);
+  Serial.print(F("SVS CURRENT INPUT="));
+  Serial.print(num.toInt() + offset);
+  Serial.println(F("\r"));
+  currentProf[0] = 1; // 1 is SVS profile
+  currentProf[1] = num.toInt() + offset;
+}
+
+void sendRBP(int prof){ // send Remote Button Profile
+  Serial.print(F("remote prof"));
+  Serial.print(prof);
+  Serial.println(F("\r"));
+  currentProf[0] = 0; // 0 is Remote Button Profile
+  currentProf[1] = prof;
+}
+
+void sendSVSwake(int mil){
+  if((currentProf[0] == 1 && currentProf[1] == 0) || (currentProf[0] == 0 && currentProf[1] == 12)){
+    SVSwake = false;
+  }
+  else{
+    currentTime = millis();
+    if(prevTime == 0)
+      prevTime = millis();
+    if((currentTime - prevTime) >= mil){
+      prevTime = 0;
+      currentTime = 0;
+      SVSwake = false;
+      if(currentProf[0])
+        sendSVS(currentProf[1]);
+      else
+        sendRBP(currentProf[1]);
+    }
+  }
+} // end of sendSVSwake()
