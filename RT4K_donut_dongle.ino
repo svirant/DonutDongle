@@ -1611,7 +1611,6 @@ void sendSVSwake(int mil){
     }
     if(currentTime - prevBlinkTime >= 1000){
       prevBlinkTime = currentTime;
-      Serial.println("Blink!");
       if(digitalRead(LED_BUILTIN) == LOW)digitalWrite(LED_BUILTIN,HIGH);
       else digitalWrite(LED_BUILTIN,LOW);
     }
