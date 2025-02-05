@@ -1450,6 +1450,11 @@ void irRec(){
         else{
           Serial.println(F("remote pwr\r"));
           pwrtoggle = 1;
+          prevTime = 0;
+          prevBlinkTime = 0;
+          currentTime = 0;
+          SVSwake = false;
+          digitalWrite(LED_BUILTIN,LOW);
         }
       }
     }
