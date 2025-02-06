@@ -324,7 +324,7 @@ void loop(){
 
   // below are a list of functions that loop over and over to read in port changes and other misc tasks. you can disable them by commenting them out
 
-  irRec(); // intercepts the remote's button presses and relays them through the Serial interface giving a much more responsive experience and new functionality
+  readIR(); // intercepts the remote's button presses and relays them through the Serial interface giving a much more responsive experience and new functionality
 
   readGscart1(); // reads A0,A1,A2 pins to see which port, if any, are active
 
@@ -792,7 +792,7 @@ void readExtron2(){
         otakuoff[1] = 1;
         if(S0 && otakuoff[0] && allgscartoff[0] && allgscartoff[1] && ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku, Extron status
                             (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
-
+          if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
           if(SVS == 0){
             sendRBP(12);
           }
@@ -1120,7 +1120,7 @@ void readGscart2(){
 
 } // end readGscart2()
 
-void irRec(){
+void readIR(){
 
   uint8_t ir_recv_command = 0;
   uint8_t ir_recv_address = 0;
@@ -1559,7 +1559,7 @@ void irRec(){
     } // end of turbo directional mode
     
   } // end of TinyReceiverDecode()   
-} // end of irRec()
+} // end of readIR()
 
 void overrideGscart(uint8_t port){ // disable auto switching and allows gscart port select
   if(port <= 8){
