@@ -192,8 +192,8 @@ Some Arduino Nano's come with an Old Bootloader and won't Upload unless specifie
 
 | **SVS = 1 (default)** | **Profile #** | Notes |
 |----------|----------|---------|
-| Extron sw1 | 1 -  99 | also for TESmart, MT-ViKi devices|
-| Extron sw2 | 101 - 199 | also for TESmart, MT-ViKi devices |
+| Extron sw1 | 1 -  99 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices|
+| Extron sw2 | 101 - 199 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices |
 | GSCART sw1 | 201 - 208 | |
 | GSCART sw2 | 209 - 216 | |
 
@@ -203,8 +203,8 @@ Remote Button Profiles are **not** used when **SVS=1**
 
 | **SVS = 0** | **Profile #** | Notes |
 |----------|----------|---------|
-| Extron sw1 | 13 -  99 | also for TESmart, MT-ViKi devices|
-| Extron sw2 | 101 - 199 | also for TESmart, MT-ViKi devices |
+| Extron sw1 | 13 -  99 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices|
+| Extron sw2 | 101 - 199 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices |
 | GSCART sw1 | 201 - 208 | |
 | GSCART sw2 | 209 - 216 | |
 
@@ -214,8 +214,8 @@ Remote Button Profiles **1-12** are used for Extron sw1 when **SVS=0**
 
 | **SVS = 2** | **Profile #** | Notes |
 |----------|----------|---------|
-| Extron sw1 | 1 -  99 | also for TESmart, MT-ViKi devices|
-| Extron sw2 | 101 - 199 | also for TESmart, MT-ViKi devices |
+| Extron sw1 | 1 -  99 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices|
+| Extron sw2 | 101 - 199 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices |
 | GSCART sw1 | N/A | |
 | GSCART sw2 | 213 - 216 | inputs 5-8 |
 
@@ -388,11 +388,13 @@ uint8_t voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input change
 
 
 uint8_t RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
-                     // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
+                     // 1 = enabled for Extron alt sw1, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected
                      //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
-                     //     (S0 - if enabled uses Profile 10 on the RT5X)
                      //
                      // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-10 for first 2 inputs on second gscart)
+                     //
+                     // 3 = enabled for Extron alt sw2, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected 
+                     //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
 
 uint8_t RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
                      // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
