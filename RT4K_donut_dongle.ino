@@ -271,14 +271,10 @@ SoftwareSerial extronSerial = SoftwareSerial(rxPin,txPin); // setup a software s
 AltSoftSerial extronSerial2; // setup yet another serial port for listening to Extron sw2 / alt sw2. hardcoded to pins D8 / D9
 
 // Extron Global variables
-byte ecapbytes[2][13]; // used to store first 13 captured bytes / messages for Extron                
-String ecap[2]; // used to store Extron status messages for Extron in String format
-String einput[2]; // used to store first 4 chars of Extron input
 String previnput[2] = {"discon","discon"}; // used to keep track of previous input
-String eoutput[2]; // used to store first 2 chars of Extron output
+uint8_t eoutput[2]; // used to store Extron output
 
 // IR Global variables
-uint8_t pwrtoggle = 0; // used to toggle remote power button command (on/off) when using the optional IR Receiver
 uint8_t repeatcount = 0; // used to help emulate the repeat nature of directional button presses
 String svsbutton; // used to store 3 digit SVS profile when AUX8 is double pressed
 uint8_t nument = 0; // used to keep track of how many digits have been entered for 3 digit SVS profile
@@ -340,129 +336,133 @@ void loop(){
 
 void readExtron1(){
 
+    byte ecapbytes[13]; // used to store first 13 captured bytes / messages for Extron                
+    String ecap; // used to store Extron status messages for Extron in String format
+    String einput; // used to store first 4 chars of Extron input
+
     // listens to the Extron sw1 Port for changes
     // SIS Command Responses reference - Page 77 https://media.extron.com/public/download/files/userman/XP300_Matrix_B.pdf
     if(extronSerial.available() > 0){ // if there is data available for reading, read
-    extronSerial.readBytes(ecapbytes[0],13); // read in and store only the first 13 bytes for every status message received from 1st Extron SW port
+    extronSerial.readBytes(ecapbytes,13); // read in and store only the first 13 bytes for every status message received from 1st Extron SW port
     }
-    ecap[0] = String((char *)ecapbytes[0]); // convert bytes to String for Extron switches
+    ecap = String((char *)ecapbytes); // convert bytes to String for Extron switches
 
 
-    if(ecap[0].substring(0,3) == "Out"){ // store only the input and output states, some Extron devices report output first instead of input
-      einput[0] = ecap[0].substring(6,10);
-      eoutput[0] = ecap[0].substring(3,5);
+    if(ecap.substring(0,3) == "Out"){ // store only the input and output states, some Extron devices report output first instead of input
+      einput = ecap.substring(6,10);
+      eoutput[0] = ecap.substring(3,5).toInt();
     }
-    else if(ecap[0].substring(0,1) == "F"){ // detect if switch has changed auto/manual states
-      einput[0] = ecap[0].substring(4,8);
-      eoutput[0] = "00";
+    else if(ecap.substring(0,1) == "F"){ // detect if switch has changed auto/manual states
+      einput = ecap.substring(4,8);
+      eoutput[0] = 0;
     }
-    else if(ecap[0].substring(0,3) == "Rpr"){ // detect if a Preset has been used
-      einput[0] = ecap[0].substring(0,5);
-      eoutput[0] = "00";
+    else if(ecap.substring(0,3) == "Rpr"){ // detect if a Preset has been used
+      einput = ecap.substring(0,5);
+      eoutput[0] = 0;
     }
     else{                             // less complex switches only report input status, no output status
-      einput[0] = ecap[0].substring(0,4);
-      eoutput[0] = "00";
+      einput = ecap.substring(0,4);
+      eoutput[0] = 0;
     }
 
 
     // for Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMaxtrix
-    if((einput[0].substring(0,2) == "In" && voutMatrix[eoutput[0].toInt()]) || (einput[0].substring(0,3) == "Rpr")){
-      if(einput[0] == "In1 " || einput[0] == "In01" || einput[0] == "Rpr01"){
+    if((einput.substring(0,2) == "In" && voutMatrix[eoutput[0]]) || (einput.substring(0,3) == "Rpr")){
+      if(einput == "In1 " || einput == "In01" || einput == "Rpr01"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
 
         if(SVS==0)sendRBP(1);
         else sendSVS(1);
       }
-      else if(einput[0] == "In2 " || einput[0] == "In02" || einput[0] == "Rpr02"){
+      else if(einput == "In2 " || einput == "In02" || einput == "Rpr02"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x07,2); // RT4K profile 2
 
         if(SVS==0)sendRBP(2);
         else sendSVS(2);
       }
-      else if(einput[0] == "In3 " || einput[0] == "In03" || einput[0] == "Rpr03"){
+      else if(einput == "In3 " || einput == "In03" || einput == "Rpr03"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x03,2); // RT4K profile 3
 
         if(SVS==0)sendRBP(3);
         else sendSVS(3);
       }
-      else if(einput[0] == "In4 " || einput[0] == "In04" || einput[0] == "Rpr04"){
+      else if(einput == "In4 " || einput == "In04" || einput == "Rpr04"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x0A,2); // RT4K profile 4
 
         if(SVS==0)sendRBP(4);
         else sendSVS(4);
       }
-      else if(einput[0] == "In5 " || einput[0] == "In05" || einput[0] == "Rpr05"){
+      else if(einput == "In5 " || einput == "In05" || einput == "Rpr05"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x06,2); // RT4K profile 5
 
         if(SVS==0)sendRBP(5);
         else sendSVS(5);
       }
-      else if(einput[0] == "In6 " || einput[0] == "In06" || einput[0] == "Rpr06"){
+      else if(einput == "In6 " || einput == "In06" || einput == "Rpr06"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x02,2); // RT4K profile 6
 
         if(SVS==0)sendRBP(6);
         else sendSVS(6);
       }
-      else if(einput[0] == "In7 " || einput[0] == "In07" || einput[0] == "Rpr07"){
+      else if(einput == "In7 " || einput == "In07" || einput == "Rpr07"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x09,2); // RT4K profile 7
 
         if(SVS==0)sendRBP(7);
         else sendSVS(7);
       }
-      else if(einput[0] == "In8 " || einput[0] == "In08" || einput[0] == "Rpr08"){
+      else if(einput == "In8 " || einput == "In08" || einput == "Rpr08"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x05,2); // RT4K profile 8
 
         if(SVS==0)sendRBP(8);
         else sendSVS(8);
       }
-      else if(einput[0] == "In9 " || einput[0] == "In09" || einput[0] == "Rpr09"){
+      else if(einput == "In9 " || einput == "In09" || einput == "Rpr09"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x01,2); // RT4K profile 9
 
         if(SVS==0)sendRBP(9);
         else sendSVS(9);
       }
-      else if(einput[0] == "In10" || einput[0] == "Rpr10"){
+      else if(einput == "In10" || einput == "Rpr10"){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x25,2); // RT4K profile 10
 
         if(SVS==0)sendRBP(10);
         else sendSVS(10);
       }
-      else if(einput[0] == "In11" || einput[0] == "Rpr11"){
+      else if(einput == "In11" || einput == "Rpr11"){
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x26,2); // RT4K profile 11
 
         if(SVS==0)sendRBP(11);
         else sendSVS(11);
       }
-      else if(einput[0] == "In12" || einput[0] == "Rpr12"){
+      else if(einput == "In12" || einput == "Rpr12"){
         if((RT4Kir == 1) && !S0)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
 
         if((SVS==0 && !S0))sendRBP(12); // okay to use this profile if S0 is set to false
         else sendSVS(12);
       }
-      else if(einput[0].substring(0,3) == "Rpr"){
-        sendSVS(einput[0].substring(3,5));
+      else if(einput.substring(0,3) == "Rpr"){
+        sendSVS(einput.substring(3,5));
       }
-      else if(einput[0] != "In0 " && einput[0] != "In00"){ // for inputs 13-99 (SVS only)
-        sendSVS(einput[0].substring(2,4));
+      else if(einput != "In0 " && einput != "In00"){ // for inputs 13-99 (SVS only)
+        sendSVS(einput.substring(2,4));
       }
 
-      previnput[0] = einput[0];
+      previnput[0] = einput;
 
       // Exton S0
       // when both Extron switches match In0 or In00 (no active ports), both gscart/gcomp/otaku are disconnected or all ports in-active, a S0 Profile can be loaded if S0 is enabled
-      if(((einput[0] == "In0 " || einput[0] == "In00") && (previnput[1] == "In0 " || previnput[1] == "In00" || previnput[1] == "discon")) && S0 
-        && otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1] && voutMatrix[eoutput[0].toInt()] && (previnput[1] == "discon" || voutMatrix[eoutput[1].toInt()+32])){
+      if(((einput == "In0 " || einput == "In00") && (previnput[1] == "In0 " || previnput[1] == "In00" || previnput[1] == "discon")) && S0 
+        && otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1] && voutMatrix[eoutput[0]] && (previnput[1] == "discon" || voutMatrix[eoutput[1]+32])){
 
       if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
 
@@ -480,108 +480,108 @@ void readExtron1(){
     }
 
     // for TESmart / MT-VIKI HDMI switch on Extron sw1 / alt sw1
-    if(ecapbytes[0][4] == 17 || ecapbytes[0][4] == 95){
-      if(ecapbytes[0][6] == 22 || ecapbytes[0][11] == 48){
+    if(ecapbytes[4] == 17 || ecapbytes[4] == 95){
+      if(ecapbytes[6] == 22 || ecapbytes[11] == 48){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
 
         if(SVS==0)sendRBP(1);
         else sendSVS(1);
       }
-      else if(ecapbytes[0][6] == 23 || ecapbytes[0][11] == 49){
+      else if(ecapbytes[6] == 23 || ecapbytes[11] == 49){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x07,2); // RT4K profile 2
 
         if(SVS==0)sendRBP(2);
         else sendSVS(2);
       }
-      else if(ecapbytes[0][6] == 24 || ecapbytes[0][11] == 50){
+      else if(ecapbytes[6] == 24 || ecapbytes[11] == 50){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x03,2); // RT4K profile 3
 
         if(SVS==0)sendRBP(3);
         else sendSVS(3);
       }
-      else if(ecapbytes[0][6] == 25 || ecapbytes[0][11] == 51){
+      else if(ecapbytes[6] == 25 || ecapbytes[11] == 51){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x0A,2); // RT4K profile 4
 
         if(SVS==0)sendRBP(4);
         else sendSVS(4);
       }
-      else if(ecapbytes[0][6] == 26 || ecapbytes[0][11] == 52){
+      else if(ecapbytes[6] == 26 || ecapbytes[11] == 52){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x06,2); // RT4K profile 5
 
         if(SVS==0)sendRBP(5);
         else sendSVS(5);
       }
-      else if(ecapbytes[0][6] == 27 || ecapbytes[0][11] == 53){
+      else if(ecapbytes[6] == 27 || ecapbytes[11] == 53){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x02,2); // RT4K profile 6
 
         if(SVS==0)sendRBP(6);
         else sendSVS(6);
       }
-      else if(ecapbytes[0][6] == 28 || ecapbytes[0][11] == 54){
+      else if(ecapbytes[6] == 28 || ecapbytes[11] == 54){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x09,2); // RT4K profile 7
 
         if(SVS==0)sendRBP(7);
         else sendSVS(7);
       }
-      else if(ecapbytes[0][6] == 29 || ecapbytes[0][11] == 55){
+      else if(ecapbytes[6] == 29 || ecapbytes[11] == 55){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x05,2); // RT4K profile 8
 
         if(SVS==0)sendRBP(8);
         else sendSVS(8);
       }
-      else if(ecapbytes[0][6] == 30){
+      else if(ecapbytes[6] == 30){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x01,2); // RT4K profile 9
 
         if(SVS==0)sendRBP(9);
         else sendSVS(9);
       }
-      else if(ecapbytes[0][6] == 31){
+      else if(ecapbytes[6] == 31){
         if(RT5Xir == 1){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x25,2); // RT4K profile 10
 
         if(SVS==0)sendRBP(10);
         else sendSVS(10);
       }
-      else if(ecapbytes[0][6] == 32){
+      else if(ecapbytes[6] == 32){
         if(RT4Kir == 1)irsend.sendNEC(0x49,0x26,2); // RT4K profile 11
 
         if(SVS==0)sendRBP(11);
         else sendSVS(11);
       }
-      else if(ecapbytes[0][6] == 33){
+      else if(ecapbytes[6] == 33){
         if((RT4Kir == 1) && !S0)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
 
         if(SVS==0 && !S0)sendRBP(12); // okay to use this profile if S0 is set to false
         else sendSVS(12);
       }
-      else if(ecapbytes[0][6] > 33 && ecapbytes[0][6] < 38){
-        sendSVS(ecapbytes[0][6] - 21);
+      else if(ecapbytes[6] > 33 && ecapbytes[6] < 38){
+        sendSVS(ecapbytes[6] - 21);
       }
     }
 
-    // set ecapbytes[0] to 0 for next read
-    memset(ecapbytes[0],0,sizeof(ecapbytes[0]));
+    // set ecapbytes to 0 for next read
+    memset(ecapbytes,0,sizeof(ecapbytes));
 
     // for Otaku Games Scart Switch
-    if(ecap[0].substring(0,6) == "remote"){
+    if(ecap.substring(0,6) == "remote"){
       otakuoff[0] = 0;
-      if(ecap[0].substring(0,13) == "remote prof10"){
+      if(ecap.substring(0,13) == "remote prof10"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x87,2);delay(30);} // RT5X profile 10
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x25,2); // RT4K profile 10
 
           if(SVS==0) sendRBP(10);
           else sendSVS(10);
       }
-      else if(ecap[0].substring(0,13) == "remote prof12"){
+      else if(ecap.substring(0,13) == "remote prof12"){
         otakuoff[0] = 1;
         if(S0 && otakuoff[1] && allgscartoff[0] && allgscartoff[1] && ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku2, Extron status
                             (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
@@ -595,63 +595,63 @@ void readExtron1(){
           }
         }
       }
-      else if(ecap[0].substring(0,12) == "remote prof1"){
+      else if(ecap.substring(0,12) == "remote prof1"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x92,2);delay(30);} // RT5X profile 1 
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x0B,2); // RT4K profile 1
 
           if(SVS==0) sendRBP(1);
           else sendSVS(1);
       }
-      else if(ecap[0].substring(0,12) == "remote prof2"){
+      else if(ecap.substring(0,12) == "remote prof2"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x93,2);delay(30);} // RT5X profile 2
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x07,2); // RT4K profile 2
 
           if(SVS==0) sendRBP(2);
           else sendSVS(2);
       }
-      else if(ecap[0].substring(0,12) == "remote prof3"){
+      else if(ecap.substring(0,12) == "remote prof3"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0xCC,2);delay(30);} // RT5X profile 3
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x03,2); // RT4K profile 3
 
           if(SVS==0) sendRBP(3);
           else sendSVS(3);
       }
-      else if(ecap[0].substring(0,12) == "remote prof4"){
+      else if(ecap.substring(0,12) == "remote prof4"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8E,2);delay(30);} // RT5X profile 4
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x0A,2); // RT4K profile 4
 
           if(SVS==0) sendRBP(4);
           else sendSVS(4);
       }
-      else if(ecap[0].substring(0,12) == "remote prof5"){
+      else if(ecap.substring(0,12) == "remote prof5"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8F,2);delay(30);} // RT5X profile 5
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x06,2); // RT4K profile 5
 
           if(SVS==0) sendRBP(5);
           else sendSVS(5);
       }
-      else if(ecap[0].substring(0,12) == "remote prof6"){
+      else if(ecap.substring(0,12) == "remote prof6"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC8,2);delay(30);} // RT5X profile 6
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x02,2); // RT4K profile 6
 
           if(SVS==0) sendRBP(6);
           else sendSVS(6);
       }
-      else if(ecap[0].substring(0,12) == "remote prof7"){
+      else if(ecap.substring(0,12) == "remote prof7"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8A,2);delay(30);} // RT5X profile 7
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x09,2); // RT4K profile 7
 
           if(SVS==0) sendRBP(7);
           else sendSVS(7);
       }
-      else if(ecap[0].substring(0,12) == "remote prof8"){
+      else if(ecap.substring(0,12) == "remote prof8"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0x8B,2);delay(30);} // RT5X profile 8
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x05,2); // RT4K profile 8
 
           if(SVS==0) sendRBP(8);
           else sendSVS(8);
       }
-      else if(ecap[0].substring(0,12) == "remote prof9"){
+      else if(ecap.substring(0,12) == "remote prof9"){
           if(RT5Xir == 1){irsend.sendNEC(0xB3,0xC4,2);delay(30);} // RT5X profile 9
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x01,2); // RT4K profile 9
 
@@ -664,48 +664,52 @@ void readExtron1(){
 
 void readExtron2(){
     
+    byte ecapbytes[13]; // used to store first 13 captured bytes / messages for Extron                
+    String ecap; // used to store Extron status messages for Extron in String format
+    String einput; // used to store first 4 chars of Extron input
+
     // listens to the Extron sw2 Port for changes
     if(extronSerial2.available() > 0){ // if there is data available for reading, read
-    extronSerial2.readBytes(ecapbytes[1],13); // read in and store only the first 13 bytes for every status message received from 2nd Extron port
+    extronSerial2.readBytes(ecapbytes,13); // read in and store only the first 13 bytes for every status message received from 2nd Extron port
     }
-    ecap[1] = String((char *)ecapbytes[1]);
+    ecap = String((char *)ecapbytes);
 
-    if(ecap[1].substring(0,3) == "Out"){ // store only the input and output states, some Extron devices report output first instead of input
-      einput[1] = ecap[1].substring(6,10);
-      eoutput[1] = ecap[1].substring(3,5);
+    if(ecap.substring(0,3) == "Out"){ // store only the input and output states, some Extron devices report output first instead of input
+      einput = ecap.substring(6,10);
+      eoutput[1] = ecap.substring(3,5).toInt();
     }
-    else if(ecap[1].substring(0,1) == "F"){ // detect if switch has changed auto/manual states
-      einput[1] = ecap[1].substring(4,8);
-      eoutput[1] = "00";
+    else if(ecap.substring(0,1) == "F"){ // detect if switch has changed auto/manual states
+      einput = ecap.substring(4,8);
+      eoutput[1] = 0;
     }
-    else if(ecap[1].substring(0,3) == "Rpr"){ // detect if a Preset has been used
-      einput[1] = ecap[1].substring(0,5);
-      eoutput[1] = "00";
+    else if(ecap.substring(0,3) == "Rpr"){ // detect if a Preset has been used
+      einput = ecap.substring(0,5);
+      eoutput[1] = 0;
     }
     else{                              // less complex switches only report input status, no output status
-      einput[1] = ecap[1].substring(0,4);
-      eoutput[1] = "00";
+      einput = ecap.substring(0,4);
+      eoutput[1] = 0;
     }
 
 
     // For Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMaxtrix
-    if((einput[1].substring(0,2) == "In" && voutMatrix[eoutput[1].toInt()+32]) || (einput[1].substring(0,3) == "Rpr")){
-      if(einput[1].substring(0,3) == "Rpr"){
-        sendSVS(einput[1].substring(3,5).toInt()+100);
+    if((einput.substring(0,2) == "In" && voutMatrix[eoutput[1]+32]) || (einput.substring(0,3) == "Rpr")){
+      if(einput.substring(0,3) == "Rpr"){
+        sendSVS(einput.substring(3,5).toInt()+100);
       }
-      else if(einput[1] != "In0 " && einput[1] != "In00"){ // much easier method for switch 2 since ALL inputs will respond with SVS commands regardless of SVS option above
-        if(einput[1].substring(3,4) == " ") 
-          sendSVS(einput[1].substring(2,3).toInt()+100);
+      else if(einput != "In0 " && einput != "In00"){ // much easier method for switch 2 since ALL inputs will respond with SVS commands regardless of SVS option above
+        if(einput.substring(3,4) == " ") 
+          sendSVS(einput.substring(2,3).toInt()+100);
         else 
-          sendSVS(einput[1].substring(2,4).toInt()+100);
+          sendSVS(einput.substring(2,4).toInt()+100);
       }
 
-      previnput[1] = einput[1];
+      previnput[1] = einput;
       
       // Extron2 S0
       // when both Extron switches match In0 or In00 (no active ports), both gscart/gcomp/otaku are disconnected or all ports in-active, a Profile 0 can be loaded if S0 is enabled
-      if(((einput[1] == "In0 " || einput[1] == "In00") && (previnput[0] == "In0 " || previnput[0] == "In00" || previnput[0] == "discon")) && S0 
-        && otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1] && voutMatrix[eoutput[1].toInt()+32] && (previnput[0] == "discon" || voutMatrix[eoutput[0].toInt()])){
+      if(((einput == "In0 " || einput == "In00") && (previnput[0] == "In0 " || previnput[0] == "In00" || previnput[0] == "discon")) && S0 
+        && otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1] && voutMatrix[eoutput[1]+32] && (previnput[0] == "discon" || voutMatrix[eoutput[0]])){
 
 
       if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
@@ -723,72 +727,65 @@ void readExtron2(){
 
     }
 
-    // // for TESmart / MT-VIKI HDMI switch on Extron alt sw2 Port
-    // if(ecapbytes[1][4] == 17 && ecapbytes[1][6] > 21 && ecapbytes[1][6] < 38){ // TESmart
-    //   sendSVS(ecapbytes[1][6] + 79);
-    // }
-    // else if(ecapbytes[1][4] == 95 && ecapbytes[1][11] > 47 && ecapbytes[1][11] < 56){ // MT-VIKI 
-    //   sendSVS(ecapbytes[1][11] + 53);
-    // }
 
     // for TESmart / MT-VIKI HDMI switch on Extron alt sw2 Port
-    if(ecapbytes[1][4] == 17 || ecapbytes[1][4] == 95){
-      if(ecapbytes[1][6] == 22 || ecapbytes[1][11] == 48){
+    if(ecapbytes[4] == 17 || ecapbytes[4] == 95){
+      if(ecapbytes[6] == 22 || ecapbytes[11] == 48){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0x92,2); // RT5X profile 1 
         sendSVS(101);
       }
-      else if(ecapbytes[1][6] == 23 || ecapbytes[1][11] == 49){
+      else if(ecapbytes[6] == 23 || ecapbytes[11] == 49){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0x93,2); // RT5X profile 2
         sendSVS(102);
       }
-      else if(ecapbytes[1][6] == 24 || ecapbytes[1][11] == 50){
+      else if(ecapbytes[6] == 24 || ecapbytes[11] == 50){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0xCC,2); // RT5X profile 3
         sendSVS(103);
       }
-      else if(ecapbytes[1][6] == 25 || ecapbytes[1][11] == 51){
+      else if(ecapbytes[6] == 25 || ecapbytes[11] == 51){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0x8E,2); // RT5X profile 4
         sendSVS(104);
       }
-      else if(ecapbytes[1][6] == 26 || ecapbytes[1][11] == 52){
+      else if(ecapbytes[6] == 26 || ecapbytes[11] == 52){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0x8F,2); // RT5X profile 5
         sendSVS(105);
       }
-      else if(ecapbytes[1][6] == 27 || ecapbytes[1][11] == 53){
+      else if(ecapbytes[6] == 27 || ecapbytes[11] == 53){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0xC8,2); // RT5X profile 6
         sendSVS(106);
       }
-      else if(ecapbytes[1][6] == 28 || ecapbytes[1][11] == 54){
+      else if(ecapbytes[6] == 28 || ecapbytes[11] == 54){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0x8A,2); // RT5X profile 7
         sendSVS(107);
       }
-      else if(ecapbytes[1][6] == 29 || ecapbytes[1][11] == 55){
+      else if(ecapbytes[6] == 29 || ecapbytes[11] == 55){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0x8B,2); // RT5X profile 8
         sendSVS(108);
       }
-      else if(ecapbytes[1][6] == 30){
+      else if(ecapbytes[6] == 30){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0xC4,2); // RT5X profile 9
         sendSVS(109);
       }
-      else if(ecapbytes[1][6] == 31){
+      else if(ecapbytes[6] == 31){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0x87,2); // RT5X profile 10
         sendSVS(110);
       }
-      else if(ecapbytes[1][6] > 31 && ecapbytes[1][6] < 38){
-        sendSVS(ecapbytes[1][6] + 79);
+      else if(ecapbytes[6] > 31 && ecapbytes[6] < 38){
+        sendSVS(ecapbytes[6] + 79);
       }
     }
 
-    // set ecapbytes[1] to 0 for next read
-    memset(ecapbytes[1],0,sizeof(ecapbytes[1]));
+    // set ecapbytes to 0 for next read
+    memset(ecapbytes,0,sizeof(ecapbytes));
 
     // for Otaku Games Scart Switch
-    if(ecap[1].substring(0,6) == "remote"){
+    if(ecap.substring(0,6) == "remote"){
       otakuoff[1] = 0;
-      if(ecap[1].substring(0,13) == "remote prof10"){
+      if(ecap.substring(0,13) == "remote prof10"){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0x87,2); // RT5X profile 10
         sendSVS(110);
       }
-      else if(ecap[1].substring(0,13) == "remote prof12"){
+      else if(ecap.substring(0,13) == "remote prof12"){
         otakuoff[1] = 1;
         if(S0 && otakuoff[0] && allgscartoff[0] && allgscartoff[1] && ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku, Extron status
                             (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
@@ -801,39 +798,39 @@ void readExtron2(){
           }
         }
       }
-      else if(ecap[1].substring(0,12) == "remote prof1"){
+      else if(ecap.substring(0,12) == "remote prof1"){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0x92,2); // RT5X profile 1 
         sendSVS(101);
       }
-      else if(ecap[1].substring(0,12) == "remote prof2"){
+      else if(ecap.substring(0,12) == "remote prof2"){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0x93,2); // RT5X profile 2
         sendSVS(102);
       }
-      else if(ecap[1].substring(0,12) == "remote prof3"){
+      else if(ecap.substring(0,12) == "remote prof3"){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0xCC,2); // RT5X profile 3
         sendSVS(103);
       }
-      else if(ecap[1].substring(0,12) == "remote prof4"){
+      else if(ecap.substring(0,12) == "remote prof4"){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0x8E,2); // RT5X profile 4
         sendSVS(104);
       }
-      else if(ecap[1].substring(0,12) == "remote prof5"){
+      else if(ecap.substring(0,12) == "remote prof5"){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0x8F,2); // RT5X profile 5
         sendSVS(105);
       }
-      else if(ecap[1].substring(0,12) == "remote prof6"){
+      else if(ecap.substring(0,12) == "remote prof6"){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0xC8,2); // RT5X profile 6
         sendSVS(106);
       }
-      else if(ecap[1].substring(0,12) == "remote prof7"){
+      else if(ecap.substring(0,12) == "remote prof7"){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0x8A,2); // RT5X profile 7
         sendSVS(107);
       }
-      else if(ecap[1].substring(0,12) == "remote prof8"){
+      else if(ecap.substring(0,12) == "remote prof8"){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0x8B,2); // RT5X profile 8
         sendSVS(108);
       }
-      else if(ecap[1].substring(0,12) == "remote prof9"){
+      else if(ecap.substring(0,12) == "remote prof9"){
         if(RT5Xir == 3)irsend.sendNEC(0xB3,0xC4,2); // RT5X profile 9
         sendSVS(109);
       }
@@ -1519,15 +1516,9 @@ void readIR(){
         Serial.println(F("remote menu\r"));
       }
       else if(ir_recv_command == 26){
-        if(pwrtoggle){
-          Serial.println(F("pwr on\r"));
-          pwrtoggle = 0;
-          RTwake = true;
-        }
-        else{
-          Serial.println(F("remote pwr\r"));
-          pwrtoggle = 1;
-        }
+        Serial.println(F("pwr on\r"));
+        Serial.println(F("remote pwr\r"));
+        RTwake = true;
       }
     }
     else if(ir_recv_address == 73 && repeatcount > 4){ // directional buttons have to be held down for just a bit before repeating
@@ -1667,10 +1658,6 @@ void sendRBP(int prof){ // send Remote Button Profile
 }
 
 void sendRTwake(int mil){
-  if((currentProf[0] == 1 && currentProf[1] == 0) || (currentProf[0] == 0 && currentProf[1] == 12)){
-    RTwake = false;
-  }
-  else{
     currentTime = millis();
     if(prevTime == 0)
       prevTime = millis();
@@ -1680,15 +1667,16 @@ void sendRTwake(int mil){
       currentTime = 0;
       RTwake = false;
       digitalWrite(LED_BUILTIN,LOW);
-      if(currentProf[0])
-        sendSVS(currentProf[1]);
-      else
-        sendRBP(currentProf[1]);
+      if((currentProf[0] == 1 && currentProf[1] != 0) || (currentProf[0] == 0 && currentProf[1] != 12)){
+        if(currentProf[0])
+          sendSVS(currentProf[1]);
+        else
+          sendRBP(currentProf[1]);
+      }
     }
     if(currentTime - prevBlinkTime >= 300){
       prevBlinkTime = currentTime;
       if(digitalRead(LED_BUILTIN) == LOW)digitalWrite(LED_BUILTIN,HIGH);
       else digitalWrite(LED_BUILTIN,LOW);
     }
-  }
 } // end of sendRTwake()
