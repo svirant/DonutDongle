@@ -34,11 +34,11 @@
 */
 
 
-int offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
+int const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                 // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with offset = 0.
 
 
-uint8_t SVS = 1; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
+uint8_t const SVS = 1; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
              //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
              //     the profile being used for a console's switch input if your setup is in flux. SVS require you to rename the file itself on the SD card which is 
              //     a little more work.  Regardless, SVS profiles will need to be used for console switch inputs over 12.
@@ -81,7 +81,7 @@ uint8_t SVS = 1; //     "Remote" profiles are profiles that are assigned to butt
 
 
 
-bool S0  = false;        // (Profile 0) 
+bool const S0  = false;        // (Profile 0) 
                          //
                          //  ** Recommended to remove any /profile/SVS/S0_<user defined>.rt4 profiles and leave this option "false" if using in tandem with the Scalable Video Switch. **
                          //
@@ -114,7 +114,7 @@ bool S0  = false;        // (Profile 0)
 
 
 
-uint8_t voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input changes to any/all outputs result in a profile change
+uint8_t const voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input changes to any/all outputs result in a profile change
                                                    // disable specific outputs from triggering profile changes
                                                    //
                            1,  // output 1 (1 = enabled, 0 = disabled)
@@ -187,7 +187,7 @@ uint8_t voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input change
                            
 
 
-uint8_t RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
+uint8_t const RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
                      // 1 = enabled for Extron sw1 / alt sw1, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected
                      //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
                      //
@@ -196,14 +196,14 @@ uint8_t RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
                      // 3 = enabled for Extron sw2 / alt sw2, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected 
                      //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
 
-uint8_t RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
+uint8_t const RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
                      // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
                      //     sends Profile 1 - 12 commands to RetroTink 4K. Must have IR LED emitter connected.
                      //     (S0 - if enabled uses Profile 12 on the RT4K)
                      //
                      // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-12 for first 4 inputs on second gscart)
 
-uint8_t MTVIKIir = 0;    // Must have IR "Receiver" connected to the Donut Dongle for option 1 & 2.
+uint8_t const MTVIKIir = 0;    // Must have IR "Receiver" connected to the Donut Dongle for option 1 & 2.
                      // 0 = disables IR Receiver -> Serial Control for MT-VIKI 8 Port HDMI switch
                      //
                      // 1 = MT-VIKI 8 Port HDMI switch connected to "Extron sw1"
@@ -214,7 +214,7 @@ uint8_t MTVIKIir = 0;    // Must have IR "Receiver" connected to the Donut Dongl
                      //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the MT-VIKI Input over Serial.
                      //     Sends auxprof SVS profiles listed below. You can change them below to 101 - 108 to prevent SVS profile conflicts if needed.
 
-uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons. 
+uint8_t const auxprof[12] =    // Assign SVS profiles to IR remote profile buttons. 
                           // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
                           // Press AUX8 then profile button to load. Must have IR Receiver connected and Serial connection to RT4K.
                           // 
@@ -232,53 +232,50 @@ uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons.
                       12, // AUX8 + profile 12 button
                       };
 
-uint8_t extrabuttonprof = 0; // Used to keep track of AUX8 button presses for addtional button profiles
-                             //
+
+// gscart / gcomp adjustment variables for port detection
+float const highsamvolt[2] = {1.2,1.2}; // for gscart sw1,sw2 rise above this voltage for a high sample
+byte const apin[2][3] = {{A0,A1,A2},{A3,A4,A5}}; // defines analog pins used to read bit0, bit1, bit2
+uint8_t const dch = 15; // (duty cycle high) at least this many high samples per "samsize" for a high bit (~75% duty cycle)
+uint8_t const dcl = 5; // (duty cycle low) at least this many high samples and less than "dch" per "samsize" indicate all inputs are in-active (~50% duty cycle)
+uint8_t const samsize = 20; // total number of ADC samples required to capture at least 1 period
+uint8_t const fpdccountmax = 3; // number of periods required when in the 50% duty cycle state before a Profile 0 is triggered.
+uint8_t const gctl = 0; // disable gscart/gcomp override by default until all boards have voltage divider (or you would be sending 5v to gscart 3.3v pins)
+
+
+uint8_t extrabuttonprof = 0; // 3 = disabled | If you want to use AUX7, AUX8 buttons to control Scalable Video Switch inputs instead. 
                              // 0 = enabled (default)
                              //
-                             // 3 = disabled | Useful if you want to use AUX7, AUX8 buttons to control Scalable Video Switch inputs instead. 
-                             //                
+                             // Used to keep track of AUX8 button presses for addtional button profiles
                              //
 
 ////////////////////////////////////////////////////////////////////////
-
 
 // gscart / gcomp Global variables
 uint8_t fpdcprev[2] = {0,0}; // stores 50% duty cycle detection
 uint8_t fpdccount[2] = {0,0}; // number of times a 50% duty cycle period has been detected
 uint8_t allgscartoff[2] = {2,2}; // 0 = at least 1 port is active, 1 = no ports are active, 2 = disconnected or not used yet
-uint8_t otakuoff[2] = {2,2}; // 0 = at least 1 port is active, 1 = no ports are active, 2 = disconnected or not used yet
 uint8_t samcc[2] = {0,0}; // ADC sample cycle counter
 uint8_t highcount[2][3] = {{0,0,0},{0,0,0}}; // number of high samples recorded for bit0, bit1, bit2
 uint8_t bitprev[2][3] = {{0,0,0},{0,0,0}}; // stores previous bit state
-byte const apin[2][3] = {{A0,A1,A2},{A3,A4,A5}}; // defines analog pins used to read bit0, bit1, bit2
-uint8_t gctl = 0; // disable gscart/gcomp override by default until all boards have voltage divider (or you would be sending 5v to gscart 3.3v pins)
 uint8_t auxgsw[2] = {0,0}; // gscart sw1,sw2 toggle override
 
-// gscart / gcomp adjustment Global variables for port detection
-float highsamvolt[2] = {1.2,1.2}; // for gscart sw1,sw2 rise above this voltage for a high sample
-uint8_t dch = 15; // (duty cycle high) at least this many high samples per "samsize" for a high bit (~75% duty cycle)
-uint8_t dcl = 5; // (duty cycle low) at least this many high samples and less than "dch" per "samsize" indicate all inputs are in-active (~50% duty cycle)
-uint8_t samsize = 20; // total number of ADC samples required to capture at least 1 period
-uint8_t fpdccountmax = 3; // number of periods required when in the 50% duty cycle state before a Profile 0 is triggered.
+// Extron sw1 / alt sw1 software serial port -> MAX3232 TTL IC (when jumpers set to "H")
+SoftwareSerial extronSerial = SoftwareSerial(3,4); // setup a software serial port for listening to Extron sw1 / alt sw1. rxPin =3 / txPin = 4
 
-// Extron sw1 / alt sw1 software serial port -> MAX3232 TTL IC
-#define rxPin 3 // sets Extron sw1 Rx pin to D3 on Arduino
-#define txPin 4 // sets Extron sw1 Tx pin to D4 ...
-SoftwareSerial extronSerial = SoftwareSerial(rxPin,txPin); // setup a software serial port for listening to Extron sw1 / alt sw1
-
-// Extron sw2 / alt sw2 software serial port -> MAX3232 TTL IC
+// Extron sw2 / alt sw2 software serial port -> MAX3232 TTL IC (when jumpers set to "H")
 AltSoftSerial extronSerial2; // setup yet another serial port for listening to Extron sw2 / alt sw2. hardcoded to pins D8 / D9
 
 // Extron Global variables
 String previnput[2] = {"discon","discon"}; // used to keep track of previous input
 uint8_t eoutput[2]; // used to store Extron output
+uint8_t otakuoff[2] = {2,2}; // 0 = at least 1 port is active, 1 = no ports are active, 2 = disconnected or not used yet
 
 // IR Global variables
+IRsend irsend;
 uint8_t repeatcount = 0; // used to help emulate the repeat nature of directional button presses
 String svsbutton; // used to store 3 digit SVS profile when AUX8 is double pressed
 uint8_t nument = 0; // used to keep track of how many digits have been entered for 3 digit SVS profile
-IRsend irsend;
 byte viki1[4] = {0xA5,0x5A,0x00,0xCC};
 byte viki2[4] = {0xA5,0x5A,0x01,0xCC};
 byte viki3[4] = {0xA5,0x5A,0x02,0xCC};
@@ -1099,7 +1096,7 @@ void readGscart2(){
     memset(bitprev[1],0,sizeof(bitprev[1]));
     fpdcprev[1] = fpdc;
     
-    if(S0 && allgscartoff && 
+    if(S0 && allgscartoff[0] && 
       otakuoff[0] && otakuoff[1] && 
       ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") &&  // cross-checks gscart, otaku, Extron status
        (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
