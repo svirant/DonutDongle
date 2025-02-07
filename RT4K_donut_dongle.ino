@@ -232,6 +232,8 @@ uint8_t const auxprof[12] =    // Assign SVS profiles to IR remote profile butto
                       12, // AUX8 + profile 12 button
                       };
 
+String const auxpower = "LG"; // AUX8 + Power button sends power off/on via IR Emitter. "LG" OLEX CX is the only one implemented atm. 
+
 
 // gscart / gcomp adjustment variables for port detection
 float const highsamvolt[2] = {1.2,1.2}; // for gscart sw1,sw2 rise above this voltage for a high sample
@@ -1273,10 +1275,14 @@ void readIR(){
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
+      else if(ir_recv_command == 26){ // Power button
+        sendIR(auxpower,0,0);
+        ir_recv_command = 0;
+        extrabuttonprof = 0;
+      }
       else if(ir_recv_command == 63){
         ir_recv_command = 0;
         extrabuttonprof++;
-
       }
       else{
         extrabuttonprof = 0;
@@ -1682,6 +1688,18 @@ void sendIR(String type, uint8_t prof, uint8_t repeat){
     else if(prof == 11){irsend.sendNEC(0x49,0x26,repeat);} // RT4K profile 11
     else if(prof == 12){irsend.sendNEC(0x49,0x27,repeat);} // RT4K profile 12
   }
+  else if(type == "LG"){           // LG CX OLED
+      irsend.sendNEC(0x04,0x08,0); // Power button
+      irsend.sendNEC(0x00,0x00,0);
+      irsend.sendNEC(0x00,0x00,0);
+      irsend.sendNEC(0x00,0x00,0);
+      delay(30);
+      irsend.sendNEC(0x04,0x08,0); // send once more
+      irsend.sendNEC(0x00,0x00,0);
+      irsend.sendNEC(0x00,0x00,0);
+      irsend.sendNEC(0x00,0x00,0);
+  }
+  
 } // end of sendIR()
 
 void sendRTwake(int mil){
