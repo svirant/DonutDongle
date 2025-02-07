@@ -234,54 +234,54 @@ The following is from the .ino file itself. Refer to it directly for all **Advan
 */
 
 
-int offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
-                // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with offset = 0.
+int const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
+                      // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with offset = 0.
 
 
-uint8_t SVS = 1; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
-             //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
-             //     the profile being used for a console's switch input if your setup is in flux. SVS require you to rename the file itself on the SD card which is 
-             //     a little more work.  Regardless, SVS profiles will need to be used for console switch inputs over 12.
-             //
-             // **** Make sure "Auto Load SVS" is "On" under the RT4K Profiles menu. A requirement for most options ****
-             //
-             // 0 - use "Remote" profiles 1-12 for up to 12 inputs on 1st Extron Switch and SVS 13 - 99 for everything over 12. Only SVS profiles are used on 2nd Extron Switch if connected.
-             //
-             //     - remote profiles 1-12 for 1st Extron or TESmart Switch (If S0 below is set to true - remote profile 12 is used when all ports are in-active)
-             //     - SVS  12 - 99  for 1st Extron or TESmart (S0 is true)
-             //     - SVS  13 - 99  for 1st Extron or TESmart (S0 is false)
-             //     - SVS 101 - 199 for 2nd Extron or TESmart
-             //     - SVS 201 - 208 for 1st gScart
-             //     - SVS 209 - 216 for 2nd gScart
-             //
-             // 1 - use only "SVS" profiles.
-             //     Make sure "Auto Load SVS" is "On" under the RT4K Profiles menu
-             //     RT4K checks the /profile/SVS subfolder for profiles and need to be named: "S<input number>_<user defined>.rt4"
-             //     For example, SVS input 2 would look for a profile that is named S2_SNES.rt4
-             //     If there’s more than one profile that fits the pattern, the first match is used
-             //
-             //     - SVS   1 -  99 for 1st Extron or TESmart
-             //     - SVS 101 - 199 for 2nd Extron or TESmart
-             //     - SVS 201 - 208 for 1st gScart
-             //     - SVS 209 - 216 for 2nd gScart
-             //     - SVS   0       for S0 option mentioned below
-             //
-             //  ** If S0 below is set to true, create "/profile/SVS/S0_<user defined>.rt4" for when all ports are in-active. Ex: S0_HDMI.rt4
-             //
-             // 2 - use "Remote" profiles 1-12 for gscart/gcomp switches. Remote profile 1-8 for 1st gscart switch, 9-12 for inputs 1-4 on 2nd gscart switch.
-             //     inputs 5-8 on the 2nd gscart switch will use SVS profiles 213 - 216
-             //
-             //     - remote profiles 1-8 for 1st gScart, 9 - 12 for first 4 inputs on 2nd gScart (If S0 below is set to true - remote profile 12 is used when all ports are in-active)
-             //     - SVS 213 -  216 for remaining inputs 5 - 8 on 2nd gScart 
-             //     - SVS   1 -  99 for 1st Extron or TESmart
-             //     - SVS 101 - 199 for 2nd Extron or TESmart
-             //
-             //
-             //
+uint8_t const SVS = 1; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
+                      //     on the SD card.  This option allows you to choose which ones to call when a console is powered on.  Remote profiles allow you to easily change 
+                      //     the profile being used for a console's switch input if your setup is in flux. SVS require you to rename the file itself on the SD card which is 
+                      //     a little more work.  Regardless, SVS profiles will need to be used for console switch inputs over 12.
+                      //
+                      // **** Make sure "Auto Load SVS" is "On" under the RT4K Profiles menu. A requirement for most options ****
+                      //
+                      // 0 - use "Remote" profiles 1-12 for up to 12 inputs on 1st Extron Switch and SVS 13 - 99 for everything over 12. Only SVS profiles are used on 2nd Extron Switch if connected.
+                      //
+                      //     - remote profiles 1-12 for 1st Extron or TESmart Switch (If S0 below is set to true - remote profile 12 is used when all ports are in-active)
+                      //     - SVS  12 - 99  for 1st Extron or TESmart (S0 is true)
+                      //     - SVS  13 - 99  for 1st Extron or TESmart (S0 is false)
+                      //     - SVS 101 - 199 for 2nd Extron or TESmart
+                      //     - SVS 201 - 208 for 1st gScart
+                      //     - SVS 209 - 216 for 2nd gScart
+                      //
+                      // 1 - use only "SVS" profiles.
+                      //     Make sure "Auto Load SVS" is "On" under the RT4K Profiles menu
+                      //     RT4K checks the /profile/SVS subfolder for profiles and need to be named: "S<input number>_<user defined>.rt4"
+                      //     For example, SVS input 2 would look for a profile that is named S2_SNES.rt4
+                      //     If there’s more than one profile that fits the pattern, the first match is used
+                      //
+                      //     - SVS   1 -  99 for 1st Extron or TESmart
+                      //     - SVS 101 - 199 for 2nd Extron or TESmart
+                      //     - SVS 201 - 208 for 1st gScart
+                      //     - SVS 209 - 216 for 2nd gScart
+                      //     - SVS   0       for S0 option mentioned below
+                      //
+                      //  ** If S0 below is set to true, create "/profile/SVS/S0_<user defined>.rt4" for when all ports are in-active. Ex: S0_HDMI.rt4
+                      //
+                      // 2 - use "Remote" profiles 1-12 for gscart/gcomp switches. Remote profile 1-8 for 1st gscart switch, 9-12 for inputs 1-4 on 2nd gscart switch.
+                      //     inputs 5-8 on the 2nd gscart switch will use SVS profiles 213 - 216
+                      //
+                      //     - remote profiles 1-8 for 1st gScart, 9 - 12 for first 4 inputs on 2nd gScart (If S0 below is set to true - remote profile 12 is used when all ports are in-active)
+                      //     - SVS 213 -  216 for remaining inputs 5 - 8 on 2nd gScart 
+                      //     - SVS   1 -  99 for 1st Extron or TESmart
+                      //     - SVS 101 - 199 for 2nd Extron or TESmart
+                      //
+                      //
+                      //
 
 
 
-bool S0  = false;        // (Profile 0) 
+bool const S0  = false;        // (Profile 0) 
                          //
                          //  ** Recommended to remove any /profile/SVS/S0_<user defined>.rt4 profiles and leave this option "false" if using in tandem with the Scalable Video Switch. **
                          //
@@ -314,7 +314,7 @@ bool S0  = false;        // (Profile 0)
 
 
 
-uint8_t voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input changes to any/all outputs result in a profile change
+uint8_t const voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input changes to any/all outputs result in a profile change
                                                    // disable specific outputs from triggering profile changes
                                                    //
                            1,  // output 1 (1 = enabled, 0 = disabled)
@@ -387,23 +387,23 @@ uint8_t voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input change
                            
 
 
-uint8_t RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
-                     // 1 = enabled for Extron alt sw1, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected
+uint8_t const RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
+                     // 1 = enabled for Extron sw1 / alt sw1, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected
                      //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
                      //
                      // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-10 for first 2 inputs on second gscart)
                      //
-                     // 3 = enabled for Extron alt sw2, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected 
+                     // 3 = enabled for Extron sw2 / alt sw2, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected 
                      //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
 
-uint8_t RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
+uint8_t const RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
                      // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
                      //     sends Profile 1 - 12 commands to RetroTink 4K. Must have IR LED emitter connected.
                      //     (S0 - if enabled uses Profile 12 on the RT4K)
                      //
                      // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-12 for first 4 inputs on second gscart)
 
-uint8_t MTVIKIir = 0;    // Must have IR "Receiver" connected to the Donut Dongle for option 1 & 2.
+uint8_t const MTVIKIir = 0;    // Must have IR "Receiver" connected to the Donut Dongle for option 1 & 2.
                      // 0 = disables IR Receiver -> Serial Control for MT-VIKI 8 Port HDMI switch
                      //
                      // 1 = MT-VIKI 8 Port HDMI switch connected to "Extron sw1"
@@ -414,7 +414,7 @@ uint8_t MTVIKIir = 0;    // Must have IR "Receiver" connected to the Donut Dongl
                      //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the MT-VIKI Input over Serial.
                      //     Sends auxprof SVS profiles listed below. You can change them below to 101 - 108 to prevent SVS profile conflicts if needed.
 
-uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons. 
+uint8_t const auxprof[12] =    // Assign SVS profiles to IR remote profile buttons. 
                           // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
                           // Press AUX8 then profile button to load. Must have IR Receiver connected and Serial connection to RT4K.
                           // 
@@ -432,13 +432,8 @@ uint8_t auxprof[12] =    // Assign SVS profiles to IR remote profile buttons.
                       12, // AUX8 + profile 12 button
                       };
 
-uint8_t extrabuttonprof = 0; // Used to keep track of AUX8 button presses for addtional button profiles
-                             //
-                             // 0 = enabled (default)
-                             //
-                             // 3 = disabled | Useful if you want to use AUX7, AUX8 buttons to control Scalable Video Switch inputs instead. 
-                             //                
-                             //
+String const auxpower = "LG"; // AUX8 + Power button sends power off/on via IR Emitter. "LG" OLEX CX is the only one implemented atm. 
+
 
 ////////////////////////////////////////////////////////////////////////
 ```
