@@ -293,7 +293,7 @@ unsigned long currentTime = 0;
 unsigned long prevTime = 0;
 unsigned long prevBlinkTime = 0;
 bool RTwake = false;
-int currentProf[2] = {1,0};
+int currentProf[2] = {1,0}; // first index: 0 = remote button profile, 1 = SVS profiles. second index: profile number
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -451,26 +451,28 @@ void readExtron1(){
         else sendSVS(12);
       }
       else if(einput.substring(0,3) == "Rpr"){
-        sendSVS(einput.substring(3,5));
+        sendSVS(einput.substring(3,5).toInt());
       }
       else if(einput != "In0 " && einput != "In00"){ // for inputs 13-99 (SVS only)
-        sendSVS(einput.substring(2,4));
+        sendSVS(einput.substring(2,4).toInt());
       }
 
       previnput[0] = einput;
 
       // Exton S0
       // when both Extron switches match In0 or In00 (no active ports), both gscart/gcomp/otaku are disconnected or all ports in-active, a S0 Profile can be loaded if S0 is enabled
-      if(((einput == "In0 " || einput == "In00") && (previnput[1] == "In0 " || previnput[1] == "In00" || previnput[1] == "discon")) && S0 
-        && otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1] && voutMatrix[eoutput[0]] && (previnput[1] == "discon" || voutMatrix[eoutput[1]+32])){
+      if(((einput == "In0 " || einput == "In00") && 
+        (previnput[1] == "In0 " || previnput[1] == "In00" || previnput[1] == "discon")) && 
+        S0 && otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1] && 
+        voutMatrix[eoutput[0]] && (previnput[1] == "discon" || voutMatrix[eoutput[1]+32])){
 
-      if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
+        if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
 
-      if(SVS==0)sendRBP(12);
-      else if(SVS==1)sendSVS(0);
+        if(SVS==0)sendRBP(12);
+        else if(SVS==1)sendSVS(0);
 
-      previnput[0] = "0";
-      if(previnput[1] != "discon")previnput[1] = "0";
+        previnput[0] = "0";
+        if(previnput[1] != "discon")previnput[1] = "0";
       
       } // end of Extron S0
 
@@ -583,8 +585,10 @@ void readExtron1(){
       }
       else if(ecap.substring(0,13) == "remote prof12"){
         otakuoff[0] = 1;
-        if(S0 && otakuoff[1] && allgscartoff[0] && allgscartoff[1] && ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku2, Extron status
-                            (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
+        if(S0 && otakuoff[1] && 
+          allgscartoff[0] && allgscartoff[1] && 
+          ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku2, Extron status
+           (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
           
           if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
           if(SVS == 0){
@@ -708,17 +712,19 @@ void readExtron2(){
       
       // Extron2 S0
       // when both Extron switches match In0 or In00 (no active ports), both gscart/gcomp/otaku are disconnected or all ports in-active, a Profile 0 can be loaded if S0 is enabled
-      if(((einput == "In0 " || einput == "In00") && (previnput[0] == "In0 " || previnput[0] == "In00" || previnput[0] == "discon")) && S0 
-        && otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1] && voutMatrix[eoutput[1]+32] && (previnput[0] == "discon" || voutMatrix[eoutput[0]])){
+      if(S0 && otakuoff[0] && otakuoff[1] && 
+        allgscartoff[0] && allgscartoff[1] && 
+        ((einput == "In0 " || einput == "In00") && 
+        (previnput[0] == "In0 " || previnput[0] == "In00" || previnput[0] == "discon")) && 
+        (previnput[0] == "discon" || voutMatrix[eoutput[0]]) && voutMatrix[eoutput[1]+32]){
 
+        if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
 
-      if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
+        if(SVS==0)sendRBP(12);
+        else if(SVS==1)sendSVS(0);
 
-      if(SVS==0)sendRBP(12);
-      else if(SVS==1)sendSVS(0);
-
-      previnput[1] = "0";
-      if(previnput[0] != "discon")previnput[0] = "0";
+        previnput[1] = "0";
+        if(previnput[0] != "discon")previnput[0] = "0";
       
       } // end of Extron2 S0
 
@@ -787,15 +793,17 @@ void readExtron2(){
       }
       else if(ecap.substring(0,13) == "remote prof12"){
         otakuoff[1] = 1;
-        if(S0 && otakuoff[0] && allgscartoff[0] && allgscartoff[1] && ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku, Extron status
-                            (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
-          if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
-          if(SVS == 0){
-            sendRBP(12);
-          }
-          else if(SVS == 1){
-            sendSVS(0);
-          }
+        if(S0 && otakuoff[0] && 
+          allgscartoff[0] && allgscartoff[1] && 
+          ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku, Extron status
+          (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
+            if(RT4Kir == 1)irsend.sendNEC(0x49,0x27,2); // RT4K profile 12
+            if(SVS == 0){
+              sendRBP(12);
+            }
+            else if(SVS == 1){
+              sendSVS(0);
+            }
         }
       }
       else if(ecap.substring(0,12) == "remote prof1"){
@@ -962,8 +970,10 @@ void readGscart1(){
     memset(bitprev[0],0,sizeof(bitprev[0]));
     fpdcprev[0] = fpdc;
 
-    if(S0 && otakuoff[0] && otakuoff[1] && allgscartoff[1] && ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks otaku, gscart2, Extron status
-                              (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
+    if(S0 && otakuoff[0] && 
+      otakuoff[1] && allgscartoff[1] && 
+      ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks otaku, gscart2, Extron status
+       (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
       if(SVS==1)sendSVS(0);
       else if(SVS==2)sendRBP(12);
     }
@@ -1089,8 +1099,10 @@ void readGscart2(){
     memset(bitprev[1],0,sizeof(bitprev[1]));
     fpdcprev[1] = fpdc;
     
-    if(S0 && allgscartoff && otakuoff[0] && otakuoff[1] && ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") &&  // cross-checks gscart, otaku, Extron status
-                              (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
+    if(S0 && allgscartoff && 
+      otakuoff[0] && otakuoff[1] && 
+      ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") &&  // cross-checks gscart, otaku, Extron status
+       (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
       if(SVS==1)sendSVS(0);
       else if(SVS==2)sendRBP(12);
     }
@@ -1341,7 +1353,7 @@ void readIR(){
     } // end auxgsw[0] = 1, auxgsw[1] = 1
 
     if(nument == 3){
-      sendSVS(svsbutton);
+      sendSVS(svsbutton.toInt());
       nument = 0;
       svsbutton = "";
       extrabuttonprof = 0;
@@ -1635,18 +1647,6 @@ void sendSVS(int num){
   Serial.println(F("\r"));
   currentProf[0] = 1; // 1 is SVS profile
   currentProf[1] = num + offset;
-}
-
-void sendSVS(String num){
-  Serial.print(F("SVS NEW INPUT="));
-  Serial.print(num.toInt() + offset);
-  Serial.println(F("\r"));
-  delay(1000);
-  Serial.print(F("SVS CURRENT INPUT="));
-  Serial.print(num.toInt() + offset);
-  Serial.println(F("\r"));
-  currentProf[0] = 1; // 1 is SVS profile
-  currentProf[1] = num.toInt() + offset;
 }
 
 void sendRBP(int prof){ // send Remote Button Profile
