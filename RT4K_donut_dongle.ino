@@ -240,7 +240,7 @@ uint8_t const dch = 15; // (duty cycle high) at least this many high samples per
 uint8_t const dcl = 5; // (duty cycle low) at least this many high samples and less than "dch" per "samsize" indicate all inputs are in-active (~50% duty cycle)
 uint8_t const samsize = 20; // total number of ADC samples required to capture at least 1 period
 uint8_t const fpdccountmax = 3; // number of periods required when in the 50% duty cycle state before a Profile 0 is triggered.
-uint8_t const gctl = 0; // disable gscart/gcomp override by default until all boards have voltage divider (or you would be sending 5v to gscart 3.3v pins)
+uint8_t const gctl = 0; // (0 is disabled) disable gscart/gcomp override by default until all boards have voltage divider (or you would be sending 5v to gscart 3.3v pins)
 
 
 uint8_t extrabuttonprof = 0; // 3 = disabled | If you want to use AUX7, AUX8 buttons to control Scalable Video Switch inputs instead. 
@@ -1292,43 +1292,43 @@ void readIR(){
 
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && gctl && (auxgsw[0] || auxgsw[1])){ // if AUX5 or AUX6 was pressed and a profile button is pressed next,
       if(ir_recv_command == 11){ // profile button 1
-        if(auxgsw[0]){overrideGscart(1);auxgsw[0] = 0;}
-        else if(auxgsw[1]){overrideGscart(9);auxgsw[1] = 0;}
+        if(auxgsw[0])overrideGscart(1);
+        else if(auxgsw[1])overrideGscart(9);
         ir_recv_command = 0;
       }
       else if(ir_recv_command == 7){ // profile button 2
-        if(auxgsw[0]){overrideGscart(2);auxgsw[0] = 0;}
-        else if(auxgsw[1]){overrideGscart(10);auxgsw[1] = 0;}
+        if(auxgsw[0])overrideGscart(2);
+        else if(auxgsw[1])overrideGscart(10);
         ir_recv_command = 0;
       }
       else if(ir_recv_command == 3){ // profile button 3
-        if(auxgsw[0]){overrideGscart(3);auxgsw[0] = 0;}
-        else if(auxgsw[1]){overrideGscart(11);auxgsw[1] = 0;}
+        if(auxgsw[0])overrideGscart(3);
+        else if(auxgsw[1])overrideGscart(11);
         ir_recv_command = 0;
       }
       else if(ir_recv_command == 10){ // profile button 4
-        if(auxgsw[0]){overrideGscart(4);auxgsw[0] = 0;}
-        else if(auxgsw[1]){overrideGscart(12);auxgsw[1] = 0;}
+        if(auxgsw[0])overrideGscart(4);
+        else if(auxgsw[1])overrideGscart(12);
         ir_recv_command = 0;
       }
       else if(ir_recv_command == 6){ // profile button 5
-        if(auxgsw[0]){overrideGscart(5);auxgsw[0] = 0;}
-        else if(auxgsw[1]){overrideGscart(13);auxgsw[1] = 0;}
+        if(auxgsw[0])overrideGscart(5);
+        else if(auxgsw[1])overrideGscart(13);
         ir_recv_command = 0;
       }
       else if(ir_recv_command == 2){ // profile button 6
-        if(auxgsw[0]){overrideGscart(6);auxgsw[0] = 0;}
-        else if(auxgsw[1]){overrideGscart(14);auxgsw[1] = 0;}
+        if(auxgsw[0])overrideGscart(6);
+        else if(auxgsw[1])overrideGscart(14);
         ir_recv_command = 0;
       }
       else if(ir_recv_command == 9){ // profile button 7
-        if(auxgsw[0]){overrideGscart(7);auxgsw[0] = 0;}
-        else if(auxgsw[1]){overrideGscart(15);auxgsw[1] = 0;}
+        if(auxgsw[0])overrideGscart(7);
+        else if(auxgsw[1])overrideGscart(15);
         ir_recv_command = 0;
       }
       else if(ir_recv_command == 5){ // profile button 8
-        if(auxgsw[0]){overrideGscart(8);auxgsw[0] = 0;}
-        else if(auxgsw[1]){overrideGscart(16);auxgsw[1] = 0;}
+        if(auxgsw[0])overrideGscart(8);
+        else if(auxgsw[1])overrideGscart(16);
         ir_recv_command = 0;
       }
       else if(ir_recv_command == 1 || ir_recv_command == 37 || ir_recv_command == 38 || ir_recv_command == 39){ // profile button 9,10,11,12 will turn off manual mode, back to auto mode
@@ -1567,6 +1567,7 @@ void readIR(){
 
 void overrideGscart(uint8_t port){ // disable auto switching and allows gscart port select
   if(port <= 8){
+    auxgsw[0] = 0;
     DDRC |= B00000111; // only set A0-A2 as outputs
     digitalWrite(12,HIGH); // D12 / gscart sw1 override set HIGH to select port (disables auto switching)
     if(port == 1){
@@ -1602,6 +1603,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
     }
   }
   else if(port >= 9){
+    auxgsw[1] = 0;
     DDRC |= B00111000; // only set A3-A5 as outputs
     digitalWrite(10,HIGH); // D10 / gscart sw2 override set HIGH to select port (disables auto switching)
     if(port == 9){
