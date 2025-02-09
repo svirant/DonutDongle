@@ -16,13 +16,11 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define PORT->Group[g_APinDescription[SDA].ulPort].PINCFG[g_APinDescription[SDA].ulPin].bit.PMUXEN = 0; // set SDA pin back to GPIO
-#define PORT->Group[g_APinDescription[SCL].ulPort].PINCFG[g_APinDescription[SCL].ulPin].bit.PMUXEN = 0; // set SCL pin back to GPIO
 #define IR_SEND_PIN 11  // Optional IR LED Emitter for RT5X compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2 // Optional IR Receiver on pin D2
 
-#include "TinyIRReceiver.hpp"
-#include <IRremote.h>       // found in the built-in Library Manager
+#include <TinyIRReceiver.hpp>
+#include <IRremote.hpp>       // found in the built-in Library Manager
 #include <SoftwareSerial.h>
 #include <AltSoftSerial.h>  // https://github.com/PaulStoffregen/AltSoftSerial in order to have a 3rd Serial port for 2nd Extron Switch / alt sw2
                             // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
@@ -34,7 +32,7 @@
 */
 
 
-int const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
+uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with offset = 0.
 
 
@@ -279,7 +277,7 @@ String svsbutton; // used to store 3 digit SVS profile when AUX8 is double press
 uint8_t nument = 0; // used to keep track of how many digits have been entered for 3 digit SVS profile
 
 // sendRTwake global variables
-int currentProf[2] = {1,0}; // first index: 0 = remote button profile, 1 = SVS profiles. second index: profile number
+uint16_t currentProf[2] = {1,0}; // first index: 0 = remote button profile, 1 = SVS profiles. second index: profile number
 bool RTwake = false;
 unsigned long currentTime = 0;
 unsigned long prevTime = 0;
@@ -323,7 +321,7 @@ void loop(){
 
   if(RTwake)sendRTwake(11900); // 11900 is 11.9 seconds. After waking the RT4K, wait this amount of time before re-sending the latest profile change.
 
-} /////////////////////////////////// end of void loop ////////////////////////////////////
+} // end of loop()
 
 void readExtron1(){
 
@@ -564,7 +562,7 @@ void readExtron1(){
     // set ecapbytes to 0 for next read
     memset(ecapbytes,0,sizeof(ecapbytes));
 
-    // for Otaku Games Scart Switch
+    // for Otaku Games Scart Switch 1
     if(ecap.substring(0,6) == "remote"){
       otakuoff[0] = 0;
       if(ecap.substring(0,13) == "remote prof10"){
@@ -775,7 +773,7 @@ void readExtron2(){
     // set ecapbytes to 0 for next read
     memset(ecapbytes,0,sizeof(ecapbytes));
 
-    // for Otaku Games Scart Switch
+    // for Otaku Games Scart Switch 2
     if(ecap.substring(0,6) == "remote"){
       otakuoff[1] = 0;
       if(ecap.substring(0,13) == "remote prof10"){
@@ -1553,12 +1551,12 @@ void readIR(){
     
     if(ir_recv_address == 73 && repeatcount > 15){ // when directional buttons are held down for even longer... turbo directional mode
       if(ir_recv_command == 87){
-        for(int i=0;i<4;i++){
+        for(uint8_t i=0;i<4;i++){
           Serial.println(F("remote left\r"));
         }
       }
       else if(ir_recv_command == 79){
-        for(int i=0;i<4;i++){
+        for(uint8_t i=0;i<4;i++){
           Serial.println(F("remote right\r"));
         }
       }
@@ -1640,7 +1638,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
   }
 } // end of overrideGscart()
 
-void sendSVS(int num){
+void sendSVS(uint16_t num){
   Serial.print(F("SVS NEW INPUT="));
   Serial.print(num + offset);
   Serial.println(F("\r"));
@@ -1652,7 +1650,7 @@ void sendSVS(int num){
   currentProf[1] = num + offset;
 }
 
-void sendRBP(int prof){ // send Remote Button Profile
+void sendRBP(uint16_t prof){ // send Remote Button Profile
   Serial.print(F("remote prof"));
   Serial.print(prof);
   Serial.println(F("\r"));
@@ -1702,7 +1700,7 @@ void sendIR(String type, uint8_t prof, uint8_t repeat){
   
 } // end of sendIR()
 
-void sendRTwake(int mil){
+void sendRTwake(uint16_t mil){
     currentTime = millis();
     if(prevTime == 0)
       prevTime = millis();
