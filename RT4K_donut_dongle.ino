@@ -1338,12 +1338,14 @@ void readIR(){
           PORTB &= B11101111;  // D12 (PB4) LOW / enables auto-switching
           DDRC &= B11111000; // set A0-A2 as inputs
           PORTC &= B11111000;  // disable A0-A2 pullup resistors, uses external pulldown resistors
+          lastginput = 1;
           auxgsw[0] = 0;
         }
         else if(auxgsw[1]){
           PORTB &= B11111011;  // D10 (PB2) LOW / enables auto-switching
           DDRC &= B11000111;  // set A3-A5 as inputs
           PORTC &= B11000111;  // disable A3-A5 pullup resistors, uses external pulldown resistors
+          lastginput = 9;
           auxgsw[1] = 0;
         }
         ir_recv_command = 0;
