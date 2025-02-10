@@ -175,7 +175,7 @@ Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/
 # Programming an Arduino Nano
 I recommend the [Official Arduino IDE and guide](https://www.arduino.cc/en/Guide) if you're unfamiliar with Arduinos. All .ino files used for programming are listed above. The following Libraries will also need to be added in order to Compile successfully.<br />
 - **Libraries:**
-  - <IRremote.h> Available through the built-in Library Manager under "Tools" -> "Manage Libraries..."
+  - <IRremote.hpp> "IRremote" available through the built-in Library Manager under "Tools" -> "Manage Libraries..."
   - <AltSoftSerial.h>  Follow these steps to add AltSoftSerial.h
     - Goto https://github.com/PaulStoffregen/AltSoftSerial
     - Click the GREEN "<> Code" box and "Download ZIP"
