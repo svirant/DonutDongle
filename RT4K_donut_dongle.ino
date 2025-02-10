@@ -259,6 +259,7 @@ uint8_t samcc[2] = {0,0}; // ADC sample cycle counter
 uint8_t highcount[2][3] = {{0,0,0},{0,0,0}}; // number of high samples recorded for bit0, bit1, bit2
 uint8_t bitprev[2][3] = {{0,0,0},{0,0,0}}; // stores previous bit state
 uint8_t auxgsw[2] = {0,0}; // gscart sw1,sw2 toggle override
+uint8_t lastginput = 1; // used to keep track of overrideGscart last input
 
 // Extron sw1 / alt sw1 software serial port -> MAX3232 TTL IC (when jumpers set to "H")
 SoftwareSerial extronSerial = SoftwareSerial(3,4); // setup a software serial port for listening to Extron sw1 / alt sw1. rxPin =3 / txPin = 4
@@ -863,8 +864,8 @@ void readGscart1(){
   uint8_t bit[3] = {0,0,0};
   float val[3] = {0,0,0};
 
-  for(uint8_t i = 0; i < 3; i++){ // read in analog pin voltages, read each pin 4x in a row to ensure an accurate read, combats if using too large of a pull-down resistor
-    for(uint8_t j = 0; j < 4; j++){
+  for(uint8_t i=0;i<3;i++){ // read in analog pin voltages, read each pin 4x in a row to ensure an accurate read, combats if using too large of a pull-down resistor
+    for(uint8_t j=0;j<4;j++){
       val[i] = analogRead(apin[0][i]);
     }
     if((val[i]/211) >= highsamvolt[0]){ // if voltage is greater than or equal to the voltage defined for a high, increase highcount[0] by 1 for that analog pin
@@ -873,13 +874,14 @@ void readGscart1(){
   }
 
   if(samcc[0] == samsize){               // when the "samsize" number of samples has been taken, if the voltage was "high" for more than "dch" # of the "samsize" samples, set the bit to 1
-    for(uint8_t i = 0; i < 3; i++){
+    for(uint8_t i=0;i<3;i++){
       if(highcount[0][i] > dch)          // if the number of "high" samples per "samsize" are greater than "dch" set bit to 1.  
         bit[i] = 1;
       else if(highcount[0][i] > dcl)     // if the number of "high" samples is greater than "dcl" and less than "dch" (50% high samples) the switch must be cycling inputs, therefor no active input
         fpdc = 1;
     }
   }
+
 
 
   if(((bit[2] != bitprev[0][2] || bit[1] != bitprev[0][1] || bit[0] != bitprev[0][0]) || (allgscartoff[0] == 1)) && (samcc[0] == samsize) && !(fpdc)){
@@ -1020,8 +1022,8 @@ void readGscart2(){
   uint8_t bit[3] = {0,0,0};
   float val[3] = {0,0,0};
 
-  for(uint8_t i = 0; i < 3; i++){
-    for(uint8_t j = 0; j < 4; j++){
+  for(uint8_t i=0;i<3;i++){
+    for(uint8_t j=0;j<4;j++){
       val[i] = analogRead(apin[1][i]);
     }
     if((val[i]/211) >= highsamvolt[1]){
@@ -1030,7 +1032,7 @@ void readGscart2(){
   }
 
   if(samcc[1] == samsize){              // when the "samsize" number of samples has been taken, if the voltage was high for more than dch of the samples, set the bit to 1
-    for(uint8_t i = 0; i < 3; i++){   // if the voltage was high for only dcl to dch samples, set an all in-active ports flag (fpdc = 1)
+    for(uint8_t i=0;i<3;i++){   // if the voltage was high for only dcl to dch samples, set an all in-active ports flag (fpdc = 1)
       if(highcount[1][i] > dch)         // how many "high" samples per "samsize" are required for a bit to be 1.  
         bit[i] = 1;
       else if(highcount[1][i] > dcl)
@@ -1064,7 +1066,7 @@ void readGscart2(){
         else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
           if(RT4Kir == 2)sendIR("4k",12,2); // RT4K profile 12
 
-          if(SVS==2)sendRBP(12);
+          if(SVS==2 && !S0)sendRBP(12);
           else sendSVS(212);
         }
         else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0))sendSVS(213); // 1 0 0
@@ -1093,7 +1095,7 @@ void readGscart2(){
 
       if(SVS == 1)sendSVS(0);
       else sendRBP(12);
-      
+
     }
 
   }
@@ -1567,77 +1569,165 @@ void readIR(){
 
 void overrideGscart(uint8_t port){ // disable auto switching and allows gscart port select
   if(port <= 8){
-    bitprev[0][0] = 2; // force a profile change next time readGscart1() loops
     auxgsw[0] = 0;
-    DDRC |= B00000111; // only set A0-A2 as outputs
     digitalWrite(12,HIGH); // D12 / gscart sw1 override set HIGH to select port (disables auto switching)
+    DDRC |= B00000111; // only set A0-A2 as outputs
     if(port == 1){
       PORTC &= B11111000; // set low bits with 0
+      if(lastginput == port){
+        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 1
+        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 1
+        if(SVS==2)sendRBP(port);
+        else sendSVS(200 + port);
+      }
+      lastginput = port;
     }
     else if(port == 2){
       PORTC &= B11111000; // set low bits with 0
       PORTC |= B00000001; // set high bits with 1
+      if(lastginput == port){
+        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 2
+        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 2
+        if(SVS==2)sendRBP(port);
+        else sendSVS(200 + port);
+      }
+      lastginput = port;
     }
     else if(port == 3){
       PORTC &= B11111000; // set low bits with 0
       PORTC |= B00000010; // set high bits with 1
+      if(lastginput == port){
+        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 3
+        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 3
+        if(SVS==2)sendRBP(port);
+        else sendSVS(200 + port);
+      }
+      lastginput = port;
     }
     else if(port == 4){
       PORTC &= B11111000; // set low bits with 0
       PORTC |= B00000011; // set high bits with 1
+      if(lastginput == port){
+        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 4
+        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 4
+        if(SVS==2)sendRBP(port);
+        else sendSVS(200 + port);
+      }
+      lastginput = port;
     }
     else if(port == 5){
       PORTC &= B11111000; // set low bits with 0
       PORTC |= B00000100; // set high bits with 1
+      if(lastginput == port){
+        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 5
+        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 5
+        if(SVS==2)sendRBP(port);
+        else sendSVS(200 + port);
+      }
+      lastginput = port;
     }
     else if(port == 6){
       PORTC &= B11111000; // set low bits with 0
       PORTC |= B00000101; // set high bits with 1
+      if(lastginput == port){
+        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 6
+        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 6
+        if(SVS==2)sendRBP(port);
+        else sendSVS(200 + port);
+      }
+      lastginput = port;
     }
     else if(port == 7){
       PORTC &= B11111000; // set low bits with 0
       PORTC |= B00000110; // set high bits with 1
+      if(lastginput == port){
+        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 7
+        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 7
+        if(SVS==2)sendRBP(port);
+        else sendSVS(200 + port);
+      }
+      lastginput = port;
     }
     else if(port == 8){
       PORTC &= B11111000; // set low bits with 0
       PORTC |= B00000111; // set high bits with 1
+      if(lastginput == port){
+        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 8
+        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 8
+        if(SVS==2)sendRBP(port);
+        else sendSVS(200 + port);
+      }
+      lastginput = port;
     }
   }
   else if(port >= 9){
-    bitprev[1][0] = 2; // force a profile change next time readGscart2() loops
     auxgsw[1] = 0;
-    DDRC |= B00111000; // only set A3-A5 as outputs
     digitalWrite(10,HIGH); // D10 / gscart sw2 override set HIGH to select port (disables auto switching)
+    DDRC |= B00111000; // only set A3-A5 as outputs
     if(port == 9){
       PORTC &= B11000111; // set low bits with 0
+      if(lastginput == 1){ // == 1 done on purpose
+        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 9
+        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 9
+        if(SVS==2)sendRBP(port);
+        else sendSVS(200 + port);
+      }
+      lastginput = 1; // = 1 done on purpose
     }
     else if(port == 10){
       PORTC &= B11000111; // set low bits with 0
       PORTC |= B00001000; // set high bits with 1
+      if(lastginput == port){
+        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 10
+        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 10
+        if(SVS==2)sendRBP(port);
+        else sendSVS(200 + port);
+      }
+      lastginput = port;
     }
     else if(port == 11){
       PORTC &= B11000111; // set low bits with 0
       PORTC |= B00010000; // set high bits with 1
+      if(lastginput == port){
+        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 11
+        if(SVS==2)sendRBP(port);
+        else sendSVS(200 + port);
+      }
+      lastginput = port;
     }
     else if(port == 12){
       PORTC &= B11000111; // set low bits with 0
       PORTC |= B00011000; // set high bits with 1
+      if(lastginput == port){
+        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 12
+        if(SVS==2 && !S0)sendRBP(port);
+        else sendSVS(200 + port);
+      }
+      lastginput = port;
     }
     else if(port == 13){
       PORTC &= B11000111; // set low bits with 0
       PORTC |= B00100000; // set high bits with 1
+      if(lastginput == port)sendSVS(200 + port);
+      lastginput = port;
     }
     else if(port == 14){
       PORTC &= B11000111; // set low bits with 0
       PORTC |= B00101000; // set high bits with 1
+      if(lastginput == port)sendSVS(200 + port);
+      lastginput = port;
     }
     else if(port == 15){
       PORTC &= B11000111; // set low bits with 0
       PORTC |= B00110000; // set high bits with 1
+      if(lastginput == port)sendSVS(200 + port);
+      lastginput = port;
     }
     else if(port == 16){
       PORTC &= B11000111; // set low bits with 0
       PORTC |= B00111000; // set high bits with 1
+      if(lastginput == port)sendSVS(200 + port);
+      lastginput = port;
     }
   }
 } // end of overrideGscart()
