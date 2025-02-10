@@ -83,15 +83,15 @@ bool const S0  = false;        // (Profile 0)
                          //
                          //  ** Recommended to remove any /profile/SVS/S0_<user defined>.rt4 profiles and leave this option "false" if using in tandem with the Scalable Video Switch. **
                          //
-                         // set true to load "Remote" profile 12 (if SVS=0) when all ports are in-active on 1st Extron switch (and 2nd if connected). 
+                         // set "true" to load "Remote Profile 12" instead of "S0_<user definted>.rt4" (if SVS=0) when all ports are in-active on 1st Extron switch (and 2nd if connected). 
                          // You can assign it to a generic HDMI profile for example.
-                         // If your device has a 12th input, SVS will be used instead. "IF" you also have an active 2nd Extron Switch, remote profile 12
+                         // If your device has a 12th input, SVS will be used instead. "If" you also have an active 2nd Extron Switch, Remote Profile 12
                          // will only load if "BOTH" switches have all in-active ports.
                          // 
                          // 
-                         // If SVS=1, /profile/SVS/ "S0_<user defined>.rt4" will be used instead of remote profile 12
+                         // If SVS=1, /profile/SVS/ "S0_<user defined>.rt4" will be used instead of Remote Profile 12
                          //
-                         // If SVS=2, remote profile 12 will be used for gscart/gcomp
+                         // If SVS=2, Remote Profile 12 will be used instead of "S0_<user defined>.rt4"
                          //
                          //
                          // default is false // also recommended to set false to filter out unstable Extron inputs that can result in spamming the RT4K with profile changes 
@@ -104,9 +104,9 @@ bool const S0  = false;        // (Profile 0)
                         // when S0=0 and SVS=0, button profiles 1 - 12 are used for EXTRON sw1, and SVS for EVERYTHING else
                         // when S0=0 and SVS=1, SVS profiles are used for everything
                         // when S0=0 and SVS=2, button profiles 1 - 8 are used for GSCART sw1, 9 - 12 for GSCART sw2 (ports 1 - 4), and SVS for EVERYTHING else
-                        // when S0=1 and SVS=0, button profiles 1 - 11 are used for EXTRON sw1 and 12 as "Profile 0", and SVS for everything else 
+                        // when S0=1 and SVS=0, button profiles 1 - 11 are used for EXTRON sw1 and Remote Profile 12 as "Profile S0", and SVS for everything else 
                         // when S0=1 and SVS=1, SVS profiles for everything, and uses S0_<user defined>.rt4 as "Profile 0" 
-                        // when S0=1 and SVS=2, button profiles 1 - 8 are used for GSCART sw1, 9 - 11 for GSCART sw2 (ports 1 -3) and 12 as "Profile 0", and SVS for EVERYTHING else
+                        // when S0=1 and SVS=2, button profiles 1 - 8 are used for GSCART sw1, 9 - 11 for GSCART sw2 (ports 1 - 3) and Remote Profile 12 as "Profile S0", and SVS for EVERYTHING else
                         //
 //////////////////////////
 
@@ -450,15 +450,15 @@ void readExtron1(){
 
       // Exton S0
       // when both Extron switches match In0 or In00 (no active ports), both gscart/gcomp/otaku are disconnected or all ports in-active, a S0 Profile can be loaded if S0 is enabled
-      if(((einput == "In0 " || einput == "In00") && 
+      if(S0 && ((einput == "In0 " || einput == "In00") && 
         (previnput[1] == "In0 " || previnput[1] == "In00" || previnput[1] == "discon")) && 
-        S0 && otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1] && 
+        otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1] && 
         voutMatrix[eoutput[0]] && (previnput[1] == "discon" || voutMatrix[eoutput[1]+32])){
 
         if(RT4Kir == 1)sendIR("4k",12,2); // RT4K profile 12
 
-        if(SVS==0)sendRBP(12);
-        else if(SVS==1)sendSVS(0);
+        if(SVS == 1)sendSVS(0);
+        else sendRBP(12);
 
         previnput[0] = "0";
         if(previnput[1] != "discon")previnput[1] = "0";
@@ -580,12 +580,10 @@ void readExtron1(){
            (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
           
           if(RT4Kir == 1)sendIR("4k",12,2); // RT4K profile 12
-          if(SVS == 0){
-            sendRBP(12);
-          }
-          else if(SVS == 1){
-            sendSVS(0);
-          }
+
+          if(SVS == 1)sendSVS(0);
+          else sendRBP(12);
+
         }
       }
       else if(ecap.substring(0,12) == "remote prof1"){
@@ -709,8 +707,8 @@ void readExtron2(){
 
         if(RT4Kir == 1)sendIR("4k",12,2); // RT4K profile 12
 
-        if(SVS==0)sendRBP(12);
-        else if(SVS==1)sendSVS(0);
+        if(SVS == 1)sendSVS(0);
+        else sendRBP(12);
 
         previnput[1] = "0";
         if(previnput[0] != "discon")previnput[0] = "0";
@@ -787,12 +785,10 @@ void readExtron2(){
           ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku, Extron status
           (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
             if(RT4Kir == 1)sendIR("4k",12,2); // RT4K profile 12
-            if(SVS == 0){
-              sendRBP(12);
-            }
-            else if(SVS == 1){
-              sendSVS(0);
-            }
+
+            if(SVS == 1)sendSVS(0);
+            else sendRBP(12);
+
         }
       }
       else if(ecap.substring(0,12) == "remote prof1"){
@@ -963,8 +959,10 @@ void readGscart1(){
       otakuoff[1] && allgscartoff[1] && 
       ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks otaku, gscart2, Extron status
        (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
-      if(SVS==1)sendSVS(0);
-      else if(SVS==2)sendRBP(12);
+
+      if(SVS == 1)sendSVS(0);
+      else sendRBP(12);
+
     }
 
   }
@@ -1092,8 +1090,10 @@ void readGscart2(){
       otakuoff[0] && otakuoff[1] && 
       ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") &&  // cross-checks gscart, otaku, Extron status
        (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
-      if(SVS==1)sendSVS(0);
-      else if(SVS==2)sendRBP(12);
+
+      if(SVS == 1)sendSVS(0);
+      else sendRBP(12);
+      
     }
 
   }
@@ -1567,7 +1567,7 @@ void readIR(){
 
 void overrideGscart(uint8_t port){ // disable auto switching and allows gscart port select
   if(port <= 8){
-    bitprev[0][0] = 2;
+    bitprev[0][0] = 2; // force a profile change next time readGscart1() loops
     auxgsw[0] = 0;
     DDRC |= B00000111; // only set A0-A2 as outputs
     digitalWrite(12,HIGH); // D12 / gscart sw1 override set HIGH to select port (disables auto switching)
@@ -1604,7 +1604,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
     }
   }
   else if(port >= 9){
-    bitprev[1][0] = 2;
+    bitprev[1][0] = 2; // force a profile change next time readGscart2() loops
     auxgsw[1] = 0;
     DDRC |= B00111000; // only set A3-A5 as outputs
     digitalWrite(10,HIGH); // D10 / gscart sw2 override set HIGH to select port (disables auto switching)
