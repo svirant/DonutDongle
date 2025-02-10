@@ -181,7 +181,7 @@ I recommend the [Official Arduino IDE and guide](https://www.arduino.cc/en/Guide
     - Click the GREEN "<> Code" box and "Download ZIP"
     - In Arudino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
 
-Some Arduino Nano's come with an Old Bootloader and won't Upload unless specified. **If you get errors** when trying to upload, swap to this option as a possible fix.
+Some Arduino Nanos come with an Old Bootloader and won't Upload unless specified. **If you get errors** when trying to upload, swap to this option as a possible fix.
 
 <img width="600" alt="bootloader" src="./images/9.png" />
 
@@ -197,8 +197,8 @@ Some Arduino Nano's come with an Old Bootloader and won't Upload unless specifie
 
 | **SVS = 1 (default)** | **Profile #** | Notes |
 |----------|----------|---------|
-| Extron sw1 | 1 -  99 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices|
-| Extron sw2 | 101 - 199 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices |
+| Extron sw1 / alt sw1 | 1 -  99 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices|
+| Extron sw2 / alt sw2 | 101 - 199 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices |
 | GSCART sw1 | 201 - 208 | |
 | GSCART sw2 | 209 - 216 | |
 
@@ -208,8 +208,8 @@ Remote Button Profiles are **not** used when **SVS=1**
 
 | **SVS = 0** | **Profile #** | Notes |
 |----------|----------|---------|
-| Extron sw1 | 13 -  99 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices|
-| Extron sw2 | 101 - 199 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices |
+| Extron sw1 / alt sw1 | 13 -  99 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices|
+| Extron sw2 / alt sw2 | 101 - 199 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices |
 | GSCART sw1 | 201 - 208 | |
 | GSCART sw2 | 209 - 216 | |
 
@@ -219,8 +219,8 @@ Remote Button Profiles **1-12** are used for Extron sw1 when **SVS=0**
 
 | **SVS = 2** | **Profile #** | Notes |
 |----------|----------|---------|
-| Extron sw1 | 1 -  99 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices|
-| Extron sw2 | 101 - 199 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices |
+| Extron sw1 / alt sw1 | 1 -  99 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices|
+| Extron sw2 / alt sw2 | 101 - 199 | also for TESmart, MT-ViKi, Otaku Games Scart 10 devices |
 | GSCART sw1 | N/A | |
 | GSCART sw2 | 213 - 216 | inputs 5-8 |
 
