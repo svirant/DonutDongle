@@ -1574,91 +1574,42 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
     DDRC |= B00000111; // only set A0-A2 as outputs
     if(port == 1){
       PORTC &= B11111000; // set low bits with 0
-      if(lastginput == port){
-        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 1
-        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 1
-        if(SVS==2)sendRBP(port);
-        else sendSVS(200 + port);
-      }
-      lastginput = port;
     }
     else if(port == 2){
       PORTC &= B11111000; // set low bits with 0
       PORTC |= B00000001; // set high bits with 1
-      if(lastginput == port){
-        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 2
-        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 2
-        if(SVS==2)sendRBP(port);
-        else sendSVS(200 + port);
-      }
-      lastginput = port;
     }
     else if(port == 3){
       PORTC &= B11111000; // set low bits with 0
       PORTC |= B00000010; // set high bits with 1
-      if(lastginput == port){
-        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 3
-        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 3
-        if(SVS==2)sendRBP(port);
-        else sendSVS(200 + port);
-      }
-      lastginput = port;
     }
     else if(port == 4){
       PORTC &= B11111000; // set low bits with 0
       PORTC |= B00000011; // set high bits with 1
-      if(lastginput == port){
-        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 4
-        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 4
-        if(SVS==2)sendRBP(port);
-        else sendSVS(200 + port);
-      }
-      lastginput = port;
     }
     else if(port == 5){
       PORTC &= B11111000; // set low bits with 0
       PORTC |= B00000100; // set high bits with 1
-      if(lastginput == port){
-        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 5
-        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 5
-        if(SVS==2)sendRBP(port);
-        else sendSVS(200 + port);
-      }
-      lastginput = port;
     }
     else if(port == 6){
       PORTC &= B11111000; // set low bits with 0
       PORTC |= B00000101; // set high bits with 1
-      if(lastginput == port){
-        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 6
-        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 6
-        if(SVS==2)sendRBP(port);
-        else sendSVS(200 + port);
-      }
-      lastginput = port;
     }
     else if(port == 7){
       PORTC &= B11111000; // set low bits with 0
       PORTC |= B00000110; // set high bits with 1
-      if(lastginput == port){
-        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 7
-        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 7
-        if(SVS==2)sendRBP(port);
-        else sendSVS(200 + port);
-      }
-      lastginput = port;
     }
     else if(port == 8){
       PORTC &= B11111000; // set low bits with 0
       PORTC |= B00000111; // set high bits with 1
-      if(lastginput == port){
-        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 8
-        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 8
-        if(SVS==2)sendRBP(port);
-        else sendSVS(200 + port);
-      }
-      lastginput = port;
     }
+    if(lastginput == port || lastginput == 9){
+      if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 1 - 8 (based on port#)
+      if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 1 - 8 (based on port#)
+      if(SVS==2)sendRBP(port);
+      else sendSVS(200 + port);
+    }
+    lastginput = port;
   }
   else if(port >= 9){
     auxgsw[1] = 0;
@@ -1666,13 +1617,13 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
     DDRC |= B00111000; // only set A3-A5 as outputs
     if(port == 9){
       PORTC &= B11000111; // set low bits with 0
-      if(lastginput == 1){ // == 1 done on purpose
+      if(lastginput == port || lastginput == 1){
         if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 9
         if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 9
         if(SVS==2)sendRBP(port);
         else sendSVS(200 + port);
       }
-      lastginput = 1; // = 1 done on purpose
+      lastginput = port;
     }
     else if(port == 10){
       PORTC &= B11000111; // set low bits with 0
