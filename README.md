@@ -1,5 +1,5 @@
 # Donut Dongle
-**Arduino Nano based hub that connects your console switching setup with the RetroTink 4K and/or RetroTink 5x for Auto Profile switching**
+**Arduino Nano based hub that connects your digital and analog console switching setup with the RetroTink 4K and/or RetroTink 5x for Auto Profile switching**
 
 <img width="700" src="./images/1a.png" />
 <br />
