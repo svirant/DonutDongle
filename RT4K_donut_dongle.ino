@@ -293,8 +293,8 @@ void setup(){
     digitalWrite(12,LOW); // gscart sw1 override set low for query mode by default
     pinMode(10,OUTPUT);
     digitalWrite(10,LOW); // gscart sw2 override set low for query mode by default
-    PORTC &= B11111000;  // disable A0-A2 pullup resistors, uses external pulldown resistors
-    PORTC &= B11000111;  // disable A3-A5 pullup resistors, ...
+    pinMode(A2,INPUT);pinMode(A1,INPUT);pinMode(A0,INPUT); // set gscart1 port as input
+    pinMode(A5,INPUT);pinMode(A4,INPUT);pinMode(A3,INPUT); // set gscart2 port as input
     initPCIInterruptForTinyReceiver(); // for IR Receiver
     Serial.begin(9600); // set the baud rate for the RT4K Serial Connection
     while(!Serial){;}   // allow connection to establish before continuing
@@ -303,6 +303,7 @@ void setup(){
     extronSerial.setTimeout(150); // sets the timeout for reading / saving into a string
     extronSerial2.begin(9600); // set the baud rate for Extron sw2 Connection
     extronSerial2.setTimeout(150); // sets the timeout for reading / saving into a string for the Extron sw2 Connection
+    pinMode(LED_BUILTIN, OUTPUT); // initialize builtin led for RTwake
 
 } // end of setup
 
@@ -449,7 +450,7 @@ void readExtron1(){
 
       previnput[0] = einput;
 
-      // Exton S0
+      // Extron S0
       // when both Extron switches match In0 or In00 (no active ports), both gscart/gcomp/otaku are disconnected or all ports in-active, a S0 Profile can be loaded if S0 is enabled
       if(S0 && ((einput == "In0 " || einput == "In00") && 
         (previnput[1] == "In0 " || previnput[1] == "In00" || previnput[1] == "discon")) && 
@@ -1335,16 +1336,14 @@ void readIR(){
       }
       else if(ir_recv_command == 1 || ir_recv_command == 37 || ir_recv_command == 38 || ir_recv_command == 39){ // profile button 9,10,11,12 will turn off manual mode, back to auto mode
         if(auxgsw[0]){
-          PORTB &= B11101111;  // D12 (PB4) LOW / enables auto-switching
-          DDRC &= B11111000; // set A0-A2 as inputs
-          PORTC &= B11111000;  // disable A0-A2 pullup resistors, uses external pulldown resistors
+          digitalWrite(12,LOW); // D12 (PB4) LOW / enables auto-switching
+          pinMode(A2,INPUT);pinMode(A1,INPUT);pinMode(A0,INPUT); // set A0-A2 as inputs
           lastginput = 1;
           auxgsw[0] = 0;
         }
         else if(auxgsw[1]){
-          PORTB &= B11111011;  // D10 (PB2) LOW / enables auto-switching
-          DDRC &= B11000111;  // set A3-A5 as inputs
-          PORTC &= B11000111;  // disable A3-A5 pullup resistors, uses external pulldown resistors
+          digitalWrite(10,LOW); // D10 (PB2) LOW / enables auto-switching
+          pinMode(A5,INPUT);pinMode(A4,INPUT);pinMode(A3,INPUT); // set A3-A5 as inputs
           lastginput = 9;
           auxgsw[1] = 0;
         }
@@ -1575,35 +1574,28 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
     digitalWrite(12,HIGH); // D12 / gscart sw1 override set HIGH to select port (disables auto switching)
     DDRC |= B00000111; // only set A0-A2 as outputs
     if(port == 1){
-      PORTC &= B11111000; // set low bits with 0
+      digitalWrite(A2,LOW);digitalWrite(A1,LOW);digitalWrite(A0,LOW); // 000
     }
     else if(port == 2){
-      PORTC &= B11111000; // set low bits with 0
-      PORTC |= B00000001; // set high bits with 1
+      digitalWrite(A2,LOW);digitalWrite(A1,LOW);digitalWrite(A0,HIGH); // 001
     }
     else if(port == 3){
-      PORTC &= B11111000; // set low bits with 0
-      PORTC |= B00000010; // set high bits with 1
+      digitalWrite(A2,LOW);digitalWrite(A1,HIGH);digitalWrite(A0,LOW); // 010
     }
     else if(port == 4){
-      PORTC &= B11111000; // set low bits with 0
-      PORTC |= B00000011; // set high bits with 1
+      digitalWrite(A2,LOW);digitalWrite(A1,HIGH);digitalWrite(A0,HIGH); // 011
     }
     else if(port == 5){
-      PORTC &= B11111000; // set low bits with 0
-      PORTC |= B00000100; // set high bits with 1
+      digitalWrite(A2,HIGH);digitalWrite(A1,LOW);digitalWrite(A0,LOW); // 100
     }
     else if(port == 6){
-      PORTC &= B11111000; // set low bits with 0
-      PORTC |= B00000101; // set high bits with 1
+      digitalWrite(A2,HIGH);digitalWrite(A1,LOW);digitalWrite(A0,HIGH); // 101
     }
     else if(port == 7){
-      PORTC &= B11111000; // set low bits with 0
-      PORTC |= B00000110; // set high bits with 1
+      digitalWrite(A2,HIGH);digitalWrite(A1,HIGH);digitalWrite(A0,LOW); // 110
     }
     else if(port == 8){
-      PORTC &= B11111000; // set low bits with 0
-      PORTC |= B00000111; // set high bits with 1
+      digitalWrite(A2,HIGH);digitalWrite(A1,HIGH);digitalWrite(A0,HIGH); // 111
     }
     if(lastginput == port || lastginput == 9){
       if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 1 - 8 (based on port#)
@@ -1618,7 +1610,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
     digitalWrite(10,HIGH); // D10 / gscart sw2 override set HIGH to select port (disables auto switching)
     DDRC |= B00111000; // only set A3-A5 as outputs
     if(port == 9){
-      PORTC &= B11000111; // set low bits with 0
+      digitalWrite(A5,LOW);digitalWrite(A4,LOW);digitalWrite(A3,LOW); // 000
       if(lastginput == port || lastginput == 1){
         if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 9
         if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 9
@@ -1628,8 +1620,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
       lastginput = port;
     }
     else if(port == 10){
-      PORTC &= B11000111; // set low bits with 0
-      PORTC |= B00001000; // set high bits with 1
+      digitalWrite(A5,LOW);digitalWrite(A4,LOW);digitalWrite(A3,HIGH); // 001
       if(lastginput == port){
         if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 10
         if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 10
@@ -1639,8 +1630,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
       lastginput = port;
     }
     else if(port == 11){
-      PORTC &= B11000111; // set low bits with 0
-      PORTC |= B00010000; // set high bits with 1
+      digitalWrite(A5,LOW);digitalWrite(A4,HIGH);digitalWrite(A3,LOW); // 010
       if(lastginput == port){
         if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 11
         if(SVS==2)sendRBP(port);
@@ -1649,8 +1639,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
       lastginput = port;
     }
     else if(port == 12){
-      PORTC &= B11000111; // set low bits with 0
-      PORTC |= B00011000; // set high bits with 1
+      digitalWrite(A5,LOW);digitalWrite(A4,HIGH);digitalWrite(A3,HIGH); // 011
       if(lastginput == port){
         if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 12
         if(SVS==2 && !S0)sendRBP(port);
@@ -1659,26 +1648,22 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
       lastginput = port;
     }
     else if(port == 13){
-      PORTC &= B11000111; // set low bits with 0
-      PORTC |= B00100000; // set high bits with 1
+      digitalWrite(A5,HIGH);digitalWrite(A4,LOW);digitalWrite(A3,LOW); // 100
       if(lastginput == port)sendSVS(200 + port);
       lastginput = port;
     }
     else if(port == 14){
-      PORTC &= B11000111; // set low bits with 0
-      PORTC |= B00101000; // set high bits with 1
+      digitalWrite(A5,HIGH);digitalWrite(A4,LOW);digitalWrite(A3,HIGH); // 101
       if(lastginput == port)sendSVS(200 + port);
       lastginput = port;
     }
     else if(port == 15){
-      PORTC &= B11000111; // set low bits with 0
-      PORTC |= B00110000; // set high bits with 1
+      digitalWrite(A5,HIGH);digitalWrite(A4,HIGH);digitalWrite(A3,LOW); // 110
       if(lastginput == port)sendSVS(200 + port);
       lastginput = port;
     }
     else if(port == 16){
-      PORTC &= B11000111; // set low bits with 0
-      PORTC |= B00111000; // set high bits with 1
+      digitalWrite(A5,HIGH);digitalWrite(A4,HIGH);digitalWrite(A3,HIGH); // 111
       if(lastginput == port)sendSVS(200 + port);
       lastginput = port;
     }
