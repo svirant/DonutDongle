@@ -562,7 +562,7 @@ void readExtron1(){
     }
 
     // set ecapbytes to 0 for next read
-    memset(ecapbytes,0,sizeof(ecapbytes));
+    memset(ecapbytes,0,sizeof(ecapbytes)); // ecapbytes is local variable, but superstitious clearing regardless :) 
 
     // for Otaku Games Scart Switch 1
     if(ecap.substring(0,6) == "remote"){
@@ -701,7 +701,7 @@ void readExtron2(){
       
       // Extron2 S0
       // when both Extron switches match In0 or In00 (no active ports), both gscart/gcomp/otaku are disconnected or all ports in-active, a Profile 0 can be loaded if S0 is enabled
-      if(S0 && otakuoff[0] && otakuoff[1] && 
+      if(S0 && otakuoff[0] && otakuoff[1] &&
         allgscartoff[0] && allgscartoff[1] && 
         ((einput == "In0 " || einput == "In00") && 
         (previnput[0] == "In0 " || previnput[0] == "In00" || previnput[0] == "discon")) && 
@@ -771,7 +771,7 @@ void readExtron2(){
     }
 
     // set ecapbytes to 0 for next read
-    memset(ecapbytes,0,sizeof(ecapbytes));
+    memset(ecapbytes,0,sizeof(ecapbytes)); // ecapbytes is local variable, but superstitious clearing regardless :) 
 
     // for Otaku Games Scart Switch 2
     if(ecap.substring(0,6) == "remote"){
@@ -1572,7 +1572,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
   if(port <= 8){
     auxgsw[0] = 0;
     digitalWrite(12,HIGH); // D12 / gscart sw1 override set HIGH to select port (disables auto switching)
-    DDRC |= B00000111; // only set A0-A2 as outputs
+    pinMode(A2,OUTPUT);pinMode(A1,OUTPUT);pinMode(A0,OUTPUT);// set A0-A2 as outputs
     if(port == 1){
       digitalWrite(A2,LOW);digitalWrite(A1,LOW);digitalWrite(A0,LOW); // 000
     }
@@ -1608,7 +1608,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
   else if(port >= 9){
     auxgsw[1] = 0;
     digitalWrite(10,HIGH); // D10 / gscart sw2 override set HIGH to select port (disables auto switching)
-    DDRC |= B00111000; // only set A3-A5 as outputs
+    pinMode(A5,OUTPUT);pinMode(A4,OUTPUT);pinMode(A3,OUTPUT); // set A3-A5 as outputs
     if(port == 9){
       digitalWrite(A5,LOW);digitalWrite(A4,LOW);digitalWrite(A3,LOW); // 000
       if(lastginput == port || lastginput == 1){
