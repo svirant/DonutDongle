@@ -1,0 +1,373 @@
+(footprint "SJ335083ATR"
+	(version 20240108)
+	(generator "pcbnew")
+	(generator_version "8.0")
+	(layer "F.Cu")
+	(descr "SJ3-35083A-TR-1")
+	(tags "Connector")
+	(property "Reference" "REF**"
+		(at 3.6 -2.415 0)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "f39f7d7b-36c4-4849-b6a4-ed0944a921a3")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.254)
+			)
+		)
+	)
+	(property "Value" "PJ-320"
+		(at 3.4 2.3 0)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "cac6856f-ad71-402a-8dec-102957e8d0fd")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.254)
+			)
+		)
+	)
+	(property "Footprint" "Connector_Audio:SJ335083ATR"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "dedbe9ad-59cd-4795-b968-9e6f73e3df03")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" "https://www.cuidevices.com/product/resource/sj3-3508x.pdf"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "bbbae3f8-48e1-478f-bbe8-adf08c33ac4b")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "Phone Connectors Audio Jack, 3.5mm, Through Hole, 3 Conductors, 0 Switches"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "c675c937-4383-4dee-9435-c539d5fda6a3")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Manufacturer_Part_Number" "SJ3-35083A-TR"
+		(at 0.3 0.1 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "e26ea801-f3bd-42ce-8ae3-ceec9f4df5d6")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Manufacturer_Name" "Same Sky"
+		(at 0.3 0.1 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "b6a20fa7-2f57-496f-97e7-40dadee71d89")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Mouser Part Number" "179-SJ3-35083A-TR"
+		(at 0.3 0.1 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "944f6be5-fb86-4d7a-8740-b8ddd94a09d1")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Mouser Price/Stock" "https://www.mouser.co.uk/ProductDetail/Same-Sky/SJ3-35083A-TR?qs=IKkN%2F947nfAXbylC140wLg%3D%3D"
+		(at 0.3 0.1 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "dca4f271-9742-44d7-a124-fe888544d0de")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Height" "5.3"
+		(at 0.3 0.1 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "76053136-fa00-401f-891f-be344e0ce11a")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_line
+		(start -4.3 -4.3)
+		(end -4.3 0.6)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "d6b0cbbd-cc0f-4d76-88db-d68addbc0b35")
+	)
+	(fp_line
+		(start -4.25 0.6)
+		(end -1.7 0.6)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "d4332ff0-fb52-4c9e-893d-7b215793998a")
+	)
+	(fp_line
+		(start -1.75 -4.35)
+		(end -4.25 -4.35)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "3ee30200-36db-48da-b1b4-71d66639367d")
+	)
+	(fp_line
+		(start -1.7 -5)
+		(end -1.7 0.55)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "47279d88-a1d6-4c79-ba28-4da168b8f3ab")
+	)
+	(fp_line
+		(start 0.3 -5)
+		(end -1.7 -5)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "2f7c5fe7-12b1-4a13-ad1a-56be7f603dca")
+	)
+	(fp_line
+		(start 2.4 0.65)
+		(end 4.8 0.65)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "37a67194-a5d7-4d6f-8164-6a61e502cc44")
+	)
+	(fp_line
+		(start 3.5 -5)
+		(end 9.4 -5)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "3fd8355f-134e-4ae8-a829-96e901236529")
+	)
+	(fp_line
+		(start 9.4 -4.95)
+		(end 9.4 0.55)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "a8d0e815-3f41-4a87-b789-ab22e0fdd9cf")
+	)
+	(fp_line
+		(start -5.5 -6.5)
+		(end 10 -6.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "7ff9d2c2-600e-4711-8888-518e21dd0a1e")
+	)
+	(fp_line
+		(start -5.5 1.7)
+		(end -5.5 -6.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "78e530ea-f567-439b-9f14-108eaf2be7ab")
+	)
+	(fp_line
+		(start 10 -6.5)
+		(end 10 1.7)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "e4846e47-13f4-4940-8fbf-9edf24657466")
+	)
+	(fp_line
+		(start 10 1.7)
+		(end -5.5 1.7)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "feaa8a23-853e-4e1d-9171-2ddfa2635e14")
+	)
+	(fp_line
+		(start -4.6 -4.95)
+		(end -4.6 0.05)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "3e618583-a6a5-4da3-a99e-632565d94491")
+	)
+	(fp_line
+		(start -4.6 0.05)
+		(end -2.1 0.05)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "0630b148-2783-47e5-beec-55b1bd13902b")
+	)
+	(fp_line
+		(start -2.1 -5.55)
+		(end 12.4 -5.55)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "e2e7ef02-d032-40ab-8ae6-e2c0d3cb185c")
+	)
+	(fp_line
+		(start -2.1 -4.95)
+		(end -4.6 -4.95)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "80b06802-ab1c-4b8e-a803-0f32b4906c51")
+	)
+	(fp_line
+		(start -2.1 0.65)
+		(end -2.1 -5.55)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "52650667-8bcf-400a-ad98-a1fe14fc8c24")
+	)
+	(fp_line
+		(start 12.4 -5.55)
+		(end 12.4 0.65)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "3e467af0-e20a-400e-bc40-a7cf786de5f5")
+	)
+	(fp_line
+		(start 12.4 0.65)
+		(end -2.1 0.65)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "48052bce-a5c1-48c0-9b49-5f996b6e6399")
+	)
+	(pad "" np_thru_hole circle
+		(at -0.2 -2)
+		(size 1 1)
+		(drill 1)
+		(layers "F&B.Cu" "*.Mask")
+		(uuid "3ca51b88-345b-45fc-bfca-6b1709ae8108")
+	)
+	(pad "" np_thru_hole circle
+		(at 5.8 -2)
+		(size 1 1)
+		(drill 1)
+		(layers "F&B.Cu" "*.Mask")
+		(uuid "64074125-2622-47b6-ba41-d804c9df7641")
+	)
+	(pad "1" thru_hole rect
+		(at 0.2 0.3)
+		(size 2 1.6)
+		(drill oval 1.4 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "9bd35a13-6d50-42d4-a191-6855b5426b3a")
+	)
+	(pad "2" thru_hole oval
+		(at 7 0.1)
+		(size 2 1.6)
+		(drill oval 1.4 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "c37531a0-3ec3-41e8-9aec-1b8afdd5a2f4")
+	)
+	(pad "5" thru_hole oval
+		(at 1.9 -4.4)
+		(size 2 1.6)
+		(drill oval 1.4 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "30135efe-e11b-42f5-bc1e-1317aeef946a")
+	)
+	(model "${KIPRJMOD}/3D/PJ-320.stp"
+		(offset
+			(xyz -2 2 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)
