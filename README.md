@@ -69,7 +69,7 @@ Let me know what ideas you have, and perhaps I can add them in.
 
 # Ordering PCBs
 PCBs for this project:
- - Donut Dongle (coming soon!)
+ - Donut Dongle
  - [VGA Adapter](https://github.com/svirant/DonutDongle/tree/main/Adapters) (VGAPassthrough or YC2VGA)
  - (Optional) [TESmart_connector](https://github.com/svirant/DonutDongle/tree/main/Accessories)
  - (Optional) [gscart_ext_connector](https://github.com/svirant/DonutDongle/tree/main/Accessories) (works for gcomp too!)
