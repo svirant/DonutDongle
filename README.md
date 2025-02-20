@@ -85,12 +85,21 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 
 # Assembly
 
+**Release Candidate 1**<br /><br />
 Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/ibom.html)
 
 [<img width="400" src="./images/8.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
 [<img width="382" src="./images/8b.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
 
+# PCB
+**Release Candidate 1**
 
+<img width="400" src="./images/PCB.png">
+
+# Schematic
+**Release Candidate 1**
+
+<img width="400" src="./images/Schematic.png">
 
 ## Bill of Materials (BOM)
 ### [- Digikey shared list](https://www.digikey.com/en/mylists/list/53XEHTQZJK)
