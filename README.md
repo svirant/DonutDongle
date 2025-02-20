@@ -31,6 +31,19 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
   - 1x IR Receiver (optional for better reception and IR remote customizations)
 <img width="600" src="./images/1b.jpg" />
 
+<br /><br />
+
+# Layout Example
+ - **TESmart 16x1 HDMI switch & 2x gSCART/gCOMP**
+    - **VGA Passthrough adapter**
+    - **TESmart adapter**
+    - **gScart EXT pushpin adapter**
+
+<img width=600 src="./images/1c.jpg">
+
+<br /><br />
+
+
 # Connection Acccessories
 
 **gscart/gcomp EXT connector (plug-n-play)**<br />
