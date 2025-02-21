@@ -40,7 +40,13 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
     - **gScart EXT pushpin adapter**
 
 <img width=600 src="./images/1c.jpg">
+<br />
+<br />
 
+ - **Case closed**
+   - **ribbon cables fold over and come out slots in the back of case**
+
+<img width=600 src="./images/1d.jpg">
 <br /><br />
 
 
