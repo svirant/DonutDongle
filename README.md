@@ -88,12 +88,12 @@ Let me know what ideas you have, and perhaps I can add them in.
 
 # Ordering PCBs
 PCBs for this project:
- - Donut Dongle
+ - [Donut Dongle](https://github.com/svirant/DonutDongle/blob/main/RT4K_donut_dongle_rc1.zip)
  - [VGA Adapter](https://github.com/svirant/DonutDongle/tree/main/Adapters) (VGAPassthrough or YC2VGA)
  - (Optional) [TESmart_connector](https://github.com/svirant/DonutDongle/tree/main/Accessories)
  - (Optional) [gscart_ext_connector](https://github.com/svirant/DonutDongle/tree/main/Accessories) (works for gcomp too!)
  
-There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://jlcpcb.com) No affiliation. Using the gerber (.zip) files provided, it's easy to place an order. Below are some tips/guidelines:
+There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://jlcpcb.com) (No affiliation). Using the gerber (.zip) files provided, it's easy to place an order. Below are some tips/guidelines:
 - 1.0mm PCB Thickness for gscart_ext_connector.zip
 - 1.6mm for all others
 - For Surface Finish, "HASL(with lead)" is fine
@@ -105,7 +105,7 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 # Assembly
 
 **Release Candidate 1**<br /><br />
-Try out the [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/ibom.html)
+[Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/ibom.html)
 
 [<img width="400" src="./images/8.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
 [<img width="382" src="./images/8b.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
