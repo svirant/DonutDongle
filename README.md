@@ -1,10 +1,10 @@
 # Donut Dongle
-**Arduino Nano based hub that connects your digital and analog console switching setup with the RetroTink 4K and/or RetroTink 5x for Auto Profile switching**
+**Arduino Nano based hub that connects your digital and analog console switching setup with the RetroTink 4K and/or RetroTink 5x / OSSC for Auto Profile switching**
 
 <img width="700" src="./images/1a.png" />
 <br />
 
-The Donut Dongle connects to a switch in a way that allows it to see which port is active. When a console powers on (auto-switching) or an input is manually selected, the Donut Dongle sends a serial command to the RetroTink 4k (or IR signal to the RT5x) telling it to load a profile. The profiles can either be defined as remote profiles; those configured in the RT4K menu for the remote buttons. Or they can be SVS profiles which are configured on the RT4K's SDcard. <br />
+The Donut Dongle connects to a switch in a way that allows it to see which port is active. When a console powers on (auto-switching) or an input is manually selected, the Donut Dongle sends a serial command to the RetroTink 4k (or IR signal to the RT5x, OSSC) telling it to load a profile. The profiles can either be defined as remote profiles; those configured in the RT4K menu for the remote buttons. Or they can be SVS profiles which are configured on the RT4K's SDcard. <br />
 
 For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/tree/main/README.md#how-to-use) section below.
 # Supported Switches
@@ -27,7 +27,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
     - 2x Extron, 2x TESmart, or 1 of each
   - 1x usb-c port for power/programming (on Arduino Nano)
   - 1x 3.5mm "TX OUT to Retrotink 4K VGA adapter" port
-  - 1x IR Emitter (optional for RT5x)
+  - 1x IR Emitter (optional for RT5x, OSSC)
   - 1x IR Receiver (optional for better reception and IR remote customizations)
 <img width="600" src="./images/1b.jpg" />
 
@@ -142,7 +142,7 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 | 4  | J4,J9-11 | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256807448104402.html) | Color: PJ-320B DIP | 
 | 2  | J3,J6 | 2x5 Pin Double Row 2.54mm Pitch Straight Box Header | [AliExpress](https://www.aliexpress.us/item/3256805177947724.html) | (Color: STRAIGHT TYPE, Pins: 10PCS DC3-10Pin) |
 | 2  | J5,J8 | 2x4 Pin Double Row 2.54mm Pitch Straight Box Header | [AliExpress](https://www.aliexpress.us/item/3256805177947724.html) | (Color: STRAIGHT TYPE, Pins: 10PCS DC3-8Pin) |
-| 1  | (optional) | 3.5mm CHF03 1.5 Meters IR Infrared Remote Emission Cable | [AliExpress](https://www.aliexpress.us/item/3256805962345169.html) | required for RT5X support |
+| 1  | (optional) | 3.5mm CHF03 1.5 Meters IR Infrared Remote Emission Cable | [AliExpress](https://www.aliexpress.us/item/3256805962345169.html) | required for RT5X, OSSC support |
 | 1  | (optional) | 3.5mm Infrared Remote Control Receiver Extension Cable | [AliExpress](https://www.aliexpress.us/item/2251832741040177.html) | required for [New IR Remote Control functionality](https://github.com/svirant/DonutDongle?tab=readme-ov-file#new-ir-remote-control-functionality) |
 | 2  | H1,H2 | 2.54mm Pitch Single Row Female 15P Header Strip | [AliExpress](https://www.aliexpress.us/item/3256801232229618.html) | |
 | 1  | | Any 3.5mm / aux / stereo / trs / cable | [AliExpress](https://www.aliexpress.us/item/2255799962255486.html) | |
@@ -267,8 +267,8 @@ The following is from the .ino file itself. Refer to it directly for all **Advan
 */
 
 
-int const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
-                      // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with offset = 0.
+uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
+                      // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
 
 
 uint8_t const SVS = 1; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
@@ -318,15 +318,15 @@ bool const S0  = false;        // (Profile 0)
                          //
                          //  ** Recommended to remove any /profile/SVS/S0_<user defined>.rt4 profiles and leave this option "false" if using in tandem with the Scalable Video Switch. **
                          //
-                         // set true to load "Remote" profile 12 (if SVS=0) when all ports are in-active on 1st Extron switch (and 2nd if connected). 
+                         // set "true" to load "Remote Profile 12" instead of "S0_<user definted>.rt4" (if SVS=0) when all ports are in-active on 1st Extron switch (and 2nd if connected). 
                          // You can assign it to a generic HDMI profile for example.
-                         // If your device has a 12th input, SVS will be used instead. "IF" you also have an active 2nd Extron Switch, remote profile 12
+                         // If your device has a 12th input, SVS will be used instead. "If" you also have an active 2nd Extron Switch, Remote Profile 12
                          // will only load if "BOTH" switches have all in-active ports.
                          // 
                          // 
-                         // If SVS=1, /profile/SVS/ "S0_<user defined>.rt4" will be used instead of remote profile 12
+                         // If SVS=1, /profile/SVS/ "S0_<user defined>.rt4" will be used instead of Remote Profile 12
                          //
-                         // If SVS=2, remote profile 12 will be used for gscart/gcomp
+                         // If SVS=2, Remote Profile 12 will be used instead of "S0_<user defined>.rt4"
                          //
                          //
                          // default is false // also recommended to set false to filter out unstable Extron inputs that can result in spamming the RT4K with profile changes 
@@ -339,9 +339,9 @@ bool const S0  = false;        // (Profile 0)
                         // when S0=0 and SVS=0, button profiles 1 - 12 are used for EXTRON sw1, and SVS for EVERYTHING else
                         // when S0=0 and SVS=1, SVS profiles are used for everything
                         // when S0=0 and SVS=2, button profiles 1 - 8 are used for GSCART sw1, 9 - 12 for GSCART sw2 (ports 1 - 4), and SVS for EVERYTHING else
-                        // when S0=1 and SVS=0, button profiles 1 - 11 are used for EXTRON sw1 and 12 as "Profile 0", and SVS for everything else 
+                        // when S0=1 and SVS=0, button profiles 1 - 11 are used for EXTRON sw1 and Remote Profile 12 as "Profile S0", and SVS for everything else 
                         // when S0=1 and SVS=1, SVS profiles for everything, and uses S0_<user defined>.rt4 as "Profile 0" 
-                        // when S0=1 and SVS=2, button profiles 1 - 8 are used for GSCART sw1, 9 - 11 for GSCART sw2 (ports 1 -3) and 12 as "Profile 0", and SVS for EVERYTHING else
+                        // when S0=1 and SVS=2, button profiles 1 - 8 are used for GSCART sw1, 9 - 11 for GSCART sw2 (ports 1 - 3) and Remote Profile 12 as "Profile S0", and SVS for EVERYTHING else
                         //
 //////////////////////////
 
@@ -429,12 +429,11 @@ uint8_t const RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
                      // 3 = enabled for Extron sw2 / alt sw2, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected 
                      //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
 
-uint8_t const RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
+uint8_t const OSSCir = 0;      // 0 = disables IR Emitter for OSSC
                      // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
-                     //     sends Profile 1 - 12 commands to RetroTink 4K. Must have IR LED emitter connected.
-                     //     (S0 - if enabled uses Profile 12 on the RT4K)
-                     //
-                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-12 for first 4 inputs on second gscart)
+                     //     sends Profile 1 - 14 commands to OSSC. Must have IR LED emitter connected.
+                     //     
+                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-14 for first 6 inputs on second gscart)
 
 uint8_t const MTVIKIir = 0;    // Must have IR "Receiver" connected to the Donut Dongle for option 1 & 2.
                      // 0 = disables IR Receiver -> Serial Control for MT-VIKI 8 Port HDMI switch
@@ -466,7 +465,4 @@ uint8_t const auxprof[12] =    // Assign SVS profiles to IR remote profile butto
                       };
 
 String const auxpower = "LG"; // AUX8 + Power button sends power off/on via IR Emitter. "LG" OLEX CX is the only one implemented atm. 
-
-
-////////////////////////////////////////////////////////////////////////
 ```
