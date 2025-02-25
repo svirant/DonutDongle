@@ -33,7 +33,7 @@
 
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
-                      // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with offset = 0.
+                      // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
 
 
 uint8_t const SVS = 1; //     "Remote" profiles are profiles that are assigned to buttons 1-12 on the RT4K remote. "SVS" profiles reside under the "/profile/SVS/" directory 
@@ -194,12 +194,11 @@ uint8_t const RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
                      // 3 = enabled for Extron sw2 / alt sw2, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected 
                      //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
 
-uint8_t const RT4Kir = 0;      // 0 = disables IR Emitter for RetroTink 4K
+uint8_t const OSSCir = 0;      // 0 = disables IR Emitter for OSSC
                      // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
-                     //     sends Profile 1 - 12 commands to RetroTink 4K. Must have IR LED emitter connected.
-                     //     (S0 - if enabled uses Profile 12 on the RT4K)
-                     //
-                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-12 for first 4 inputs on second gscart)
+                     //     sends Profile 1 - 14 commands to OSSC. Must have IR LED emitter connected.
+                     //     
+                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-14 for first 6 inputs on second gscart)
 
 uint8_t const MTVIKIir = 0;    // Must have IR "Receiver" connected to the Donut Dongle for option 1 & 2.
                      // 0 = disables IR Receiver -> Serial Control for MT-VIKI 8 Port HDMI switch
@@ -360,86 +359,105 @@ void readExtron1(){
     // for Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMaxtrix
     if((einput.substring(0,2) == "In" && voutMatrix[eoutput[0]]) || (einput.substring(0,3) == "Rpr")){
       if(einput == "In1 " || einput == "In01" || einput == "Rpr01"){
-        if(RT5Xir == 1){sendIR("5x",1,2);delay(30);} // RT5X profile 1 
-        if(RT4Kir == 1)sendIR("4k",1,2); // RT4K profile 1
+        if(RT5Xir == 1)sendIR("5x",1,2); // RT5X profile 1 
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",1,3); // OSSC profile 1
 
         if(SVS==0)sendRBP(1);
         else sendSVS(1);
       }
       else if(einput == "In2 " || einput == "In02" || einput == "Rpr02"){
-        if(RT5Xir == 1){sendIR("5x",2,2);delay(30);} // RT5X profile 2
-        if(RT4Kir == 1)sendIR("4k",2,2); // RT4K profile 2
+        if(RT5Xir == 1)sendIR("5x",2,2); // RT5X profile 2
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",2,3); // OSSC profile 2
 
         if(SVS==0)sendRBP(2);
         else sendSVS(2);
       }
       else if(einput == "In3 " || einput == "In03" || einput == "Rpr03"){
-        if(RT5Xir == 1){sendIR("5x",3,2);delay(30);} // RT5X profile 3
-        if(RT4Kir == 1)sendIR("4k",3,2); // RT4K profile 3
+        if(RT5Xir == 1)sendIR("5x",3,2); // RT5X profile 3
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",3,3); // OSSC profile 3
 
         if(SVS==0)sendRBP(3);
         else sendSVS(3);
       }
       else if(einput == "In4 " || einput == "In04" || einput == "Rpr04"){
-        if(RT5Xir == 1){sendIR("5x",4,2);delay(30);} // RT5X profile 4
-        if(RT4Kir == 1)sendIR("4k",4,2); // RT4K profile 4
+        if(RT5Xir == 1)sendIR("5x",4,2); // RT5X profile 4
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",4,3); // OSSC profile 4
 
         if(SVS==0)sendRBP(4);
         else sendSVS(4);
       }
       else if(einput == "In5 " || einput == "In05" || einput == "Rpr05"){
-        if(RT5Xir == 1){sendIR("5x",5,2);delay(30);} // RT5X profile 5
-        if(RT4Kir == 1)sendIR("4k",5,2); // RT4K profile 5
+        if(RT5Xir == 1)sendIR("5x",5,2); // RT5X profile 5
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",5,3); // OSSC profile 5
 
         if(SVS==0)sendRBP(5);
         else sendSVS(5);
       }
       else if(einput == "In6 " || einput == "In06" || einput == "Rpr06"){
-        if(RT5Xir == 1){sendIR("5x",6,2);delay(30);} // RT5X profile 6
-        if(RT4Kir == 1)sendIR("4k",6,2); // RT4K profile 6
+        if(RT5Xir == 1)sendIR("5x",6,2); // RT5X profile 6
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",6,3); // OSSC profile 6
 
         if(SVS==0)sendRBP(6);
         else sendSVS(6);
       }
       else if(einput == "In7 " || einput == "In07" || einput == "Rpr07"){
-        if(RT5Xir == 1){sendIR("5x",7,2);delay(30);} // RT5X profile 7
-        if(RT4Kir == 1)sendIR("4k",7,2); // RT4K profile 7
+        if(RT5Xir == 1)sendIR("5x",7,2); // RT5X profile 7
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",7,3); // OSSC profile 7
 
         if(SVS==0)sendRBP(7);
         else sendSVS(7);
       }
       else if(einput == "In8 " || einput == "In08" || einput == "Rpr08"){
-        if(RT5Xir == 1){sendIR("5x",8,2);delay(30);} // RT5X profile 8
-        if(RT4Kir == 1)sendIR("4k",8,2); // RT4K profile 8
+        if(RT5Xir == 1)sendIR("5x",8,2); // RT5X profile 8
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",8,3); // OSSC profile 8
 
         if(SVS==0)sendRBP(8);
         else sendSVS(8);
       }
       else if(einput == "In9 " || einput == "In09" || einput == "Rpr09"){
-        if(RT5Xir == 1){sendIR("5x",9,2);delay(30);} // RT5X profile 9
-        if(RT4Kir == 1)sendIR("4k",9,2); // RT4K profile 9
+        if(RT5Xir == 1)sendIR("5x",9,2); // RT5X profile 9
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",9,3); // OSSC profile 9
 
         if(SVS==0)sendRBP(9);
         else sendSVS(9);
       }
       else if(einput == "In10" || einput == "Rpr10"){
-        if(RT5Xir == 1){sendIR("5x",10,2);delay(30);} // RT5X profile 10
-        if(RT4Kir == 1)sendIR("4k",10,2); // RT4K profile 10
+        if(RT5Xir == 1)sendIR("5x",10,2); // RT5X profile 10
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",10,3); // OSSC profile 10
 
         if(SVS==0)sendRBP(10);
         else sendSVS(10);
       }
       else if(einput == "In11" || einput == "Rpr11"){
-        if(RT4Kir == 1)sendIR("4k",11,2); // RT4K profile 11
+        if(OSSCir == 1)sendIR("ossc",11,3); // OSSC profile 11
 
         if(SVS==0)sendRBP(11);
         else sendSVS(11);
       }
       else if(einput == "In12" || einput == "Rpr12"){
-        if((RT4Kir == 1) && !S0)sendIR("4k",12,2); // RT4K profile 12
+        //if((OSSCir == 1) && !S0)sendIR("ossc",12,3); // OSSC profile 12
+        if(OSSCir == 1)sendIR("ossc",12,3); // OSSC profile 12
 
         if((SVS==0 && !S0))sendRBP(12); // okay to use this profile if S0 is set to false
         else sendSVS(12);
+      }
+      else if(einput == "In13" || einput == "Rpr13"){
+        if(OSSCir == 1)sendIR("ossc",13,3); // OSSC profile 13
+        sendSVS(13);
+      }
+      else if(einput == "In14" || einput == "Rpr14"){
+        if(OSSCir == 1)sendIR("ossc",14,3); // OSSC profile 14
+        sendSVS(14);
       }
       else if(einput.substring(0,3) == "Rpr"){
         sendSVS(einput.substring(3,5).toInt());
@@ -457,7 +475,7 @@ void readExtron1(){
         otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1] && 
         voutMatrix[eoutput[0]] && (previnput[1] == "discon" || voutMatrix[eoutput[1]+32])){
 
-        if(RT4Kir == 1)sendIR("4k",12,2); // RT4K profile 12
+        //if(OSSCir == 1)sendIR("ossc",12,3); // OSSC profile 12
 
         if(SVS == 1)sendSVS(0);
         else sendRBP(12);
@@ -475,88 +493,107 @@ void readExtron1(){
     // for TESmart / MT-VIKI HDMI switch on Extron sw1 / alt sw1
     if(ecapbytes[4] == 17 || ecapbytes[4] == 95){
       if(ecapbytes[6] == 22 || ecapbytes[11] == 48){
-        if(RT5Xir == 1){sendIR("5x",1,2);delay(30);} // RT5X profile 1 
-        if(RT4Kir == 1)sendIR("4k",1,2); // RT4K profile 1
+        if(RT5Xir == 1)sendIR("5x",1,2); // RT5X profile 1 
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",1,3); // OSSC profile 1
 
         if(SVS==0)sendRBP(1);
         else sendSVS(1);
       }
       else if(ecapbytes[6] == 23 || ecapbytes[11] == 49){
-        if(RT5Xir == 1){sendIR("5x",2,2);delay(30);} // RT5X profile 2
-        if(RT4Kir == 1)sendIR("4k",2,2); // RT4K profile 2
+        if(RT5Xir == 1)sendIR("5x",2,2); // RT5X profile 2
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",2,3); // OSSC profile 2
 
         if(SVS==0)sendRBP(2);
         else sendSVS(2);
       }
       else if(ecapbytes[6] == 24 || ecapbytes[11] == 50){
-        if(RT5Xir == 1){sendIR("5x",3,2);delay(30);} // RT5X profile 3
-        if(RT4Kir == 1)sendIR("4k",3,2); // RT4K profile 3
+        if(RT5Xir == 1)sendIR("5x",3,2); // RT5X profile 3
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",3,3); // OSSC profile 3
 
         if(SVS==0)sendRBP(3);
         else sendSVS(3);
       }
       else if(ecapbytes[6] == 25 || ecapbytes[11] == 51){
-        if(RT5Xir == 1){sendIR("5x",4,2);delay(30);} // RT5X profile 4
-        if(RT4Kir == 1)sendIR("4k",4,2); // RT4K profile 4
+        if(RT5Xir == 1)sendIR("5x",4,2); // RT5X profile 4
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",4,3); // OSSC profile 4
 
         if(SVS==0)sendRBP(4);
         else sendSVS(4);
       }
       else if(ecapbytes[6] == 26 || ecapbytes[11] == 52){
-        if(RT5Xir == 1){sendIR("5x",5,2);delay(30);} // RT5X profile 5
-        if(RT4Kir == 1)sendIR("4k",5,2); // RT4K profile 5
+        if(RT5Xir == 1)sendIR("5x",5,2); // RT5X profile 5
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",5,3); // OSSC profile 5
 
         if(SVS==0)sendRBP(5);
         else sendSVS(5);
       }
       else if(ecapbytes[6] == 27 || ecapbytes[11] == 53){
-        if(RT5Xir == 1){sendIR("5x",6,2);delay(30);} // RT5X profile 6
-        if(RT4Kir == 1)sendIR("4k",6,2); // RT4K profile 6
+        if(RT5Xir == 1)sendIR("5x",6,2); // RT5X profile 6
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",6,3); // OSSC profile 6
 
         if(SVS==0)sendRBP(6);
         else sendSVS(6);
       }
       else if(ecapbytes[6] == 28 || ecapbytes[11] == 54){
-        if(RT5Xir == 1){sendIR("5x",7,2);delay(30);} // RT5X profile 7
-        if(RT4Kir == 1)sendIR("4k",7,2); // RT4K profile 7
+        if(RT5Xir == 1)sendIR("5x",7,2); // RT5X profile 7
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",7,3); // OSSC profile 7
 
         if(SVS==0)sendRBP(7);
         else sendSVS(7);
       }
       else if(ecapbytes[6] == 29 || ecapbytes[11] == 55){
-        if(RT5Xir == 1){sendIR("5x",8,2);delay(30);} // RT5X profile 8
-        if(RT4Kir == 1)sendIR("4k",8,2); // RT4K profile 8
+        if(RT5Xir == 1)sendIR("5x",8,2); // RT5X profile 8
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",8,3); // OSSC profile 8
 
         if(SVS==0)sendRBP(8);
         else sendSVS(8);
       }
       else if(ecapbytes[6] == 30){
-        if(RT5Xir == 1){sendIR("5x",9,2);delay(30);} // RT5X profile 9
-        if(RT4Kir == 1)sendIR("4k",9,2); // RT4K profile 9
+        if(RT5Xir == 1)sendIR("5x",9,2); // RT5X profile 9
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",9,3); // OSSC profile 9
 
         if(SVS==0)sendRBP(9);
         else sendSVS(9);
       }
       else if(ecapbytes[6] == 31){
-        if(RT5Xir == 1){sendIR("5x",10,2);delay(30);} // RT5X profile 10
-        if(RT4Kir == 1)sendIR("4k",10,2); // RT4K profile 10
+        if(RT5Xir == 1)sendIR("5x",10,2); // RT5X profile 10
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",10,3); // OSSC profile 10
 
         if(SVS==0)sendRBP(10);
         else sendSVS(10);
       }
       else if(ecapbytes[6] == 32){
-        if(RT4Kir == 1)sendIR("4k",11,2); // RT4K profile 11
+        if(OSSCir == 1)sendIR("ossc",11,3); // OSSC profile 11
 
         if(SVS==0)sendRBP(11);
         else sendSVS(11);
       }
       else if(ecapbytes[6] == 33){
-        if((RT4Kir == 1) && !S0)sendIR("4k",12,2); // RT4K profile 12
+        //if((OSSCir == 1) && !S0)sendIR("ossc",12,3); // OSSC profile 12
+        if(OSSCir == 1)sendIR("ossc",12,3); // OSSC profile 12
 
         if(SVS==0 && !S0)sendRBP(12); // okay to use this profile if S0 is set to false
         else sendSVS(12);
       }
-      else if(ecapbytes[6] > 33 && ecapbytes[6] < 38){
+      else if(ecapbytes[6] == 34){
+        if(OSSCir == 1)sendIR("ossc",13,3); // OSSC profile 13
+        sendSVS(13);
+      }
+      else if(ecapbytes[6] == 35){
+        if(OSSCir == 1)sendIR("ossc",14,3); // OSSC profile 14
+        sendSVS(14);
+      }
+      else if(ecapbytes[6] > 35 && ecapbytes[6] < 38){
         sendSVS(ecapbytes[6] - 21);
       }
     }
@@ -568,8 +605,9 @@ void readExtron1(){
     if(ecap.substring(0,6) == "remote"){
       otakuoff[0] = 0;
       if(ecap.substring(0,13) == "remote prof10"){
-          if(RT5Xir == 1){sendIR("5x",10,2);delay(30);} // RT5X profile 10
-          if(RT4Kir == 1)sendIR("4k",10,2); // RT4K profile 10
+          if(RT5Xir == 1)sendIR("5x",10,2); // RT5X profile 10
+          if(RT5Xir && OSSCir)delay(500);
+          if(OSSCir == 1)sendIR("ossc",10,3); // OSSC profile 10
 
           if(SVS==0) sendRBP(10);
           else sendSVS(10);
@@ -581,7 +619,7 @@ void readExtron1(){
           ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku2, Extron status
            (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
           
-          if(RT4Kir == 1)sendIR("4k",12,2); // RT4K profile 12
+          //if(OSSCir == 1)sendIR("ossc",12,3); // OSSC profile 12
 
           if(SVS == 1)sendSVS(0);
           else sendRBP(12);
@@ -589,64 +627,73 @@ void readExtron1(){
         }
       }
       else if(ecap.substring(0,12) == "remote prof1"){
-          if(RT5Xir == 1){sendIR("5x",1,2);delay(30);} // RT5X profile 1 
-          if(RT4Kir == 1)sendIR("4k",1,2); // RT4K profile 1
+          if(RT5Xir == 1)sendIR("5x",1,2); // RT5X profile 1 
+          if(RT5Xir && OSSCir)delay(500);
+          if(OSSCir == 1)sendIR("ossc",1,3); // OSSC profile 1
 
           if(SVS==0) sendRBP(1);
           else sendSVS(1);
       }
       else if(ecap.substring(0,12) == "remote prof2"){
-          if(RT5Xir == 1){sendIR("5x",2,2);delay(30);} // RT5X profile 2
-          if(RT4Kir == 1)sendIR("4k",2,2); // RT4K profile 2
+          if(RT5Xir == 1)sendIR("5x",2,2); // RT5X profile 2
+          if(RT5Xir && OSSCir)delay(500);
+          if(OSSCir == 1)sendIR("ossc",2,3); // OSSC profile 2
 
           if(SVS==0) sendRBP(2);
           else sendSVS(2);
       }
       else if(ecap.substring(0,12) == "remote prof3"){
-          if(RT5Xir == 1){sendIR("5x",3,2);delay(30);} // RT5X profile 3
-          if(RT4Kir == 1)sendIR("4k",3,2); // RT4K profile 3
+          if(RT5Xir == 1)sendIR("5x",3,2); // RT5X profile 3
+          if(RT5Xir && OSSCir)delay(500);
+          if(OSSCir == 1)sendIR("ossc",3,3); // OSSC profile 3
 
           if(SVS==0) sendRBP(3);
           else sendSVS(3);
       }
       else if(ecap.substring(0,12) == "remote prof4"){
-          if(RT5Xir == 1){sendIR("5x",4,2);delay(30);} // RT5X profile 4
-          if(RT4Kir == 1)sendIR("4k",4,2); // RT4K profile 4
+          if(RT5Xir == 1)sendIR("5x",4,2); // RT5X profile 4
+          if(RT5Xir && OSSCir)delay(500);
+          if(OSSCir == 1)sendIR("ossc",4,3); // OSSC profile 4
 
           if(SVS==0) sendRBP(4);
           else sendSVS(4);
       }
       else if(ecap.substring(0,12) == "remote prof5"){
-          if(RT5Xir == 1){sendIR("5x",5,2);delay(30);} // RT5X profile 5
-          if(RT4Kir == 1)sendIR("4k",5,2); // RT4K profile 5
+          if(RT5Xir == 1)sendIR("5x",5,2); // RT5X profile 5
+          if(RT5Xir && OSSCir)delay(500);
+          if(OSSCir == 1)sendIR("ossc",5,3); // OSSC profile 5
 
           if(SVS==0) sendRBP(5);
           else sendSVS(5);
       }
       else if(ecap.substring(0,12) == "remote prof6"){
-          if(RT5Xir == 1){sendIR("5x",6,2);delay(30);} // RT5X profile 6
-          if(RT4Kir == 1)sendIR("4k",6,2); // RT4K profile 6
+          if(RT5Xir == 1)sendIR("5x",6,2); // RT5X profile 6
+          if(RT5Xir && OSSCir)delay(500);
+          if(OSSCir == 1)sendIR("ossc",6,3); // OSSC profile 6
 
           if(SVS==0) sendRBP(6);
           else sendSVS(6);
       }
       else if(ecap.substring(0,12) == "remote prof7"){
-          if(RT5Xir == 1){sendIR("5x",7,2);delay(30);} // RT5X profile 7
-          if(RT4Kir == 1)sendIR("4k",7,2); // RT4K profile 7
+          if(RT5Xir == 1)sendIR("5x",7,2); // RT5X profile 7
+          if(RT5Xir && OSSCir)delay(500);
+          if(OSSCir == 1)sendIR("ossc",7,3); // OSSC profile 7
 
           if(SVS==0) sendRBP(7);
           else sendSVS(7);
       }
       else if(ecap.substring(0,12) == "remote prof8"){
-          if(RT5Xir == 1){sendIR("5x",8,2);delay(30);} // RT5X profile 8
-          if(RT4Kir == 1)sendIR("4k",8,2); // RT4K profile 8
+          if(RT5Xir == 1)sendIR("5x",8,2); // RT5X profile 8
+          if(RT5Xir && OSSCir)delay(500);
+          if(OSSCir == 1)sendIR("ossc",8,3); // OSSC profile 8
 
           if(SVS==0) sendRBP(8);
           else sendSVS(8);
       }
       else if(ecap.substring(0,12) == "remote prof9"){
-          if(RT5Xir == 1){sendIR("5x",9,2);delay(30);} // RT5X profile 9
-          if(RT4Kir == 1)sendIR("4k",9,2); // RT4K profile 9
+          if(RT5Xir == 1)sendIR("5x",9,2); // RT5X profile 9
+          if(RT5Xir && OSSCir)delay(500);
+          if(OSSCir == 1)sendIR("ossc",9,3); // OSSC profile 9
 
           if(SVS==0) sendRBP(9);
           else sendSVS(9);
@@ -707,7 +754,7 @@ void readExtron2(){
         (previnput[0] == "In0 " || previnput[0] == "In00" || previnput[0] == "discon")) && 
         (previnput[0] == "discon" || voutMatrix[eoutput[0]]) && voutMatrix[eoutput[1]+32]){
 
-        if(RT4Kir == 1)sendIR("4k",12,2); // RT4K profile 12
+        //if(OSSCir == 1)sendIR("ossc",12,3); // OSSC profile 12
 
         if(SVS == 1)sendSVS(0);
         else sendRBP(12);
@@ -786,7 +833,7 @@ void readExtron2(){
           allgscartoff[0] && allgscartoff[1] && 
           ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku, Extron status
           (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
-            if(RT4Kir == 1)sendIR("4k",12,2); // RT4K profile 12
+            //if(OSSCir == 1)sendIR("ossc",12,3); // OSSC profile 12
 
             if(SVS == 1)sendSVS(0);
             else sendRBP(12);
@@ -888,57 +935,65 @@ void readGscart1(){
   if(((bit[2] != bitprev[0][2] || bit[1] != bitprev[0][1] || bit[0] != bitprev[0][0]) || (allgscartoff[0] == 1)) && (samcc[0] == samsize) && !(fpdc)){
     //Detect which scart port is now active and change profile accordingly
     if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
-      if(RT5Xir == 2){sendIR("5x",1,2);delay(30);} // RT5X profile 1 
-      if(RT4Kir == 2)sendIR("4k",1,2); // RT4K profile 1
+      if(RT5Xir == 2)sendIR("5x",1,2); // RT5X profile 1 
+      if(RT5Xir && OSSCir)delay(500);
+      if(OSSCir == 2)sendIR("ossc",1,3); // OSSC profile 1
 
       if(SVS==2)sendRBP(1);
       else sendSVS(201);
     } 
     else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){ // 0 0 1
-      if(RT5Xir == 2){sendIR("5x",2,2);delay(30);} // RT5X profile 2
-      if(RT4Kir == 2)sendIR("4k",2,2);  // RT4K profile 2
+      if(RT5Xir == 2)sendIR("5x",2,2); // RT5X profile 2
+      if(RT5Xir && OSSCir)delay(500);
+      if(OSSCir == 2)sendIR("ossc",2,3); // OSSC profile 2
 
       if(SVS==2)sendRBP(2);
       else sendSVS(202);
     }
     else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){ // 0 1 0
-      if(RT5Xir == 2){sendIR("5x",3,2);delay(30);} // RT5X profile 3
-      if(RT4Kir == 2)sendIR("4k",3,2);  // RT4K profile 3
+      if(RT5Xir == 2)sendIR("5x",3,2); // RT5X profile 3
+      if(RT5Xir && OSSCir)delay(500);
+      if(OSSCir == 2)sendIR("ossc",3,3); // OSSC profile 3
 
       if(SVS==2)sendRBP(3);
       else sendSVS(203);
     }
     else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
-      if(RT5Xir == 2){sendIR("5x",4,2);delay(30);} // RT5X profile 4
-      if(RT4Kir == 2)sendIR("4k",4,2);  // RT4K profile 4
+      if(RT5Xir == 2)sendIR("5x",4,2); // RT5X profile 4
+      if(RT5Xir && OSSCir)delay(500);
+      if(OSSCir == 2)sendIR("ossc",4,3); // OSSC profile 4
 
       if(SVS==2)sendRBP(4);
       else sendSVS(204);
     }
     else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0)){ // 1 0 0
-      if(RT5Xir == 2){sendIR("5x",5,2);delay(30);} // RT5X profile 5
-      if(RT4Kir == 2)sendIR("4k",5,2);  // RT4K profile 5
+      if(RT5Xir == 2)sendIR("5x",5,2); // RT5X profile 5
+      if(RT5Xir && OSSCir)delay(500);
+      if(OSSCir == 2)sendIR("ossc",5,3); // OSSC profile 5
 
       if(SVS==2)sendRBP(5);
       else sendSVS(205);
     } 
     else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1)){ // 1 0 1
-      if(RT5Xir == 2){sendIR("5x",6,2);delay(30);} // RT5X profile 6
-      if(RT4Kir == 2)sendIR("4k",6,2);  // RT4K profile 6
+      if(RT5Xir == 2)sendIR("5x",6,2); // RT5X profile 6
+      if(RT5Xir && OSSCir)delay(500);
+      if(OSSCir == 2)sendIR("ossc",6,3); // OSSC profile 6
 
       if(SVS==2)sendRBP(6);
       else sendSVS(206);
     }   
     else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0)){ // 1 1 0
-      if(RT5Xir == 2){sendIR("5x",7,2);delay(30);} // RT5X profile 7
-      if(RT4Kir == 2)sendIR("4k",7,2);  // RT4K profile 7
+      if(RT5Xir == 2)sendIR("5x",7,2); // RT5X profile 7
+      if(RT5Xir && OSSCir)delay(500);
+      if(OSSCir == 2)sendIR("ossc",7,3); // OSSC profile 7
 
       if(SVS==2)sendRBP(7);
       else sendSVS(207);
     } 
     else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1)){ // 1 1 1
-      if(RT5Xir == 2){sendIR("5x",8,2);delay(30);} // RT5X profile 8
-      if(RT4Kir == 2)sendIR("4k",8,2);  // RT4K profile 8
+      if(RT5Xir == 2)sendIR("5x",8,2); // RT5X profile 8
+      if(RT5Xir && OSSCir)delay(500);
+      if(OSSCir == 2)sendIR("ossc",8,3); // OSSC profile 8
 
       if(SVS==2)sendRBP(8);
       else sendSVS(208);
@@ -1045,33 +1100,41 @@ void readGscart2(){
   if(((bit[2] != bitprev[1][2] || bit[1] != bitprev[1][1] || bit[0] != bitprev[1][0]) || (allgscartoff[1] == 1)) && (samcc[1] == samsize) && !(fpdc)){
         //Detect which scart port is now active and change profile accordingly
         if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
-          if(RT5Xir == 2){sendIR("5x",9,2);delay(30);} // RT5X profile 9
-          if(RT4Kir == 2)sendIR("4k",9,2);  // RT4K profile 9
+          if(RT5Xir == 2)sendIR("5x",9,2); // RT5X profile 9
+          if(RT5Xir && OSSCir)delay(500);
+          if(OSSCir == 2)sendIR("ossc",9,3); // OSSC profile 9
 
           if(SVS==2)sendRBP(9);
           else sendSVS(209);
         } 
         else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){ // 0 0 1
-          if(RT5Xir == 2){sendIR("5x",10,2);delay(30);} // RT5X profile 10
-          if(RT4Kir == 2)sendIR("4k",10,2);  // RT4K profile 10
+          if(RT5Xir == 2)sendIR("5x",10,2); // RT5X profile 10
+          if(RT5Xir && OSSCir)delay(500);
+          if(OSSCir == 2)sendIR("ossc",10,3); // OSSC profile 10
 
           if(SVS==2)sendRBP(10);
           else sendSVS(210);
         }
         else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){ // 0 1 0
-          if(RT4Kir == 2)sendIR("4k",11,2);  // RT4K profile 11
+          if(OSSCir == 2)sendIR("ossc",11,3); // OSSC profile 11
 
           if(SVS==2)sendRBP(11);
           else sendSVS(211);
         }
         else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
-          if(RT4Kir == 2)sendIR("4k",12,2); // RT4K profile 12
+          if(OSSCir == 2)sendIR("ossc",12,3); // OSSC profile 12
 
           if(SVS==2 && !S0)sendRBP(12);
           else sendSVS(212);
         }
-        else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0))sendSVS(213); // 1 0 0
-        else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1))sendSVS(214); // 1 0 1
+        else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0)){ // 1 0 0
+          if(OSSCir == 2)sendIR("ossc",13,3); // OSSC profile 13
+          sendSVS(213);
+        }
+        else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1)){ // 1 0 1
+          if(OSSCir == 2)sendIR("ossc",14,3); // OSSC profile 14
+          sendSVS(214);
+        }
         else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0))sendSVS(215); // 1 1 0
         else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1))sendSVS(216); // 1 1 1
 
@@ -1445,48 +1508,71 @@ void readIR(){
       }
       else if(ir_recv_command == 11){
         sendRBP(1);
-        if(RT5Xir >= 1){sendIR("5x",1,1);delay(30);sendIR("5x",1,1);} // RT5X profile 1 
+        if(RT5Xir >= 1){sendIR("5x",1,1);delay(30);sendIR("5x",1,1);} // RT5X profile 1
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1){sendIR("ossc",1,3);} // OSSC profile 1
+        ir_recv_command = 0;
       }
       else if(ir_recv_command == 7){
         sendRBP(2);
         if(RT5Xir >= 1){sendIR("5x",2,1);delay(30);sendIR("5x",2,1);} // RT5X profile 2
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1){sendIR("ossc",2,3);} // OSSC profile 2
       }
       else if(ir_recv_command == 3){
         sendRBP(3);
         if(RT5Xir >= 1){sendIR("5x",3,1);delay(30);sendIR("5x",3,1);} // RT5X profile 3
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1){sendIR("ossc",3,3);} // OSSC profile 3
       }
       else if(ir_recv_command == 10){
         sendRBP(4);
         if(RT5Xir >= 1){sendIR("5x",4,1);delay(30);sendIR("5x",4,1);} // RT5X profile 4
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1){sendIR("ossc",4,3);} // OSSC profile 4
       }
       else if(ir_recv_command == 6){
         sendRBP(5);
         if(RT5Xir >= 1){sendIR("5x",5,1);delay(30);sendIR("5x",5,1);} // RT5X profile 5
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1){sendIR("ossc",5,3);} // OSSC profile 5
       }
       else if(ir_recv_command == 2){
         sendRBP(6);
         if(RT5Xir >= 1){sendIR("5x",6,1);delay(30);sendIR("5x",6,1);} // RT5X profile 6
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1){sendIR("ossc",6,3);} // OSSC profile 6
       }
       else if(ir_recv_command == 9){
         sendRBP(7);
         if(RT5Xir >= 1){sendIR("5x",7,1);delay(30);sendIR("5x",7,1);} // RT5X profile 7
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1){sendIR("ossc",7,3);} // OSSC profile 7
       }
       else if(ir_recv_command == 5){
         sendRBP(8);
         if(RT5Xir >= 1){sendIR("5x",8,1);delay(30);sendIR("5x",8,1);} // RT5X profile 8
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1){sendIR("ossc",8,3);} // OSSC profile 8
       }
       else if(ir_recv_command == 1){
         sendRBP(9);
         if(RT5Xir >= 1){sendIR("5x",9,1);delay(30);sendIR("5x",9,1);} // RT5X profile 9
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1){sendIR("ossc",9,3);} // OSSC profile 9
       }
       else if(ir_recv_command == 37){
         sendRBP(10);
         if(RT5Xir >= 1){sendIR("5x",10,1);delay(30);sendIR("5x",10,1);} // RT5X profile 10
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1){sendIR("ossc",10,3);} // OSSC profile 10
       }
       else if(ir_recv_command == 38){
+        if(OSSCir == 1){sendIR("ossc",11,3);} // OSSC profile 11
         sendRBP(11);
       }
       else if(ir_recv_command == 39){
+        if(OSSCir == 1){sendIR("ossc",12,3);} // OSSC profile 12
         sendRBP(12);
       }
       else if(ir_recv_command == 35){
@@ -1564,6 +1650,77 @@ void readIR(){
         }
       }
     } // end of turbo directional mode
+
+    if(ir_recv_address == 128 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT){ // legacy 5x remote
+      if(ir_recv_command == 137 && gctl)overrideGscart(1);      // vol- / scanlines button
+      else if(ir_recv_command == 72 && gctl)overrideGscart(4);  // mouse / h. sampling button
+      else if(ir_recv_command == 135 && gctl)overrideGscart(8); // vol+ / interpolation button
+      else if(ir_recv_command == 39 && gctl){                   // back button / disable override
+        digitalWrite(12,LOW); // D12 (PB4) LOW / enables auto-switching
+        pinMode(A2,INPUT);pinMode(A1,INPUT);pinMode(A0,INPUT); // set A0-A2 as inputs
+        lastginput = 1;      
+      }
+      else if(ir_recv_command == 64){} // down button
+      else if(ir_recv_command == 56){} // up button
+      else if(ir_recv_command == 55){} // left button
+      else if(ir_recv_command == 57){} // right button
+      else if(ir_recv_command == 19){} // ok button
+      else if(ir_recv_command == 131){} // menu / output res button
+      else if(ir_recv_command == 115){} // home / input button
+      else if(ir_recv_command == 129){} // power button
+
+    } // end of legacy 5x remote
+
+    if(ir_recv_address == 124 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT){ // OSSC remote (124 is 7C hex)
+      if(ir_recv_command == 148){} // 1 button
+      else if(ir_recv_command == 149){} // 2 button
+      else if(ir_recv_command == 150){} // 3 button
+      else if(ir_recv_command == 151){} // 4 button
+      else if(ir_recv_command == 152){} // 5 button
+      else if(ir_recv_command == 153){} // 6 button
+      else if(ir_recv_command == 154){} // 7 button
+      else if(ir_recv_command == 155){} // 8 button
+      else if(ir_recv_command == 156){} // 9 button
+      else if(ir_recv_command == 147){} // 0 button
+      else if(ir_recv_command == 157){} // 10+ --/- button
+      else if(ir_recv_command == 158){} // return <__S--> button
+      else if(ir_recv_command == 180){} // up button
+      else if(ir_recv_command == 179){} // down button
+      else if(ir_recv_command == 181){} // left button
+      else if(ir_recv_command == 182){} // right button
+      else if(ir_recv_command == 184){} // ok button
+      else if(ir_recv_command == 178){} // menu button
+      else if(ir_recv_command == 173){} // L/R button
+      else if(ir_recv_command == 139){} // cancel / PIC & clock & zoom button
+      else if(ir_recv_command == 183){} // exit button
+      else if(ir_recv_command == 166){} // info button
+      else if(ir_recv_command == 131){} // red pause button
+      else if(ir_recv_command == 130){} // green play button
+      else if(ir_recv_command == 133){} // yellow stop button
+      else if(ir_recv_command == 177){} // blue eject button
+      else if(ir_recv_command == 186){} // >>| next button
+      else if(ir_recv_command == 185){} // |<< previous button
+      else if(ir_recv_command == 134){} // << button
+      else if(ir_recv_command == 135){} // >> button
+      else if(ir_recv_command == 128){} // Power button
+    }
+    else if(ir_recv_address == 122 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT){ // 122 is 7A hex
+      if(ir_recv_command == 27){} // tone- button
+      else if(ir_recv_command == 26){} // tone+ button
+    }
+    else if(ir_recv_address == 56 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT){ // 56 is 38 hex
+      if(ir_recv_command == 14){} // vol+ button
+      else if(ir_recv_command == 15){} // vol- button
+      else if(ir_recv_command == 10){} // ch+ button
+      else if(ir_recv_command == 11){} // ch- button
+      else if(ir_recv_command == 18){} // p.n.s. button
+      else if(ir_recv_command == 19){} // tv/av button
+      else if(ir_recv_command == 24){} // mute speaker button
+      //else if(ir_recv_command == ){} // TV button , I dont believe these are NEC based
+      //else if(ir_recv_command == ){} // SAT / DVB button ... ^^^
+      //else if(ir_recv_command == ){} // DVD / HIFI button ... ^^^
+      
+    } // end of OSSC remote
     
   } // end of TinyReceiverDecode()   
 } // end of readIR()
@@ -1598,8 +1755,9 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
       digitalWrite(A2,HIGH);digitalWrite(A1,HIGH);digitalWrite(A0,HIGH); // 111
     }
     if(lastginput == port || lastginput == 9){
-      if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 1 - 8 (based on port#)
-      if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 1 - 8 (based on port#)
+      if(RT5Xir == 2){sendIR("5x",port,1);delay(30);sendIR("5x",port,1);} // RT5X profile 1 - 8 (based on port#)
+      if(RT5Xir && OSSCir)delay(500);
+      if(OSSCir == 2)sendIR("ossc",port,3); // OSSC profile 1 - 8 (based on port#)
       if(SVS==2)sendRBP(port);
       else sendSVS(200 + port);
     }
@@ -1612,8 +1770,9 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
     if(port == 9){
       digitalWrite(A5,LOW);digitalWrite(A4,LOW);digitalWrite(A3,LOW); // 000
       if(lastginput == port || lastginput == 1){
-        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 9
-        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 9
+        if(RT5Xir == 2){sendIR("5x",port,1);delay(30);sendIR("5x",port,1);} // RT5X profile 9
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 2)sendIR("ossc",port,3); // OSSC profile 9
         if(SVS==2)sendRBP(port);
         else sendSVS(200 + port);
       }
@@ -1622,8 +1781,9 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
     else if(port == 10){
       digitalWrite(A5,LOW);digitalWrite(A4,LOW);digitalWrite(A3,HIGH); // 001
       if(lastginput == port){
-        if(RT5Xir == 2){sendIR("5x",port,2);delay(30);} // RT5X profile 10
-        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 10
+        if(RT5Xir == 2){sendIR("5x",port,1);delay(30);sendIR("5x",port,1);} // RT5X profile 10
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 2)sendIR("ossc",port,3); // OSSC profile 10
         if(SVS==2)sendRBP(port);
         else sendSVS(200 + port);
       }
@@ -1632,7 +1792,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
     else if(port == 11){
       digitalWrite(A5,LOW);digitalWrite(A4,HIGH);digitalWrite(A3,LOW); // 010
       if(lastginput == port){
-        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 11
+        if(OSSCir == 2)sendIR("ossc",port,3); // OSSC profile 11
         if(SVS==2)sendRBP(port);
         else sendSVS(200 + port);
       }
@@ -1641,7 +1801,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
     else if(port == 12){
       digitalWrite(A5,LOW);digitalWrite(A4,HIGH);digitalWrite(A3,HIGH); // 011
       if(lastginput == port){
-        if(RT4Kir == 2)sendIR("4k",port,2);  // RT4K profile 12
+        if(OSSCir == 2)sendIR("ossc",port,3); // OSSC profile 12
         if(SVS==2 && !S0)sendRBP(port);
         else sendSVS(200 + port);
       }
@@ -1649,11 +1809,13 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
     }
     else if(port == 13){
       digitalWrite(A5,HIGH);digitalWrite(A4,LOW);digitalWrite(A3,LOW); // 100
+      if(OSSCir == 2)sendIR("ossc",port,3); // OSSC profile 13
       if(lastginput == port)sendSVS(200 + port);
       lastginput = port;
     }
     else if(port == 14){
       digitalWrite(A5,HIGH);digitalWrite(A4,LOW);digitalWrite(A3,HIGH); // 101
+      if(OSSCir == 2)sendIR("ossc",port,3); // OSSC profile 14
       if(lastginput == port)sendSVS(200 + port);
       lastginput = port;
     }
@@ -1717,6 +1879,23 @@ void sendIR(String type, uint8_t prof, uint8_t repeat){
     else if(prof == 10){irsend.sendNEC(0x49,0x25,repeat);} // RT4K profile 10
     else if(prof == 11){irsend.sendNEC(0x49,0x26,repeat);} // RT4K profile 11
     else if(prof == 12){irsend.sendNEC(0x49,0x27,repeat);} // RT4K profile 12
+  }
+  else if(type == "OSSC" || type == "ossc"){
+    //if(prof == 0){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x93,repeat);} // OSSC profile 0 not used atm
+    if(prof == 1){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x94,repeat);} // OSSC profile 1 
+    else if(prof == 2){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x95,repeat);} // OSSC profile 2
+    else if(prof == 3){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x96,repeat);} // OSSC profile 3
+    else if(prof == 4){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x97,repeat);} // OSSC profile 4
+    else if(prof == 5){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x98,repeat);} // OSSC profile 5
+    else if(prof == 6){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x99,repeat);} // OSSC profile 6
+    else if(prof == 7){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9A,repeat);} // OSSC profile 7
+    else if(prof == 8){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9B,repeat);} // OSSC profile 8
+    else if(prof == 9){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9C,repeat);} // OSSC profile 9
+    else if(prof == 10){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x93,repeat);} // OSSC profile 10
+    else if(prof == 11){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x94,repeat);} // OSSC profile 11
+    else if(prof == 12){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x95,repeat);} // OSSC profile 12
+    else if(prof == 13){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x96,repeat);} // OSSC profile 13
+    else if(prof == 14){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x47C,0x97,repeat);} // OSSC profile 14
   }
   else if(type == "LG"){           // LG CX OLED
       irsend.sendNEC(0x04,0x08,0); // Power button
