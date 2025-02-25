@@ -1,5 +1,5 @@
 /*
-* RT4K Donut Dongle v0.7
+* RT4K Donut Dongle v0.71
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -1881,21 +1881,27 @@ void sendIR(String type, uint8_t prof, uint8_t repeat){
     else if(prof == 12){irsend.sendNEC(0x49,0x27,repeat);} // RT4K profile 12
   }
   else if(type == "OSSC" || type == "ossc"){
-    //if(prof == 0){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x93,repeat);} // OSSC profile 0 not used atm
-    if(prof == 1){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x94,repeat);} // OSSC profile 1 
-    else if(prof == 2){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x95,repeat);} // OSSC profile 2
-    else if(prof == 3){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x96,repeat);} // OSSC profile 3
-    else if(prof == 4){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x97,repeat);} // OSSC profile 4
-    else if(prof == 5){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x98,repeat);} // OSSC profile 5
-    else if(prof == 6){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x99,repeat);} // OSSC profile 6
-    else if(prof == 7){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9A,repeat);} // OSSC profile 7
-    else if(prof == 8){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9B,repeat);} // OSSC profile 8
-    else if(prof == 9){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9C,repeat);} // OSSC profile 9
-    else if(prof == 10){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x93,repeat);} // OSSC profile 10
-    else if(prof == 11){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x94,repeat);} // OSSC profile 11
-    else if(prof == 12){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x95,repeat);} // OSSC profile 12
-    else if(prof == 13){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x96,repeat);} // OSSC profile 13
-    else if(prof == 14){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x47C,0x97,repeat);} // OSSC profile 14
+    irsend.sendNEC(0x7C,0xB7,repeat); // exit
+    delay(100);
+    irsend.sendNEC(0x7C,0xB7,repeat); // exit 
+    delay(100);
+    irsend.sendNEC(0x7C,0x9D,repeat); // 10+ button
+    delay(400);
+    //if(prof == 0){irsend.sendNEC(0x7C,0x93,repeat);} // OSSC profile 0 not used atm
+    if(prof == 1){irsend.sendNEC(0x7C,0x94,repeat);} // OSSC profile 1 
+    else if(prof == 2){irsend.sendNEC(0x7C,0x95,repeat);} // OSSC profile 2
+    else if(prof == 3){irsend.sendNEC(0x7C,0x96,repeat);} // OSSC profile 3
+    else if(prof == 4){irsend.sendNEC(0x7C,0x97,repeat);} // OSSC profile 4
+    else if(prof == 5){irsend.sendNEC(0x7C,0x98,repeat);} // OSSC profile 5
+    else if(prof == 6){irsend.sendNEC(0x7C,0x99,repeat);} // OSSC profile 6
+    else if(prof == 7){irsend.sendNEC(0x7C,0x9A,repeat);} // OSSC profile 7
+    else if(prof == 8){irsend.sendNEC(0x7C,0x9B,repeat);} // OSSC profile 8
+    else if(prof == 9){irsend.sendNEC(0x7C,0x9C,repeat);} // OSSC profile 9
+    else if(prof == 10){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x93,repeat);} // OSSC profile 10
+    else if(prof == 11){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x94,repeat);} // OSSC profile 11
+    else if(prof == 12){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x95,repeat);} // OSSC profile 12
+    else if(prof == 13){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x96,repeat);} // OSSC profile 13
+    else if(prof == 14){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x47C,0x97,repeat);} // OSSC profile 14
   }
   else if(type == "LG"){           // LG CX OLED
       irsend.sendNEC(0x04,0x08,0); // Power button
