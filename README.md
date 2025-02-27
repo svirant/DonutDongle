@@ -65,6 +65,8 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 # Connection Acccessories
 
 **gscart/gcomp EXT connector (plug-n-play)**<br />
+The spring pins allow it to stay "sandwiched" in place by the lid<br />
+<img width="470" src="./images/2a.jpg" />
 <img width="380" src="./images/2.jpg" />
 <img width="600" src="./images/3.jpg" /><br />
 
