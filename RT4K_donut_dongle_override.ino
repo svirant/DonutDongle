@@ -240,6 +240,7 @@ uint8_t const dcl = 5; // (duty cycle low) at least this many high samples and l
 uint8_t const samsize = 20; // total number of ADC samples required to capture at least 1 period
 uint8_t const fpdccountmax = 3; // number of periods required when in the 50% duty cycle state before a Profile 0 is triggered.
 uint8_t const gctl = 1; // *experimental* (0 is disabled) disable gscart/gcomp override by default until all boards have voltage divider (or you would be sending 5v to gscart 3.3v pins)
+uint8_t const goverride = 1; // 1 = HIGH, 0 = LOW
 
 
 uint8_t extrabuttonprof = 0; // 3 = disabled | If you want to use AUX7, AUX8 buttons to control Scalable Video Switch inputs instead. 
@@ -1728,7 +1729,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
   if(port <= 8){
     auxgsw[0] = 0;
     pinMode(12,OUTPUT);
-    digitalWrite(12,LOW); // D12 / gscart sw1 override set LOW to select port (disables auto switching)
+    digitalWrite(12,goverride); // D12 / gscart sw1 override set HIGH/LOW? to select port (disables auto switching)
     pinMode(A2,OUTPUT);pinMode(A1,OUTPUT);pinMode(A0,OUTPUT);// set A0-A2 as outputs
     if(port == 1){
       digitalWrite(A2,LOW);digitalWrite(A1,LOW);digitalWrite(A0,LOW); // 000
@@ -1766,7 +1767,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
   else if(port >= 9){
     auxgsw[1] = 0;
     pinMode(10,OUTPUT);
-    digitalWrite(10,LOW); // D10 / gscart sw2 override set LOW to select port (disables auto switching)
+    digitalWrite(10,goverride); // D10 / gscart sw2 override set HIGH/LOW? to select port (disables auto switching)
     pinMode(A5,OUTPUT);pinMode(A4,OUTPUT);pinMode(A3,OUTPUT); // set A3-A5 as outputs
     if(port == 9){
       digitalWrite(A5,LOW);digitalWrite(A4,LOW);digitalWrite(A3,LOW); // 000
