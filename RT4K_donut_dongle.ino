@@ -184,7 +184,7 @@ uint8_t const voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input 
                            };
                            
 
-
+                               // ** Must be on firmware version 3.7 or higher **
 uint8_t const RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
                      // 1 = enabled for Extron sw1 / alt sw1, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected
                      //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
@@ -233,7 +233,7 @@ String const auxpower = "LG"; // AUX8 + Power button sends power off/on via IR E
 
 
 // gscart / gcomp adjustment variables for port detection
-float const highsamvolt[2] = {1.2,1.2}; // for gscart sw1,sw2 rise above this voltage for a high sample
+float const highsamvolt[2] = {1.6,1.6}; // for gscart sw1,sw2 rise above this voltage for a high sample
 byte const apin[2][3] = {{A0,A1,A2},{A3,A4,A5}}; // defines analog pins used to read bit0, bit1, bit2
 uint8_t const dch = 15; // (duty cycle high) at least this many high samples per "samsize" for a high bit (~75% duty cycle)
 uint8_t const dcl = 5; // (duty cycle low) at least this many high samples and less than "dch" per "samsize" indicate all inputs are in-active (~50% duty cycle)
@@ -288,10 +288,12 @@ unsigned long prevBlinkTime = 0;
 
 void setup(){
 
-    pinMode(12,OUTPUT);
-    digitalWrite(12,LOW); // gscart sw1 override set low for query mode by default
-    pinMode(10,OUTPUT);
-    digitalWrite(10,LOW); // gscart sw2 override set low for query mode by default
+    if(gctl){
+      pinMode(12,OUTPUT);
+      digitalWrite(12,LOW); // gscart sw1 override set low for query mode by default
+      pinMode(10,OUTPUT);
+      digitalWrite(10,LOW); // gscart sw2 override set low for query mode by default
+    }
     pinMode(A2,INPUT);pinMode(A1,INPUT);pinMode(A0,INPUT); // set gscart1 port as input
     pinMode(A5,INPUT);pinMode(A4,INPUT);pinMode(A3,INPUT); // set gscart2 port as input
     initPCIInterruptForTinyReceiver(); // for IR Receiver
@@ -1652,14 +1654,10 @@ void readIR(){
     } // end of turbo directional mode
 
     if(ir_recv_address == 128 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT){ // legacy 5x remote
-      if(ir_recv_command == 137 && gctl)overrideGscart(1);      // vol- / scanlines button
-      else if(ir_recv_command == 72 && gctl)overrideGscart(4);  // mouse / h. sampling button
-      else if(ir_recv_command == 135 && gctl)overrideGscart(8); // vol+ / interpolation button
-      else if(ir_recv_command == 39 && gctl){                   // back button / disable override
-        digitalWrite(12,LOW); // D12 (PB4) LOW / enables auto-switching
-        pinMode(A2,INPUT);pinMode(A1,INPUT);pinMode(A0,INPUT); // set A0-A2 as inputs
-        lastginput = 1;      
-      }
+      if(ir_recv_command == 137 && gctl){}      // vol- / scanlines button
+      else if(ir_recv_command == 72 && gctl){}  // mouse / h. sampling button
+      else if(ir_recv_command == 135 && gctl){} // vol+ / interpolation button
+      else if(ir_recv_command == 39 && gctl){}  // back button / disable override   
       else if(ir_recv_command == 64){} // down button
       else if(ir_recv_command == 56){} // up button
       else if(ir_recv_command == 55){} // left button
