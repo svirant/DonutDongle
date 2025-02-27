@@ -9,7 +9,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 <img width="700" src="./images/0a.jpeg" />
 <img width="700" src="./images/0b.jpeg" />
 
-### [Image Gallery](https://photos.sixteenbit.app/share/KXUwNPO2uvjenoCdj3gsQnEMd4q5h4ymUv-0fc8PItIhjA8JXHlVgPDeFnTRXM76KPM): Courtesy of [Justin@sixteenbit.com](https://makerworld.com/en/models/1154283#profileId-1159282)
+### [Image Gallery](https://photos.sixteenbit.app/share/KXUwNPO2uvjenoCdj3gsQnEMd4q5h4ymUv-0fc8PItIhjA8JXHlVgPDeFnTRXM76KPM): Courtesy of [https://byjustin.me/](https://byjustin.me/)
 <br />
 
 -------
