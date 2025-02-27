@@ -1,12 +1,25 @@
 # Donut Dongle
 **Arduino Nano based hub that connects your digital and analog console switching setup with the RetroTink 4K and/or RetroTink 5x / OSSC for Auto Profile switching**
 
-<img width="700" src="./images/1a.png" />
-<br />
-
 The Donut Dongle connects to a switch in a way that allows it to see which port is active. When a console powers on (auto-switching) or an input is manually selected, the Donut Dongle sends a serial command to the RetroTink 4k (or IR signal to the RT5x, OSSC) telling it to load a profile. The profiles can either be defined as remote profiles; those configured in the RT4K menu for the remote buttons. Or they can be SVS profiles which are configured on the RT4K's SDcard. <br />
 
 For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/tree/main/README.md#how-to-use) section below.
+
+<img width="700" src="./images/0.jpeg" />
+<img width="700" src="./images/0a.jpeg" />
+<img width="700" src="./images/0b.jpeg" />
+<br />
+
+### [Image Gallery](https://photos.sixteenbit.app/share/KXUwNPO2uvjenoCdj3gsQnEMd4q5h4ymUv-0fc8PItIhjA8JXHlVgPDeFnTRXM76KPM): Courtesy of [Justin@sixteenbit.com](https://makerworld.com/en/models/1154283#profileId-1159282)
+<br />
+
+-------
+
+# New 3D printed case
+
+### **Please support** him on [MakerWorld](https://makerworld.com/en/models/1154283#profileId-1159282) by printing your Donut Dongle case from there.<br/><br />
+
+
 # Supported Switches
 (current list, but not limited to)
 | **Switch**    | Supported | Notes |
