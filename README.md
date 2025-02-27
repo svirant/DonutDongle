@@ -39,7 +39,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
     - 2x Extron, 2x TESmart, or 1 of each
   - 1x usb-c port for power/programming (on Arduino Nano)
   - 1x 3.5mm "TX OUT to Retrotink 4K VGA adapter" port
-  - 1x IR Emitter (optional for RT5x, OSSC)
+  - 1x IR Emitter (required for OSSC, RT5x (RT5x must be on firmware version 3.7 or higher))
   - 1x IR Receiver (optional for better reception and IR remote customizations)
 <img width="600" src="./images/1b.jpg" />
 
@@ -154,7 +154,7 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 | 4  | J4,J9-11 | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256807448104402.html) | Color: PJ-320B DIP | 
 | 2  | J3,J6 | 2x5 Pin Double Row 2.54mm Pitch Straight Box Header | [AliExpress](https://www.aliexpress.us/item/3256805177947724.html) | (Color: STRAIGHT TYPE, Pins: 10PCS DC3-10Pin) |
 | 2  | J5,J8 | 2x4 Pin Double Row 2.54mm Pitch Straight Box Header | [AliExpress](https://www.aliexpress.us/item/3256805177947724.html) | (Color: STRAIGHT TYPE, Pins: 10PCS DC3-8Pin) |
-| 1  | (optional) | 3.5mm CHF03 1.5 Meters IR Infrared Remote Emission Cable | [AliExpress](https://www.aliexpress.us/item/3256805962345169.html) | required for RT5X, OSSC support |
+| 1  | (optional) | 3.5mm CHF03 1.5 Meters IR Infrared Remote Emission Cable | [AliExpress](https://www.aliexpress.us/item/3256805962345169.html) | required for OSSC, RT5X (must be firmware version 3.7+) |
 | 1  | (optional) | 3.5mm Infrared Remote Control Receiver Extension Cable | [AliExpress](https://www.aliexpress.us/item/2251832741040177.html) | required for [New IR Remote Control functionality](https://github.com/svirant/DonutDongle?tab=readme-ov-file#new-ir-remote-control-functionality) |
 | 2  | H1,H2 | 2.54mm Pitch Single Row Female 15P Header Strip | [AliExpress](https://www.aliexpress.us/item/3256801232229618.html) | |
 | 1  | | Any 3.5mm / aux / stereo / trs / cable | [AliExpress](https://www.aliexpress.us/item/2255799962255486.html) | |
@@ -431,7 +431,7 @@ uint8_t const voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input 
                            };
                            
 
-
+                               // ** Must be on firmware version 3.7 or higher **
 uint8_t const RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
                      // 1 = enabled for Extron sw1 / alt sw1, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected
                      //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
