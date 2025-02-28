@@ -8,6 +8,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 <img width="700" src="./images/0.jpeg" />
 <img width="700" src="./images/0a.jpeg" />
 <img width="700" src="./images/0b.jpeg" />
+<img width="700" src="./images/0c.jpeg" />
 
 ### [Image Gallery & Case](https://photos.sixteenbit.app/share/KXUwNPO2uvjenoCdj3gsQnEMd4q5h4ymUv-0fc8PItIhjA8JXHlVgPDeFnTRXM76KPM): Courtesy of [https://byjustin.me/](https://byjustin.me/)
 <br />
@@ -445,52 +446,52 @@ uint8_t const voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input 
                            };
                            
 
-                               // ** Must be on firmware version 3.7 or higher **
-uint8_t const RT5Xir = 1;      // 0 = disables IR Emitter for RetroTink 5x
-                     // 1 = enabled for Extron sw1 / alt sw1, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected
-                     //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
-                     //
-                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-10 for first 2 inputs on second gscart)
-                     //
-                     // 3 = enabled for Extron sw2 / alt sw2, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected 
-                     //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
+                           // ** Must be on firmware version 3.7 or higher **
+uint8_t const RT5Xir = 2;     // 0 = disables IR Emitter for RetroTink 5x
+                              // 1 = enabled for Extron sw1 / alt sw1, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected
+                              //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
+                              //
+                              // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-10 for first 2 inputs on second gscart)
+                              //
+                              // 3 = enabled for Extron sw2 / alt sw2, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected 
+                              //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
 
-uint8_t const OSSCir = 0;      // 0 = disables IR Emitter for OSSC
-                     // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
-                     //     sends Profile 1 - 14 commands to OSSC. Must have IR LED emitter connected.
-                     //     
-                     // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-14 for first 6 inputs on second gscart)
+uint8_t const OSSCir = 0;     // 0 = disables IR Emitter for OSSC
+                              // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
+                              //     sends Profile 1 - 14 commands to OSSC. Must have IR LED emitter connected.
+                              //     
+                              // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-14 for first 6 inputs on second gscart)
 
-uint8_t const MTVIKIir = 0;    // Must have IR "Receiver" connected to the Donut Dongle for option 1 & 2.
-                     // 0 = disables IR Receiver -> Serial Control for MT-VIKI 8 Port HDMI switch
-                     //
-                     // 1 = MT-VIKI 8 Port HDMI switch connected to "Extron sw1"
-                     //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the MT-VIKI Input over Serial.
-                     //     Sends auxprof SVS profiles listed below.
-                     //
-                     // 2 = MT-VIKI 8 Port HDMI switch connected to "Extron sw2"
-                     //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the MT-VIKI Input over Serial.
-                     //     Sends auxprof SVS profiles listed below. You can change them below to 101 - 108 to prevent SVS profile conflicts if needed.
+uint8_t const MTVIKIir = 0;   // Must have IR "Receiver" connected to the Donut Dongle for option 1 & 2.
+                              // 0 = disables IR Receiver -> Serial Control for MT-VIKI 8 Port HDMI switch
+                              //
+                              // 1 = MT-VIKI 8 Port HDMI switch connected to "Extron sw1"
+                              //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the MT-VIKI Input over Serial.
+                              //     Sends auxprof SVS profiles listed below.
+                              //
+                              // 2 = MT-VIKI 8 Port HDMI switch connected to "Extron sw2"
+                              //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the MT-VIKI Input over Serial.
+                              //     Sends auxprof SVS profiles listed below. You can change them below to 101 - 108 to prevent SVS profile conflicts if needed.
 
-uint8_t const auxprof[12] =    // Assign SVS profiles to IR remote profile buttons. 
-                          // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
-                          // Press AUX8 then profile button to load. Must have IR Receiver connected and Serial connection to RT4K.
-                          // 
-                     {1,  // AUX8 + profile 1 button
-                      2,  // AUX8 + profile 2 button
-                      3,  // AUX8 + profile 3 button
-                      4,  // AUX8 + profile 4 button
-                      5,  // AUX8 + profile 5 button
-                      6,  // AUX8 + profile 6 button
-                      7,  // AUX8 + profile 7 button
-                      8,  // AUX8 + profile 8 button
-                      9,  // AUX8 + profile 9 button
-                      10, // AUX8 + profile 10 button
-                      11, // AUX8 + profile 11 button
-                      12, // AUX8 + profile 12 button
-                      };
+uint8_t const auxprof[12] =   // Assign SVS profiles to IR remote profile buttons. 
+                              // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
+                              // Press AUX8 then profile button to load. Must have IR Receiver connected and Serial connection to RT4K.
+                              // 
+                              {1,  // AUX8 + profile 1 button
+                                2,  // AUX8 + profile 2 button
+                                3,  // AUX8 + profile 3 button
+                                4,  // AUX8 + profile 4 button
+                                5,  // AUX8 + profile 5 button
+                                6,  // AUX8 + profile 6 button
+                                7,  // AUX8 + profile 7 button
+                                8,  // AUX8 + profile 8 button
+                                9,  // AUX8 + profile 9 button
+                                10, // AUX8 + profile 10 button
+                                11, // AUX8 + profile 11 button
+                                12, // AUX8 + profile 12 button
+                                };
 
-uint8_t const gctl = 0; // 1 = Enables gscart/gcomp manual input selection.
+uint8_t const gctl = 1; // 1 = Enables gscart/gcomp manual input selection.
                         // 0 = Disabled (default)
                         // ** Only supported on vers 5.x gscart/gcomp switches **
                         //
@@ -503,4 +504,11 @@ uint8_t const gctl = 0; // 1 = Enables gscart/gcomp manual input selection.
                         // (RT5x and OSSC may require a repeat of the button combo for the IR signal to send.)
 
 String const auxpower = "LG"; // AUX8 + Power button sends power off/on via IR Emitter. "LG" OLEX CX is the only one implemented atm. 
+
+uint8_t const legacyOR[] = {1,2,3}; // For Legacy RT5x remote, when gctl = 1, you can use the bottom-most 3 buttons for manual input selection of gscart/gcomp inputs.
+                                    //                         set to input 1, 2, and 3 as default. Values can be: 1 - 8, for gscart/gcomp sw1 only at the moment.
+                                    //
+                                    // Use the "Back/Exit" button to re-enable auto switching.
+                                    //
+                                    // ** Only supported on vers 5.x gscart/gcomp switches **
 ```
