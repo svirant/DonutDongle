@@ -229,6 +229,18 @@ uint8_t const auxprof[12] =    // Assign SVS profiles to IR remote profile butto
                       12, // AUX8 + profile 12 button
                       };
 
+uint8_t const gctl = 0; // 1 = Enables gscart/gcomp manual input selection.
+                        // 0 = Disabled (default)
+                        // ** Only supported on vers 5.x gscart/gcomp switches **
+                        //
+                        // AUX5 button + 1-8 button for gscart sw1, button 1 = input 1, etc
+                        // AUX5 + 9-12 button to return to auto switching
+                        //
+                        // AUX6 button + 1-8 button for gscart sw2, button 1 = input 1, etc
+                        // AUX6 + 9-12 button to return to auto switching
+                        // 
+                        // (RT5x and OSSC may require a repeat of the button combo for the IR signal to send.)
+
 String const auxpower = "LG"; // AUX8 + Power button sends power off/on via IR Emitter. "LG" OLEX CX is the only one implemented atm. 
 
 
@@ -239,7 +251,6 @@ uint8_t const dch = 15; // (duty cycle high) at least this many high samples per
 uint8_t const dcl = 5; // (duty cycle low) at least this many high samples and less than "dch" per "samsize" indicate all inputs are in-active (~50% duty cycle)
 uint8_t const samsize = 20; // total number of ADC samples required to capture at least 1 period
 uint8_t const fpdccountmax = 3; // number of periods required when in the 50% duty cycle state before a Profile 0 is triggered.
-uint8_t const gctl = 0; // *experimental* (0 is disabled) disable gscart/gcomp override by default until all boards have voltage divider (or you would be sending 5v to gscart 3.3v pins)
 
 
 uint8_t extrabuttonprof = 0; // 3 = disabled | If you want to use AUX7, AUX8 buttons to control Scalable Video Switch inputs instead. 
@@ -288,12 +299,6 @@ unsigned long prevBlinkTime = 0;
 
 void setup(){
 
-    if(gctl){
-      pinMode(12,OUTPUT);
-      digitalWrite(12,LOW); // gscart sw1 override set low for query mode by default
-      pinMode(10,OUTPUT);
-      digitalWrite(10,LOW); // gscart sw2 override set low for query mode by default
-    }
     pinMode(A2,INPUT);pinMode(A1,INPUT);pinMode(A0,INPUT); // set gscart1 port as input
     pinMode(A5,INPUT);pinMode(A4,INPUT);pinMode(A3,INPUT); // set gscart2 port as input
     initPCIInterruptForTinyReceiver(); // for IR Receiver
@@ -1401,13 +1406,13 @@ void readIR(){
       }
       else if(ir_recv_command == 1 || ir_recv_command == 37 || ir_recv_command == 38 || ir_recv_command == 39){ // profile button 9,10,11,12 will turn off manual mode, back to auto mode
         if(auxgsw[0]){
-          digitalWrite(12,LOW); // D12 (PB4) LOW / enables auto-switching
+          pinMode(12,INPUT); // D12 back to floating, enables auto-switching
           pinMode(A2,INPUT);pinMode(A1,INPUT);pinMode(A0,INPUT); // set A0-A2 as inputs
           lastginput = 1;
           auxgsw[0] = 0;
         }
         else if(auxgsw[1]){
-          digitalWrite(10,LOW); // D10 (PB2) LOW / enables auto-switching
+          pinMode(10,INPUT); // D10 back to floating, enables auto-switching
           pinMode(A5,INPUT);pinMode(A4,INPUT);pinMode(A3,INPUT); // set A3-A5 as inputs
           lastginput = 9;
           auxgsw[1] = 0;
@@ -1653,11 +1658,11 @@ void readIR(){
       }
     } // end of turbo directional mode
 
-    if(ir_recv_address == 128 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT){ // legacy 5x remote
+    if(ir_recv_address == 128 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT){ // legacy 5x remote, nothing defined atm.
       if(ir_recv_command == 137 && gctl){}      // vol- / scanlines button
       else if(ir_recv_command == 72 && gctl){}  // mouse / h. sampling button
       else if(ir_recv_command == 135 && gctl){} // vol+ / interpolation button
-      else if(ir_recv_command == 39 && gctl){}  // back button / disable override   
+      else if(ir_recv_command == 39 && gctl){}  // back button
       else if(ir_recv_command == 64){} // down button
       else if(ir_recv_command == 56){} // up button
       else if(ir_recv_command == 55){} // left button
@@ -1669,7 +1674,7 @@ void readIR(){
 
     } // end of legacy 5x remote
 
-    if(ir_recv_address == 124 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT){ // OSSC remote (124 is 7C hex)
+    if(ir_recv_address == 124 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT){ // OSSC remote, nothing defined atm. (124 dec is 7C hex)
       if(ir_recv_command == 148){} // 1 button
       else if(ir_recv_command == 149){} // 2 button
       else if(ir_recv_command == 150){} // 3 button
@@ -1726,7 +1731,8 @@ void readIR(){
 void overrideGscart(uint8_t port){ // disable auto switching and allows gscart port select
   if(port <= 8){
     auxgsw[0] = 0;
-    digitalWrite(12,HIGH); // D12 / gscart sw1 override set HIGH to select port (disables auto switching)
+    pinMode(12,OUTPUT);
+    digitalWrite(12,LOW); // D12 / gscart sw1 override set LOW to select port (disables auto switching)
     pinMode(A2,OUTPUT);pinMode(A1,OUTPUT);pinMode(A0,OUTPUT);// set A0-A2 as outputs
     if(port == 1){
       digitalWrite(A2,LOW);digitalWrite(A1,LOW);digitalWrite(A0,LOW); // 000
@@ -1763,7 +1769,8 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
   }
   else if(port >= 9){
     auxgsw[1] = 0;
-    digitalWrite(10,HIGH); // D10 / gscart sw2 override set HIGH to select port (disables auto switching)
+    pinMode(10,OUTPUT);
+    digitalWrite(10,LOW); // D10 / gscart sw2 override set LOW to select port (disables auto switching)
     pinMode(A5,OUTPUT);pinMode(A4,OUTPUT);pinMode(A3,OUTPUT); // set A3-A5 as outputs
     if(port == 9){
       digitalWrite(A5,LOW);digitalWrite(A4,LOW);digitalWrite(A3,LOW); // 000
