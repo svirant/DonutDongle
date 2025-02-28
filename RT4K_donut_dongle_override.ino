@@ -240,7 +240,7 @@ uint8_t const dcl = 5; // (duty cycle low) at least this many high samples and l
 uint8_t const samsize = 20; // total number of ADC samples required to capture at least 1 period
 uint8_t const fpdccountmax = 3; // number of periods required when in the 50% duty cycle state before a Profile 0 is triggered.
 uint8_t const gctl = 1; // *experimental* (0 is disabled) disable gscart/gcomp override by default until all boards have voltage divider (or you would be sending 5v to gscart 3.3v pins)
-uint8_t const goverride = 1; // 1 = HIGH, 0 = LOW
+uint8_t const goverride = 0; // 1 = HIGH, 0 = LOW
 
 
 uint8_t extrabuttonprof = 0; // 3 = disabled | If you want to use AUX7, AUX8 buttons to control Scalable Video Switch inputs instead. 
