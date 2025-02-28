@@ -25,7 +25,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 | ------------- | ------------- |------------- |
 | MT-VIKI 8 port HDMI | yes, confirmed first hand. Auto-switching Profiles work and RT4K remote can also change inputs and profiles w/ AUX8 + profile button 1 - 8.  | Front case buttons and included IR remote do not generate serial output on the switch itself therefor profile changes can't happen for these 2 other methods.  |
 | TESmart 16x1 HDMI  | yes, confirmed first hand  ||
-| gSCARTsw / gCOMPsw | **version 5.x** confirmed by [@niquallis](https://x.com/niquallis), thanks so much for your help! | gSCARTsw tested, but gCOMPsw has the same underlying logic.|
+| gSCARTsw / gCOMPsw | **version 5.x** confirmed by [@niquallis](https://x.com/niquallis) and [@UstSte](https://x.com/UstSte), thanks so much for your help! | Manual input selection works too! |
 | Extron RGBHV sw6  | yes, confirmed first hand  | |
 | Extron DXP 88 | yes, confirmed first hand | Preset 1 is Profile/SVS 1. On Extron sw2 port Preset 1 is SVS 101, etc|
 | Extron CrossPoint, MVX, etc | if it supports SIS, should work fine, please let me know :) |
@@ -94,6 +94,18 @@ When using the optional IR Receiver, the IR reception of the RT4K can be been gr
  - AUX8 pressed twice, manually enter a SVS profile to load with the profile buttons using 1 - 9 and 10,11,12 buttons for 0. Must use 3 digits. Ex: 001 = 1, 010 = 10, etc
  
  - MT-ViKI 8 Port HDMI switch's inputs can be changed with profile buttons 1 - 8. Must enable "MTVIKIir" in the options section of the .ino
+
+**gScart / gComp Control** (must set gctl = 1 in Options, Only supported on vers 5.x switches)
+
+ - AUX5 button + profile button 1 - 8 button selects corresponding input on gscart sw1
+    - AUX5 button + profile button 9 - 12 button to return to auto switching
+
+ - AUX6 button + profile button 1 - 8 button selects corresponding input on gscart sw2
+    - AUX6 button + profile button 9 - 12 button to return to auto switching
+
+ - RT5x and OSSC may require a repeat of the button combos
+ 
+ <br />
 
 Let me know what ideas you have, and perhaps I can add them in.
 
@@ -477,6 +489,18 @@ uint8_t const auxprof[12] =    // Assign SVS profiles to IR remote profile butto
                       11, // AUX8 + profile 11 button
                       12, // AUX8 + profile 12 button
                       };
+
+uint8_t const gctl = 0; // 1 = Enables gscart/gcomp manual input selection.
+                        // 0 = Disabled (default)
+                        // ** Only supported on vers 5.x gscart/gcomp switches **
+                        //
+                        // AUX5 button + 1-8 button for gscart sw1, button 1 = input 1, etc
+                        // AUX5 + 9-12 button to return to auto switching
+                        //
+                        // AUX6 button + 1-8 button for gscart sw2, button 1 = input 1, etc
+                        // AUX6 + 9-12 button to return to auto switching
+                        // 
+                        // (RT5x and OSSC may require a repeat of the button combo for the IR signal to send.)
 
 String const auxpower = "LG"; // AUX8 + Power button sends power off/on via IR Emitter. "LG" OLEX CX is the only one implemented atm. 
 ```
