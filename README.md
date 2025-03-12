@@ -115,7 +115,7 @@ Let me know what ideas you have, and perhaps I can add them in.
 
 # Ordering PCBs
 PCBs for this project:
- - [Donut Dongle](https://github.com/svirant/DonutDongle/blob/main/RT4K_donut_dongle_rc1.zip)
+ - [Donut Dongle](https://github.com/svirant/DonutDongle/blob/main/RT4K_donut_dongle_rc2.zip)
  - [VGA Adapter](https://github.com/svirant/DonutDongle/tree/main/Adapters) (VGAPassthrough or YC2VGA)
  - (Optional) [TESmart_connector](https://github.com/svirant/DonutDongle/tree/main/Accessories)
  - (Optional) [gscart_ext_connector](https://github.com/svirant/DonutDongle/tree/main/Accessories) (works for gcomp too!)
@@ -131,21 +131,25 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 
 # Assembly
 
-**Release Candidate 1**<br /><br />
+**For those with RC1 PCBs, the only change made is R10 moved as shown:** <br />
+<img width="400" src="./images/PCB_rc1_to_rc2.png" /><br />
+This pulls TX up to 3.3v instead of 5v in order to safely share the TX line with the SVS.
+
+**Release Candidate 2**<br /><br />
 [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/ibom.html)
 
 [<img width="400" src="./images/8.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
 [<img width="382" src="./images/8b.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
 
 # PCB
-**Release Candidate 1**
+**Release Candidate 2**
 
-<img width="400" src="./images/PCB.png">
+<img width="400" src="./images/PCB_rc2.png">
 
 # Schematic
-**Release Candidate 1**
+**Release Candidate 2**
 
-<img width="400" src="./images/Schematic.png">
+<img width="400" src="./images/Schematic_rc2.png">
 
 ## Bill of Materials (BOM)
 ### [- Digikey shared list](https://www.digikey.com/en/mylists/list/53XEHTQZJK)
