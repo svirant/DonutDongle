@@ -130,16 +130,11 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 - Let me know if you have any questions!
 
 # Assembly
-
-**For those with RC1 PCBs, the only change made is R10 moved as shown:** <br />
-<img width="400" src="./images/PCB_rc1_to_rc2.png" /><br />
-This pulls TX up to 3.3v instead of 5v in order to safely share the TX line with the SVS.
-
-**Release Candidate 2**<br /><br />
+**Release Candidate 2 - option of 3v3 or 5v for TX Pullup**<br /><br />
 [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/ibom.html)
 
 [<img width="400" src="./images/8.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
-[<img width="382" src="./images/8b.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
+[<img width="378" src="./images/8b.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
 
 # PCB
 **Release Candidate 2**
