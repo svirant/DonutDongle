@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "Donut Dongle")
-		(date "2025-01-31")
-		(rev "v0.7")
+		(date "2025-03-12")
+		(rev "v0.72")
 	)
 	(lib_symbols
 		(symbol "+5V_1"
@@ -5854,12 +5854,6 @@
 		(uuid "122a9b85-6942-4bcc-8f62-a262b38038c3")
 	)
 	(junction
-		(at 52.07 78.74)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "126ae4ef-0c7d-4069-b610-be38ee66ed01")
-	)
-	(junction
 		(at 120.65 143.51)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5890,12 +5884,6 @@
 		(uuid "5920271f-3541-42f7-b9f9-b99b5520c34c")
 	)
 	(junction
-		(at 52.07 73.66)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "70315e3f-faec-4171-a189-1b90321f5f2d")
-	)
-	(junction
 		(at 90.17 115.57)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5914,10 +5902,10 @@
 		(uuid "bd62315f-be6e-4c28-9e8e-bea4d9d96675")
 	)
 	(junction
-		(at 49.53 76.2)
+		(at 48.26 97.79)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "dcb508be-8ec4-40b4-b256-fc9fa9a39cb2")
+		(uuid "ca59875e-e8e5-4712-a39d-a9a662f4f5b6")
 	)
 	(junction
 		(at 118.11 140.97)
@@ -5936,6 +5924,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "ece9b1ae-11c9-45b3-8db5-8094a679bf5c")
+	)
+	(junction
+		(at 48.26 101.6)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f8f4e1a2-a9cd-4e0e-b1ef-a4e6b99df3fc")
 	)
 	(wire
 		(pts
@@ -5956,16 +5950,6 @@
 			(type default)
 		)
 		(uuid "021f650c-9104-4140-9d47-589f24946f4f")
-	)
-	(wire
-		(pts
-			(xy 43.18 97.79) (xy 63.5 97.79)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "037ae9a2-3e29-4e7b-a344-a62136788a7f")
 	)
 	(wire
 		(pts
@@ -6086,16 +6070,6 @@
 			(type solid)
 		)
 		(uuid "15d1a771-d189-4a7b-a92b-7bcb861d1cae")
-	)
-	(wire
-		(pts
-			(xy 49.53 73.66) (xy 52.07 73.66)
-		)
-		(stroke
-			(width 0)
-			(type solid)
-		)
-		(uuid "1b287bf3-c522-464a-8621-afe685c2a047")
 	)
 	(wire
 		(pts
@@ -6259,6 +6233,16 @@
 	)
 	(wire
 		(pts
+			(xy 48.26 101.6) (xy 48.26 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3b2f9cd0-b67b-4e58-8f03-05aebb4143e2")
+	)
+	(wire
+		(pts
 			(xy 147.32 36.83) (xy 147.32 38.1)
 		)
 		(stroke
@@ -6276,6 +6260,26 @@
 			(type default)
 		)
 		(uuid "409c56c9-8367-4558-81e8-c61a154ecd70")
+	)
+	(wire
+		(pts
+			(xy 55.88 101.6) (xy 57.15 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "41e58473-4b6f-4231-8d77-17e3cda252ce")
+	)
+	(wire
+		(pts
+			(xy 48.26 106.68) (xy 50.8 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "42a7e17f-0b8e-4718-a1f4-01d2df7ac444")
 	)
 	(wire
 		(pts
@@ -6359,16 +6363,6 @@
 	)
 	(wire
 		(pts
-			(xy 54.61 73.66) (xy 54.61 76.2)
-		)
-		(stroke
-			(width 0)
-			(type solid)
-		)
-		(uuid "4efcca12-e0ac-424a-92bf-916fce4c8819")
-	)
-	(wire
-		(pts
 			(xy 24.13 78.74) (xy 24.13 81.28)
 		)
 		(stroke
@@ -6429,6 +6423,16 @@
 	)
 	(wire
 		(pts
+			(xy 48.26 97.79) (xy 48.26 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5d8e13f2-10bb-479a-bc54-77b5d78f6b21")
+	)
+	(wire
+		(pts
 			(xy 213.36 81.28) (xy 213.36 85.09)
 		)
 		(stroke
@@ -6436,16 +6440,6 @@
 			(type default)
 		)
 		(uuid "5ffe7c6e-68d0-4caa-9bbb-3f19ef3db53c")
-	)
-	(wire
-		(pts
-			(xy 52.07 73.66) (xy 54.61 73.66)
-		)
-		(stroke
-			(width 0)
-			(type solid)
-		)
-		(uuid "6054d1c4-080e-4610-9321-8db40f63b79a")
 	)
 	(wire
 		(pts
@@ -6509,16 +6503,6 @@
 	)
 	(wire
 		(pts
-			(xy 54.61 76.2) (xy 63.5 76.2)
-		)
-		(stroke
-			(width 0)
-			(type solid)
-		)
-		(uuid "6c337a22-444e-46ec-b239-ace200cb39db")
-	)
-	(wire
-		(pts
 			(xy 199.39 92.71) (xy 207.01 92.71)
 		)
 		(stroke
@@ -6539,6 +6523,16 @@
 	)
 	(wire
 		(pts
+			(xy 48.26 101.6) (xy 50.8 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7605e780-ccd3-4ced-8b1c-870eaa7ff452")
+	)
+	(wire
+		(pts
 			(xy 115.57 147.32) (xy 115.57 146.05)
 		)
 		(stroke
@@ -6549,7 +6543,7 @@
 	)
 	(wire
 		(pts
-			(xy 52.07 78.74) (xy 53.34 78.74)
+			(xy 49.53 78.74) (xy 53.34 78.74)
 		)
 		(stroke
 			(width 0)
@@ -6679,6 +6673,16 @@
 	)
 	(wire
 		(pts
+			(xy 43.18 97.79) (xy 48.26 97.79)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "94aa3cb1-0f03-4eb0-9bfb-06e6c66af75d")
+	)
+	(wire
+		(pts
 			(xy 147.32 67.31) (xy 157.48 67.31)
 		)
 		(stroke
@@ -6749,6 +6753,16 @@
 	)
 	(wire
 		(pts
+			(xy 55.88 106.68) (xy 57.15 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a552abff-f030-4323-b9a1-271cf0edfc07")
+	)
+	(wire
+		(pts
 			(xy 53.34 156.21) (xy 50.8 156.21)
 		)
 		(stroke
@@ -6756,16 +6770,6 @@
 			(type default)
 		)
 		(uuid "a6bdf422-07cc-4f4e-8f7d-f91724cdfb1a")
-	)
-	(wire
-		(pts
-			(xy 45.72 76.2) (xy 49.53 76.2)
-		)
-		(stroke
-			(width 0)
-			(type solid)
-		)
-		(uuid "acdfa823-614d-439a-8adf-14a48e69a892")
 	)
 	(wire
 		(pts
@@ -6796,16 +6800,6 @@
 			(type default)
 		)
 		(uuid "b3a19881-b7c2-4461-bad4-4632710c8467")
-	)
-	(wire
-		(pts
-			(xy 49.53 78.74) (xy 52.07 78.74)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b509df47-59a4-42ce-bedc-38c7cb7e085b")
 	)
 	(wire
 		(pts
@@ -6929,16 +6923,6 @@
 	)
 	(wire
 		(pts
-			(xy 49.53 76.2) (xy 49.53 73.66)
-		)
-		(stroke
-			(width 0)
-			(type solid)
-		)
-		(uuid "c7c447d5-51df-479e-a916-e9e2d36252e6")
-	)
-	(wire
-		(pts
 			(xy 168.91 85.09) (xy 180.34 85.09)
 		)
 		(stroke
@@ -6976,6 +6960,16 @@
 			(type default)
 		)
 		(uuid "d39d6480-1a3b-4fa0-815a-94d21c9df6f2")
+	)
+	(wire
+		(pts
+			(xy 48.26 97.79) (xy 63.5 97.79)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d43ce4fe-e803-4a0c-be1f-778464604d70")
 	)
 	(wire
 		(pts
@@ -7046,6 +7040,16 @@
 			(type default)
 		)
 		(uuid "d9fc806a-e443-4d8a-b723-20e9e0e683ca")
+	)
+	(wire
+		(pts
+			(xy 49.53 76.2) (xy 63.5 76.2)
+		)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(uuid "db02ae99-e387-4c9d-a26f-88020a5aa741")
 	)
 	(wire
 		(pts
@@ -8724,6 +8728,73 @@
 		)
 	)
 	(symbol
+		(lib_name "+5V_1")
+		(lib_id "power:+5V")
+		(at 57.15 106.68 270)
+		(mirror x)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "0d255361-5f50-40d1-9f68-6f5d8a20c23e")
+		(property "Reference" "#PWR028"
+			(at 53.34 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+5V"
+			(at 62.23 106.68 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 57.15 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 57.15 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+5V\""
+			(at 57.15 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "4f5392a2-3075-4f0a-b8d2-7e4945f43162")
+		)
+		(instances
+			(project "RT4K_donut_dongle_33"
+				(path "/0d35483a-0b12-46cc-b9f2-896fd6831779"
+					(reference "#PWR028")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Library:R_Small")
 		(at 85.09 115.57 270)
 		(unit 1)
@@ -9158,6 +9229,76 @@
 			(project ""
 				(path "/0d35483a-0b12-46cc-b9f2-896fd6831779"
 					(reference "R1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Library:R_Small")
+		(at 53.34 101.6 270)
+		(mirror x)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "21d49c66-a1fb-46ab-b6c2-d7e9d75d48b1")
+		(property "Reference" "R10"
+			(at 53.34 101.6 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "10K OHM 1% 1/8W 0805"
+			(at 52.0701 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
+			(at 53.34 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 53.34 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor, small symbol"
+			(at 53.34 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d7107f28-9adb-4905-9705-283c2938aabf")
+		)
+		(pin "2"
+			(uuid "01fbdbf6-50ac-4bc4-89f2-0dc01daf5b2f")
+		)
+		(instances
+			(project "RT4K_donut_dongle_33"
+				(path "/0d35483a-0b12-46cc-b9f2-896fd6831779"
+					(reference "R10")
 					(unit 1)
 				)
 			)
@@ -11230,24 +11371,25 @@
 	)
 	(symbol
 		(lib_id "Library:R_Small")
-		(at 52.07 76.2 0)
-		(mirror y)
+		(at 53.34 106.68 270)
+		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "8a171478-a7fe-4bcb-9954-07160c9b1998")
-		(property "Reference" "R10"
-			(at 52.07 76.2 90)
+		(property "Reference" "R21"
+			(at 53.34 109.22 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(hide yes)
 			)
 		)
 		(property "Value" "10K OHM 1% 1/8W 0805"
-			(at 49.53 77.4699 0)
+			(at 52.0701 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11257,7 +11399,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 52.07 76.2 0)
+			(at 53.34 106.68 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11266,7 +11408,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 52.07 76.2 0)
+			(at 53.34 106.68 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11275,7 +11417,7 @@
 			)
 		)
 		(property "Description" "Resistor, small symbol"
-			(at 52.07 76.2 0)
+			(at 53.34 106.68 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11292,7 +11434,73 @@
 		(instances
 			(project ""
 				(path "/0d35483a-0b12-46cc-b9f2-896fd6831779"
-					(reference "R10")
+					(reference "R21")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3.3V")
+		(at 57.15 101.6 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "8a33a3ca-8bcc-4476-8e49-af34cfe6f05a")
+		(property "Reference" "#PWR024"
+			(at 53.34 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 59.69 101.6 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 57.15 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 57.15 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 57.15 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "8dc80699-303c-42df-aecf-a5573da6e751")
+		)
+		(instances
+			(project "RT4K_donut_dongle"
+				(path "/0d35483a-0b12-46cc-b9f2-896fd6831779"
+					(reference "#PWR024")
 					(unit 1)
 				)
 			)
