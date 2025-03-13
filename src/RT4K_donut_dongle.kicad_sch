@@ -7245,6 +7245,16 @@
 		)
 		(uuid "0a0a78f5-138d-4ffb-8189-c42497cdf988")
 	)
+	(text "option of 3v3 or 5v for TX pullup"
+		(exclude_from_sim no)
+		(at 54.61 109.22 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "0c071ed1-61fe-474f-b715-b632a0289bd9")
+	)
 	(text "L"
 		(exclude_from_sim no)
 		(at 238.76 78.74 0)
@@ -9245,7 +9255,7 @@
 		(dnp no)
 		(uuid "21d49c66-a1fb-46ab-b6c2-d7e9d75d48b1")
 		(property "Reference" "R10"
-			(at 53.34 101.6 90)
+			(at 53.34 104.14 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11377,7 +11387,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp yes)
+		(dnp no)
 		(uuid "8a171478-a7fe-4bcb-9954-07160c9b1998")
 		(property "Reference" "R21"
 			(at 53.34 109.22 90)
