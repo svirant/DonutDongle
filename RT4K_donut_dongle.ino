@@ -1447,79 +1447,79 @@ void readIR(){
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT){ // block most buttons from being repeated when held
       repeatcount = 0;
       if(ir_recv_command == 63){
-        //Serial.println(F("remote aux8\r")); aux8
+        //Serial.println(F("\rremote aux8\r")); aux8
         if(extrabuttonprof < 3)extrabuttonprof++;
-        else Serial.println(F("remote aux8\r"));
+        else Serial.println(F("\rremote aux8\r"));
       }
       else if(ir_recv_command == 62){
-        Serial.println(F("remote aux7\r"));
+        Serial.println(F("\rremote aux7\r"));
       }
       else if(ir_recv_command == 61){
-        //Serial.println(F("remote aux6\r")); // aux6
+        //Serial.println(F("\rremote aux6\r")); // aux6
         if(gctl)auxgsw[1] = 1;
-        else Serial.println(F("remote aux6\r"));
+        else Serial.println(F("\rremote aux6\r"));
       }
       else if(ir_recv_command == 60){
-        //Serial.println(F("remote aux5\r")); // aux5
+        //Serial.println(F("\rremote aux5\r")); // aux5
         if(gctl)auxgsw[0] = 1;
-        else Serial.println(F("remote aux5\r"));
+        else Serial.println(F("\rremote aux5\r"));
       }
       else if(ir_recv_command == 59){
-        Serial.println(F("remote aux4\r"));
+        Serial.println(F("\rremote aux4\r"));
       }
       else if(ir_recv_command == 58){
-        Serial.println(F("remote aux3\r"));
+        Serial.println(F("\rremote aux3\r"));
       }
       else if(ir_recv_command == 57){
-        Serial.println(F("remote aux2\r"));
+        Serial.println(F("\rremote aux2\r"));
       }
       else if(ir_recv_command == 56){
-        Serial.println(F("remote aux1\r"));
+        Serial.println(F("\rremote aux1\r"));
       }
       else if(ir_recv_command == 52){
-        Serial.println(F("remote res1\r"));
+        Serial.println(F("\rremote res1\r"));
       }
       else if(ir_recv_command == 53){
-        Serial.println(F("remote res2\r"));
+        Serial.println(F("\rremote res2\r"));
       }
       else if(ir_recv_command == 54){
-        Serial.println(F("remote res3\r"));
+        Serial.println(F("\rremote res3\r"));
       }
       else if(ir_recv_command == 55){
-        Serial.println(F("remote res4\r"));
+        Serial.println(F("\rremote res4\r"));
       }
       else if(ir_recv_command == 51){
-        Serial.println(F("remote res480p\r"));
+        Serial.println(F("\rremote res480p\r"));
       }
       else if(ir_recv_command == 50){
-        Serial.println(F("remote res1440p\r"));
+        Serial.println(F("\rremote res1440p\r"));
       }
       else if(ir_recv_command == 49){
-        Serial.println(F("remote res1080p\r"));
+        Serial.println(F("\rremote res1080p\r"));
       }
       else if(ir_recv_command == 48){
-        Serial.println(F("remote res4k\r"));
+        Serial.println(F("\rremote res4k\r"));
       }
       else if(ir_recv_command == 47){
-        Serial.println(F("remote buffer\r"));
+        Serial.println(F("\rremote buffer\r"));
       }
       else if(ir_recv_command == 44){
-        Serial.println(F("remote genlock\r"));
+        Serial.println(F("\rremote genlock\r"));
       }
       else if(ir_recv_command == 46){
-        Serial.println(F("remote safe\r"));
+        Serial.println(F("\rremote safe\r"));
       }
       else if(ir_recv_command == 86){
-        Serial.println(F("remote pause\r"));
+        Serial.println(F("\rremote pause\r"));
       }
       else if(ir_recv_command == 45){
-        Serial.println(F("remote phase\r"));
+        Serial.println(F("\rremote phase\r"));
       }
       else if(ir_recv_command == 43){
-        Serial.println(F("remote gain\r"));
+        Serial.println(F("\rremote gain\r"));
       }
       else if(ir_recv_command == 36){
-        Serial.println(F("remote prof\r"));
+        Serial.println(F("\rremote prof\r"));
       }
       else if(ir_recv_command == 11){
         sendRBP(1);
@@ -1591,77 +1591,77 @@ void readIR(){
         sendRBP(12);
       }
       else if(ir_recv_command == 35){
-        Serial.println(F("remote adc\r"));
+        Serial.println(F("\rremote adc\r"));
       }
       else if(ir_recv_command == 34){
-        Serial.println(F("remote sfx\r"));
+        Serial.println(F("\rremote sfx\r"));
       }
       else if(ir_recv_command == 33){
-        Serial.println(F("remote scaler\r"));
+        Serial.println(F("\rremote scaler\r"));
       }
       else if(ir_recv_command == 32){
-        Serial.println(F("remote output\r"));
+        Serial.println(F("\rremote output\r"));
       }
       else if(ir_recv_command == 17){
-        Serial.println(F("remote input\r"));
+        Serial.println(F("\rremote input\r"));
       }
       else if(ir_recv_command == 41){
-        Serial.println(F("remote stat\r"));
+        Serial.println(F("\rremote stat\r"));
       }
       else if(ir_recv_command == 40){
-        Serial.println(F("remote diag\r"));
+        Serial.println(F("\rremote diag\r"));
       }
       else if(ir_recv_command == 66){
-        Serial.println(F("remote back\r"));
+        Serial.println(F("\rremote back\r"));
       }
       else if(ir_recv_command == 83){
-        Serial.println(F("remote ok\r"));
+        Serial.println(F("\rremote ok\r"));
       }
       else if(ir_recv_command == 79){
-        Serial.println(F("remote right\r"));
+        Serial.println(F("\rremote right\r"));
       }
       else if(ir_recv_command == 16){
-        Serial.println(F("remote down\r"));
+        Serial.println(F("\rremote down\r"));
       }
       else if(ir_recv_command == 87){
-        Serial.println(F("remote left\r"));
+        Serial.println(F("\rremote left\r"));
       }
       else if(ir_recv_command == 24){
-        Serial.println(F("remote up\r"));
+        Serial.println(F("\rremote up\r"));
       }
       else if(ir_recv_command == 92){
-        Serial.println(F("remote menu\r"));
+        Serial.println(F("\rremote menu\r"));
       }
       else if(ir_recv_command == 26){
-        Serial.println(F("pwr on\r"));
-        Serial.println(F("remote pwr\r"));
+        Serial.println(F("\rpwr on\r"));
+        Serial.println(F("\rremote pwr\r"));
         RTwake = true;
       }
     }
     else if(ir_recv_address == 73 && repeatcount > 4){ // directional buttons have to be held down for just a bit before repeating
       if(ir_recv_command == 24){
-        Serial.println(F("remote up\r"));
+        Serial.println(F("\rremote up\r"));
       }
       else if(ir_recv_command == 16){
-        Serial.println(F("remote down\r"));
+        Serial.println(F("\rremote down\r"));
       }
       else if(ir_recv_command == 87){
-        Serial.println(F("remote left\r"));
+        Serial.println(F("\rremote left\r"));
       }
       else if(ir_recv_command == 79){
-        Serial.println(F("remote right\r"));
+        Serial.println(F("\rremote right\r"));
       }
     } // end of if(ir_recv_address
     
     if(ir_recv_address == 73 && repeatcount > 15){ // when directional buttons are held down for even longer... turbo directional mode
       if(ir_recv_command == 87){
         for(uint8_t i=0;i<4;i++){
-          Serial.println(F("remote left\r"));
+          Serial.println(F("\rremote left\r"));
         }
       }
       else if(ir_recv_command == 79){
         for(uint8_t i=0;i<4;i++){
-          Serial.println(F("remote right\r"));
+          Serial.println(F("\rremote right\r"));
         }
       }
     } // end of turbo directional mode
@@ -1850,11 +1850,11 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
 } // end of overrideGscart()
 
 void sendSVS(uint16_t num){
-  Serial.print(F("SVS NEW INPUT="));
+  Serial.print(F("\rSVS NEW INPUT="));
   Serial.print(num + offset);
   Serial.println(F("\r"));
   delay(1000);
-  Serial.print(F("SVS CURRENT INPUT="));
+  Serial.print(F("\rSVS CURRENT INPUT="));
   Serial.print(num + offset);
   Serial.println(F("\r"));
   currentProf[0] = 1; // 1 is SVS profile
@@ -1862,7 +1862,7 @@ void sendSVS(uint16_t num){
 }
 
 void sendRBP(uint16_t prof){ // send Remote Button Profile
-  Serial.print(F("remote prof"));
+  Serial.print(F("\rremote prof"));
   Serial.print(prof);
   Serial.println(F("\r"));
   currentProf[0] = 0; // 0 is Remote Button Profile
