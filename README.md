@@ -194,6 +194,8 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 
 * **YC2VGA w/ Serial Tap: (enhanced s-video and composite as a bonus)**
 
+<img width="300" src="./images/10a.jpg" /><br />
+
 | **Qty**    | Part |  Link  |  Notes |
 | ------------- | ------------- |------------- |------------- |
 | 1  | Yellow RCA Composite jack | [AliExpress](https://www.aliexpress.us/item/3256805949533421.html) | (Color: Yellow) |
@@ -202,6 +204,8 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 | 1  | VGA Male Connector [10090926-P156XLF-ND] | [Digikey](https://www.digikey.com/en/products/detail/amphenol-cs-fci/10090926-P156XLF/4570100) | |
  
 * **VGA Passthrough w/ Shared Serial Tap:**
+
+<img width="300" src="./images/11b.jpg" /><br />
 
 | **Qty**    | Part |  Link  |  Notes |
 | ------------- | ------------- |------------- |------------- |

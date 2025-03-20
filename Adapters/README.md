@@ -11,7 +11,10 @@ Gerbers (.zip) files needed for PCB manufacturing listed above.
  - Adds the bonus of converting the VGA port into Enhanced S-video and Composite inputs.
  - Pushon connector is nice and snug, no need for jackscrews.
  - BOM listed on Main README
-<img width="400" src="../images/10.png" />
+
+<img width="400" src="../images/10.png" /> <br />
+<img width="400" src="../images/10a.jpg" />
+
 <br />
 
 ### VGAPassthrough_wSharedSerial "shared serial bus"
@@ -20,7 +23,9 @@ Gerbers (.zip) files needed for PCB manufacturing listed above.
  - Option to disconnect non-video signals (SDA/SCL) of VGA source. (Only if interfering with Serial operations)
  - Designed for use with #4-40 x 3/4" jackscrew "bolts" for heavier VGA cable support.
  - BOM listed on Main README
- <img width="384" src="../images/11a.png" />
+
+<img width="384" src="../images/11a.png" /> <br />
+<img width="384" src="../images/11b.jpg" />
 
 
 
