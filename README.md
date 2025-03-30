@@ -17,7 +17,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 # Thanks to 
  - [Justin Peacock](https://byjustin.me/) for the amazing case design
  - [Mike Chi](https://retrotink.com) for help with the open drain serial bits
- - [@niquallis](https://x.com/niquallis) and [@UstSte](https://x.com/UstSte) for beta testing
+ - [@niquallis](https://x.com/niquallis), [@UstSte](https://x.com/UstSte), and last but not least [Aru](https://x.com/CielFricker249) for beta testing
 
 <br />
 
@@ -242,7 +242,7 @@ I recommend the [Official Arduino IDE and guide](https://www.arduino.cc/en/Guide
   - <AltSoftSerial.h>  Follow these steps to add AltSoftSerial.h
     - Goto https://github.com/PaulStoffregen/AltSoftSerial
     - Click the GREEN "<> Code" box and "Download ZIP"
-    - In Arudino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
+    - In Arduino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
 
 Some Arduino Nanos come with an Old Bootloader and won't Upload unless specified. **If you get errors** when trying to upload, swap to this option as a possible fix.
 
