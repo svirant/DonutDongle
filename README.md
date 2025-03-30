@@ -10,14 +10,16 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 <img width="700" src="./images/0b.jpeg" />
 <img width="700" src="./images/0c.jpeg" />
 
-### [Image Gallery & Case](https://photos.sixteenbit.app/share/KXUwNPO2uvjenoCdj3gsQnEMd4q5h4ymUv-0fc8PItIhjA8JXHlVgPDeFnTRXM76KPM): Courtesy of [https://byjustin.me/](https://byjustin.me/)
+### [More Images...](https://photos.sixteenbit.app/share/KXUwNPO2uvjenoCdj3gsQnEMd4q5h4ymUv-0fc8PItIhjA8JXHlVgPDeFnTRXM76KPM)
+
 <br />
 
--------
+# Thanks to 
+ - [Justin Peacock](https://byjustin.me/) for the amazing case design
+ - [Mike Chi](https://retrotink.com) for help with the open drain serial bits
+ - [@niquallis](https://x.com/niquallis) and [@UstSte](https://x.com/UstSte) for beta testing
 
-# New 3D printed case
-
-### **Please support** him on [MakerWorld](https://makerworld.com/en/models/1154283#profileId-1159282) by printing your Donut Dongle case from there.<br/><br />
+<br />
 
 
 # Supported Switches
@@ -140,13 +142,16 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 **Release Candidate 2**
 
 <img width="400" src="./images/PCB_rc2.png">
+<br /><br />
 
 # Schematic
 **Release Candidate 2**
 
 <img width="400" src="./images/Schematic_rc2.png">
+<br /><br />
 
 ## Bill of Materials (BOM)
+### [- 3D Printed Case](https://makerworld.com/en/models/1154283#profileId-1159282)
 ### [- Digikey shared list](https://www.digikey.com/en/mylists/list/53XEHTQZJK)
 ### [- AliExpress wish list](https://www.aliexpress.com/p/wish-manage/share.html?smbPageCode=wishlist-amp&spreadId=09A40E28BA67E42DE9AF29A70E7238263DE305046632ABE9A0D5E1C5C4589AD9)
 <br />
