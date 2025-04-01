@@ -18,7 +18,7 @@ Gerbers (.zip) files needed for PCB manufacturing listed above.
 <br />
 
 ### VGAPassthrough_wSharedSerial "shared serial bus"
- - Passes all video AND non-video signals (Pins 12,15) which should allow it to cohabitate with the [Scalable Video Switch](https://scalablevideoswitch.com) (Not yet confirmed)
+ - Passes all video AND non-video signals (Pins 12,15) which allow it to cohabitate with the [Scalable Video Switch](https://scalablevideoswitch.com)
  - 4 Layer design
  - Option to disconnect non-video signals (SDA/SCL) of VGA source. (Only if interfering with Serial operations)
  - Designed for use with #4-40 x 3/4" jackscrew "bolts" for heavier VGA cable support.
