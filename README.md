@@ -1,4 +1,4 @@
-# Donut Dongle
+# Donut Dongle v1.0
 **Arduino Nano based hub that connects your digital and analog console switching setup with the RetroTink 4K and/or RetroTink 5x / OSSC for Auto Profile switching**
 
 The Donut Dongle connects to a switch in a way that allows it to see which port is active. When a console powers on (auto-switching) or an input is manually selected, the Donut Dongle sends a serial command to the RetroTink 4k (or IR signal to the RT5x, OSSC) telling it to load a profile. For the RT4K, the profiles can either be defined as remote profiles; those configured in the menu for the remote buttons. Or they can be SVS profiles which are configured on the RT4K's SDcard. <br />
@@ -117,7 +117,7 @@ Let me know what ideas you have, and perhaps I can add them in.
 
 # Ordering PCBs
 PCBs for this project:
- - [Donut Dongle](https://github.com/svirant/DonutDongle/blob/main/RT4K_donut_dongle_rc2.zip)
+ - [Donut Dongle](https://github.com/svirant/DonutDongle/blob/main/RT4K_donut_dongle.zip)
  - [VGA Adapter](https://github.com/svirant/DonutDongle/tree/main/Adapters) (VGAPassthrough or YC2VGA)
  - (Optional) [TESmart_connector](https://github.com/svirant/DonutDongle/tree/main/Accessories)
  - (Optional) [gscart_ext_connector](https://github.com/svirant/DonutDongle/tree/main/Accessories) (works for gcomp too!)
@@ -132,22 +132,22 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 - Let me know if you have any questions!
 
 # Assembly
-**Release Candidate 2 - option of 3v3 or 5v for TX Pullup**<br /><br />
+**v1.0 (RC2 is now v1.0)**<br /><br />
 [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/ibom.html)
 
 [<img width="400" src="./images/8.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
 [<img width="378" src="./images/8b.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
 
 # PCB
-**Release Candidate 2**
+**v1.0**
 
-<img width="400" src="./images/PCB_rc2.png">
+<img width="400" src="./images/PCB.png">
 <br /><br />
 
 # Schematic
-**Release Candidate 2**
+**v1.0**
 
-<img width="400" src="./images/Schematic_rc2.png">
+<img width="400" src="./images/Schematic.png">
 <br /><br />
 
 ## Bill of Materials (BOM)
@@ -209,7 +209,7 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 | 1  | VGA Male Connector [10090926-P156XLF-ND] | [Digikey](https://www.digikey.com/en/products/detail/amphenol-cs-fci/10090926-P156XLF/4570100) | |
  
 * **VGA Passthrough w/ Shared Serial Tap:**
-   - Confirmed compatible with the Scalable Video Switch (SVS).
+   - Confirmed compatible with the Scalable Video Switch and it's auto profiles.
 
 <img width="300" src="./images/11b.jpg" /><br />
 

@@ -1,5 +1,5 @@
 /*
-* RT4K Donut Dongle v0.72
+* RT4K Donut Dongle v1.0
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
