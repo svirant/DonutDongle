@@ -151,7 +151,8 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 <br /><br />
 
 ## Bill of Materials (BOM)
-### [- 3D Printed Case](https://makerworld.com/en/models/1154283#profileId-1159282)
+### [- 3D Printed Dount Dongle Case](https://makerworld.com/en/models/1154283#profileId-1159282)
+### [- 3D Printed VGA Adapter Case](https://github.com/svirant/DonutDongle/tree/main/Adapters) [Courtesy of HerraAAV3 on the RetroTink Discord]
 ### [- Digikey shared list](https://www.digikey.com/en/mylists/list/53XEHTQZJK)
 ### [- AliExpress wish list](https://www.aliexpress.com/p/wish-manage/share.html?smbPageCode=wishlist-amp&spreadId=09A40E28BA67E42DE9AF29A70E7238263DE305046632ABE9A0D5E1C5C4589AD9)
 <br />
