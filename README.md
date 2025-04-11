@@ -16,6 +16,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 
 # Thanks to 
  - [Justin Peacock](https://byjustin.me/) for the amazing case design
+ - HerraAAV3 from the RetroTink discord for the VGA Adapter case design
  - [Mike Chi](https://retrotink.com) for help with the open drain serial bits
  - [@niquallis](https://x.com/niquallis), [@UstSte](https://x.com/UstSte), and last but not least [Aru](https://x.com/CielFricker249) for beta testing
 
