@@ -213,7 +213,12 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 * **VGA Passthrough w/ Shared Serial Tap:**
    - Confirmed compatible with the Scalable Video Switch and it's auto profiles.
 
-<img width="300" src="./images/11b.jpg" /><br />
+<img width="300" src="./images/11b.jpg" />
+<img width="300" src="./images/11c.JPG" /><br />
+<img width="300" src="./images/11d.JPG" />
+<img width="300" src="./images/11e.JPG" /><br />
+
+
 
 | **Qty**    | Part |  Link  |  Notes |
 | ------------- | ------------- |------------- |------------- |
