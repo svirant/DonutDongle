@@ -101,6 +101,10 @@ When using the optional IR Receiver, the IR reception of the RT4K can be been gr
  
  - MT-ViKI 8 Port HDMI switch's inputs can be changed with profile buttons 1 - 8. Must enable "MTVIKIir" in the options section of the .ino
 
+ - TESmart 16x1 HDMI switch's inputs can changed. Must set "TESmartir" in the options section.
+    - AUX7 + button 1 - 12, aux1, aux2, aux3, aux4 for inputs 1 - 16 on "alt sw1" port (SVS profiles 1 - 16)
+    - AUX8 + button 1 - 12, aux1,aux2,aux3,aux4 for inputs 1 - 16 on "alt sw2" port (SVS profiles 101 - 116)
+
 **gScart / gComp Control** (must set gctl = 1 in Options, Only supported on vers 5.x switches)
 
  - AUX5 button + profile button 1 - 8 button selects corresponding input on gscart sw1
