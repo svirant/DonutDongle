@@ -1,5 +1,5 @@
 /*
-* RT4K Donut Dongle v1.1
+* RT4K Donut Dongle v1.2
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,8 @@
 //////////////////
 */
 
-uint8_t debugE1CAP = 0; // line ~354
-uint8_t debugE2CAP = 0; // line ~740
+uint8_t debugE1CAP = 0; // line ~372
+uint8_t debugE2CAP = 0; // line ~761
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -534,9 +534,9 @@ void readExtron1(){
 
     }
 
-    // for TESmart / MT-VIKI HDMI switch on Extron sw1 / alt sw1
-    if(ecapbytes[4] == 17 || ecapbytes[4] == 95){
-      if(ecapbytes[6] == 22 || ecapbytes[11] == 48){
+    // for TESmart 4K60 / TESmart 4K30 / MT-VIKI HDMI switch on Extron sw1 / alt sw1
+    if(ecapbytes[4] == 17 || ecapbytes[3] == 17 || ecapbytes[4] == 95){
+      if(ecapbytes[6] == 22 || ecapbytes[5] == 22 || ecapbytes[11] == 48){
         if(RT5Xir == 1)sendIR("5x",1,2); // RT5X profile 1 
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",1,3); // OSSC profile 1
@@ -544,7 +544,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(1);
         else sendSVS(1);
       }
-      else if(ecapbytes[6] == 23 || ecapbytes[11] == 49){
+      else if(ecapbytes[6] == 23 || ecapbytes[5] == 23 || ecapbytes[11] == 49){
         if(RT5Xir == 1)sendIR("5x",2,2); // RT5X profile 2
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",2,3); // OSSC profile 2
@@ -552,7 +552,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(2);
         else sendSVS(2);
       }
-      else if(ecapbytes[6] == 24 || ecapbytes[11] == 50){
+      else if(ecapbytes[6] == 24 || ecapbytes[5] == 24 || ecapbytes[11] == 50){
         if(RT5Xir == 1)sendIR("5x",3,2); // RT5X profile 3
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",3,3); // OSSC profile 3
@@ -560,7 +560,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(3);
         else sendSVS(3);
       }
-      else if(ecapbytes[6] == 25 || ecapbytes[11] == 51){
+      else if(ecapbytes[6] == 25 || ecapbytes[5] == 25 || ecapbytes[11] == 51){
         if(RT5Xir == 1)sendIR("5x",4,2); // RT5X profile 4
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",4,3); // OSSC profile 4
@@ -568,7 +568,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(4);
         else sendSVS(4);
       }
-      else if(ecapbytes[6] == 26 || ecapbytes[11] == 52){
+      else if(ecapbytes[6] == 26 || ecapbytes[5] == 26 || ecapbytes[11] == 52){
         if(RT5Xir == 1)sendIR("5x",5,2); // RT5X profile 5
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",5,3); // OSSC profile 5
@@ -576,7 +576,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(5);
         else sendSVS(5);
       }
-      else if(ecapbytes[6] == 27 || ecapbytes[11] == 53){
+      else if(ecapbytes[6] == 27 || ecapbytes[5] == 27 || ecapbytes[11] == 53){
         if(RT5Xir == 1)sendIR("5x",6,2); // RT5X profile 6
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",6,3); // OSSC profile 6
@@ -584,7 +584,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(6);
         else sendSVS(6);
       }
-      else if(ecapbytes[6] == 28 || ecapbytes[11] == 54){
+      else if(ecapbytes[6] == 28 || ecapbytes[5] == 28 || ecapbytes[11] == 54){
         if(RT5Xir == 1)sendIR("5x",7,2); // RT5X profile 7
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",7,3); // OSSC profile 7
@@ -592,7 +592,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(7);
         else sendSVS(7);
       }
-      else if(ecapbytes[6] == 29 || ecapbytes[11] == 55){
+      else if(ecapbytes[6] == 29 || ecapbytes[5] == 29 || ecapbytes[11] == 55){
         if(RT5Xir == 1)sendIR("5x",8,2); // RT5X profile 8
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",8,3); // OSSC profile 8
@@ -600,7 +600,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(8);
         else sendSVS(8);
       }
-      else if(ecapbytes[6] == 30){
+      else if(ecapbytes[6] == 30 || ecapbytes[5] == 30){
         if(RT5Xir == 1)sendIR("5x",9,2); // RT5X profile 9
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",9,3); // OSSC profile 9
@@ -608,7 +608,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(9);
         else sendSVS(9);
       }
-      else if(ecapbytes[6] == 31){
+      else if(ecapbytes[6] == 31 || ecapbytes[5] == 31){
         if(RT5Xir == 1)sendIR("5x",10,2); // RT5X profile 10
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",10,3); // OSSC profile 10
@@ -616,30 +616,33 @@ void readExtron1(){
         if(SVS==0)sendRBP(10);
         else sendSVS(10);
       }
-      else if(ecapbytes[6] == 32){
+      else if(ecapbytes[6] == 32 || ecapbytes[5] == 32){
         if(OSSCir == 1)sendIR("ossc",11,3); // OSSC profile 11
 
         if(SVS==0)sendRBP(11);
         else sendSVS(11);
       }
-      else if(ecapbytes[6] == 33){
+      else if(ecapbytes[6] == 33 || ecapbytes[5] == 33){
         //if((OSSCir == 1) && !S0)sendIR("ossc",12,3); // OSSC profile 12
         if(OSSCir == 1)sendIR("ossc",12,3); // OSSC profile 12
 
         if(SVS==0 && !S0)sendRBP(12); // okay to use this profile if S0 is set to false
         else sendSVS(12);
       }
-      else if(ecapbytes[6] == 34){
+      else if(ecapbytes[6] == 34 || ecapbytes[5] == 34){
         if(OSSCir == 1)sendIR("ossc",13,3); // OSSC profile 13
         sendSVS(13);
       }
-      else if(ecapbytes[6] == 35){
+      else if(ecapbytes[6] == 35 || ecapbytes[5] == 35){
         if(OSSCir == 1)sendIR("ossc",14,3); // OSSC profile 14
         sendSVS(14);
       }
       else if(ecapbytes[6] > 35 && ecapbytes[6] < 38){
         sendSVS(ecapbytes[6] - 21);
       }
+      else if(ecapbytes[5] > 35 && ecapbytes[5] < 38){
+        sendSVS(ecapbytes[5] - 21);
+      }      
     }
 
     // set ecapbytes to 0 for next read
@@ -823,50 +826,53 @@ void readExtron2(){
     }
 
 
-    // for TESmart / MT-VIKI HDMI switch on Extron alt sw2 Port
-    if(ecapbytes[4] == 17 || ecapbytes[4] == 95){
-      if(ecapbytes[6] == 22 || ecapbytes[11] == 48){
+    // for TESmart 4K60 / TESmart 4K30 / MT-VIKI HDMI switch on Extron alt sw2 Port
+    if(ecapbytes[4] == 17 || ecapbytes[3] == 17 || ecapbytes[4] == 95){
+      if(ecapbytes[6] == 22 || ecapbytes[5] == 22 || ecapbytes[11] == 48){
         if(RT5Xir == 3)sendIR("5x",1,2); // RT5X profile 1 
         sendSVS(101);
       }
-      else if(ecapbytes[6] == 23 || ecapbytes[11] == 49){
+      else if(ecapbytes[6] == 23 || ecapbytes[5] == 23 || ecapbytes[11] == 49){
         if(RT5Xir == 3)sendIR("5x",2,2); // RT5X profile 2
         sendSVS(102);
       }
-      else if(ecapbytes[6] == 24 || ecapbytes[11] == 50){
+      else if(ecapbytes[6] == 24 || ecapbytes[5] == 24 || ecapbytes[11] == 50){
         if(RT5Xir == 3)sendIR("5x",3,2); // RT5X profile 3
         sendSVS(103);
       }
-      else if(ecapbytes[6] == 25 || ecapbytes[11] == 51){
+      else if(ecapbytes[6] == 25 || ecapbytes[5] == 25 || ecapbytes[11] == 51){
         if(RT5Xir == 3)sendIR("5x",4,2); // RT5X profile 4
         sendSVS(104);
       }
-      else if(ecapbytes[6] == 26 || ecapbytes[11] == 52){
+      else if(ecapbytes[6] == 26 || ecapbytes[5] == 26 || ecapbytes[11] == 52){
         if(RT5Xir == 3)sendIR("5x",5,2); // RT5X profile 5
         sendSVS(105);
       }
-      else if(ecapbytes[6] == 27 || ecapbytes[11] == 53){
+      else if(ecapbytes[6] == 27 || ecapbytes[5] == 27 || ecapbytes[11] == 53){
         if(RT5Xir == 3)sendIR("5x",6,2); // RT5X profile 6
         sendSVS(106);
       }
-      else if(ecapbytes[6] == 28 || ecapbytes[11] == 54){
+      else if(ecapbytes[6] == 28 || ecapbytes[5] == 28 || ecapbytes[11] == 54){
         if(RT5Xir == 3)sendIR("5x",7,2); // RT5X profile 7
         sendSVS(107);
       }
-      else if(ecapbytes[6] == 29 || ecapbytes[11] == 55){
+      else if(ecapbytes[6] == 29 || ecapbytes[5] == 29 || ecapbytes[11] == 55){
         if(RT5Xir == 3)sendIR("5x",8,2); // RT5X profile 8
         sendSVS(108);
       }
-      else if(ecapbytes[6] == 30){
+      else if(ecapbytes[6] == 30 || ecapbytes[5] == 30){
         if(RT5Xir == 3)sendIR("5x",9,2); // RT5X profile 9
         sendSVS(109);
       }
-      else if(ecapbytes[6] == 31){
+      else if(ecapbytes[6] == 31 || ecapbytes[5] == 31){
         if(RT5Xir == 3)sendIR("5x",10,2); // RT5X profile 10
         sendSVS(110);
       }
       else if(ecapbytes[6] > 31 && ecapbytes[6] < 38){
         sendSVS(ecapbytes[6] + 79);
+      }
+      else if(ecapbytes[5] > 31 && ecapbytes[5] < 38){
+        sendSVS(ecapbytes[5] + 79);
       }
     }
 
