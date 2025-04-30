@@ -33,8 +33,8 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 | TESmart 16x1 HDMI  | yes, confirmed first hand  ||
 | gSCARTsw / gCOMPsw | **version 5.x** confirmed by [@niquallis](https://x.com/niquallis) and [@UstSte](https://x.com/UstSte), thanks so much for your help! | Manual input selection works too! |
 | Extron RGBHV sw6  | yes, confirmed first hand  | |
-| Extron DXP 88 | yes, confirmed first hand | Preset 1 is Profile/SVS 1. On Extron sw2 port Preset 1 is SVS 101, etc|
-| Extron CrossPoint, MVX, etc | if it supports SIS, should work fine, please let me know :) |
+| Extron DXP 88 | yes, confirmed first hand | at the moment, works with Presets only. Preset 1 is Profile/SVS 1. On Extron sw2 port Preset 1 is SVS 101, etc|
+| Extron CrossPoint, MVX, etc | same as DXP 88 above. at the moment, Presets only |
 | Otaku Games Scart 10 | Jumper moved to "L" and with required [mod](https://github.com/svirant/RT4k_HD15_serial_control/tree/main/Otaku%20Games%20Scart%20Switch) | modded switch works on its own, but the Donut Dongle would allow you to connect 2x to the RT4K along with up to 2x gscart/gcomp|
 
 <br />
