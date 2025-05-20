@@ -224,13 +224,17 @@ uint8_t const TESmartir = 1;  // Must have IR "Receiver" connected to the Donut 
                               // 2 = TESmart 16x1 HDMI switch connected to "alt sw2"
                               //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the Input over Serial. AUX8 + AUX1 - AUX4 for Input 13 - 16.
                               //     Sends SVS profile 101 - 116 as well.
+                              //  ** this option overrides auxprof shown below  **
                               //
                               // 3 = TESmart 16x1 HDMI switch connected to BOTH "alt sw1" and "alt sw2"
                               //     Use AUX7 and AUX8 buttons as described above.
+                              //  ** this option overrides auxprof shown below  **
 
 uint8_t const auxprof[12] =   // Assign SVS profiles to IR remote profile buttons. 
                               // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
                               // Press AUX8 then profile button to load. Must have IR Receiver connected and Serial connection to RT4K.
+                              //
+                              // ** Will not work if TESmartir above is set to 2 or 3 **
                               // 
                               {1,  // AUX8 + profile 1 button
                                 2,  // AUX8 + profile 2 button
@@ -246,8 +250,9 @@ uint8_t const auxprof[12] =   // Assign SVS profiles to IR remote profile button
                                 12, // AUX8 + profile 12 button
                                 };
 
-uint8_t const gctl = 1; // 1 = Enables gscart/gcomp manual input selection.
-                        // 0 = Disabled (default)
+uint8_t const gctl = 1; // 1 = Enables gscart/gcomp manual input selection (Default)
+                        // 0 = Disable
+                        //
                         // ** Only supported on vers 5.x gscart/gcomp switches **
                         //
                         // AUX5 button + 1-8 button for gscart sw1, button 1 = input 1, etc
@@ -489,7 +494,6 @@ void readExtron1(){
         else sendSVS(11);
       }
       else if(einput == "In12" || einput == "Rpr12"){
-        //if((OSSCir == 1) && !S0)sendIR("ossc",12,3); // OSSC profile 12
         if(OSSCir == 1)sendIR("ossc",12,3); // OSSC profile 12
 
         if((SVS==0 && !S0))sendRBP(12); // okay to use this profile if S0 is set to false
@@ -518,8 +522,6 @@ void readExtron1(){
         (previnput[1] == "In0 " || previnput[1] == "In00" || previnput[1] == "discon")) && 
         otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1] && 
         voutMatrix[eoutput[0]] && (previnput[1] == "discon" || voutMatrix[eoutput[1]+32])){
-
-        //if(OSSCir == 1)sendIR("ossc",12,3); // OSSC profile 12
 
         if(SVS == 1)sendSVS(0);
         else sendRBP(12);
@@ -666,8 +668,6 @@ void readExtron1(){
           ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku2, Extron status
            (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
           
-          //if(OSSCir == 1)sendIR("ossc",12,3); // OSSC profile 12
-
           if(SVS == 1)sendSVS(0);
           else sendRBP(12);
 
@@ -810,8 +810,6 @@ void readExtron2(){
         (previnput[0] == "In0 " || previnput[0] == "In00" || previnput[0] == "discon")) && 
         (previnput[0] == "discon" || voutMatrix[eoutput[0]]) && voutMatrix[eoutput[1]+32]){
 
-        //if(OSSCir == 1)sendIR("ossc",12,3); // OSSC profile 12
-
         if(SVS == 1)sendSVS(0);
         else sendRBP(12);
 
@@ -892,7 +890,6 @@ void readExtron2(){
           allgscartoff[0] && allgscartoff[1] && 
           ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku, Extron status
           (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
-            //if(OSSCir == 1)sendIR("ossc",12,3); // OSSC profile 12
 
             if(SVS == 1)sendSVS(0);
             else sendRBP(12);
