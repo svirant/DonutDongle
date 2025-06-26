@@ -23,7 +23,7 @@ Gerbers (.zip) files needed for PCB manufacturing listed above.
 
 <br />
 
-### YC2VGA_wSerial 
+### YC2VGA_wSerial (new/smaller version)
  - 4 Layer design
  - Adds the bonus of converting the VGA port into Enhanced S-video and Composite inputs.
  - Pushon connector is nice and snug, no need for jackscrews.

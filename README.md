@@ -205,7 +205,7 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 
 ### At least 1 of the following [VGA adapters](https://github.com/svirant/DonutDongle/tree/main/Adapters) is required:
 
-* **YC2VGA w/ Serial Tap: (enhanced s-video and composite as a bonus)**
+* **YC2VGA w/ Serial Tap v2: (enhanced s-video and composite as a bonus)**
 
 <img width="300" src="./images/10a.jpg" /><br />
 
@@ -214,7 +214,7 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 | 1  | Yellow RCA Composite jack | [AliExpress](https://www.aliexpress.us/item/3256805949533421.html) | (Color: Yellow) |
 | 1  | S-Video jack | [AliExpress](https://www.aliexpress.us/item/3256804041313042.html) | (Color: A 4Pin) |
 | 1  | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) | (Color: 10PCS PJ-320) |
-| 1  | VGA Male Connector [10090926-P156XLF-ND] | [Digikey](https://www.digikey.com/en/products/detail/amphenol-cs-fci/10090926-P156XLF/4570100) | |
+| 1  | VGA Male Connector [L717HDE15PD4CH4R-ND] | [Digikey](https://www.digikey.com/en/products/detail/amphenol-cs-commercial-products/L717HDE15PD4CH4R/4886543) | |
  
 * **VGA Passthrough w/ Shared Serial Tap:**
    - Confirmed compatible with the Scalable Video Switch and it's auto profiles.
