@@ -1,13 +1,14 @@
 # Donut Dongle
- - **v1.1 - added TESmart 16x1 control via RT4K remote. See .ino Options section for details.**<br/><br/>
 
-**Arduino Nano based hub that connects your digital and analog console switching setup with the RetroTink 4K and/or RetroTink 5x / OSSC for Auto Profile switching**
-
-[!NOTE] If DIY is not your thing. I have assembled versions for gScart/gComp and TESmart/Extron/etc available in my Ko-Fi shop.
+**Arduino Nano based hub that connects your digital and analog console switching setup with the RetroTink 4K and/or RetroTink 5x / OSSC for Auto Profile switching** </br>
 
 The Donut Dongle connects to a switch in a way that allows it to see which port is active. When a console powers on (auto-switching) or an input is manually selected, the Donut Dongle sends a serial command to the RetroTink 4k (or IR signal to the RT5x, OSSC) telling it to load a profile. For the RT4K, the profiles can either be defined as remote profiles; those configured in the menu for the remote buttons. Or they can be SVS profiles which are configured on the RT4K's SDcard. <br />
 
 For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/tree/main/README.md#how-to-use) section below.
+
+> [!NOTE]
+> If DIY is not your thing. I have assembled versions for gScart/gComp and TESmart/Extron/etc available in my Ko-Fi shop.
+</br>
 
 <img width="700" src="./images/0.jpeg" />
 <img width="700" src="./images/0a.jpeg" />
