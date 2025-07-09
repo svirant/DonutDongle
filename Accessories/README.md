@@ -8,6 +8,10 @@
     - Let me know if you have any questions!
  - gscart/gcomp EXT, TESmart HDMI, and alt Extron connectors are showcased in the main README
 
+ ### MT-VIKI / Extron / DB9 to 3.5mm adapter
+  - BOM listed on Main README
+ <img width="400" src="../images/14.PNG" />
+
  ### TESmart_connector
   - BOM listed on Main README
  <img width="400" src="../images/12.png" />

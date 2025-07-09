@@ -84,12 +84,17 @@ The spring pins allow it to stay "sandwiched" in place by the lid<br />
 <img width="300" src="./images/5.jpg" />
 <img width="260" src="./images/6.jpg" />
 
+**MT-VIKI / Extron / DB9 adapter**<br />
+<img width="280" src="./images/14a.JPG" />
+<img width="280" src="./images/15.JPG" />
+
+**Parts listed in [BOM](https://github.com/svirant/DonutDongle/tree/main/README.md#connection-accessories) below**
+
+
 **Alternate Extron connection type:**
    - **DB9 male to 3.5mm (connects to alt sw1 / alt sw2 port instead of 2x5 header)**
    - **Higher quality and much longer cord than the standard 2x5 cable**
 <img width="800" alt="DB9_to_TRS_wiring" src="./images/7.png" />
-
-**Parts listed in [BOM](https://github.com/svirant/DonutDongle/tree/main/README.md#connection-accessories) below**
 
 ----------------
 # New IR Remote Control functionality
@@ -250,6 +255,13 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
  | **Qty**    | Part |  Link  |  Notes |
 | ------------- | ------------- |------------- |------------- |
 | 1 | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) | (Color: 10PCS PJ-320) |
+
+  * **MT-VIKI / Extron / DB9 connector**
+
+ | **Qty**    | Part |  Link  |  Notes |
+| ------------- | ------------- |------------- |------------- |
+| 1 | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) | (Color: 10PCS PJ-320) |
+| 1 | DB9 Male connector | [AliExpress](https://www.aliexpress.us/item/3256805749759770.html?) | (Color: Male head) |
 
   -----------
 # Programming an Arduino Nano
