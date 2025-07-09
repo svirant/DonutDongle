@@ -262,6 +262,7 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 | ------------- | ------------- |------------- |------------- |
 | 1 | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) | (Color: 10PCS PJ-320) |
 | 1 | DB9 Male connector | [AliExpress](https://www.aliexpress.us/item/3256805749759770.html?) | (Color: Male head) |
+| 2 | #4-40 1/4" pan head screw | [Amazon](https://www.amazon.com/dp/B00F34USTG?) | |
 
   -----------
 # Programming an Arduino Nano
