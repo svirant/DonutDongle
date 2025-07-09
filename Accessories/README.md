@@ -9,6 +9,7 @@
  - gscart/gcomp EXT, TESmart HDMI, and alt Extron connectors are showcased in the main README
 
  ### MT-VIKI / Extron / DB9 to 3.5mm adapter
+  - .3mf for 3DP housing listed above
   - BOM listed on Main README
  <img width="400" src="../images/14.PNG" />
 
