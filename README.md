@@ -208,6 +208,7 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 |1 or 2 | **GscartSW/GCompSW** | 2x4 Pin Female Header Ribbon Cable | [AliExpress](https://www.aliexpress.us/item/3256804576275377.html?) | (Pins: 2x4Pin, Color: Any length) |
 | 1  | **Extron** | 2 Port DB9 to 2x5 Pin Female Header Ribbon Cable | [AliExpress](https://www.aliexpress.us/item/3256807472891897.html) | |
 | | | or **2x** DB9 Male to 3.5mm Male Serial RS232 Cable 6feet | [Amazon](https://www.amazon.com/LIANSHU-DC3-5mm-Serial-RS232-Cable/dp/B07G2ZL3SL/) | "MUST" be wired as so: [DB9 Male Pin 5 -> Sleeve, DB9 Male Pin 2 -> Tip, DB9 Male Pin 3 -> Ring](/images/7.png) |
+| | | **or** make your own connectors in the "[Connection Accessories](https://github.com/svirant/DonutDongle?tab=readme-ov-file#connection-accessories-optional)" section below. | | |
  
 
 
@@ -241,7 +242,7 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 | 1 | PJ-320 3.5MM Headphone Jack Audio Video Female | [AliExpress](https://www.aliexpress.us/item/3256805995568762.html) | (Color: 10PCS PJ-320) |
 | 2 | #4-40 x 3/4" screw (optional) | [Ebay](https://www.ebay.com/itm/222577369468) | |
 
-  ### Connection Accessories (optional)
+  ### [Connection Accessories](https://github.com/svirant/DonutDongle/tree/main/Accessories) (optional)
 
   * **gscart/gcomp EXT connector**
 
