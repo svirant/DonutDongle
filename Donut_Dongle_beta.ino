@@ -859,7 +859,7 @@ void readExtron2(){
           if(einput[i] != '0'){
             currentInputSW2 = i+1;
             setTie(2,currentInputSW2);
-            sendSVS(currentInputSW2);
+            sendSVS(currentInputSW2 + 100);
           }
         }
       } //end of for loop
