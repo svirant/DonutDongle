@@ -7,7 +7,24 @@ The Donut Dongle connects to a switch in a way that allows it to see which port 
 For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/tree/main/README.md#how-to-use) section below.
 
 > [!NOTE]
-> If DIY is not your thing. I have assembled versions for gScart/gComp and TESmart/Extron/etc available in my Ko-Fi shop.
+> *NEW* beta allows **auto-switching on Extron Matrix switchers** that support DSVP.
+> <br /> - Works with RGBS/HV and HDMI/DVI signal types.
+> 
+> <br /> Use the follow Options to enable:
+> ```
+> bool automatrixSW1 = true; // set true for auto matrix switching on "SW1" port
+> bool automatrixSW2 = false; // set true for auto matrix switching on "SW2" port
+> 
+> int amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16,32
+> int amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
+> 
+> int automatrixOutputPortSW1 = 1; // set to the output port on "SW1" connected to the RT4K
+> int automatrixOutputPortSW2 = 1; // set to the output port on "SW2" connected to the RT4K
+> ```
+<br />
+
+> [!TIP]
+> If DIY is not your thing. I have assembled versions for gScart/gComp and MT-VIKI/TESmart/Extron/db9 available in my Ko-Fi shop.
 </br>
 
 <img width="700" src="./images/0.jpeg" />
