@@ -92,7 +92,7 @@ uint8_t const SVS = 1; //     "Remote" profiles are profiles that are assigned t
 
 
 
-bool const S0  = true;        // (Profile 0) 
+bool const S0  = false;        // (Profile 0) 
                          //
                          //  ** Recommended to remove any /profile/SVS/S0_<user defined>.rt4 profiles and leave this option "false" if using in tandem with the Scalable Video Switch. **
                          //
@@ -198,7 +198,7 @@ uint8_t const voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input 
                            
 
                            // ** Must be on firmware version 3.7 or higher **
-uint8_t const RT5Xir = 3;     // 0 = disables IR Emitter for RetroTink 5x
+uint8_t const RT5Xir = 1;     // 0 = disables IR Emitter for RetroTink 5x
                               // 1 = enabled for Extron sw1 / alt sw1, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected
                               //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
                               //
@@ -225,7 +225,7 @@ uint8_t const MTVIKIir = 0;   // Must have IR "Receiver" connected to the Donut 
                               //     Sends auxprof SVS profiles listed below. You can change them below to 101 - 108 to prevent SVS profile conflicts if needed.
 
 
-uint8_t const TESmartir = 0;  // Must have IR "Receiver" connected to the Donut Dongle for option 1 and above.
+uint8_t const TESmartir = 1;  // Must have IR "Receiver" connected to the Donut Dongle for option 1 and above.
                               // 0 = disables IR Receiver -> Serial Control for TESmart 16x1 Port HDMI switch
                               //
                               // 1 = TESmart 16x1 HDMI switch connected to "alt sw1"
@@ -376,11 +376,11 @@ void loop(){
 
   // below are a list of functions that loop over and over to read in port changes and other misc tasks. you can disable them by commenting them out
 
-  //readIR(); // intercepts the remote's button presses and relays them through the Serial interface giving a much more responsive experience and new functionality
+  readIR(); // intercepts the remote's button presses and relays them through the Serial interface giving a much more responsive experience and new functionality
 
-  //readGscart1(); // reads A0,A1,A2 pins to see which port, if any, are active
+  readGscart1(); // reads A0,A1,A2 pins to see which port, if any, are active
 
-  //readGscart2(); // reads A3,A4,A5 pins to see which port, if any, are active
+  readGscart2(); // reads A3,A4,A5 pins to see which port, if any, are active
 
   readExtron1(); // also reads TESmart HDMI and Otaku Games Scart switch on "alt sw1" port
 
