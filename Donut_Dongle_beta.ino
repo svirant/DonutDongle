@@ -36,13 +36,13 @@ uint8_t debugE2CAP = 0; // line ~827
 
 // For Extron Matrix switches that support DSVP. RGBS and HDMI/DVI video types.
 
-bool automatrixSW1 = true; // enable for auto matrix switching on "SW1" port
+bool automatrixSW1 = false; // enable for auto matrix switching on "SW1" port
 bool automatrixSW2 = false; // enable for auto matrix switching on "SW2" port
 
 int amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. 8,12,16,32 "should" work
 int amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
 
-int automatrixOutputPortSW1 = 3; // set to the output port on "SW1" connected to the RT4K
+int automatrixOutputPortSW1 = 1; // set to the output port on "SW1" connected to the RT4K
 int automatrixOutputPortSW2 = 1; // set to the output port on "SW2" connected to the RT4K
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
