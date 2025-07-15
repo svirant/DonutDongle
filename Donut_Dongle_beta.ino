@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.3beta
+* Donut Dongle v1.3e beta
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -31,19 +31,19 @@
 //////////////////
 */
 
-uint8_t debugE1CAP = 0; // line ~407
-uint8_t debugE2CAP = 0; // line ~827
+uint8_t debugE1CAP = 0; // line ~401
+uint8_t debugE2CAP = 0; // line ~825
 
 // For Extron Matrix switches that support DSVP. RGBS and HDMI/DVI video types.
 
-bool automatrixSW1 = false; // enable for auto matrix switching on "SW1" port
-bool automatrixSW2 = false; // enable for auto matrix switching on "SW2" port
+bool automatrixSW1 = false; // set true for auto matrix switching on "SW1" port
+bool automatrixSW2 = false; // set true for auto matrix switching on "SW2" port
 
-int amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. 8,12,16,32 "should" work
-int amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
+uint8_t amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16,32
+uint8_t amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
 
-int automatrixOutputPortSW1 = 1; // set to the output port on "SW1" connected to the RT4K
-int automatrixOutputPortSW2 = 1; // set to the output port on "SW2" connected to the RT4K
+uint8_t amOutputPortSW1 = 0; // set the output port on "SW1" connected to the RT4K. or set to 0 for ALL OUTPUTS
+uint8_t amOutputPortSW2 = 0; // set the output port on "SW2" connected to the RT4K. or set to 0 for ALL OUTPUTS
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -294,12 +294,6 @@ uint8_t const samsize = 20; // total number of ADC samples required to capture a
 uint8_t const fpdccountmax = 3; // number of periods required when in the 50% duty cycle state before a Profile 0 is triggered.
 
 
-uint8_t extrabuttonprof = 0; // 3 = disabled | If you want to use AUX7, AUX8 buttons to control Scalable Video Switch inputs instead. 
-                             // 0 = enabled (default)
-                             //
-                             // Used to keep track of AUX8 button presses for addtional button profiles
-                             //
-
 ////////////////////////////////////////////////////////////////////////
 
 // gscart / gcomp Global variables
@@ -314,6 +308,7 @@ uint8_t lastginput = 1; // used to keep track of overrideGscart last input
 
 // TESmart remote control
 uint8_t auxTESmart[2] = {0,0}; // used to keep track if aux7 was pressed to change inputs on TESmart 16x1 HDMI switch via RT4K remote.
+uint8_t extrabuttonprof = 0;  // Used to keep track of AUX8 button presses for addtional button profiles
 
 // Extron sw1 / alt sw1 software serial port -> MAX3232 TTL IC (when jumpers set to "H")
 SoftwareSerial extronSerial = SoftwareSerial(3,4); // setup a software serial port for listening to Extron sw1 / alt sw1. rxPin =3 / txPin = 4
@@ -330,7 +325,6 @@ String stack1 = "00000000000000000000000000000000";
 String stack2 = "00000000000000000000000000000000"; 
 int currentInputSW1 = -1;
 int currentInputSW2 = -1;
-byte ZEROLS[5] = {0x57,0x7C,0x30,0x4C,0x53}; // hex version of "W|0LS"
 byte VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
 
 // variables used for LS Time funcions
@@ -393,8 +387,8 @@ void loop(){
 void readExtron1(){
 
     byte ecapbytes[44]; // used to store first 44 captured bytes / messages for Extron                
-    String ecap = "0000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
-    String einput = "0000000000000000000000000000000000000000"; // used to store Extron input
+    String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
+    String einput = "00000000000000000000000000000000000000000000"; // used to store Extron input
 
     if(automatrixSW1){ // if automatrixSW1 is set "true" in options, then "LS0" is sent every 250ms to see if an input has changed
       LS0time1(250);
@@ -411,13 +405,13 @@ void readExtron1(){
         }
         Serial.println(F("\r"));
         ecap = String((char *)ecapbytes);
-        Serial.print(F("ecap ASCII: "));Serial.println(ecap);
+        Serial.print(F("ecap ASCII: "));Serial.print(ecap);
       }
     }
     ecap = String((char *)ecapbytes); // convert bytes to String for Extron switches
 
 
-    if(ecap.substring(0,3) == "Out"){ // store only the input and output states, some Extron devices report output first instead of input
+    if(ecap.substring(0,3) == "Out" && !automatrixSW1){ // store only the input and output states, some Extron devices report output first instead of input
       einput = ecap.substring(6,10);
       eoutput[0] = ecap.substring(3,5).toInt();
     }
@@ -427,6 +421,10 @@ void readExtron1(){
     }
     else if(ecap.substring(0,3) == "Rpr"){ // detect if a Preset has been used
       einput = ecap.substring(0,5);
+      eoutput[0] = 0;
+    }
+    else if(ecap.substring(amSizeSW1 + 6,amSizeSW1 + 9) == "Rpr"){ // detect if a Preset has been used 
+      einput = ecap.substring(amSizeSW1 + 6,amSizeSW1 + 11);
       eoutput[0] = 0;
     }
     else if(ecap.substring(0,3) == "In0" && automatrixSW1){ // start of automatrix
@@ -468,7 +466,7 @@ void readExtron1(){
 
 
     // for Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMaxtrix
-    if((einput.substring(0,2) == "In" && voutMatrix[eoutput[0]]) || (einput.substring(0,3) == "Rpr")){
+    if((einput.substring(0,2) == "In" && voutMatrix[eoutput[0]] && !automatrixSW1) || (einput.substring(0,3) == "Rpr")){
       if(einput == "In1 " || einput == "In01" || einput == "Rpr01"){
         if(RT5Xir == 1)sendIR("5x",1,2); // RT5X profile 1 
         if(RT5Xir && OSSCir)delay(500);
@@ -572,7 +570,7 @@ void readExtron1(){
       else if(einput.substring(0,3) == "Rpr"){
         sendSVS(einput.substring(3,5).toInt());
       }
-      else if(einput != "In0 " && einput != "In00" && !automatrixSW1){ // for inputs 13-99 (SVS only)
+      else if(einput != "In0 " && einput != "In00"){ // for inputs 13-99 (SVS only)
         sendSVS(einput.substring(2,4).toInt());
       }
 
@@ -814,8 +812,8 @@ void readExtron1(){
 void readExtron2(){
     
     byte ecapbytes[44]; // used to store first 13 captured bytes / messages for Extron                
-    String ecap = "0000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
-    String einput = "0000000000000000000000000000000000000000"; // used to store Extron input
+    String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
+    String einput = "00000000000000000000000000000000000000000000"; // used to store Extron input
 
     if(automatrixSW2){ // if automatrixSW2 is set "true" in options, then "LS0" is sent every 250ms to see if an input has changed
       LS0time2(250);
@@ -836,7 +834,7 @@ void readExtron2(){
     }
     ecap = String((char *)ecapbytes);
 
-    if(ecap.substring(0,3) == "Out"){ // store only the input and output states, some Extron devices report output first instead of input
+    if(ecap.substring(0,3) == "Out" && !automatrixSW2){ // store only the input and output states, some Extron devices report output first instead of input
       einput = ecap.substring(6,10);
       eoutput[1] = ecap.substring(3,5).toInt();
     }
@@ -846,6 +844,10 @@ void readExtron2(){
     }
     else if(ecap.substring(0,3) == "Rpr"){ // detect if a Preset has been used
       einput = ecap.substring(0,5);
+      eoutput[1] = 0;
+    }
+    else if(ecap.substring(amSizeSW2 + 6,amSizeSW2 + 9) == "Rpr"){ // detect if a Preset has been used 
+      einput = ecap.substring(amSizeSW2 + 6,amSizeSW2 + 11);
       eoutput[1] = 0;
     }
     else if(ecap.substring(0,3) == "In0" && automatrixSW2){ // start of automatrix
@@ -883,11 +885,11 @@ void readExtron2(){
 
 
     // For Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMaxtrix
-    if((einput.substring(0,2) == "In" && voutMatrix[eoutput[1]+32]) || (einput.substring(0,3) == "Rpr")){
+    if((einput.substring(0,2) == "In" && voutMatrix[eoutput[1]+32] && !automatrixSW2) || (einput.substring(0,3) == "Rpr")){
       if(einput.substring(0,3) == "Rpr"){
         sendSVS(einput.substring(3,5).toInt()+100);
       }
-      else if(einput != "In0 " && einput != "In00" && !automatrixSW2){ // much easier method for switch 2 since ALL inputs will respond with SVS commands regardless of SVS option above
+      else if(einput != "In0 " && einput != "In00"){ // much easier method for switch 2 since ALL inputs will respond with SVS commands regardless of SVS option above
         if(einput.substring(3,4) == " ") 
           sendSVS(einput.substring(2,3).toInt()+100);
         else 
@@ -2128,7 +2130,8 @@ void sendSVS(uint16_t num){
   else Serial.print(num);
   Serial.println(F("\r"));
   currentProf[0] = 1; // 1 is SVS profile
-  currentProf[1] = num + offset;
+  if(num != 0)currentProf[1] = num + offset;
+  else currentProf[1] = num;
 }
 
 void sendRBP(uint16_t prof){ // send Remote Button Profile
@@ -2258,17 +2261,17 @@ void LS0time2(unsigned long eTime){
  }
 }  // end of LS0time2()
 
-void setTie(int sw,uint16_t num){
+void setTie(uint8_t sw,uint16_t num){
   if(sw == 1){
     extronSerial.print(num);
     extronSerial.print(F("*"));
-    extronSerial.print(automatrixOutputPortSW1);
-    extronSerial.println(F("!"));
+    if(amOutputPortSW1 != 0)extronSerial.print(amOutputPortSW1);
+    extronSerial.print(F("!"));
   }
   else if(sw == 2){
     extronSerial2.print(num);
     extronSerial2.print(F("*"));
-    extronSerial2.print(automatrixOutputPortSW2);
-    extronSerial2.println(F("!"));    
+    if(amOutputPortSW2 != 0)extronSerial2.print(amOutputPortSW2);
+    extronSerial2.print(F("!"));    
   }
 }
