@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.3e beta
+* Donut Dongle v1.3f beta
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,8 @@
 //////////////////
 */
 
-uint8_t debugE1CAP = 0; // line ~401
-uint8_t debugE2CAP = 0; // line ~825
+uint8_t debugE1CAP = 0; // line ~398
+uint8_t debugE2CAP = 0; // line ~822
 
 // For Extron Matrix switches that support DSVP. RGBS and HDMI/DVI video types.
 
@@ -41,9 +41,6 @@ bool automatrixSW2 = false; // set true for auto matrix switching on "SW2" port
 
 uint8_t amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16,32
 uint8_t amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
-
-uint8_t amOutputPortSW1 = 0; // set the output port on "SW1" connected to the RT4K. or set to 0 for ALL OUTPUTS
-uint8_t amOutputPortSW2 = 0; // set the output port on "SW2" connected to the RT4K. or set to 0 for ALL OUTPUTS
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -125,10 +122,10 @@ bool const S0  = false;        // (Profile 0)
 
 
 
-uint8_t const voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input changes to any/all outputs result in a profile change
-                                                   // disable specific outputs from triggering profile changes
-                                                   //
-                           1,  // output 1 (1 = enabled, 0 = disabled)
+uint8_t const voutMatrix[65] = {1,  // MATRIX switchers // leave this set to 1 for the auto switched input to go to ALL outputs, 
+                                                        // must set to 0 if you want select outputs to be enabled/disabled as listed below
+                                                        //
+                           1,  // output 1 SW1 (1 = enabled, 0 = disabled)
                            1,  // output 2
                            1,  // output 3
                            1,  // output 4
@@ -161,8 +158,8 @@ uint8_t const voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input 
                            1,  // output 31
                            1,  // output 32 (1 = enabled, 0 = disabled)
                                //
-                               // ONLY USE FOR 2ND MATRIX SWITCH
-                           1,  // 2ND MATRIX SWITCH output 1 (1 = enabled, 0 = disabled)
+                               // ONLY USE FOR 2ND MATRIX SWITCH on SW2
+                           1,  // 2ND MATRIX SWITCH output 1 SW2 (1 = enabled, 0 = disabled)
                            1,  // 2ND MATRIX SWITCH output 2
                            1,  // 2ND MATRIX SWITCH output 3
                            1,  // 2ND MATRIX SWITCH output 4
@@ -2263,15 +2260,35 @@ void LS0time2(unsigned long eTime){
 
 void setTie(uint8_t sw,uint16_t num){
   if(sw == 1){
-    extronSerial.print(num);
-    extronSerial.print(F("*"));
-    if(amOutputPortSW1 != 0)extronSerial.print(amOutputPortSW1);
-    extronSerial.print(F("!"));
+    if(voutMatrix[0] == 1){
+      extronSerial.print(num);
+      extronSerial.print(F("*"));
+      extronSerial.print(F("!"));
+    }
+    else{
+      for(int i=1;i<(amSizeSW1 + 1);i++){
+        if(voutMatrix[i] == 1)extronSerial.print(num);
+        else extronSerial.print(0);
+        extronSerial.print(F("*"));
+        extronSerial.print(i);
+        extronSerial.print(F("!"));
+      }
+    }
   }
   else if(sw == 2){
-    extronSerial2.print(num);
-    extronSerial2.print(F("*"));
-    if(amOutputPortSW2 != 0)extronSerial2.print(amOutputPortSW2);
-    extronSerial2.print(F("!"));    
+    if(voutMatrix[0] == 1){
+      extronSerial2.print(num);
+      extronSerial2.print(F("*"));
+      extronSerial2.print(F("!"));
+    }
+    else{
+      for(int i=33;i<(amSizeSW2 + 33);i++){
+        if(voutMatrix[i] == 1)extronSerial2.print(num);
+        else extronSerial2.print(0);
+        extronSerial2.print(F("*"));
+        extronSerial2.print(i - 32);
+        extronSerial2.print(F("!"));
+      }
+    }
   }
-}
+} // end of setTie()
