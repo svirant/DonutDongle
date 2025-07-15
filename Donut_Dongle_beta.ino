@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.3f beta
+* Donut Dongle v1.3g beta
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -31,16 +31,8 @@
 //////////////////
 */
 
-uint8_t debugE1CAP = 0; // line ~398
-uint8_t debugE2CAP = 0; // line ~822
-
-// For Extron Matrix switches that support DSVP. RGBS and HDMI/DVI video types.
-
-bool automatrixSW1 = false; // set true for auto matrix switching on "SW1" port
-bool automatrixSW2 = false; // set true for auto matrix switching on "SW2" port
-
-uint8_t amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16,32
-uint8_t amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
+uint8_t debugE1CAP = 0; // line ~396
+uint8_t debugE2CAP = 0; // line ~824
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -120,7 +112,13 @@ bool const S0  = false;        // (Profile 0)
                         //
 //////////////////////////
 
+// For Extron Matrix switches that support DSVP. RGBS and HDMI/DVI video types.
 
+bool automatrixSW1 = false; // set true for auto matrix switching on "SW1" port
+bool automatrixSW2 = false; // set true for auto matrix switching on "SW2" port
+
+uint8_t amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16,32
+uint8_t amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
 
 uint8_t const voutMatrix[65] = {1,  // MATRIX switchers // leave this set to 1 for the auto switched input to go to ALL outputs, 
                                                         // must set to 0 if you want select outputs to be enabled/disabled as listed below
@@ -402,7 +400,7 @@ void readExtron1(){
         }
         Serial.println(F("\r"));
         ecap = String((char *)ecapbytes);
-        Serial.print(F("ecap ASCII: "));Serial.print(ecap);
+        Serial.print(F("ecap ASCII: "));Serial.println(ecap);
       }
     }
     ecap = String((char *)ecapbytes); // convert bytes to String for Extron switches
@@ -422,6 +420,10 @@ void readExtron1(){
     }
     else if(ecap.substring(amSizeSW1 + 6,amSizeSW1 + 9) == "Rpr"){ // detect if a Preset has been used 
       einput = ecap.substring(amSizeSW1 + 6,amSizeSW1 + 11);
+      eoutput[0] = 0;
+    }
+    else if(ecap.substring(amSizeSW1 + 7,amSizeSW1 + 10) == "Rpr"){ // detect if a Preset has been used 
+      einput = ecap.substring(amSizeSW1 + 7,amSizeSW1 + 12);
       eoutput[0] = 0;
     }
     else if(ecap.substring(0,3) == "In0" && automatrixSW1){ // start of automatrix
@@ -845,6 +847,10 @@ void readExtron2(){
     }
     else if(ecap.substring(amSizeSW2 + 6,amSizeSW2 + 9) == "Rpr"){ // detect if a Preset has been used 
       einput = ecap.substring(amSizeSW2 + 6,amSizeSW2 + 11);
+      eoutput[1] = 0;
+    }
+    else if(ecap.substring(amSizeSW2 + 7,amSizeSW2 + 10) == "Rpr"){ // detect if a Preset has been used 
+      einput = ecap.substring(amSizeSW2 + 7,amSizeSW2 + 12);
       eoutput[1] = 0;
     }
     else if(ecap.substring(0,3) == "In0" && automatrixSW2){ // start of automatrix
