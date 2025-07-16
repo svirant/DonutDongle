@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.3h beta
+* Donut Dongle v1.3i beta
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -2275,36 +2275,38 @@ void LS0time2(unsigned long eTime){
  }
 }  // end of LS0time2()
 
-void setTie(uint8_t sw,uint8_t num){
+void setTie(uint8_t sw, uint8_t num){
   if(sw == 1){
-    if(voutMatrix[0] == 1){
+    if(voutMatrix[0]){
       extronSerial.print(num);
       extronSerial.print(F("*"));
       extronSerial.print(F("!"));
     }
     else{
       for(int i=1;i<(amSizeSW1 + 1);i++){
-        if(voutMatrix[i] == 1)extronSerial.print(num);
-        else extronSerial.print(0);
-        extronSerial.print(F("*"));
-        extronSerial.print(i);
-        extronSerial.print(F("!"));
+        if(voutMatrix[i]){
+          extronSerial.print(num);
+          extronSerial.print(F("*"));
+          extronSerial.print(i);
+          extronSerial.print(F("!"));
+        }
       }
     }
   }
   else if(sw == 2){
-    if(voutMatrix[0] == 1){
+    if(voutMatrix[0]){
       extronSerial2.print(num);
       extronSerial2.print(F("*"));
       extronSerial2.print(F("!"));
     }
     else{
       for(int i=33;i<(amSizeSW2 + 33);i++){
-        if(voutMatrix[i] == 1)extronSerial2.print(num);
-        else extronSerial2.print(0);
-        extronSerial2.print(F("*"));
-        extronSerial2.print(i - 32);
-        extronSerial2.print(F("!"));
+        if(voutMatrix[i]){
+          extronSerial2.print(num);
+          extronSerial2.print(F("*"));
+          extronSerial2.print(i - 32);
+          extronSerial2.print(F("!"));
+        }
       }
     }
   }
