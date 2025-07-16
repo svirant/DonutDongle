@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.3i beta
+* Donut Dongle v1.3k beta
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,8 @@
 //////////////////
 */
 
-uint8_t debugE1CAP = 0; // line ~396
-uint8_t debugE2CAP = 0; // line ~824
+uint8_t debugE1CAP = 0; // line ~477
+uint8_t debugE2CAP = 0; // line ~913
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -120,8 +120,84 @@ bool automatrixSW2 = false; // set true for auto matrix switching on "SW2" port
 uint8_t amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16,32
 uint8_t amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
 
+uint8_t const vinMatrix[65] = {3,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 above)
+                                                        // set to 1 for the auto switched input to trigger a Preset on SW1
+                                                        // set to 2 for the auto switched input to trigger a Preset on SW2
+                                                        // set to 3 for both SW1 & SW2
+                                                        // set to 0 to disable this feature (default - aka input goes to all outputs unless defined in voutMatrix)
+                                                        //
+                                                        // set the following inputs to the desired Preset #
+                                                        // (by default each input # is set to the same corresponding Preset #)
+                           1,  // input 1 SW1
+                           2,  // input 2
+                           3,  // input 3
+                           4,  // input 4
+                           5,  // input 5
+                           6,  // input 6
+                           7,  // input 7
+                           8,  // input 8
+                           9,  // input 9
+                           10,  // input 10
+                           11,  // input 11
+                           12,  // input 12
+                           13,  // input 13
+                           14,  // input 14
+                           15,  // input 15
+                           16,  // input 16
+                           17,  // input 17
+                           18,  // input 18
+                           19,  // input 19
+                           20,  // input 20
+                           21,  // input 21
+                           22,  // input 22
+                           23,  // input 23
+                           24,  // input 24
+                           25,  // input 25
+                           26,  // input 26
+                           27,  // input 27
+                           28,  // input 28
+                           29,  // input 29
+                           30,  // input 30
+                           31,  // input 31
+                           32,  // input 32
+                               //
+                               // ONLY USE FOR 2ND MATRIX SWITCH on SW2
+                           1,  // 2ND MATRIX SWITCH input 1 SW2
+                           2,  // 2ND MATRIX SWITCH input 2
+                           3,  // 2ND MATRIX SWITCH input 3
+                           4,  // 2ND MATRIX SWITCH input 4
+                           5,  // 2ND MATRIX SWITCH input 5
+                           6,  // 2ND MATRIX SWITCH input 6
+                           7,  // 2ND MATRIX SWITCH input 7
+                           8,  // 2ND MATRIX SWITCH input 8
+                           9,  // 2ND MATRIX SWITCH input 9
+                           10,  // 2ND MATRIX SWITCH input 10
+                           11,  // 2ND MATRIX SWITCH input 11
+                           12,  // 2ND MATRIX SWITCH input 12
+                           13,  // 2ND MATRIX SWITCH input 13
+                           14,  // 2ND MATRIX SWITCH input 14
+                           15,  // 2ND MATRIX SWITCH input 15
+                           16,  // 2ND MATRIX SWITCH input 16
+                           17,  // 2ND MATRIX SWITCH input 17
+                           18,  // 2ND MATRIX SWITCH input 18
+                           19,  // 2ND MATRIX SWITCH input 19
+                           20,  // 2ND MATRIX SWITCH input 20
+                           21,  // 2ND MATRIX SWITCH input 21
+                           22,  // 2ND MATRIX SWITCH input 22
+                           23,  // 2ND MATRIX SWITCH input 23
+                           24,  // 2ND MATRIX SWITCH input 24
+                           25,  // 2ND MATRIX SWITCH input 25
+                           26,  // 2ND MATRIX SWITCH input 26
+                           27,  // 2ND MATRIX SWITCH input 27
+                           28,  // 2ND MATRIX SWITCH input 28
+                           29,  // 2ND MATRIX SWITCH input 29
+                           30,  // 2ND MATRIX SWITCH input 30
+                           31,  // 2ND MATRIX SWITCH input 31
+                           32,  // 2ND MATRIX SWITCH input 32
+                           };
+
 uint8_t const voutMatrix[66] = {1,  // MATRIX switchers // When auto matrix mode is enabled: (automatrixSW1 / SW2 above)
-                                                        // set to 1 for the auto switched intput to go to ALL outputs
+                                                        // set to 1 for the auto switched input to go to ALL outputs (default)
                                                         // set to 0 to select outputs to be enabled/disabled as listed below
                                                         //
                                                         // When auto matrix mode is disabled: 
@@ -390,7 +466,7 @@ void readExtron1(){
     String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
     String einput = "00000000000000000000000000000000000000000000"; // used to store Extron input
 
-    if(automatrixSW1){ // if automatrixSW1 is set "true" in options, then "LS0" is sent every 250ms to see if an input has changed
+    if(automatrixSW1){ // if automatrixSW1 is set "true" in options, then "0LS" is sent every 250ms to see if an input has changed
       LS0time1(250);
     }
 
@@ -437,22 +513,27 @@ void readExtron1(){
       }else 
         einput = ecap.substring(4,amSizeSW1 + 4);
       for(int i=0;i<amSizeSW1;i++){
-        if(einput[i] != stack1[i] || einput[currentInputSW1 - 1] == '0'){
+        if(einput[i] != stack1[i] || einput[currentInputSW1 - 1] == '0'){ // check to see if anything changed
           stack1[i] = einput[i];
           if(einput[i] != '0'){
             currentInputSW1 = i+1;
-            setTie(1,currentInputSW1);
-            if(RT5Xir == 1)sendIR("5x",currentInputSW1,2); // RT5X profile
-            if(RT5Xir && OSSCir)delay(500);
-            if(OSSCir == 1)sendIR("ossc",currentInputSW1,3); // OSSC profile
+            if(vinMatrix[0] == 1 || vinMatrix[0] == 3)
+            {
+              recallPreset(1,vinMatrix[currentInputSW1]);
+            }else{
+              setTie(1,currentInputSW1);
+              if(RT5Xir == 1)sendIR("5x",currentInputSW1,2); // RT5X profile
+              if(RT5Xir && OSSCir)delay(500);
+              if(OSSCir == 1)sendIR("ossc",currentInputSW1,3); // OSSC profile
 
-            if(SVS==0)sendRBP(currentInputSW1); 
-            else sendSVS(currentInputSW1);
+              if(SVS==0)sendRBP(currentInputSW1); 
+              else sendSVS(currentInputSW1);
+            }
           }
         }
       } //end of for loop
       if(einput.substring(0,amSizeSW1) == sstack.substring(0,amSizeSW1) 
-        && stack1.substring(0,amSizeSW1) == sstack.substring(0,amSizeSW1) && currentInputSW1 != 0){
+        && stack1.substring(0,amSizeSW1) == sstack.substring(0,amSizeSW1) && currentInputSW1 != 0){ // check for all inputs being off
 
         currentInputSW1 = 0;
         setTie(1,currentInputSW1);
@@ -822,7 +903,7 @@ void readExtron2(){
     String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
     String einput = "00000000000000000000000000000000000000000000"; // used to store Extron input
 
-    if(automatrixSW2){ // if automatrixSW2 is set "true" in options, then "LS0" is sent every 250ms to see if an input has changed
+    if(automatrixSW2){ // if automatrixSW2 is set "true" in options, then "0LS" is sent every 250ms to see if an input has changed
       LS0time2(250);
     }
 
@@ -867,18 +948,23 @@ void readExtron2(){
       }else 
         einput = ecap.substring(4,amSizeSW2 + 4);
       for(int i=0;i<amSizeSW2;i++){
-        if(einput[i] != stack2[i] || einput[currentInputSW2 - 1] == '0'){
+        if(einput[i] != stack2[i] || einput[currentInputSW2 - 1] == '0'){ // check to see if anything changed
           stack2[i] = einput[i];
           if(einput[i] != '0'){
             currentInputSW2 = i+1;
-
-            setTie(2,currentInputSW2);
-            sendSVS(currentInputSW2 + 100);
+            if(vinMatrix[0] == 2 || vinMatrix[0] == 3)
+            {
+              recallPreset(2,vinMatrix[currentInputSW2 + 32]);
+            }
+            else{
+              setTie(2,currentInputSW2);
+              sendSVS(currentInputSW2 + 100);
+            }
           }
         }
       } //end of for loop
       if(einput.substring(0,amSizeSW2) == sstack.substring(0,amSizeSW2) 
-        && stack2.substring(0,amSizeSW2) == sstack.substring(0,amSizeSW2) && currentInputSW2 != 0){
+        && stack2.substring(0,amSizeSW2) == sstack.substring(0,amSizeSW2) && currentInputSW2 != 0){ // check for all inputs being off
 
         currentInputSW2 = 0;
         setTie(2,currentInputSW2);
@@ -2311,3 +2397,14 @@ void setTie(uint8_t sw, uint8_t num){
     }
   }
 } // end of setTie()
+
+void recallPreset(uint8_t sw, uint8_t num){
+  if(sw == 1){
+    extronSerial.print(num);
+    extronSerial.print(F("."));
+  }
+  else if(sw == 2){
+    extronSerial2.print(num);
+    extronSerial2.print(F("."));
+  }
+} // end of recallPreset()
