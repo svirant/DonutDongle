@@ -17,9 +17,23 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 > 
 > int amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16,32
 > int amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
-> 
-> int automatrixOutputPortSW1 = 1; // set to the output port on "SW1" connected to the RT4K
-> int automatrixOutputPortSW2 = 1; // set to the output port on "SW2" connected to the RT4K
+>
+> uint8_t const vinMatrix[65] = {0,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 above)
+>                                                       // set to 1 for the auto switched input to trigger a Preset on SW1
+>                                                       // set to 2 for the auto switched input to trigger a Preset on SW2
+>                                                       // set to 3 for both SW1 & SW2
+>                                                       // set to 0 to disable this feature (default - aka input goes to all outputs unless defined in voutMatrix)
+>                                                       //
+>                                                       // set the following inputs to the desired Preset #
+>                                                       // (by default each input # is set to the same corresponding Preset #)
+>                                                       
+> uint8_t const voutMatrix[66] = {1,  // MATRIX switchers // When auto matrix mode is enabled: (automatrixSW1 / SW2 above)
+>                                                       // set to 1 for the auto switched input to go to ALL outputs (default)
+>                                                       // set to 0 to select outputs to be enabled/disabled as listed below
+>                                                       //
+>                                                       // When auto matrix mode is disabled: 
+>                                                       // ALL input changes to any/all outputs result in a profile change
+>                                                       // disable specific outputs from triggering profile changes
 > ```
 <br />
 
