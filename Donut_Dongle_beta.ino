@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.3L beta
+* Donut Dongle v1.3m beta
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -2393,7 +2393,7 @@ void setTie(uint8_t sw, uint8_t num){
         if(voutMatrix[i]){
           extronSerial2.print(num);
           extronSerial2.print(F("*"));
-          extronSerial2.print(i - 32);
+          extronSerial2.print(i - 16);
           extronSerial2.print(F("!"));
         }
       }
