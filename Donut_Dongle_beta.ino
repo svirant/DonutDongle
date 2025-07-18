@@ -401,7 +401,7 @@ String stack1 = "00000000000000000000000000000000";
 String stack2 = "00000000000000000000000000000000"; 
 int currentInputSW1 = -1;
 int currentInputSW2 = -1;
-byte VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
+byte const VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
 
 // readIR
 
@@ -492,7 +492,7 @@ void readExtron1(){
 
     byte ecapbytes[40]; // used to store first 44 captured bytes / messages for Extron                
     String ecap = "0000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
-    String einput = "0000000000000000000000000000000000000000"; // used to store Extron input
+    String einput = "00000000000000000000000000000000"; // used to store Extron input
 
     if(automatrixSW1){ // if automatrixSW1 is set "true" in options, then "0LS" is sent every 250ms to see if an input has changed
       LS0time1(250);
@@ -823,9 +823,6 @@ void readExtron1(){
       }      
     }
 
-    // set ecapbytes to 0 for next read
-    memset(ecapbytes,0,sizeof(ecapbytes)); // ecapbytes is local variable, but superstitious clearing regardless :) 
-
     // for Otaku Games Scart Switch 1
     if(ecap.substring(0,6) == "remote"){
       otakuoff[0] = 0;
@@ -923,13 +920,16 @@ void readExtron1(){
       }
     }
 
+      // set ecapbytes to 0 for next read
+  memset(ecapbytes,0,sizeof(ecapbytes)); // ecapbytes is local variable, but superstitious clearing regardless :) 
+
 } // end of readExtron1()
 
 void readExtron2(){
     
     byte ecapbytes[40]; // used to store first 13 captured bytes / messages for Extron                
     String ecap = "0000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
-    String einput = "0000000000000000000000000000000000000000"; // used to store Extron input
+    String einput = "00000000000000000000000000000000"; // used to store Extron input
 
     if(automatrixSW2){ // if automatrixSW2 is set "true" in options, then "0LS" is sent every 250ms to see if an input has changed
       LS0time2(250);
@@ -1098,9 +1098,6 @@ void readExtron2(){
       }
     }
 
-    // set ecapbytes to 0 for next read
-    memset(ecapbytes,0,sizeof(ecapbytes)); // ecapbytes is local variable, but superstitious clearing regardless :) 
-
     // for Otaku Games Scart Switch 2
     if(ecap.substring(0,6) == "remote"){
       otakuoff[1] = 0;
@@ -1157,6 +1154,9 @@ void readExtron2(){
         sendSVS(109);
       }
     }
+
+    // set ecapbytes to 0 for next read
+    memset(ecapbytes,0,sizeof(ecapbytes)); // ecapbytes is local variable, but superstitious clearing regardless :) 
 
 }// end of readExtron2()
 
@@ -2389,7 +2389,7 @@ void setTie(uint8_t sw, uint8_t num){
       extronSerial2.print(F("!"));
     }
     else{
-      for(uint8_t i=33;i<(amSizeSW2 + 33);i++){
+      for(uint8_t i=17;i<(amSizeSW2 + 17);i++){
         if(voutMatrix[i]){
           extronSerial2.print(num);
           extronSerial2.print(F("*"));
