@@ -117,7 +117,7 @@ bool const S0  = false;        // (Profile 0)
 bool const automatrixSW1 = false; // set true for auto matrix switching on "SW1" port
 bool const automatrixSW2 = false; // set true for auto matrix switching on "SW2" port
 
-uint8_t const amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16,32
+uint8_t const amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16
 uint8_t const amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
 
 uint8_t const vinMatrix[33] = {0,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 above)
@@ -982,7 +982,7 @@ void readExtron2(){
             currentInputSW2 = i+1;
             if(vinMatrix[0] == 2 || vinMatrix[0] == 3)
             {
-              recallPreset(2,vinMatrix[currentInputSW2 + 32]);
+              recallPreset(2,vinMatrix[currentInputSW2 + 16]);
             }
             else{
               setTie(2,currentInputSW2);
