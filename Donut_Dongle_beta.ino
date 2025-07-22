@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.3n beta
+* Donut Dongle v1.3o beta
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -565,6 +565,7 @@ void readExtron1(){
         && stack1.substring(0,amSizeSW1) == sstack.substring(0,amSizeSW1) && currentInputSW1 != 0){ // check for all inputs being off
 
         currentInputSW1 = 0;
+        previnput[0] = "0";
         setTie(1,currentInputSW1);
 
         if(S0 && (!automatrixSW2 && (previnput[1] == "0" || previnput[1] == "In0 " || previnput[1] == "In00" || previnput[1] == "discon"))
@@ -996,12 +997,13 @@ void readExtron2(){
         && stack2.substring(0,amSizeSW2) == sstack.substring(0,amSizeSW2) && currentInputSW2 != 0){ // check for all inputs being off
 
         currentInputSW2 = 0;
+        previnput[1] = "0";
         setTie(2,currentInputSW2);
 
         if(S0 && (!automatrixSW1 && (previnput[0] == "0" || previnput[0] == "In0 " || previnput[0] == "In00" || previnput[0] == "discon"))
               && otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1]
               && (!automatrixSW1 && (previnput[0] == "discon" || voutMatrix[eoutput[0]]))){
-            
+
           sendSVS(currentInputSW2);
         }
 
