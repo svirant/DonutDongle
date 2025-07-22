@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.3m beta
+* Donut Dongle v1.3n beta
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,8 @@
 //////////////////
 */
 
-uint8_t debugE1CAP = 0; // line ~505
-uint8_t debugE2CAP = 0; // line ~941
+uint8_t const debugE1CAP = 0; // line ~506
+uint8_t const debugE2CAP = 0; // line ~942
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -120,6 +120,7 @@ bool const automatrixSW2 = false; // set true for auto matrix switching on "SW2"
 uint8_t const amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16
 uint8_t const amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
 
+
 uint8_t const vinMatrix[33] = {0,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 above)
                                                         // set to 1 for the auto switched input to trigger a Preset on SW1
                                                         // set to 2 for the auto switched input to trigger a Preset on SW2
@@ -158,8 +159,8 @@ uint8_t const vinMatrix[33] = {0,  // MATRIX switchers  // When auto matrix mode
                           //  28,  // input 28
                           //  29,  // input 29
                           //  30,  // input 30
-                          //  31,  // input 31
-                          //  32,  // input 32
+                          //  30,  // input 31
+                          //  30,  // input 32
                                //
                                // ONLY USE FOR 2ND MATRIX SWITCH on SW2
                            1,  // 2ND MATRIX SWITCH input 1 SW2
@@ -192,8 +193,8 @@ uint8_t const vinMatrix[33] = {0,  // MATRIX switchers  // When auto matrix mode
                           //  28,  // 2ND MATRIX SWITCH input 28
                           //  29,  // 2ND MATRIX SWITCH input 29
                           //  30,  // 2ND MATRIX SWITCH input 30
-                          //  31,  // 2ND MATRIX SWITCH input 31
-                          //  32,  // 2ND MATRIX SWITCH input 32
+                          //  30,  // 2ND MATRIX SWITCH input 31
+                          //  30,  // 2ND MATRIX SWITCH input 32
                            };
 
 uint8_t const voutMatrix[34] = {1,  // MATRIX switchers // When auto matrix mode is enabled: (automatrixSW1 / SW2 above)
@@ -274,7 +275,7 @@ uint8_t const voutMatrix[34] = {1,  // MATRIX switchers // When auto matrix mode
                            
 
                            // ** Must be on firmware version 3.7 or higher **
-uint8_t const RT5Xir = 1;     // 0 = disables IR Emitter for RetroTink 5x
+uint8_t const RT5Xir = 0;     // 0 = disables IR Emitter for RetroTink 5x
                               // 1 = enabled for Extron sw1 / alt sw1, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected
                               //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
                               //
@@ -301,7 +302,7 @@ uint8_t const MTVIKIir = 0;   // Must have IR "Receiver" connected to the Donut 
                               //     Sends auxprof SVS profiles listed below. You can change them below to 101 - 108 to prevent SVS profile conflicts if needed.
 
 
-uint8_t const TESmartir = 1;  // Must have IR "Receiver" connected to the Donut Dongle for option 1 and above.
+uint8_t const TESmartir = 0;  // Must have IR "Receiver" connected to the Donut Dongle for option 1 and above.
                               // 0 = disables IR Receiver -> Serial Control for TESmart 16x1 Port HDMI switch
                               //
                               // 1 = TESmart 16x1 HDMI switch connected to "alt sw1"
@@ -337,7 +338,7 @@ uint8_t const auxprof[12] =   // Assign SVS profiles to IR remote profile button
                                 12, // AUX8 + profile 12 button
                                 };
 
-uint8_t const gctl = 1; // 1 = Enables gscart/gcomp manual input selection (Default)
+uint8_t const gctl = 0; // 1 = Enables gscart/gcomp manual input selection (Default)
                         // 0 = Disable
                         //
                         // ** Only supported on vers 5.x gscart/gcomp switches **
@@ -431,7 +432,7 @@ byte const tesmart14[6] = {0xAA,0xBB,0x03,0x01,0x0E,0xEE};
 byte const tesmart15[6] = {0xAA,0xBB,0x03,0x01,0x0F,0xEE};
 byte const tesmart16[6] = {0xAA,0xBB,0x03,0x01,0x10,0xEE};
 
-// variables used for LS Time funcions
+// variables used for Time funcions
 unsigned long LScurrentTime = 0; 
 unsigned long LScurrentTime2 = 0;
 unsigned long LSprevTime = 0;
@@ -501,7 +502,7 @@ void readExtron1(){
     // listens to the Extron sw1 Port for changes
     // SIS Command Responses reference - Page 77 https://media.extron.com/public/download/files/userman/XP300_Matrix_B.pdf
     if(extronSerial.available() > 0){ // if there is data available for reading, read
-    extronSerial.readBytes(ecapbytes,40); // read in and store only the first 13 bytes for every status message received from 1st Extron SW port
+      extronSerial.readBytes(ecapbytes,40); // read in and store only the first 13 bytes for every status message received from 1st Extron SW port
       if(debugE1CAP){
         Serial.print(F("ecap HEX: "));
         for(uint8_t i=0;i<40;i++){
@@ -921,7 +922,7 @@ void readExtron1(){
     }
 
       // set ecapbytes to 0 for next read
-  memset(ecapbytes,0,sizeof(ecapbytes)); // ecapbytes is local variable, but superstitious clearing regardless :) 
+  memset(ecapbytes,0,sizeof(ecapbytes)); // ecapbytes is local variable, but superstitious clearing regardless :)
 
 } // end of readExtron1()
 
@@ -1156,7 +1157,7 @@ void readExtron2(){
     }
 
     // set ecapbytes to 0 for next read
-    memset(ecapbytes,0,sizeof(ecapbytes)); // ecapbytes is local variable, but superstitious clearing regardless :) 
+    memset(ecapbytes,0,sizeof(ecapbytes)); // ecapbytes is local variable, but superstitious clearing regardless :)
 
 }// end of readExtron2()
 
@@ -1536,109 +1537,109 @@ void readIR(){
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && extrabuttonprof == 1){ // if AUX8 was pressed and a profile button is pressed next,
       if(ir_recv_command == 11){ // profile button 1                                                         // load "SVS" profiles 1 - 12 (profile button 1 - 12).
         if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[0]);                                                               // Can be changed to "ANY" SVS profile in the OPTIONS section
-        if(MTVIKIir == 1){extronSerial.write(viki1,4);sendSVS(auxprof[0]);}
-        if(MTVIKIir == 2){extronSerial2.write(viki1,4);sendSVS(auxprof[0]);}
-        if(TESmartir > 1){extronSerial2.write(tesmart1,6);sendSVS(101);};                                                                      
+        else if(MTVIKIir == 1){extronSerial.write(viki1,4);sendSVS(auxprof[0]);}
+        else if(MTVIKIir == 2){extronSerial2.write(viki1,4);sendSVS(auxprof[0]);}
+        if(TESmartir > 1){extronSerial2.write(tesmart1,6);sendSVS(101);}                                                                   
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 7){ // profile button 2
         if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[1]);
-        if(MTVIKIir == 1){extronSerial.write(viki2,4);sendSVS(auxprof[1]);}
-        if(MTVIKIir == 2){extronSerial2.write(viki2,4);sendSVS(auxprof[1]);}
-        if(TESmartir > 1){extronSerial2.write(tesmart2,6);sendSVS(102);};
+        else if(MTVIKIir == 1){extronSerial.write(viki2,4);sendSVS(auxprof[1]);}
+        else if(MTVIKIir == 2){extronSerial2.write(viki2,4);sendSVS(auxprof[1]);}
+        if(TESmartir > 1){extronSerial2.write(tesmart2,6);sendSVS(102);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 3){ // profile button 3
         if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[2]);
-        if(MTVIKIir == 1){extronSerial.write(viki3,4);sendSVS(auxprof[2]);}
-        if(MTVIKIir == 2){extronSerial2.write(viki3,4);sendSVS(auxprof[2]);}
-        if(TESmartir > 1){extronSerial2.write(tesmart3,6);sendSVS(103);}; 
+        else if(MTVIKIir == 1){extronSerial.write(viki3,4);sendSVS(auxprof[2]);}
+        else if(MTVIKIir == 2){extronSerial2.write(viki3,4);sendSVS(auxprof[2]);}
+        if(TESmartir > 1){extronSerial2.write(tesmart3,6);sendSVS(103);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 10){ // profile button 4
         if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[3]);
-        if(MTVIKIir == 1){extronSerial.write(viki4,4);sendSVS(auxprof[3]);}
-        if(MTVIKIir == 2){extronSerial2.write(viki4,4);sendSVS(auxprof[3]);}
-        if(TESmartir > 1){extronSerial2.write(tesmart4,6);sendSVS(104);};
+        else if(MTVIKIir == 1){extronSerial.write(viki4,4);sendSVS(auxprof[3]);}
+        else if(MTVIKIir == 2){extronSerial2.write(viki4,4);sendSVS(auxprof[3]);}
+        if(TESmartir > 1){extronSerial2.write(tesmart4,6);sendSVS(104);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 6){ // profile button 5
         if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[4]);
-        if(MTVIKIir == 1){extronSerial.write(viki5,4);sendSVS(auxprof[4]);}
-        if(MTVIKIir == 2){extronSerial2.write(viki5,4);sendSVS(auxprof[4]);}
-        if(TESmartir > 1){extronSerial2.write(tesmart5,6);sendSVS(105);};
+        else if(MTVIKIir == 1){extronSerial.write(viki5,4);sendSVS(auxprof[4]);}
+        else if(MTVIKIir == 2){extronSerial2.write(viki5,4);sendSVS(auxprof[4]);}
+        if(TESmartir > 1){extronSerial2.write(tesmart5,6);sendSVS(105);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 2){ // profile button 6
         if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[5]);
-        if(MTVIKIir == 1){extronSerial.write(viki6,4);sendSVS(auxprof[5]);}
-        if(MTVIKIir == 2){extronSerial2.write(viki6,4);sendSVS(auxprof[5]);}
-        if(TESmartir > 1){extronSerial2.write(tesmart6,6);sendSVS(106);};
+        else if(MTVIKIir == 1){extronSerial.write(viki6,4);sendSVS(auxprof[5]);}
+        else if(MTVIKIir == 2){extronSerial2.write(viki6,4);sendSVS(auxprof[5]);}
+        if(TESmartir > 1){extronSerial2.write(tesmart6,6);sendSVS(106);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 9){ // profile button 7
         if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[6]);
-        if(MTVIKIir == 1){extronSerial.write(viki7,4);sendSVS(auxprof[6]);}
-        if(MTVIKIir == 2){extronSerial2.write(viki7,4);sendSVS(auxprof[6]);}
-        if(TESmartir > 1){extronSerial2.write(tesmart7,6);sendSVS(107);};
+        else if(MTVIKIir == 1){extronSerial.write(viki7,4);sendSVS(auxprof[6]);}
+        else if(MTVIKIir == 2){extronSerial2.write(viki7,4);sendSVS(auxprof[6]);}
+        if(TESmartir > 1){extronSerial2.write(tesmart7,6);sendSVS(107);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 5){ // profile button 8
         if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[7]);
-        if(MTVIKIir == 1){extronSerial.write(viki8,4);sendSVS(auxprof[7]);}
-        if(MTVIKIir == 2){extronSerial2.write(viki8,4);sendSVS(auxprof[7]);}
-        if(TESmartir > 1){extronSerial2.write(tesmart8,6);sendSVS(108);};
+        else if(MTVIKIir == 1){extronSerial.write(viki8,4);sendSVS(auxprof[7]);}
+        else if(MTVIKIir == 2){extronSerial2.write(viki8,4);sendSVS(auxprof[7]);}
+        if(TESmartir > 1){extronSerial2.write(tesmart8,6);sendSVS(108);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 1){ // profile button 9
         if(TESmartir < 2)sendSVS(auxprof[8]);
-        if(TESmartir > 1){extronSerial2.write(tesmart9,6);sendSVS(109);};
+        if(TESmartir > 1){extronSerial2.write(tesmart9,6);sendSVS(109);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 37){ // profile button 10
         if(TESmartir < 2)sendSVS(auxprof[9]);
-        if(TESmartir > 1){extronSerial2.write(tesmart10,6);sendSVS(110);};
+        if(TESmartir > 1){extronSerial2.write(tesmart10,6);sendSVS(110);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 38){ // profile button 11
         if(TESmartir < 2)sendSVS(auxprof[10]);
-        if(TESmartir > 1){extronSerial2.write(tesmart11,6);sendSVS(111);};
+        if(TESmartir > 1){extronSerial2.write(tesmart11,6);sendSVS(111);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 39){ // profile button 12
         if(TESmartir < 2)sendSVS(auxprof[11]);
-        if(TESmartir > 1){extronSerial2.write(tesmart12,6);sendSVS(112);};
+        if(TESmartir > 1){extronSerial2.write(tesmart12,6);sendSVS(112);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 56){ // aux1 button
-        if(TESmartir > 1){extronSerial2.write(tesmart13,6);sendSVS(113);};
+        if(TESmartir > 1){extronSerial2.write(tesmart13,6);sendSVS(113);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 57){ // aux2 button
-        if(TESmartir > 1){extronSerial2.write(tesmart14,6);sendSVS(114);};
+        if(TESmartir > 1){extronSerial2.write(tesmart14,6);sendSVS(114);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 58){ // aux3 button
-        if(TESmartir > 1){extronSerial2.write(tesmart15,6);sendSVS(115);};
+        if(TESmartir > 1){extronSerial2.write(tesmart15,6);sendSVS(115);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 59){ // aux4 button
-        if(TESmartir > 1){extronSerial2.write(tesmart16,6);sendSVS(116);};
+        if(TESmartir > 1){extronSerial2.write(tesmart16,6);sendSVS(116);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
@@ -2309,10 +2310,6 @@ void sendIR(String type, uint8_t prof, uint8_t repeat){
       irsend.sendNEC(0x00,0x00,0);
       irsend.sendNEC(0x00,0x00,0);
   }
-
-  else if(type == "LG"){
-      irsend.sendNEC(0x04,0x08,3); // Power button
-  }
   
 } // end of sendIR()
 
@@ -2352,6 +2349,7 @@ void LS0time1(unsigned long eTime){
  }
 }  // end of LS0time1()
 
+
 void LS0time2(unsigned long eTime){
   LScurrentTime2 = millis();  // Init timer
   if(LSprevTime2 == 0)       // If previous timer not initialized, do so now.
@@ -2363,7 +2361,6 @@ void LS0time2(unsigned long eTime){
     delay(20);
  }
 }  // end of LS0time2()
-
 void setTie(uint8_t sw, uint8_t num){
   if(sw == 1){
     if(voutMatrix[0]){
