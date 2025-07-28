@@ -317,6 +317,10 @@ Some Arduino Nanos come with an Old Bootloader and won't Upload unless specified
 
 - Check the RT4K Diagnostic Console for Serial commands being received as confirmation.
 
+  -----------
+# Troubleshooting
+ - When (un)plugging aux cables from "alt sw1" or "alt sw2" ports make sure Donut Dongle power is disconnected. Sometimes the onboard MAX3232 chip can lock up if this is not done.
+   - To fix lockup, power off switch and DD (Donut Dongle). Disconnect/reconnect aux cable from DD and power up switch first, then DD last.
 
 ## SVS Profile numbering scheme
 
