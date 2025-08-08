@@ -138,7 +138,7 @@ When using the optional IR Receiver, the IR reception of the RT4K can be been gr
 
  - AUX8 pressed twice, manually enter a SVS profile to load with the profile buttons using 1 - 9 and 10,11,12 buttons for 0. Must use 3 digits. Ex: 001 = 1, 010 = 10, etc
  
- - MT-ViKI 8 Port HDMI switch's inputs can be changed with profile buttons 1 - 8. Must enable "MTVIKIir" in the options section of the .ino
+ - MT-ViKI 8 Port HDMI switch's inputs can be changed with AUX8 button + profile buttons 1 - 8. Must configure "MTVIKIir" in the options section of the .ino
 
  - TESmart 16x1 HDMI switch's inputs can changed. Must set "TESmartir" in the options section.
     - AUX7 + button 1 - 12, aux1, aux2, aux3, aux4 for inputs 1 - 16 on "alt sw1" port (SVS profiles 1 - 16)
