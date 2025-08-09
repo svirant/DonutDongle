@@ -65,6 +65,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 | ------------- | ------------- |------------- |
 | MT-VIKI 8 port HDMI | yes, confirmed first hand. Auto-switching Profiles work and RT4K remote can also change inputs and profiles w/ AUX8 + profile button 1 - 8.  | Front case buttons and included IR remote do not generate serial output on the switch itself therefor profile changes can't happen for these 2 other methods.  |
 | TESmart 16x1 HDMI  | yes, confirmed first hand  ||
+| TESmart 8x1 HDMI  | unconfirmed, but should work, let me know! ||
 | gSCARTsw / gCOMPsw | **version 5.x** confirmed by [@niquallis](https://x.com/niquallis) and [@UstSte](https://x.com/UstSte), thanks so much for your help! | Manual input selection works too! |
 | Extron RGBHV sw6  | yes, confirmed first hand  | |
 | Extron DXP 88 | yes, confirmed first hand | at the moment, works with Presets only. Preset 1 is Profile/SVS 1. On Extron sw2 port Preset 1 is SVS 101, etc|
