@@ -7,8 +7,10 @@ The Donut Dongle connects to a switch in a way that allows it to see which port 
 For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/tree/main/README.md#how-to-use) section below.
 
 > [!NOTE]
-> *NEW* beta allows **auto-switching on Extron Matrix switchers** that support DSVP.
-> <br /> - Works with RGBS/HV and HDMI/DVI signal types.
+> *NEW* beta allows:
+>   - **front case buttons/remote NOW change profiles on the MT-VIKI HDMI switch.** Thanks to [Arthrimus](https://scalablevideoswitch.com/)! 
+>   - **auto-switching on Extron Matrix switchers** that support DSVP. Works with RGBS/HV and HDMI/DVI signal types.
+> <br />
 > 
 > <br /> Use the follow Options to enable:
 > ```
@@ -63,8 +65,8 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 (current list, but not limited to)
 | **Switch**    | Supported | Notes |
 | ------------- | ------------- |------------- |
-| MT-VIKI 8 port HDMI | yes, confirmed first hand. Auto-switching Profiles work and RT4K remote can also change inputs and profiles w/ AUX8 + profile button 1 - 8.  | Front case buttons and included IR remote do not generate serial output on the switch itself therefor profile changes can't happen for these 2 other methods.  |
-| TESmart 16x1 HDMI  | yes, confirmed first hand  ||
+| MT-VIKI 8 port HDMI | yes, confirmed first hand. RT4K remote can also change inputs and profiles.  | Front case buttons and included IR remote **NOW** also change profiles! All Thanks to [Arthrimus](https://scalablevideoswitch.com/)!  Only supported in _beta firmware atm. |
+| TESmart 16x1 HDMI  | yes, confirmed first hand  | RT4K remote can also change inputs and profiles. |
 | TESmart 8x1 HDMI  | unconfirmed, but should work, let me know! ||
 | gSCARTsw / gCOMPsw | **version 5.x** confirmed by [@niquallis](https://x.com/niquallis) and [@UstSte](https://x.com/UstSte), thanks so much for your help! | Manual input selection works too! |
 | Extron RGBHV sw6  | yes, confirmed first hand  | |
