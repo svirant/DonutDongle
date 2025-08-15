@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.3p beta
+* Donut Dongle v1.4 beta
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,8 @@
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~506
-uint8_t const debugE2CAP = 0; // line ~943
+uint8_t const debugE1CAP = 0; // line ~525
+uint8_t const debugE2CAP = 0; // line ~1008
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -290,7 +290,7 @@ uint8_t const OSSCir = 0;     // 0 = disables IR Emitter for OSSC
                               //     
                               // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-14 for first 6 inputs on second gscart)
 
-uint8_t const MTVIKIir = 0;   // Must have IR "Receiver" connected to the Donut Dongle for option 1 & 2.
+uint8_t const MTVir = 1;   // Must have IR "Receiver" connected to the Donut Dongle for option 1 & 2.
                               // 0 = disables IR Receiver -> Serial Control for MT-VIKI 8 Port HDMI switch
                               //
                               // 1 = MT-VIKI 8 Port HDMI switch connected to "Extron sw1"
@@ -301,6 +301,13 @@ uint8_t const MTVIKIir = 0;   // Must have IR "Receiver" connected to the Donut 
                               //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the MT-VIKI Input over Serial.
                               //     Sends auxprof SVS profiles listed below. You can change them below to 101 - 108 to prevent SVS profile conflicts if needed.
 
+uint8_t const MTVbuttons = 1; // 0 = disables MT-VIKI face/remote buttons from changing profiles (saves memory)
+                              //
+                              // 1 = enables changing profiles for MT-VIKI face/remote buttons when connected to "Extron sw1" port
+                              //
+                              // 2 = enables changing profiles for MT-VIKI face/remote buttons when connected to "Extron sw2" port
+                              //
+                              // 3 = enabled for BOTH sw1 & sw2
 
 uint8_t const TESmartir = 0;  // Must have IR "Receiver" connected to the Donut Dongle for option 1 and above.
                               // 0 = disables IR Receiver -> Serial Control for TESmart 16x1 Port HDMI switch
@@ -405,7 +412,6 @@ int currentInputSW2 = -1;
 byte const VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
 
 // readIR
-
 byte const viki1[4] = {0xA5,0x5A,0x00,0xCC};
 byte const viki2[4] = {0xA5,0x5A,0x01,0xCC};
 byte const viki3[4] = {0xA5,0x5A,0x02,0xCC};
@@ -450,6 +456,19 @@ unsigned long currentTime = 0;
 unsigned long prevTime = 0;
 unsigned long prevBlinkTime = 0;
 
+// VIKI Manual Switch Variables
+unsigned long sendtimer = 0;
+unsigned long sendtimer2 = 0;
+unsigned long modetimer = 0;
+unsigned long modetimer2 = 0;
+uint8_t itestatus[] = {3,0,0};
+uint8_t itestatus2[] = {3,0,0};
+bool sendyes = 1;
+bool sendyes2 = 1;
+bool mode = 0;
+bool mode2 = 0;
+uint8_t iteinputnum = 0;
+uint8_t iteinputnum2 = 0;
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -714,9 +733,54 @@ void readExtron1(){
 
     }
 
+    //VIKI Manual Switch Detection (created by: https://github.com/Arthrimus)
+
+    // modetimer blocks the ITE messages from triggering a sendSVS event for long enough to avoid duplicates
+    if((millis() - modetimer > 1200) && (MTVbuttons == 1 || MTVbuttons == 3)){  // Timer that disables sending SVS serial commands using the ITE mux data when there has recently been an autoswitch command (prevents duplicate commands)
+      modetimer = millis(); // Resets timer to current millis() count to disable this function once the variables have been updated
+      mode = 0;  // Sets mode to 0 so the ITE mux data can be used to send SVS serial commands again
+      sendyes = 1; // Turns off sendyes so the SVS serial commands are not repeated if an autoswitch command preceeded the ITE commands
+    }
+
+
+    if(ecap.startsWith("=") && mode == 0 && (MTVbuttons == 1 || MTVbuttons == 3)){   // checks if the serial command from the VIKI starts with "=" This indicates that the command is an ITE mux status message
+      if(ecap.substring(10,11) == "P"){        // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
+        itestatus[0] = ecap.substring(11,12).toInt();
+      }
+      if(ecap.substring(18,20) == ">0"){       // checks the value of the IT66535 IC that points to Dev->0. P2 is input 1 / P1 is input 2 / P0 is input 3
+        itestatus[1] = ecap.substring(12,13).toInt();
+      }
+      if(ecap.substring(18,20) == ">1"){       // checks the value of the IT66535 IC that points to Dev->1. P2 is input 4 / P1 is input 5 / P0 is input 6
+        itestatus[2] = ecap.substring(12,13).toInt();
+      }
+      sendyes = 0;                             // sets sendyes to 0 indicating that an ITE message has been received and an SVS command can be sent once the sendtimer elapses
+      sendtimer = millis();                    // resets sendtimer to millis()
+      modetimer = millis();                    // resets modetimer to millis()
+    }
+
+    // sendtimer prevents a duplicated sendSVS event because the "auto_port" message will trigger it as well as the ITE messages. 
+    if((millis() - sendtimer > 300) && sendyes == 0 && (MTVbuttons == 1 || MTVbuttons == 3)){ // && mode == 0){   // Checks is all conditions are met to sendSVS based on the ITE messages
+      sendtimer = millis();                     // resets sendtimer to millis()
+      sendyes = 1;                              // sets sendyes to 1 to prevent the message from being resent
+      if(itestatus[0] == 3){                   // Checks itestatus array position 0 to determine if port 3 of the IT6635 chip is currently selected
+        if(itestatus[1] == 2) iteinputnum = 1;   // Checks itestatus array position 1 to determine if port 2 of the IT66353 DEV0 chip is selected, Sets iteinputnum to input 1
+        else if(itestatus[1] == 1) iteinputnum = 2;   // Checks itestatus array position 1 to determine if port 1 of the IT66353 DEV0 chip is selected, Sets iteinputnum to input 2
+        else if(itestatus[1] == 0) iteinputnum = 3;   // Checks itestatus array position 1 to determine if port 0 of the IT66353 DEV0 chip is selected, Sets iteinputnum to input 3
+      }
+      else if(itestatus[0] == 2){                 // Checks itestatus array position 0 to determine if port 2 of the IT6635 chip is currently selected
+        if(itestatus[2] == 2) iteinputnum = 4;   // Checks itestatus array position 1 to determine if port 2 of the IT66353 DEV1 chip is selected, Sets iteinputnum to input 4
+        else if(itestatus[2] == 1) iteinputnum = 5;   // Checks itestatus array position 1 to determine if port 1 of the IT66353 DEV1 chip is selected, Sets iteinputnum to input 5
+        else if(itestatus[2] == 0) iteinputnum = 6;   // Checks itestatus array position 1 to determine if port 0 of the IT66353 DEV1 chip is selected, Sets iteinputnum to input 6
+      }
+      else if(itestatus[0] == 1) iteinputnum = 7;   // Checks itestatus array position 0 to determine if port 1 of the IT6635 chip is currently selected, Sets iteinputnum to input 7
+      else if(itestatus[0] == 0) iteinputnum = 8;   // Checks itestatus array position 0 to determine if port 0 of the IT6635 chip is currently selected, Sets iteinputnum to input 8
+    }
+
     // for TESmart 4K60 / TESmart 4K30 / MT-VIKI HDMI switch on Extron sw1 / alt sw1
-    if(ecapbytes[4] == 17 || ecapbytes[3] == 17 || ecapbytes[4] == 95){
-      if(ecapbytes[6] == 22 || ecapbytes[5] == 22 || ecapbytes[11] == 48){
+    if(ecapbytes[4] == 17 || ecapbytes[3] == 17 || ecapbytes[4] == 95 || iteinputnum > 0){
+          mode = 1;                             // Sets mode to 1 so the ITE mux data will be ignored while an autoswitch command is detected.
+          modetimer = millis();                 // resets modetimer to millis()
+      if(ecapbytes[6] == 22 || ecapbytes[5] == 22 || ecapbytes[11] == 48 || iteinputnum == 1){
         if(RT5Xir == 1)sendIR("5x",1,2); // RT5X profile 1 
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",1,3); // OSSC profile 1
@@ -724,7 +788,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(1);
         else sendSVS(1);
       }
-      else if(ecapbytes[6] == 23 || ecapbytes[5] == 23 || ecapbytes[11] == 49){
+      else if(ecapbytes[6] == 23 || ecapbytes[5] == 23 || ecapbytes[11] == 49 || iteinputnum == 2){
         if(RT5Xir == 1)sendIR("5x",2,2); // RT5X profile 2
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",2,3); // OSSC profile 2
@@ -732,7 +796,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(2);
         else sendSVS(2);
       }
-      else if(ecapbytes[6] == 24 || ecapbytes[5] == 24 || ecapbytes[11] == 50){
+      else if(ecapbytes[6] == 24 || ecapbytes[5] == 24 || ecapbytes[11] == 50 || iteinputnum == 3){
         if(RT5Xir == 1)sendIR("5x",3,2); // RT5X profile 3
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",3,3); // OSSC profile 3
@@ -740,7 +804,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(3);
         else sendSVS(3);
       }
-      else if(ecapbytes[6] == 25 || ecapbytes[5] == 25 || ecapbytes[11] == 51){
+      else if(ecapbytes[6] == 25 || ecapbytes[5] == 25 || ecapbytes[11] == 51 || iteinputnum == 4){
         if(RT5Xir == 1)sendIR("5x",4,2); // RT5X profile 4
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",4,3); // OSSC profile 4
@@ -748,7 +812,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(4);
         else sendSVS(4);
       }
-      else if(ecapbytes[6] == 26 || ecapbytes[5] == 26 || ecapbytes[11] == 52){
+      else if(ecapbytes[6] == 26 || ecapbytes[5] == 26 || ecapbytes[11] == 52 || iteinputnum == 5){
         if(RT5Xir == 1)sendIR("5x",5,2); // RT5X profile 5
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",5,3); // OSSC profile 5
@@ -756,7 +820,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(5);
         else sendSVS(5);
       }
-      else if(ecapbytes[6] == 27 || ecapbytes[5] == 27 || ecapbytes[11] == 53){
+      else if(ecapbytes[6] == 27 || ecapbytes[5] == 27 || ecapbytes[11] == 53 || iteinputnum == 6){
         if(RT5Xir == 1)sendIR("5x",6,2); // RT5X profile 6
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",6,3); // OSSC profile 6
@@ -764,7 +828,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(6);
         else sendSVS(6);
       }
-      else if(ecapbytes[6] == 28 || ecapbytes[5] == 28 || ecapbytes[11] == 54){
+      else if(ecapbytes[6] == 28 || ecapbytes[5] == 28 || ecapbytes[11] == 54 || iteinputnum == 7){
         if(RT5Xir == 1)sendIR("5x",7,2); // RT5X profile 7
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",7,3); // OSSC profile 7
@@ -772,7 +836,7 @@ void readExtron1(){
         if(SVS==0)sendRBP(7);
         else sendSVS(7);
       }
-      else if(ecapbytes[6] == 29 || ecapbytes[5] == 29 || ecapbytes[11] == 55){
+      else if(ecapbytes[6] == 29 || ecapbytes[5] == 29 || ecapbytes[11] == 55 || iteinputnum == 8){
         if(RT5Xir == 1)sendIR("5x",8,2); // RT5X profile 8
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1)sendIR("ossc",8,3); // OSSC profile 8
@@ -822,7 +886,8 @@ void readExtron1(){
       }
       else if(ecapbytes[5] > 35 && ecapbytes[5] < 38){
         sendSVS(ecapbytes[5] - 21);
-      }      
+      } 
+      iteinputnum = 0;                                          // Resets iteinputnum to 0 so sendSVS will not repeat after this cycle through the Void loop
     }
 
     // for Otaku Games Scart Switch 1
@@ -1051,37 +1116,79 @@ void readExtron2(){
     }
 
 
+    //VIKI Manual Switch Detection (created by: https://github.com/Arthrimus)
+
+    if(millis() - modetimer2 > 1200 && (MTVbuttons == 2 || MTVbuttons == 3)){  // Timer that disables sending SVS serial commands using the ITE mux data when there has recently been an autoswitch command (prevents duplicate commands)
+      modetimer2 = millis(); // Resets timer to current millis() count to disable this function once the variables hav been updated
+      mode2 = 0;  // Sets mode to 0 so the ITE mux data can be used to send SVS serial commands again
+      sendyes2 = 1; // Turns off sendyes so the SVS serial commands are not repeated if an autoswitch command preceeded the ITE commands
+    }
+
+    if(ecap.startsWith("=") && mode2 == 0 && (MTVbuttons == 2 || MTVbuttons == 3)){   // checks if the serial command from the VIKI starts with "=" This indicates that the command is an ITE mux status message
+      if(ecap.substring(10,11) == "P"){       // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
+        itestatus2[0] = ecap.substring(11,12).toInt();
+      }
+      if(ecap.substring(18,20) == ">0"){       // checks the value of the IT66535 IC that points to Dev->0. P2 is input 1 / P1 is input 2 / P0 is input 3
+        itestatus2[1] = ecap.substring(12,13).toInt();
+      }
+      if(ecap.substring(18,20) == ">1"){       // checks the value of the IT66535 IC that points to Dev->1. P2 is input 4 / P1 is input 5 / P0 is input 6
+        itestatus2[2] = ecap.substring(12,13).toInt();
+      }
+      sendyes2 = 0;                             // sets sendyes to 0 indicating that an ITE message has been received and an SVS command can be sent once the sendtimer elapses
+      sendtimer2 = millis();                    // resets sendtimer to millis()
+      modetimer2 = millis();                    // resets modetimer to millis()
+    }
+
+    if((millis() - sendtimer2 > 300) && sendyes2 == 0 && mode2 == 0  && (MTVbuttons == 2 || MTVbuttons == 3)){   // Checks is all conditions are met to sendSVS based on the ITE messages
+      sendtimer2 = millis();                     // resets sendtimer to millis()
+      sendyes2 = 1;                              // sets sendyes to 1 to prevent the message from being resent
+      if(itestatus2[0] == 3){                   // Checks itestatus array position 0 to determine if port 3 of the IT6635 chip is currently selected
+        if(itestatus2[1] == 2) iteinputnum2 = 1;   // Checks itestatus array position 1 to determine if port 2 of the IT66353 DEV0 chip is selected, Sets iteinputnum to input 1
+        else if(itestatus2[1] == 1) iteinputnum2 = 2;   // Checks itestatus array position 1 to determine if port 1 of the IT66353 DEV0 chip is selected, Sets iteinputnum to input 2
+        else if(itestatus2[1] == 0) iteinputnum2 = 3;   // Checks itestatus array position` 1 to determine if port 0 of the IT66353 DEV0 chip is selected, Sets iteinputnum to input 3
+      }
+      else if(itestatus2[0] == 2){                 // Checks itestatus array position 0 to determine if port 2 of the IT6635 chip is currently selected
+        if(itestatus2[2] == 2) iteinputnum2 = 4;   // Checks itestatus array position 1 to determine if port 2 of the IT66353 DEV1 chip is selected, Sets iteinputnum to input 4
+        else if(itestatus2[2] == 1) iteinputnum2 = 5;   // Checks itestatus array position 1 to determine if port 1 of the IT66353 DEV1 chip is selected, Sets iteinputnum to input 5
+        else if(itestatus2[2] == 0) iteinputnum2 = 6;   // Checks itestatus array position 1 to determine if port 0 of the IT66353 DEV1 chip is selected, Sets iteinputnum to input 6
+      }
+      else if(itestatus2[0] == 1) iteinputnum2 = 7;   // Checks itestatus array position 0 to determine if port 1 of the IT6635 chip is currently selected, Sets iteinputnum to input 7
+      else if(itestatus2[0] == 0) iteinputnum2 = 8;   // Checks itestatus array position 0 to determine if port 0 of the IT6635 chip is currently selected, Sets iteinputnum to input 8
+    }
+
     // for TESmart 4K60 / TESmart 4K30 / MT-VIKI HDMI switch on Extron alt sw2 Port
-    if(ecapbytes[4] == 17 || ecapbytes[3] == 17 || ecapbytes[4] == 95){
-      if(ecapbytes[6] == 22 || ecapbytes[5] == 22 || ecapbytes[11] == 48){
+    if(ecapbytes[4] == 17 || ecapbytes[3] == 17 || ecapbytes[4] == 95 || iteinputnum2 > 0){
+          mode2 = 1;                             // Sets mode to 1 so the ITE mux data will be ignored while an autoswitch command is detected.
+          modetimer2 = millis();                 // resets modetimer to millis()
+      if(ecapbytes[6] == 22 || ecapbytes[5] == 22 || ecapbytes[11] == 48 || iteinputnum2 == 1){
         if(RT5Xir == 3)sendIR("5x",1,2); // RT5X profile 1 
         sendSVS(101);
       }
-      else if(ecapbytes[6] == 23 || ecapbytes[5] == 23 || ecapbytes[11] == 49){
+      else if(ecapbytes[6] == 23 || ecapbytes[5] == 23 || ecapbytes[11] == 49 || iteinputnum2 == 2){
         if(RT5Xir == 3)sendIR("5x",2,2); // RT5X profile 2
         sendSVS(102);
       }
-      else if(ecapbytes[6] == 24 || ecapbytes[5] == 24 || ecapbytes[11] == 50){
+      else if(ecapbytes[6] == 24 || ecapbytes[5] == 24 || ecapbytes[11] == 50 || iteinputnum2 == 3){
         if(RT5Xir == 3)sendIR("5x",3,2); // RT5X profile 3
         sendSVS(103);
       }
-      else if(ecapbytes[6] == 25 || ecapbytes[5] == 25 || ecapbytes[11] == 51){
+      else if(ecapbytes[6] == 25 || ecapbytes[5] == 25 || ecapbytes[11] == 51 || iteinputnum2 == 4){
         if(RT5Xir == 3)sendIR("5x",4,2); // RT5X profile 4
         sendSVS(104);
       }
-      else if(ecapbytes[6] == 26 || ecapbytes[5] == 26 || ecapbytes[11] == 52){
+      else if(ecapbytes[6] == 26 || ecapbytes[5] == 26 || ecapbytes[11] == 52 || iteinputnum2 == 5){
         if(RT5Xir == 3)sendIR("5x",5,2); // RT5X profile 5
         sendSVS(105);
       }
-      else if(ecapbytes[6] == 27 || ecapbytes[5] == 27 || ecapbytes[11] == 53){
+      else if(ecapbytes[6] == 27 || ecapbytes[5] == 27 || ecapbytes[11] == 53 || iteinputnum2 == 6){
         if(RT5Xir == 3)sendIR("5x",6,2); // RT5X profile 6
         sendSVS(106);
       }
-      else if(ecapbytes[6] == 28 || ecapbytes[5] == 28 || ecapbytes[11] == 54){
+      else if(ecapbytes[6] == 28 || ecapbytes[5] == 28 || ecapbytes[11] == 54 || iteinputnum2 == 7){
         if(RT5Xir == 3)sendIR("5x",7,2); // RT5X profile 7
         sendSVS(107);
       }
-      else if(ecapbytes[6] == 29 || ecapbytes[5] == 29 || ecapbytes[11] == 55){
+      else if(ecapbytes[6] == 29 || ecapbytes[5] == 29 || ecapbytes[11] == 55 || iteinputnum2 == 8){
         if(RT5Xir == 3)sendIR("5x",8,2); // RT5X profile 8
         sendSVS(108);
       }
@@ -1099,6 +1206,7 @@ void readExtron2(){
       else if(ecapbytes[5] > 31 && ecapbytes[5] < 38){
         sendSVS(ecapbytes[5] + 79);
       }
+      iteinputnum2 = 0;                                           // Resets iteinputnum to 0 so sendSVS will not repeat after this cycle through the Void loop
     }
 
     // for Otaku Games Scart Switch 2
@@ -1538,65 +1646,65 @@ void readIR(){
 
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && extrabuttonprof == 1){ // if AUX8 was pressed and a profile button is pressed next,
       if(ir_recv_command == 11){ // profile button 1                                                         // load "SVS" profiles 1 - 12 (profile button 1 - 12).
-        if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[0]);                                                               // Can be changed to "ANY" SVS profile in the OPTIONS section
-        else if(MTVIKIir == 1){extronSerial.write(viki1,4);sendSVS(auxprof[0]);}
-        else if(MTVIKIir == 2){extronSerial2.write(viki1,4);sendSVS(auxprof[0]);}
+        if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[0]);                                                               // Can be changed to "ANY" SVS profile in the OPTIONS section
+        else if(MTVir == 1){extronSerial.write(viki1,4);sendSVS(auxprof[0]);}
+        else if(MTVir == 2){extronSerial2.write(viki1,4);sendSVS(auxprof[0]);}
         if(TESmartir > 1){extronSerial2.write(tesmart1,6);sendSVS(101);}                                                                   
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 7){ // profile button 2
-        if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[1]);
-        else if(MTVIKIir == 1){extronSerial.write(viki2,4);sendSVS(auxprof[1]);}
-        else if(MTVIKIir == 2){extronSerial2.write(viki2,4);sendSVS(auxprof[1]);}
+        if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[1]);
+        else if(MTVir == 1){extronSerial.write(viki2,4);sendSVS(auxprof[1]);}
+        else if(MTVir == 2){extronSerial2.write(viki2,4);sendSVS(auxprof[1]);}
         if(TESmartir > 1){extronSerial2.write(tesmart2,6);sendSVS(102);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 3){ // profile button 3
-        if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[2]);
-        else if(MTVIKIir == 1){extronSerial.write(viki3,4);sendSVS(auxprof[2]);}
-        else if(MTVIKIir == 2){extronSerial2.write(viki3,4);sendSVS(auxprof[2]);}
+        if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[2]);
+        else if(MTVir == 1){extronSerial.write(viki3,4);sendSVS(auxprof[2]);}
+        else if(MTVir == 2){extronSerial2.write(viki3,4);sendSVS(auxprof[2]);}
         if(TESmartir > 1){extronSerial2.write(tesmart3,6);sendSVS(103);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 10){ // profile button 4
-        if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[3]);
-        else if(MTVIKIir == 1){extronSerial.write(viki4,4);sendSVS(auxprof[3]);}
-        else if(MTVIKIir == 2){extronSerial2.write(viki4,4);sendSVS(auxprof[3]);}
+        if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[3]);
+        else if(MTVir == 1){extronSerial.write(viki4,4);sendSVS(auxprof[3]);}
+        else if(MTVir == 2){extronSerial2.write(viki4,4);sendSVS(auxprof[3]);}
         if(TESmartir > 1){extronSerial2.write(tesmart4,6);sendSVS(104);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 6){ // profile button 5
-        if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[4]);
-        else if(MTVIKIir == 1){extronSerial.write(viki5,4);sendSVS(auxprof[4]);}
-        else if(MTVIKIir == 2){extronSerial2.write(viki5,4);sendSVS(auxprof[4]);}
+        if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[4]);
+        else if(MTVir == 1){extronSerial.write(viki5,4);sendSVS(auxprof[4]);}
+        else if(MTVir == 2){extronSerial2.write(viki5,4);sendSVS(auxprof[4]);}
         if(TESmartir > 1){extronSerial2.write(tesmart5,6);sendSVS(105);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 2){ // profile button 6
-        if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[5]);
-        else if(MTVIKIir == 1){extronSerial.write(viki6,4);sendSVS(auxprof[5]);}
-        else if(MTVIKIir == 2){extronSerial2.write(viki6,4);sendSVS(auxprof[5]);}
+        if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[5]);
+        else if(MTVir == 1){extronSerial.write(viki6,4);sendSVS(auxprof[5]);}
+        else if(MTVir == 2){extronSerial2.write(viki6,4);sendSVS(auxprof[5]);}
         if(TESmartir > 1){extronSerial2.write(tesmart6,6);sendSVS(106);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 9){ // profile button 7
-        if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[6]);
-        else if(MTVIKIir == 1){extronSerial.write(viki7,4);sendSVS(auxprof[6]);}
-        else if(MTVIKIir == 2){extronSerial2.write(viki7,4);sendSVS(auxprof[6]);}
+        if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[6]);
+        else if(MTVir == 1){extronSerial.write(viki7,4);sendSVS(auxprof[6]);}
+        else if(MTVir == 2){extronSerial2.write(viki7,4);sendSVS(auxprof[6]);}
         if(TESmartir > 1){extronSerial2.write(tesmart7,6);sendSVS(107);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 5){ // profile button 8
-        if(MTVIKIir == 0 && TESmartir < 2)sendSVS(auxprof[7]);
-        else if(MTVIKIir == 1){extronSerial.write(viki8,4);sendSVS(auxprof[7]);}
-        else if(MTVIKIir == 2){extronSerial2.write(viki8,4);sendSVS(auxprof[7]);}
+        if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[7]);
+        else if(MTVir == 1){extronSerial.write(viki8,4);sendSVS(auxprof[7]);}
+        else if(MTVir == 2){extronSerial2.write(viki8,4);sendSVS(auxprof[7]);}
         if(TESmartir > 1){extronSerial2.write(tesmart8,6);sendSVS(108);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
