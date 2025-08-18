@@ -31,8 +31,8 @@
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~525
-uint8_t const debugE2CAP = 0; // line ~1008
+uint8_t const debugE1CAP = 0; // line ~521
+uint8_t const debugE2CAP = 0; // line ~1006
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -76,14 +76,12 @@ uint8_t const SVS = 1; //     "Remote" profiles are profiles that are assigned t
                       //     - SVS   1 -  99 for 1st Extron or TESmart
                       //     - SVS 101 - 199 for 2nd Extron or TESmart
                       //
-                      //
-                      //
 
 
-
-bool const S0  = false;        // (Profile 0) 
+bool const S0  = false;  // (Profile 0) default is false 
                          //
                          //  ** Recommended to remove any /profile/SVS/S0_<user defined>.rt4 profiles and leave this option "false" if using in tandem with the Scalable Video Switch. **
+                         //  ** Does not work with MT-VIKI / TESmart HDMI switches **
                          //
                          // set "true" to load "Remote Profile 12" instead of "S0_<user definted>.rt4" (if SVS=0) when all ports are in-active on 1st Extron switch (and 2nd if connected). 
                          // You can assign it to a generic HDMI profile for example.
@@ -95,9 +93,6 @@ bool const S0  = false;        // (Profile 0)
                          //
                          // If SVS=2, Remote Profile 12 will be used instead of "S0_<user defined>.rt4"
                          //
-                         //
-                         // default is false // also recommended to set false to filter out unstable Extron inputs that can result in spamming the RT4K with profile changes 
-                       
 
 
 ////////////////////////// 
@@ -412,7 +407,7 @@ int currentInputSW1 = -1;
 int currentInputSW2 = -1;
 byte const VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
 
-// readIR
+// MT-VIKI / TESmart serial commands
 byte const viki1[4] = {0xA5,0x5A,0x00,0xCC};
 byte const viki2[4] = {0xA5,0x5A,0x01,0xCC};
 byte const viki3[4] = {0xA5,0x5A,0x02,0xCC};
@@ -439,7 +434,7 @@ byte const tesmart14[6] = {0xAA,0xBB,0x03,0x01,0x0E,0xEE};
 byte const tesmart15[6] = {0xAA,0xBB,0x03,0x01,0x0F,0xEE};
 byte const tesmart16[6] = {0xAA,0xBB,0x03,0x01,0x10,0xEE};
 
-// variables used for Time funcions
+// LS timer variables
 unsigned long LScurrentTime = 0; 
 unsigned long LScurrentTime2 = 0;
 unsigned long LSprevTime = 0;
@@ -457,7 +452,7 @@ unsigned long currentTime = 0;
 unsigned long prevTime = 0;
 unsigned long prevBlinkTime = 0;
 
-// VIKI Manual Switch Variables
+// VIKI Manual Switch variables
 unsigned long sendtimer = 0;
 unsigned long sendtimer2 = 0;
 unsigned long ITEtimer = 0;
@@ -734,7 +729,8 @@ void readExtron1(){
 
     }
 
-    //VIKI Manual Switch Detection (created by: https://github.com/Arthrimus)
+    // VIKI Manual Switch Detection (created by: https://github.com/Arthrimus)
+    // ** hdmi output must be connected when powering on switch for ITE messages to appear, thus manual button detection working **
 
     if((millis() - ITEtimer > 1200) && (MTVb == 1 || MTVb == 3)){  // Timer that disables sending SVS serial commands using the ITE mux data when there has recently been an autoswitch command (prevents duplicate commands)
       listenITE = 1;  // Sets listenITE to 1 so the ITE mux data can be used to send SVS serial commands again
@@ -743,7 +739,7 @@ void readExtron1(){
     }
 
 
-    if(ecap.startsWith("=") && listenITE == 1 && (MTVb == 1 || MTVb == 3)){   // checks if the serial command from the VIKI starts with "=" This indicates that the command is an ITE mux status message
+    if(ecap.startsWith("=") && listenITE && (MTVb == 1 || MTVb == 3)){   // checks if the serial command from the VIKI starts with "=" This indicates that the command is an ITE mux status message
       if(ecap.substring(10,11) == "P"){        // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
         ITEstatus[0] = ecap.substring(11,12).toInt();
       }
@@ -760,7 +756,7 @@ void readExtron1(){
     }
 
 
-    if((millis() - sendtimer > 300) && ITErecv == 1 && (MTVb == 1 || MTVb == 3)){ // wait 300ms to make sure all ITE messages are received in order to complete ITEstatus
+    if((millis() - sendtimer > 300) && ITErecv && (MTVb == 1 || MTVb == 3)){ // wait 300ms to make sure all ITE messages are received in order to complete ITEstatus
       if(ITEstatus[0] == 3){                   // Checks if port 3 of the IT6635 chip is currently selected
         if(ITEstatus[1] == 2) ITEinputnum = 1;   // Checks if port 2 of the IT66353 DEV0 chip is selected, Sets ITEinputnum to input 1
         else if(ITEstatus[1] == 1) ITEinputnum = 2;   // Checks if port 1 of the IT66353 DEV0 chip is selected, Sets ITEinputnum to input 2
@@ -1118,7 +1114,8 @@ void readExtron2(){
     }
 
 
-    //VIKI Manual Switch Detection (created by: https://github.com/Arthrimus)
+    // VIKI Manual Switch Detection (created by: https://github.com/Arthrimus)
+    // ** hdmi output must be connected when powering on switch for ITE messages to appear, thus manual button detection working **
 
     if((millis() - ITEtimer2 > 1200) && (MTVb > 1)){  // Timer that disables sending SVS serial commands using the ITE mux data when there has recently been an autoswitch command (prevents duplicate commands)
       listenITE2 = 1;  // Sets listenITE2 to 1 so the ITE mux data can be used to send SVS serial commands again
@@ -1127,7 +1124,7 @@ void readExtron2(){
     }
 
 
-    if(ecap.startsWith("=") && listenITE2 == 1 && (MTVb > 1)){   // checks if the serial command from the VIKI starts with "=" This indicates that the command is an ITE mux status message
+    if(ecap.startsWith("=") && listenITE2 && (MTVb > 1)){   // checks if the serial command from the VIKI starts with "=" This indicates that the command is an ITE mux status message
       if(ecap.substring(10,11) == "P"){       // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
         ITEstatus2[0] = ecap.substring(11,12).toInt();
       }
@@ -1143,7 +1140,7 @@ void readExtron2(){
     }
 
 
-    if((millis() - sendtimer2 > 300) && ITErecv2 == 1  && (MTVb > 1)){ // wait 300ms to make sure all ITE messages are received in order to complete ITEstatus
+    if((millis() - sendtimer2 > 300) && ITErecv && (MTVb > 1)){ // wait 300ms to make sure all ITE messages are received in order to complete ITEstatus
       if(ITEstatus2[0] == 3){                   // Checks if port 3 of the IT6635 chip is currently selected
         if(ITEstatus2[1] == 2) ITEinputnum2 = 1;   // Checks if port 2 of the IT66353 DEV0 chip is selected, Sets ITEinputnum to input 1
         else if(ITEstatus2[1] == 1) ITEinputnum2 = 2;   // Checks if port 1 of the IT66353 DEV0 chip is selected, Sets ITEinputnum to input 2
