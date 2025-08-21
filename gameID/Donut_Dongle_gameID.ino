@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.1 (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.1a (Arduino Nano ESP32 only)
 * Copyright(C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -19,9 +19,10 @@
 #define SEND_LEDC_CHANNEL 0
 #define IR_SEND_PIN 11    // Optional IR LED Emitter for RT5X compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2  // Optional IR Receiver on pin D2
-#define Serial Serial0 // comment out the line to see commands over the Serial Monitor instead of the RT4K
 #define extronSerial Serial1
 #define extronSerial2 Serial2
+#define Serial Serial0 // ** COMMENT OUT THIS LINE ** to see output in Serial Monitor. Disables Serial output to RT4K.
+
 
 #include <TinyIRReceiver.hpp>
 #include <IRremote.hpp>       // found in the built-in Library Manager
@@ -81,7 +82,7 @@ String gameDB[][2] = {{"00000000-00000000---00","7"}, // 7 is the "SVS PROFILE",
                       {"SLUS-00214","10"}, // PS1 Ridge Racer Revolution
                       {"SCUS-94300","9"}}; // PS1 Ridge Racer
 
-// WiFi config is just below (line ~528)
+// WiFi config is just below (line ~527)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -532,10 +533,11 @@ void setup(){
   analogWrite(LED_BLUE,255);
   uint16_t gTime = 2000;
 
-  usbHost.begin(115200); // leave at 115200 for RT4K connection
-  Serial0.begin(9600);
-  while(!Serial0){;}   // allow connection to establish before continuing
-  Serial0.print(F("\r")); // clear RT4K Serial buffer
+  #ifdef Serial
+    usbHost.begin(115200); // leave at 115200 for RT4K usb-host mode connection
+  #endif
+
+  Serial.begin(9600);                           // set the baud rate for the RT4K VGA serial connection
   extronSerial.begin(9600,SERIAL_8N1,3,4);   // set the baud rate for the Extron sw1 Connection
   extronSerial.setTimeout(150);                 // sets the timeout for reading / saving into a string
   extronSerial2.begin(9600,SERIAL_8N1,8,9);  // set the baud rate for Extron sw2 Connection
@@ -559,8 +561,11 @@ void DDloop(void *pvParameters){
     readIR();
     readExtron1();
     readExtron2();
-    usbHost.task(); // comment out to disable usb-c serial
     if(RTwake)sendRTwake(10000); // 10000 is 10 seconds. After waking the RT4K, wait this amount of time before re-sending the latest profile change.
+
+    #ifdef Serial  
+      usbHost.task();
+    #endif
   }
 } // end of DDloop
 
@@ -604,7 +609,8 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
               if(i != j && consoles[j].King == 1)
                 consoles[j].King = 0;
             }
-            sendProfile(consoles[i].Prof);
+            if(consoles[i].Prof >= 0) sendSVS(consoles[i].Prof);
+            else sendRBP((-1) * consoles[i].Prof);
           }
        } 
       } // end of if(httpCode > 0 || httpCode == -11)
@@ -620,7 +626,8 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
               for(int l=0;l < consolelen;l++){ // find next Console that is on
                 if(consoles[l].On == 1){
                   consoles[l].King = 1;
-                  sendProfile(consoles[l].Prof);
+                  if(consoles[l].Prof >= 0) sendSVS(consoles[l].Prof);
+                  else sendRBP((-1) * consoles[l].Prof);
                   break;
                 }
               }
@@ -633,7 +640,8 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
           if(consoles[m].On == 0) count++;
         }
         if(count == consolelen && S0_pwr){
-          sendProfile(S0_pwr_profile);
+          if(S0_pwr_profile >= 0) sendSVS(S0_pwr_profile);
+          else sendRBP((-1) * S0_pwr_profile);
         }   
       } // end of else()
     http.end();
@@ -682,19 +690,6 @@ bool isIPAddress(String str){
   IPAddress ip;
   return ip.fromString(str);  // Returns true if the string is a valid IP address
 } // end of isIPAddress()
-
-void sendProfile(int num){
-  analogWrite(LED_RED,255);
-  analogWrite(LED_BLUE,255);
-  analogWrite(LED_GREEN,222);
-
-  usbHost.cprof = String(num);
-
-  if(num >= 0) sendSVS(num);
-  else sendRBP((-1) * num);
-
-  analogWrite(LED_GREEN,255);
-} // end of sendProfile()
 
 void readExtron1(){
 
@@ -2184,46 +2179,40 @@ void recallPreset(uint8_t sw, uint8_t num){
   }
 } // end of recallPreset()
 
-void sendSVS(int num){
+void sendSVS(uint16_t num){
   analogWrite(LED_RED,255);
   analogWrite(LED_BLUE,255);
   analogWrite(LED_GREEN,222);
-  usbHost.cprof = num;
-  if(num >= 0){
-    Serial0.print(F("\rSVS NEW INPUT="));
-    if(num != 0)Serial0.print(num + offset);
-    else Serial0.print(num);;
-    Serial0.println(F("\r"));
-    delay(1000);
-    Serial0.print(F("\rSVS CURRENT INPUT="));
-    if(num != 0)Serial0.print(num + offset);
-    else Serial0.print(num);
-    Serial0.println(F("\r"));
-    currWakeProf[0] = 1; // 1 is SVS profile
-    if(num != 0)currWakeProf[1] = num + offset;
-  }
-  else if(num < 0){
-    Serial0.print(F("\rremote prof"));
-    Serial0.print((-1) * num);
-    Serial0.println(F("\r"));
-    currWakeProf[0] = 0; // 0 is Remote profile
-    currWakeProf[1] = (-1) * num ;
-  }
+  usbHost.cprof = String(num);
+
+  Serial.print(F("\rSVS NEW INPUT="));
+  if(num != 0)Serial.print(num + offset);
+  else Serial.print(num);;
+  Serial.println(F("\r"));
+  delay(1000);
+  Serial.print(F("\rSVS CURRENT INPUT="));
+  if(num != 0)Serial.print(num + offset);
+  else Serial.print(num);
+  Serial.println(F("\r"));
+
+  currWakeProf[0] = 1; // 1 is SVS profile
+  if(num != 0)currWakeProf[1] = num + offset;
+  else currWakeProf[1] = num;
   analogWrite(LED_GREEN,255);
 } // end of sendSVS()
 
-void sendRBP(uint16_t prof){ // send Remote Button Profile
-  if(prof <= 12){
-    analogWrite(LED_RED,255);
-    analogWrite(LED_BLUE,255);
-    analogWrite(LED_GREEN,222);
-    usbHost.cprof = (-1) * prof;
-    Serial.print(F("\rremote prof"));
-    Serial.print(prof);
-    Serial.println(F("\r"));
-    delay(1000);
-    analogWrite(LED_GREEN,255);
-    currWakeProf[0] = 0; // 0 is Remote Button Profile
-    currWakeProf[1] = prof;
-  }
+void sendRBP(uint8_t prof){ // send Remote Button Profile
+  analogWrite(LED_RED,255);
+  analogWrite(LED_BLUE,255);
+  analogWrite(LED_GREEN,222);
+  usbHost.cprof = String((-1) * prof);
+
+  Serial.print(F("\rremote prof"));
+  Serial.print(prof);
+  Serial.println(F("\r"));
+
+  currWakeProf[0] = 0; // 0 is Remote Button Profile
+  currWakeProf[1] = prof;
+  delay(1000);
+  analogWrite(LED_GREEN,255);
 } // end of sendRBP()
