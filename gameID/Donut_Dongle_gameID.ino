@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.1a (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.1b (Arduino Nano ESP32 only)
 * Copyright(C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -29,9 +29,7 @@
 #include <Arduino_JSON.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <EspUsbHostSerial_FTDI.h> // https://github.com/wakwak-koba/EspUsbHost in order to have FTDI support for the RT4K usb serial port, this is the easist method.
-                                   // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
-                                   // Step 2 - In Arudino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
+
 
 struct Console {
   String Address;
@@ -82,7 +80,7 @@ String gameDB[][2] = {{"00000000-00000000---00","7"}, // 7 is the "SVS PROFILE",
                       {"SLUS-00214","10"}, // PS1 Ridge Racer Revolution
                       {"SCUS-94300","9"}}; // PS1 Ridge Racer
 
-// WiFi config is just below (line ~527)
+// WiFi config is below (line ~490)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -92,8 +90,8 @@ String gameDB[][2] = {{"00000000-00000000---00","7"}, // 7 is the "SVS PROFILE",
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~766
-uint8_t const debugE2CAP = 0; // line ~1252
+uint8_t const debugE1CAP = 0; // line ~662
+uint8_t const debugE2CAP = 0; // line ~1147
 
 bool const S0_pwr = false;       // Load "S0_pwr_profile" when all consoles defined below are off. Defined below.
 
@@ -480,41 +478,6 @@ bool listenITE2 = 1;
 uint8_t ITEinputnum = 0;
 uint8_t ITEinputnum2 = 0;
 
-
-class SerialFTDI : public EspUsbHostSerial_FTDI {
-  public:
-  String cprof = "null";
-  String tcprof = "null";
-  virtual void task(void) override {
-    EspUsbHost::task();
-    if (this->isReady()) {
-      esp_err_t err = usb_host_transfer_submit(this->usbTransfer_recv);
-      if (err != ESP_OK && err != ESP_ERR_NOT_FINISHED && err != ESP_ERR_INVALID_STATE) {
-        ESP_LOGI("EspUsbHostSerial", "usb_host_transfer_submit() err=%x", err);
-      }
-      if(cprof != "null" && currentProf != cprof.toInt()){
-        currentProf = cprof.toInt();
-        analogWrite(LED_GREEN,222);
-        if(currentProf >= 0){
-          tcprof = "\rSVS NEW INPUT=" + cprof + "\r";
-          submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcprof[0]), tcprof.length());
-          delay(1000);
-          tcprof = "\rSVS CURRENT INPUT=" + cprof + "\r";
-        }
-        if(currentProf < 0){
-          tcprof = "\rremote prof" + String((-1)*currentProf) + "\r";
-          delay(1000); // only added so the green led stays lit for 1 second. not needed for "remote prof" command.
-        }
-        submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcprof[0]), tcprof.length());
-        analogWrite(LED_GREEN,255);
-
-      }
-    }
-  }
-};
-
-SerialFTDI usbHost;
-
 const int consolelen = sizeof(consoles) / sizeof(consoles[0]); // length of consoles DB, used frequently
 const int gameDBlen = sizeof(gameDB) / sizeof(gameDB[0]); // length of gameDB...
 
@@ -532,10 +495,6 @@ void setup(){
   analogWrite(LED_GREEN,255);
   analogWrite(LED_BLUE,255);
   uint16_t gTime = 2000;
-
-  #ifdef Serial
-    usbHost.begin(115200); // leave at 115200 for RT4K usb-host mode connection
-  #endif
 
   Serial.begin(9600);                           // set the baud rate for the RT4K VGA serial connection
   extronSerial.begin(9600,SERIAL_8N1,3,4);   // set the baud rate for the Extron sw1 Connection
@@ -562,10 +521,6 @@ void DDloop(void *pvParameters){
     readExtron1();
     readExtron2();
     if(RTwake)sendRTwake(10000); // 10000 is 10 seconds. After waking the RT4K, wait this amount of time before re-sending the latest profile change.
-
-    #ifdef Serial  
-      usbHost.task();
-    #endif
   }
 } // end of DDloop
 
@@ -619,7 +574,6 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
         consoles[i].Prof = 33333;
         if(consoles[i].King == 1){
           currentProf = 33333;
-          usbHost.cprof = String(33333);
           for(int k=0;k < consolelen;k++){
             if(i == k){
               consoles[k].King = 0;
@@ -2183,7 +2137,6 @@ void sendSVS(uint16_t num){
   analogWrite(LED_RED,255);
   analogWrite(LED_BLUE,255);
   analogWrite(LED_GREEN,222);
-  usbHost.cprof = String(num);
 
   Serial.print(F("\rSVS NEW INPUT="));
   if(num != 0)Serial.print(num + offset);
@@ -2205,7 +2158,6 @@ void sendRBP(uint8_t prof){ // send Remote Button Profile
   analogWrite(LED_RED,255);
   analogWrite(LED_BLUE,255);
   analogWrite(LED_GREEN,222);
-  usbHost.cprof = String((-1) * prof);
 
   Serial.print(F("\rremote prof"));
   Serial.print(prof);
