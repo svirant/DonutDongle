@@ -1,5 +1,5 @@
 /*
-* RT4K Donut Dongle v1.2a
+* RT4K Donut Dongle v1.2b
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -2032,7 +2032,7 @@ void sendSVS(uint16_t num){
   Serial.print(num + offset);
   Serial.println(F("\r"));
   currentProf[0] = 1; // 1 is SVS profile
-  currentProf[1] = num + offset;
+  currentProf[1] = num;
 }
 
 void sendRBP(uint16_t prof){ // send Remote Button Profile
