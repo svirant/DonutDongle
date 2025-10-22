@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.4b beta
+* Donut Dongle v1.4c beta
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -1140,7 +1140,7 @@ void readExtron2(){
     }
 
 
-    if((millis() - sendtimer2 > 300) && ITErecv && (MTVb > 1)){ // wait 300ms to make sure all ITE messages are received in order to complete ITEstatus
+    if((millis() - sendtimer2 > 300) && ITErecv2 && (MTVb > 1)){ // wait 300ms to make sure all ITE messages are received in order to complete ITEstatus
       if(ITEstatus2[0] == 3){                   // Checks if port 3 of the IT6635 chip is currently selected
         if(ITEstatus2[1] == 2) ITEinputnum2 = 1;   // Checks if port 2 of the IT66353 DEV0 chip is selected, Sets ITEinputnum to input 1
         else if(ITEstatus2[1] == 1) ITEinputnum2 = 2;   // Checks if port 1 of the IT66353 DEV0 chip is selected, Sets ITEinputnum to input 2
@@ -2454,7 +2454,6 @@ void LS0time1(unsigned long eTime){
  }
 }  // end of LS0time1()
 
-
 void LS0time2(unsigned long eTime){
   LScurrentTime2 = millis();  // Init timer
   if(LSprevTime2 == 0)       // If previous timer not initialized, do so now.
@@ -2466,6 +2465,7 @@ void LS0time2(unsigned long eTime){
     delay(20);
  }
 }  // end of LS0time2()
+
 void setTie(uint8_t sw, uint8_t num){
   if(sw == 1){
     if(voutMatrix[0]){
