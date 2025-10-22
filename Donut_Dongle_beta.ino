@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.4c beta
+* Donut Dongle v1.4d beta
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -2347,8 +2347,7 @@ void sendSVS(uint16_t num){
   else Serial.print(num);
   Serial.println(F("\r"));
   currentProf[0] = 1; // 1 is SVS profile
-  if(num != 0)currentProf[1] = num + offset;
-  else currentProf[1] = num;
+  currentProf[1] = num;
 }
 
 void sendRBP(uint16_t prof){ // send Remote Button Profile
