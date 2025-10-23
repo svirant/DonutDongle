@@ -181,7 +181,7 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 - Let me know if you have any questions!
 
 # Assembly
-**v1.0 (RC2 is now v1.0)**<br /><br />
+**v1.0**<br /><br />
 [Interactive HTML BOM](https://svirant.github.io/DonutDongle/images/ibom.html)
 
 [<img width="400" src="./images/8.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
