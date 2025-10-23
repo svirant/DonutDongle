@@ -6,6 +6,10 @@ The Donut Dongle connects to a switch in a way that allows it to see which port 
 
 For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/tree/main/README.md#how-to-use) section below.
 
+> [!TIP]
+> If DIY is not your thing. I have assembled versions for gScart/gComp and MT-VIKI/TESmart/Extron/db9 available in my [Ko-fi](https://ko-fi.com/donutswdad/shop) shop.
+</br>
+
 > [!NOTE]
 > *NEW* beta allows:
 >   - **front case buttons/remote NOW change profiles on the MT-VIKI HDMI switch.** Thanks to [Arthrimus](https://scalablevideoswitch.com/)! 
@@ -38,10 +42,6 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 >                                                       // disable specific outputs from triggering profile changes
 > ```
 <br />
-
-> [!TIP]
-> If DIY is not your thing. I have assembled versions for gScart/gComp and MT-VIKI/TESmart/Extron/db9 available in my Ko-Fi shop.
-</br>
 
 <img width="700" src="./images/0.jpeg" />
 <img width="700" src="./images/0a.jpeg" />
@@ -210,7 +210,8 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 
 | **Qty**    | Designation | Part |  Link  |  Notes |
 | ------------- | ------------- |------------- |------------- |------------- |
-| 5  | C1-C5 | 0.1 uf / 100nf 50V X7R 0805 Capacitor| [Digikey](https://www.digikey.com/en/products/detail/yageo/CC0805KRX7R9BB104/302874?s=N4IgTCBcDaIMwEYEFokBYAMrkDkAiIAugL5A) | |
+| 2  | C1,C5 | 0.1 uf / 100nf 50V X7R 0805 Capacitor| [Digikey](https://www.digikey.com/en/products/detail/yageo/CC0805KRX7R9BB104/302874?s=N4IgTCBcDaIMwEYEFokBYAMrkDkAiIAugL5A) | |
+| 3  | C2-C4 | 0.33 uf / 330nf 50V X7R 0805 Capacitor| [Digikey](https://www.digikey.com/en/products/detail/samsung-electro-mechanics/CL21B334KBFNNNE/3886781) | |
 | 1  | R1 | 30 OHM 1% 1/2W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-P06F30R0V/9811718) | |
 | 1  | R2 | 1K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/yageo/RC0805FR-071KL/727444) | |
 | 10  | R3 - R10, R17, R19 | 10K OHM 1% 1/8W 0805 Resistor | [Digikey](https://www.digikey.com/en/products/detail/yageo/AC0805FR-0710KL/2827834) | |
