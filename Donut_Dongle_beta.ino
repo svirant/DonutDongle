@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.4d beta
+* Donut Dongle v1.4e beta
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -341,8 +341,8 @@ uint8_t const auxprof[12] =   // Assign SVS profiles to IR remote profile button
                                 12, // AUX8 + profile 12 button
                                 };
 
-uint8_t const gctl = 0; // 1 = Enables gscart/gcomp manual input selection (Default)
-                        // 0 = Disable
+uint8_t const gctl = 0; // 1 = Enables gscart/gcomp manual input selection
+                        // 0 = Disable (Default)
                         //
                         // ** Only supported on vers 5.x gscart/gcomp switches **
                         //
@@ -1900,6 +1900,10 @@ void readIR(){
         else if(auxgsw[1])overrideGscart(16);
         ir_recv_command = 0;
       }
+      else if(ir_recv_command == 60){ // button aux5
+        if(auxgsw[0])Serial.println(F("\rremote aud\r"));
+        ir_recv_command = 0;
+      }
       else if(ir_recv_command == 1 || ir_recv_command == 37 || ir_recv_command == 38 || ir_recv_command == 39){ // profile button 9,10,11,12 will turn off manual mode, back to auto mode
         if(auxgsw[0]){
           pinMode(12,INPUT); // D12 back to floating, enables auto-switching
@@ -1949,19 +1953,19 @@ void readIR(){
       }
       else if(ir_recv_command == 60){
         if(gctl)auxgsw[0] = 1;
-        else Serial.println(F("\rremote aux5\r"));
+        else Serial.println(F("\rremote aud\r")); // remote aux5
       }
       else if(ir_recv_command == 59){
-        Serial.println(F("\rremote aux4\r"));
+        Serial.println(F("\rremote col\r")); // remote aux4
       }
       else if(ir_recv_command == 58){
-        Serial.println(F("\rremote aux3\r"));
+        Serial.println(F("\rremote aux3\r")); // remote aux3
       }
       else if(ir_recv_command == 57){
-        Serial.println(F("\rremote aux2\r"));
+        Serial.println(F("\rremote aux2\r")); // remote aux2
       }
       else if(ir_recv_command == 56){
-        Serial.println(F("\rremote aux1\r"));
+        Serial.println(F("\rremote aux1\r")); // remote aux1
       }
       else if(ir_recv_command == 52){
         Serial.println(F("\rremote res1\r"));
