@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.1b (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.1c (Arduino Nano ESP32 only)
 * Copyright(C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -2031,8 +2031,16 @@ void sendIR(String type, uint8_t prof, uint8_t repeat){
     else if(prof == 13){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x96,repeat);} // OSSC profile 13
     else if(prof == 14){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x47C,0x97,repeat);} // OSSC profile 14
   }
-  else if(type == "LG"){ // LG TV
-      irsend.sendNEC(0xFB04,0xF708,3); // Power button
+  else if(type == "LG"){ // LG CX OLED
+      irsend.sendNEC(0x04,0x08,0); // Power button
+      irsend.sendNEC(0x00,0x00,0);
+      irsend.sendNEC(0x00,0x00,0);
+      irsend.sendNEC(0x00,0x00,0);
+      delay(30);
+      irsend.sendNEC(0x04,0x08,0); // send once more
+      irsend.sendNEC(0x00,0x00,0);
+      irsend.sendNEC(0x00,0x00,0);
+      irsend.sendNEC(0x00,0x00,0);
   }
   
 } // end of sendIR()
