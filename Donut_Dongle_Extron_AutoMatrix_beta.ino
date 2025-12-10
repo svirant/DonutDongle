@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.4f beta
+* Donut Dongle Extron AutoMatrix v1.4g beta
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -598,7 +598,7 @@ void readExtron1(){
     }
 
 
-    // for Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMaxtrix
+    // for Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMatrix
     if((einput.substring(0,2) == "In" && voutMatrix[eoutput[0]] && !automatrixSW1) || (einput.substring(0,3) == "Rpr")){
       if(einput == "In1 " || einput == "In01" || einput == "Rpr01"){
         if(RT5Xir == 1)sendIR("5x",1,2); // RT5X profile 1 
@@ -1078,7 +1078,7 @@ void readExtron2(){
     }
 
 
-    // For Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMaxtrix
+    // For Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMatrix
     if((einput.substring(0,2) == "In" && voutMatrix[eoutput[1]+16] && !automatrixSW2) || (einput.substring(0,3) == "Rpr")){
       if(einput.substring(0,3) == "Rpr"){
         sendSVS(einput.substring(3,5).toInt()+100);
