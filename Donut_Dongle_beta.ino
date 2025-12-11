@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.5
+* Donut Dongle beta v1.5a
 * Copyright (C) 2025 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define IR_SEND_PIN 11  // Optional IR LED Emitter for RT5X compatibility. Sends IR data out Arduino pin D11
+#define IR_SEND_PIN 11  // Optional IR LED Emitter for RT5X / OSSC compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2 // Optional IR Receiver on pin D2
 
 #include <TinyIRReceiver.hpp>
@@ -31,8 +31,8 @@
 //////////////////
 */
 
-uint8_t debugE1CAP = 0; // line ~372
-uint8_t debugE2CAP = 0; // line ~761
+uint8_t debugE1CAP = 0; // line ~349
+uint8_t debugE2CAP = 0; // line ~836
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -178,7 +178,7 @@ uint8_t const auxprof[12] =   // Assign SVS profiles to IR remote profile button
                                 12, // AUX8 + profile 12 button
                                 };
 
-uint8_t const gctl = 1; // 1 = Enables gscart/gcomp manual input selection
+uint8_t const gctl = 0; // 1 = Enables gscart/gcomp manual input selection
                         // 0 = Disable (Default)
                         //
                         // ** Only supported on vers 5.x gscart/gcomp switches **
@@ -334,7 +334,7 @@ void loop(){
 
 void readExtron1(){
 
-    byte ecapbytes[44]; // used to store first 13 captured bytes / messages for Extron                
+    byte ecapbytes[44]; // used to store first 44 captured bytes / messages for Extron                
     String ecap; // used to store Extron status messages for Extron in String format
     String einput; // used to store first 4 chars of Extron input
 
@@ -345,7 +345,7 @@ void readExtron1(){
     // listens to the Extron sw1 Port for changes
     // SIS Command Responses reference - Page 77 https://media.extron.com/public/download/files/userman/XP300_Matrix_B.pdf
     if(extronSerial.available() > 0){ // if there is data available for reading, read
-    extronSerial.readBytes(ecapbytes,44); // read in and store only the first 13 bytes for every status message received from 1st Extron SW port
+    extronSerial.readBytes(ecapbytes,44); // read in and store only the first 44 bytes for every status message received from 1st Extron SW port
       if(debugE1CAP){
         Serial.print(F("ecap HEX: "));
         for(int i=0;i<44;i++){
@@ -822,7 +822,7 @@ void readExtron1(){
 
 void readExtron2(){
     
-    byte ecapbytes[44]; // used to store first 13 captured bytes / messages for Extron                
+    byte ecapbytes[44]; // used to store first 44 captured bytes / messages for Extron                
     String ecap; // used to store Extron status messages for Extron in String format
     String einput; // used to store first 4 chars of Extron input
 
@@ -832,7 +832,7 @@ void readExtron2(){
 
     // listens to the Extron sw2 Port for changes
     if(extronSerial2.available() > 0){ // if there is data available for reading, read
-    extronSerial2.readBytes(ecapbytes,44); // read in and store only the first 13 bytes for every status message received from 2nd Extron port
+    extronSerial2.readBytes(ecapbytes,44); // read in and store only the first 44 bytes for every status message received from 2nd Extron port
       if(debugE2CAP){
         Serial.print(F("ecap2 HEX: "));
         for(int i=0;i<44;i++){
