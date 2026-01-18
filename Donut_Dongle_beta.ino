@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.6a
+* Donut Dongle beta v1.6b
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -78,7 +78,7 @@ uint8_t const SVS = 1; //     "Remote" profiles are profiles that are assigned t
                       //
 
 
-bool const S0  = false;  // (Profile 0) default is false 
+bool const S0 = false;  // (Profile 0) default is false 
                          //
                          //  ** Recommended to remove any /profile/SVS/S0_<user defined>.rt4 profiles and leave this option "false" if using in tandem with the Scalable Video Switch. **
                          //  ** Does not work with MT-VIKI / TESmart HDMI switches **
@@ -112,16 +112,12 @@ bool const S0  = false;  // (Profile 0) default is false
 bool const automatrixSW1 = false; // set true for auto matrix switching on "SW1" port
 bool const automatrixSW2 = false; // set true for auto matrix switching on "SW2" port
 
-
 uint8_t const amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16
 uint8_t const amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
 
 ///////////////////////////////
 
-
-// For non "Plus" Extron Matrix models, must specify video output port that connects to RT4K
-
-uint8_t ExtronVideoOutputPortSW1 = 1;
+uint8_t ExtronVideoOutputPortSW1 = 1; // For non "Plus" Extron Matrix models, must specify video output port that connects to RT4K
 uint8_t ExtronVideoOutputPortSW2 = 1;
 
 ///////////////////////////////
@@ -400,34 +396,34 @@ String stack1 = "00000000000000000000000000000000";
 String stack2 = "00000000000000000000000000000000"; 
 int currentInputSW1 = -1;
 int currentInputSW2 = -1;
-byte const VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
+byte const PROGMEM VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
 
 // MT-VIKI / TESmart serial commands
-byte const viki1[4] = {0xA5,0x5A,0x00,0xCC};
-byte const viki2[4] = {0xA5,0x5A,0x01,0xCC};
-byte const viki3[4] = {0xA5,0x5A,0x02,0xCC};
-byte const viki4[4] = {0xA5,0x5A,0x03,0xCC};
-byte const viki5[4] = {0xA5,0x5A,0x04,0xCC};
-byte const viki6[4] = {0xA5,0x5A,0x05,0xCC};
-byte const viki7[4] = {0xA5,0x5A,0x06,0xCC};
-byte const viki8[4] = {0xA5,0x5A,0x07,0xCC};
+byte const PROGMEM viki1[4] = {0xA5,0x5A,0x00,0xCC};
+byte const PROGMEM viki2[4] = {0xA5,0x5A,0x01,0xCC};
+byte const PROGMEM viki3[4] = {0xA5,0x5A,0x02,0xCC};
+byte const PROGMEM viki4[4] = {0xA5,0x5A,0x03,0xCC};
+byte const PROGMEM viki5[4] = {0xA5,0x5A,0x04,0xCC};
+byte const PROGMEM viki6[4] = {0xA5,0x5A,0x05,0xCC};
+byte const PROGMEM viki7[4] = {0xA5,0x5A,0x06,0xCC};
+byte const PROGMEM viki8[4] = {0xA5,0x5A,0x07,0xCC};
 
-byte const tesmart1[6] = {0xAA,0xBB,0x03,0x01,0x01,0xEE};
-byte const tesmart2[6] = {0xAA,0xBB,0x03,0x01,0x02,0xEE};
-byte const tesmart3[6] = {0xAA,0xBB,0x03,0x01,0x03,0xEE};
-byte const tesmart4[6] = {0xAA,0xBB,0x03,0x01,0x04,0xEE};
-byte const tesmart5[6] = {0xAA,0xBB,0x03,0x01,0x05,0xEE};
-byte const tesmart6[6] = {0xAA,0xBB,0x03,0x01,0x06,0xEE};
-byte const tesmart7[6] = {0xAA,0xBB,0x03,0x01,0x07,0xEE};
-byte const tesmart8[6] = {0xAA,0xBB,0x03,0x01,0x08,0xEE};
-byte const tesmart9[6] = {0xAA,0xBB,0x03,0x01,0x09,0xEE};
-byte const tesmart10[6] = {0xAA,0xBB,0x03,0x01,0x0A,0xEE};
-byte const tesmart11[6] = {0xAA,0xBB,0x03,0x01,0x0B,0xEE};
-byte const tesmart12[6] = {0xAA,0xBB,0x03,0x01,0x0C,0xEE};
-byte const tesmart13[6] = {0xAA,0xBB,0x03,0x01,0x0D,0xEE};
-byte const tesmart14[6] = {0xAA,0xBB,0x03,0x01,0x0E,0xEE};
-byte const tesmart15[6] = {0xAA,0xBB,0x03,0x01,0x0F,0xEE};
-byte const tesmart16[6] = {0xAA,0xBB,0x03,0x01,0x10,0xEE};
+byte const PROGMEM tesmart1[6] = {0xAA,0xBB,0x03,0x01,0x01,0xEE};
+byte const PROGMEM tesmart2[6] = {0xAA,0xBB,0x03,0x01,0x02,0xEE};
+byte const PROGMEM tesmart3[6] = {0xAA,0xBB,0x03,0x01,0x03,0xEE};
+byte const PROGMEM tesmart4[6] = {0xAA,0xBB,0x03,0x01,0x04,0xEE};
+byte const PROGMEM tesmart5[6] = {0xAA,0xBB,0x03,0x01,0x05,0xEE};
+byte const PROGMEM tesmart6[6] = {0xAA,0xBB,0x03,0x01,0x06,0xEE};
+byte const PROGMEM tesmart7[6] = {0xAA,0xBB,0x03,0x01,0x07,0xEE};
+byte const PROGMEM tesmart8[6] = {0xAA,0xBB,0x03,0x01,0x08,0xEE};
+byte const PROGMEM tesmart9[6] = {0xAA,0xBB,0x03,0x01,0x09,0xEE};
+byte const PROGMEM tesmart10[6] = {0xAA,0xBB,0x03,0x01,0x0A,0xEE};
+byte const PROGMEM tesmart11[6] = {0xAA,0xBB,0x03,0x01,0x0B,0xEE};
+byte const PROGMEM tesmart12[6] = {0xAA,0xBB,0x03,0x01,0x0C,0xEE};
+byte const PROGMEM tesmart13[6] = {0xAA,0xBB,0x03,0x01,0x0D,0xEE};
+byte const PROGMEM tesmart14[6] = {0xAA,0xBB,0x03,0x01,0x0E,0xEE};
+byte const PROGMEM tesmart15[6] = {0xAA,0xBB,0x03,0x01,0x0F,0xEE};
+byte const PROGMEM tesmart16[6] = {0xAA,0xBB,0x03,0x01,0x10,0xEE};
 
 // LS timer variables
 unsigned long LScurrentTime = 0; 
@@ -529,7 +525,7 @@ void readExtron1(){
     // listens to the Extron sw1 Port for changes
     // SIS Command Responses reference - Page 77 https://media.extron.com/public/download/files/userman/XP300_Matrix_B.pdf
     if(extronSerial.available() > 0){ // if there is data available for reading, read
-      extronSerial.readBytes(ecapbytes,44); // read in and store only the first 13 bytes for every status message received from 1st Extron SW port
+      extronSerial.readBytes(ecapbytes,44); // read in and store only the first 44 bytes for every status message received from 1st Extron SW port
       if(debugE1CAP){
         Serial.print(F("ecap HEX: "));
         for(uint8_t i=0;i<44;i++){
@@ -547,7 +543,7 @@ void readExtron1(){
       einput = ecap.substring(6,10);
       eoutput[0] = ecap.substring(3,4).toInt();
     }
-    else if(ecap.substring(0,3) == "OUT" && !automatrixSW1){
+    else if(ecap.substring(0,3) == "OUT"){
       einput = ecap.substring(5,9);
       eoutput[0] = ecap.substring(3,5).toInt();
     }
@@ -613,7 +609,7 @@ void readExtron1(){
             else sendSVS(currentInputSW1);
         }
       }
-    } // end of automatrix 
+    } // end of automatrix
     else{                             // less complex switches only report input status, no output status
       einput = ecap.substring(0,4);
       eoutput[0] = 33;
@@ -1080,7 +1076,7 @@ void readExtron2(){
 
     // listens to the Extron sw2 Port for changes
     if(extronSerial2.available() > 0){ // if there is data available for reading, read
-    extronSerial2.readBytes(ecapbytes,44); // read in and store only the first 13 bytes for every status message received from 2nd Extron port
+    extronSerial2.readBytes(ecapbytes,44); // read in and store only the first 44 bytes for every status message received from 2nd Extron port
       if(debugE2CAP){
         Serial.print(F("ecap2 HEX: "));
         for(uint8_t i=0;i<44;i++){
@@ -1097,7 +1093,7 @@ void readExtron2(){
       einput = ecap.substring(6,10);
       eoutput[1] = ecap.substring(3,5).toInt();
     }
-    else if(ecap.substring(0,3) == "OUT" && !automatrixSW2){ // store only the input and output states, some Extron devices report output first instead of input
+    else if(ecap.substring(0,3) == "OUT"){ // store only the input and output states, some Extron devices report output first instead of input
       einput = ecap.substring(5,9);
       eoutput[1] = ecap.substring(3,5).toInt();
     }
