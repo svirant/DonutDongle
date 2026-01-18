@@ -72,6 +72,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 | Extron RGBHV sw6  | yes, confirmed first hand  | |
 | Extron DXP 88 | yes, confirmed first hand | at the moment, works with Presets only. Preset 1 is Profile/SVS 1. On Extron sw2 port Preset 1 is SVS 101, etc|
 | Extron CrossPoint, MVX, etc | same as DXP 88 above. at the moment, Presets only |
+| Extron CrossPoint (non Plus)  | yes, works with Presets and Input changes | Must set ExtronVideoOutputPortSW1 / SW2 variable to output connected to RT4K |
 | Extron SW4 VGA Ars | yes, confirmed by "Nobody" on the RT4K Discord |
 | Otaku Games Scart 10 | Jumper moved to "L" and with required [mod](https://github.com/svirant/RT4k_HD15_serial_control/tree/main/Otaku%20Games%20Scart%20Switch) , **SVS=0; must also be set in the Otaku .ino for the DD to respond** | modded switch works on its own, but connecting through the DD is mostly useful if your Otaku mod doesn't include the buffer IC |
 
