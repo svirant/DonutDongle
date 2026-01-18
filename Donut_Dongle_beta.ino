@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.6b
+* Donut Dongle beta v1.6c
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -541,11 +541,11 @@ void readExtron1(){
 
     if(ecap.substring(0,3) == "Out" && !automatrixSW1){ // store only the input and output states, some Extron devices report output first instead of input
       einput = ecap.substring(6,10);
-      eoutput[0] = ecap.substring(3,4).toInt();
+      eoutput[0] = ecap.substring(3,5).toInt();
     }
     else if(ecap.substring(0,3) == "OUT"){
       einput = ecap.substring(5,9);
-      eoutput[0] = ecap.substring(3,5).toInt();
+      eoutput[0] = ecap.substring(3,4).toInt();
     }
     else if(ecap.substring(0,1) == "F"){ // detect if switch has changed auto/manual states
       einput = ecap.substring(4,8);
@@ -1095,7 +1095,7 @@ void readExtron2(){
     }
     else if(ecap.substring(0,3) == "OUT"){ // store only the input and output states, some Extron devices report output first instead of input
       einput = ecap.substring(5,9);
-      eoutput[1] = ecap.substring(3,5).toInt();
+      eoutput[1] = ecap.substring(3,4).toInt();
     }
     else if(ecap.substring(0,1) == "F"){ // detect if switch has changed auto/manual states
       einput = ecap.substring(4,8);
