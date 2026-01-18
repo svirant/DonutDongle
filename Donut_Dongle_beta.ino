@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.6d
+* Donut Dongle beta v1.6e
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -615,6 +615,13 @@ void readExtron1(){
       eoutput[0] = 33;
     }
 
+    // For older Extron Crosspoints, where "RECONFIG" is sent when changes are made, the profile is only changed when a different input is selected for the defined output. (ExtronVideoOutputPortSW1)
+    // Without this, the profile would be resent when changes to other outputs are selected.
+    if(einput.substring(0,2) == "IN"){
+      if(einput.substring(2,3).toInt() == currentProf[1] || einput.substring(2,4).toInt() == currentProf[1])
+        einput = "XX00"; // if the input is still the same, set einput so that nothing triggers a profile send
+    }
+
     // for Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMatrix
     if(((einput.substring(0,2) == "IN" || einput.substring(0,2) == "In") && voutMatrix[eoutput[0]] && !automatrixSW1) || (einput.substring(0,3) == "Rpr")){
       if(einput.substring(2,4) == "1 " || einput.substring(2,4) == "01" || einput.substring(3,5) == "01"){
@@ -1161,9 +1168,15 @@ void readExtron2(){
       eoutput[1] = 33;
     }
 
+    // For older Extron Crosspoints, where "RECONFIG" is sent when changes are made, the profile is only changed when a different input is selected for the defined output. (ExtronVideoOutputPortSW2)
+    // Without this, the profile would be resent when changes to other outputs are selected.
+    if(einput.substring(0,2) == "IN"){
+      if(einput.substring(2,3).toInt() == currentProf[1] || einput.substring(2,4).toInt() == currentProf[1])
+        einput = "XX00"; // if the input is still the same, set einput so that nothing triggers a profile send
+    }
 
     // For Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMatrix
-    if(((einput.substring(0,2) == "In" || einput.substring(0,2) == "IN") && voutMatrix[eoutput[1]+16] && !automatrixSW2) || (einput.substring(0,3) == "Rpr")){
+    if(((einput.substring(0,2) == "IN" || einput.substring(0,2) == "In") && voutMatrix[eoutput[1]+16] && !automatrixSW2) || (einput.substring(0,3) == "Rpr")){
       if(einput.substring(0,3) == "Rpr"){
         sendSVS(einput.substring(3,5).toInt()+100);
       }
