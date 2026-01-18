@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.6f
+* Donut Dongle beta v1.6g
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -32,7 +32,7 @@
 */
 
 uint8_t const debugE1CAP = 0; // line ~529
-uint8_t const debugE2CAP = 0; // line ~1087
+uint8_t const debugE2CAP = 0; // line ~1090
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -539,13 +539,15 @@ void readExtron1(){
     ecap = String((char *)ecapbytes); // convert bytes to String for Extron switches
 
 
-    if(ecap.substring(0,3) == "Out" && !automatrixSW1){ // store only the input and output states, some Extron devices report output first instead of input
-      einput = ecap.substring(6,10);
-      eoutput[0] = ecap.substring(3,5).toInt();
-    }
-    else if(ecap.substring(0,3) == "OUT"){
-      einput = ecap.substring(5,9);
-      eoutput[0] = ecap.substring(3,4).toInt();
+    if((ecap.substring(0,3) == "Out" || ecap.substring(0,3) == "OUT") && !automatrixSW1){ // store only the input and output states, some Extron devices report output first instead of input
+      if(ecap.substring(4,5) == " "){
+        eoutput[0] = ecap.substring(3,4).toInt();
+        einput = ecap.substring(5,9);
+      }
+      else{
+        eoutput[0] = ecap.substring(3,5).toInt();
+        einput = ecap.substring(6,10);
+      }
     }
     else if(ecap.substring(0,1) == "F"){ // detect if switch has changed auto/manual states
       einput = ecap.substring(4,8);
@@ -614,6 +616,7 @@ void readExtron1(){
       einput = ecap.substring(0,4);
       eoutput[0] = 33;
     }
+
 
     // For older Extron Crosspoints, where "RECONFIG" is sent when changes are made, the profile is only changed when a different input is selected for the defined output. (ExtronVideoOutputPortSW1)
     // Without this, the profile would be resent when changes to other outputs are selected.
@@ -1096,13 +1099,15 @@ void readExtron2(){
     }
     ecap = String((char *)ecapbytes);
 
-    if(ecap.substring(0,3) == "Out" && !automatrixSW2){ // store only the input and output states, some Extron devices report output first instead of input
-      einput = ecap.substring(6,10);
-      eoutput[1] = ecap.substring(3,5).toInt();
-    }
-    else if(ecap.substring(0,3) == "OUT"){ // store only the input and output states, some Extron devices report output first instead of input
-      einput = ecap.substring(5,9);
-      eoutput[1] = ecap.substring(3,4).toInt();
+    if((ecap.substring(0,3) == "Out" || ecap.substring(0,3) == "OUT") && !automatrixSW2){ // store only the input and output states, some Extron devices report output first instead of input
+      if(ecap.substring(4,5) == " "){
+        eoutput[1] = ecap.substring(3,4).toInt();
+        einput = ecap.substring(5,9);
+      }
+      else{
+        eoutput[1] = ecap.substring(3,5).toInt();
+        einput = ecap.substring(6,10);
+      }
     }
     else if(ecap.substring(0,1) == "F"){ // detect if switch has changed auto/manual states
       einput = ecap.substring(4,8);
