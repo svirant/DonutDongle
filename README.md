@@ -12,8 +12,10 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 
 > [!NOTE]
 > *NEW* beta allows:
+>   - **MT-VIKI Disconnection Detection** - when an input is powered off and on, the profile is resent.
 >   - **front case buttons/remote NOW change profiles on the MT-VIKI HDMI switch.** Thanks to [Arthrimus](https://scalablevideoswitch.com/)! 
 >   - **auto-switching on Extron Matrix switchers** that support DSVP. Works with RGBS/HV and HDMI/DVI signal types.
+>   - **Support for older Extron Crosspoint (non plus) matrix switchers**
 > <br />
 > 
 > <br /> Use the follow Options to enable:
@@ -24,7 +26,10 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 > int amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16,32
 > int amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
 >
-> uint8_t const vinMatrix[65] = {0,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 above)
+> uint8_t ExtronVideoOutputPortSW1 = 1; // For non "Plus" Extron Matrix models, must specify video output port that connects to RT4K
+> uint8_t ExtronVideoOutputPortSW2 = 1;
+> 
+> uint8_t const vinMatrix[33] = {0,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 above)
 >                                                       // set to 1 for the auto switched input to trigger a Preset on SW1
 >                                                       // set to 2 for the auto switched input to trigger a Preset on SW2
 >                                                       // set to 3 for both SW1 & SW2
@@ -33,7 +38,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 >                                                       // set the following inputs to the desired Preset #
 >                                                       // (by default each input # is set to the same corresponding Preset #)
 >                                                       
-> uint8_t const voutMatrix[66] = {1,  // MATRIX switchers // When auto matrix mode is enabled: (automatrixSW1 / SW2 above)
+> uint8_t const voutMatrix[34] = {1,  // MATRIX switchers // When auto matrix mode is enabled: (automatrixSW1 / SW2 above)
 >                                                       // set to 1 for the auto switched input to go to ALL outputs (default)
 >                                                       // set to 0 to select outputs to be enabled/disabled as listed below
 >                                                       //
