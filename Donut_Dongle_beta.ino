@@ -1,6 +1,6 @@
 /*
-* Donut Dongle beta v1.6
-* Copyright (C) 2025 @Donutswdad
+* Donut Dongle beta v1.6a
+* Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -605,7 +605,7 @@ void readExtron1(){
         previnput[0] = "0";
         setTie(1,currentInputSW1);
 
-        if(S0 && (!automatrixSW2 && (previnput[1] == "0" || previnput[1] == "In0 " || previnput[1] == "In00" || previnput[1] == "discon"))
+        if(S0 && (!automatrixSW2 && (previnput[1] == "0" || previnput[1] == "IN0 " || previnput[1] == "In0 " || previnput[1] == "In00" || previnput[1] == "discon"))
               && otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1]
               && (!automatrixSW2 && (previnput[1] == "discon" || voutMatrix[eoutput[1]+16]))){
 
@@ -724,7 +724,7 @@ void readExtron1(){
       else if(einput.substring(0,3) == "Rpr"){
         sendSVS(einput.substring(3,5).toInt());
       }
-      else if(einput != "In0 " && einput != "In00"){ // for inputs 13-99 (SVS only)
+      else if(einput != "IN0 " && einput != "In0 " && einput != "In00"){ // for inputs 13-99 (SVS only)
         sendSVS(einput.substring(2,4).toInt());
       }
 
@@ -732,8 +732,8 @@ void readExtron1(){
 
       // Extron S0
       // when both Extron switches match In0 or In00 (no active ports), both gscart/gcomp/otaku are disconnected or all ports in-active, a S0 Profile can be loaded if S0 is enabled
-      if(S0 && (currentInputSW2 <= 0) && ((einput == "In0 " || einput == "In00") && 
-        (previnput[1] == "In0 " || previnput[1] == "In00" || previnput[1] == "discon")) && 
+      if(S0 && (currentInputSW2 <= 0) && ((einput == "IN0 " || einput == "In0 " || einput == "In00") && 
+        (previnput[1] == "IN0 " || previnput[1] == "In0 " || previnput[1] == "In00" || previnput[1] == "discon")) && 
         otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1] && 
         voutMatrix[eoutput[0]] && (previnput[1] == "discon" || voutMatrix[eoutput[1]+16])){
 
@@ -745,8 +745,8 @@ void readExtron1(){
       
       } // end of Extron S0
 
-      if(previnput[0] == "0" && previnput[1].substring(0,2) == "In")previnput[0] = "In00";  // changes previnput[0] "0" state to "In00" when there is a newly active input on the other switch
-      if(previnput[1] == "0" && previnput[0].substring(0,2) == "In")previnput[1] = "In00";
+      if(previnput[0] == "0" && (previnput[1].substring(0,2) == "In" || previnput[1].substring(0,2) == "IN"))previnput[0] = "In00";  // changes previnput[0] "0" state to "In00" when there is a newly active input on the other switch
+      if(previnput[1] == "0" && (previnput[0].substring(0,2) == "In" || previnput[0].substring(0,2) == "IN"))previnput[1] = "In00";
 
     }
 
@@ -976,8 +976,8 @@ void readExtron1(){
         otakuoff[0] = 1;
         if(S0 && otakuoff[1] && 
           allgscartoff[0] && allgscartoff[1] && 
-          ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku2, Extron status
-           (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
+          ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "IN0 " || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku2, Extron status
+           (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "IN0 " || previnput[1] == "In0 " || previnput[1] == "In00"))){
           
           if(SVS == 1)sendSVS(0);
           else sendRBP(12);
@@ -1151,7 +1151,7 @@ void readExtron2(){
         previnput[1] = "0";
         setTie(2,currentInputSW2);
 
-        if(S0 && (!automatrixSW1 && (previnput[0] == "0" || previnput[0] == "In0 " || previnput[0] == "In00" || previnput[0] == "discon"))
+        if(S0 && (!automatrixSW1 && (previnput[0] == "0" || previnput[0] == "IN0 " || previnput[0] == "In0 " || previnput[0] == "In00" || previnput[0] == "discon"))
               && otakuoff[0] && otakuoff[1] && allgscartoff[0] && allgscartoff[1]
               && (!automatrixSW1 && (previnput[0] == "discon" || voutMatrix[eoutput[0]]))){
 
@@ -1167,11 +1167,11 @@ void readExtron2(){
 
 
     // For Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references voutMatrix
-    if(((einput.substring(0,2) == "IN" || einput.substring(0,2) == "In") && voutMatrix[eoutput[1]+16] && !automatrixSW2) || (einput.substring(0,3) == "Rpr")){
+    if(((einput.substring(0,2) == "In" || einput.substring(0,2) == "IN") && voutMatrix[eoutput[1]+16] && !automatrixSW2) || (einput.substring(0,3) == "Rpr")){
       if(einput.substring(0,3) == "Rpr"){
         sendSVS(einput.substring(3,5).toInt()+100);
       }
-      else if(einput != "In0 " && einput != "In00"){ // much easier method for switch 2 since ALL inputs will respond with SVS commands regardless of SVS option above
+      else if(einput != "IN0 " && einput != "In0 " && einput != "In00"){ // much easier method for switch 2 since ALL inputs will respond with SVS commands regardless of SVS option above
         if(einput.substring(3,4) == " ") 
           sendSVS(einput.substring(2,3).toInt()+100);
         else 
@@ -1184,8 +1184,8 @@ void readExtron2(){
       // when both Extron switches match In0 or In00 (no active ports), both gscart/gcomp/otaku are disconnected or all ports in-active, a Profile 0 can be loaded if S0 is enabled
       if(S0 && otakuoff[0] && otakuoff[1] &&
         allgscartoff[0] && allgscartoff[1] && 
-        (currentInputSW1 <= 0) && ((einput == "In0 " || einput == "In00") && 
-        (previnput[0] == "In0 " || previnput[0] == "In00" || previnput[0] == "discon")) && 
+        (currentInputSW1 <= 0) && ((einput == "IN0 " || einput == "In0 " || einput == "In00") && 
+        (previnput[0] == "IN0 " || previnput[0] == "In0 " || previnput[0] == "In00" || previnput[0] == "discon")) && 
         (previnput[0] == "discon" || voutMatrix[eoutput[0]]) && voutMatrix[eoutput[1]+16]){
 
         if(SVS == 1)sendSVS(0);
@@ -1196,8 +1196,8 @@ void readExtron2(){
       
       } // end of Extron2 S0
 
-      if(previnput[0] == "0" && previnput[1].substring(0,2) == "In")previnput[0] = "In00";  // changes previnput[0] "0" state to "In00" when there is a newly active input on the other switch
-      if(previnput[1] == "0" && previnput[0].substring(0,2) == "In")previnput[1] = "In00";
+      if(previnput[0] == "0" && (previnput[1].substring(0,2) == "In" || previnput[1].substring(0,2) == "IN"))previnput[0] = "In00";  // changes previnput[0] "0" state to "In00" when there is a newly active input on the other switch
+      if(previnput[1] == "0" && (previnput[0].substring(0,2) == "In" || previnput[0].substring(0,2) == "IN"))previnput[1] = "In00";
 
     }
 
@@ -1363,8 +1363,8 @@ void readExtron2(){
         otakuoff[1] = 1;
         if(S0 && otakuoff[0] && 
           allgscartoff[0] && allgscartoff[1] && 
-          ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku, Extron status
-          (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
+          ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "IN0 " || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks gscart, otaku, Extron status
+          (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "IN0 " || previnput[1] == "In0 " || previnput[1] == "In00"))){
 
             if(SVS == 1)sendSVS(0);
             else sendRBP(12);
@@ -1546,8 +1546,8 @@ void readGscart1(){
 
     if(S0 && otakuoff[0] && 
       otakuoff[1] && allgscartoff[1] && 
-      ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks otaku, gscart2, Extron status
-       (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
+      ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "IN0 " || previnput[0] == "In0 " || previnput[0] == "In00") && // cross-checks otaku, gscart2, Extron status
+       (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "IN0 " || previnput[1] == "In0 " || previnput[1] == "In00"))){
 
       if(SVS == 1)sendSVS(0);
       else sendRBP(12);
@@ -1684,8 +1684,8 @@ void readGscart2(){
     
     if(S0 && allgscartoff[0] && 
       otakuoff[0] && otakuoff[1] && 
-      ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "In0 " || previnput[0] == "In00") &&  // cross-checks gscart, otaku, Extron status
-       (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "In0 " || previnput[1] == "In00"))){
+      ((previnput[0] == "0" || previnput[0] == "discon" || previnput[0] == "IN0 " || previnput[0] == "In0 " || previnput[0] == "In00") &&  // cross-checks gscart, otaku, Extron status
+       (previnput[1] == "0" || previnput[1] == "discon" || previnput[1] == "IN0 " || previnput[1] == "In0 " || previnput[1] == "In00"))){
 
       if(SVS == 1)sendSVS(0);
       else sendRBP(12);
