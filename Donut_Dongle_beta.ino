@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.6h
+* Donut Dongle beta v1.6i
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -32,7 +32,7 @@
 */
 
 uint8_t const debugE1CAP = 0; // line ~529
-uint8_t const debugE2CAP = 0; // line ~1096
+uint8_t const debugE2CAP = 0; // line ~1097
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -566,16 +566,17 @@ void readExtron1(){
       eoutput[0] = 33;
     }
     else if(ecap.substring(0,8) == "RECONFIG"){ // This is sent everytime a change is made on older Extron Crosspoints
-      char buf[6];                              // Returns current input for "ExtronVideoOutputPortSW1"
-      extronSerial.write('v');
-      itoa(ExtronVideoOutputPortSW1,buf,10);
-      extronSerial.write(buf);
-      extronSerial.write('%');
+      char cmd[6];                              // Returns current input for "ExtronVideoOutputPortSW1"
+      char buff[4];
+      cmd[0] = 'v';
+      itoa(ExtronVideoOutputPortSW1,buff,10);
+      int i = 1;
+      for(char* j = buff; *j; j++){
+        cmd[i++] = *j;
+      }
+      cmd[i++] = '%';
+      extronSerial.write((uint8_t*)cmd, i);
       delay(20);
-    }
-    else if(ecap.substring(0,3) == "Qik"){
-      einput = "IN11";
-      eoutput[0] = 1;
     }
     else if(ecap.substring(0,3) == "In0" && ecap.substring(4,7) != "All" && ecap.substring(5,8) != "All" && automatrixSW1){ // start of automatrix
       if(ecap.substring(0,4) == "In00"){
@@ -1132,11 +1133,16 @@ void readExtron2(){
       eoutput[1] = 33;
     }
     else if(ecap.substring(0,8) == "RECONFIG"){ // This is sent everytime a change is made on older Extron Crosspoints.
-      char buf[6];                              // Returns current input for "ExtronVideoOutputPortSW2"
-      extronSerial2.write('v');
-      itoa(ExtronVideoOutputPortSW2,buf,10);
-      extronSerial2.write(buf);
-      extronSerial2.write('%');
+      char cmd[6];                              // Returns current input for "ExtronVideoOutputPortSW2"
+      char buff[4];
+      cmd[0] = 'v';
+      itoa(ExtronVideoOutputPortSW2,buff,10);
+      int i = 1;
+      for(char* j = buff; *j; j++){
+        cmd[i++] = *j;
+      }
+      cmd[i++] = '%';
+      extronSerial2.write((uint8_t*)cmd, i);
       delay(20);
     }
     else if(ecap.substring(0,3) == "In0" && ecap.substring(4,7) != "All" && ecap.substring(5,8) != "All" && automatrixSW2){ // start of automatrix
