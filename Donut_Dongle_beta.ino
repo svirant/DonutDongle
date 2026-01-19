@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.6g
+* Donut Dongle beta v1.6h
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -32,7 +32,7 @@
 */
 
 uint8_t const debugE1CAP = 0; // line ~529
-uint8_t const debugE2CAP = 0; // line ~1090
+uint8_t const debugE2CAP = 0; // line ~1096
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -118,7 +118,7 @@ uint8_t const amSizeSW2 = 8; // number of input ports for auto matrix switching 
 ///////////////////////////////
 
 uint8_t ExtronVideoOutputPortSW1 = 1; // For non "Plus" Extron Matrix models, must specify video output port that connects to RT4K
-uint8_t ExtronVideoOutputPortSW2 = 1;
+uint8_t ExtronVideoOutputPortSW2 = 1; // 
 
 ///////////////////////////////
 
@@ -565,11 +565,17 @@ void readExtron1(){
       einput = ecap.substring(amSizeSW1 + 7,amSizeSW1 + 12);
       eoutput[0] = 33;
     }
-    else if(ecap.substring(0,8) == "RECONFIG"){ // this is sent everytime a change is made on older Extron Crosspoints
-      char cmd[10];
-      snprintf(cmd, sizeof(cmd), "v%d%%", ExtronVideoOutputPortSW1);
-      extronSerial.write(cmd);
+    else if(ecap.substring(0,8) == "RECONFIG"){ // This is sent everytime a change is made on older Extron Crosspoints
+      char buf[6];                              // Returns current input for "ExtronVideoOutputPortSW1"
+      extronSerial.write('v');
+      itoa(ExtronVideoOutputPortSW1,buf,10);
+      extronSerial.write(buf);
+      extronSerial.write('%');
       delay(20);
+    }
+    else if(ecap.substring(0,3) == "Qik"){
+      einput = "IN11";
+      eoutput[0] = 1;
     }
     else if(ecap.substring(0,3) == "In0" && ecap.substring(4,7) != "All" && ecap.substring(5,8) != "All" && automatrixSW1){ // start of automatrix
       if(ecap.substring(0,4) == "In00"){
@@ -1125,10 +1131,12 @@ void readExtron2(){
       einput = ecap.substring(amSizeSW2 + 7,amSizeSW2 + 12);
       eoutput[1] = 33;
     }
-    else if(ecap.substring(0,8) == "RECONFIG"){ // this is sent everytime a change is made on older Extron Crosspoints
-      char cmd[10];
-      snprintf(cmd, sizeof(cmd), "v%d%%", ExtronVideoOutputPortSW2);
-      extronSerial2.write(cmd);
+    else if(ecap.substring(0,8) == "RECONFIG"){ // This is sent everytime a change is made on older Extron Crosspoints.
+      char buf[6];                              // Returns current input for "ExtronVideoOutputPortSW2"
+      extronSerial2.write('v');
+      itoa(ExtronVideoOutputPortSW2,buf,10);
+      extronSerial2.write(buf);
+      extronSerial2.write('%');
       delay(20);
     }
     else if(ecap.substring(0,3) == "In0" && ecap.substring(4,7) != "All" && ecap.substring(5,8) != "All" && automatrixSW2){ // start of automatrix
