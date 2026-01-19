@@ -309,17 +309,26 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 
   -----------
 # Programming an Arduino Nano
-I recommend the [Official Arduino IDE and guide](https://www.arduino.cc/en/Guide) if you're unfamiliar with Arduinos. All .ino files used for programming are listed above. The following Libraries will also need to be added in order to Compile successfully.<br />
+I recommend the [Official Arduino IDE and guide](https://www.arduino.cc/en/software/) if you're unfamiliar with Arduinos. All .ino files used for programming are listed above. The following Libraries will also need to be added in order to Compile successfully.<br />
 - **Libraries:**
   - <IRremote.hpp> "IRremote" available through the built-in Library Manager under "Tools" -> "Manage Libraries..."
   - <AltSoftSerial.h>  Follow these steps to add AltSoftSerial.h
     - Goto https://github.com/PaulStoffregen/AltSoftSerial
     - Click the GREEN "<> Code" box and "Download ZIP"
     - In Arduino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
-
-Some Arduino Nanos come with an Old Bootloader and won't Upload unless specified. **If you get errors** when trying to upload, swap to this option as a possible fix.
-
-<img width="600" alt="bootloader" src="./images/9.png" />
+   
+## Steps to program the Donut Dongle
+ - 1 - Click the green "<> Code" button above and "Download ZIP".
+ - 2 - Extract the .zip file and open up the "Donut_Dongle.ino" file in the Arduino IDE. It will ask if you would like to move this file inside a folder, select OK.
+ - 3 - With the source code now open, select "Tools" -> "Board" -> "Arduino AVR Boards" -> "Arduino Nano"
+ - 4 - Connect the Donut Dongle device to your PC or Mac using the usb-c cable. You should see an LED light up when connected.
+ - 5 - With the Donut Dongle now connected, select it's "port" by going to "Tools" -> "Port", and select the port that starts with "/dev/cu.usbserial-" (on Mac) or "COM" if on PC.
+ - 6 - From the menu at the top, select "Sketch" -> "Verify/Compile". If everything is setup properly, you should see a message in the bottom corner saying "Done compiling".
+ - 7 - Now select "Sketch" -> "Upload". You should see the LEDs on the Donut Dongle flicker and a message that says "Done uploading." if successful.
+   - If you get errors, see the section below about changing the "Bootloader" type.
+ - 8 - Disconnect the usb-c cable from your computer and give it a whirl! You can repeat these steps in the future to make any other changes or update if a newer firmware is ever released.
+ - 9 - It's also best practice when unplugging/reconnecting cables to the Donut Dongle, that you do so with the power disconnected. 
+<br>
 
   -----------
 # How to Use
@@ -332,7 +341,12 @@ Some Arduino Nanos come with an Old Bootloader and won't Upload unless specified
 # Troubleshooting
  - When (un)plugging aux cables from "alt sw1" or "alt sw2" ports make sure Donut Dongle power is disconnected. Sometimes the onboard MAX3232 chip can lock up if this is not done.
    - To fix lockup, power off switch and DD (Donut Dongle). Disconnect/reconnect aux cable from DD and power up switch first, then DD last.
+  
+ - Some Arduino Nanos come with an Old Bootloader and won't Upload unless specified. **If you get errors** when trying to upload, swap to this option as a possible fix.
 
+<img width="600" alt="bootloader" src="./images/9.png" />
+  
+  -----------
 ## SVS Profile numbering scheme
 
 | **SVS = 1 (default)** | **Profile #** | Notes |
