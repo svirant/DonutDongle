@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.6k
+* Donut Dongle beta v1.6l
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -198,7 +198,7 @@ uint8_t const vinMatrix[] = {0,  // MATRIX switchers  // When auto matrix mode i
                            30,  // 2ND MATRIX SWITCH input 32
                            };
 
-uint8_t const PROGMEM voutMatrix[] = {1,  // MATRIX switchers // When auto matrix mode is enabled: (automatrixSW1 / SW2 above)
+uint8_t const voutMatrix[] = {0,  // MATRIX switchers // When auto matrix mode is enabled: (automatrixSW1 / SW2 above)
                                                         // set to 1 for the auto switched input to go to ALL outputs (default)
                                                         // set to 0 to select outputs to be enabled/disabled as listed below
                                                         //
