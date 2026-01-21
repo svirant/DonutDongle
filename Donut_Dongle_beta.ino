@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.6m
+* Donut Dongle beta v1.6n
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,8 @@
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~529
-uint8_t const debugE2CAP = 0; // line ~1094
+uint8_t const debugE1CAP = 0; // line ~504
+uint8_t const debugE2CAP = 0; // line ~1068
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -394,34 +394,11 @@ char stack1[] = "00000000000000000000000000000000";
 char stack2[] = "00000000000000000000000000000000"; 
 int currentInputSW1 = -1;
 int currentInputSW2 = -1;
-byte const PROGMEM VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
+byte const VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
 
 // MT-VIKI / TESmart serial commands
-byte const PROGMEM viki1[4] = {0xA5,0x5A,0x00,0xCC};
-byte const PROGMEM viki2[4] = {0xA5,0x5A,0x01,0xCC};
-byte const PROGMEM viki3[4] = {0xA5,0x5A,0x02,0xCC};
-byte const PROGMEM viki4[4] = {0xA5,0x5A,0x03,0xCC};
-byte const PROGMEM viki5[4] = {0xA5,0x5A,0x04,0xCC};
-byte const PROGMEM viki6[4] = {0xA5,0x5A,0x05,0xCC};
-byte const PROGMEM viki7[4] = {0xA5,0x5A,0x06,0xCC};
-byte const PROGMEM viki8[4] = {0xA5,0x5A,0x07,0xCC};
-
-byte const PROGMEM tesmart1[6] = {0xAA,0xBB,0x03,0x01,0x01,0xEE};
-byte const PROGMEM tesmart2[6] = {0xAA,0xBB,0x03,0x01,0x02,0xEE};
-byte const PROGMEM tesmart3[6] = {0xAA,0xBB,0x03,0x01,0x03,0xEE};
-byte const PROGMEM tesmart4[6] = {0xAA,0xBB,0x03,0x01,0x04,0xEE};
-byte const PROGMEM tesmart5[6] = {0xAA,0xBB,0x03,0x01,0x05,0xEE};
-byte const PROGMEM tesmart6[6] = {0xAA,0xBB,0x03,0x01,0x06,0xEE};
-byte const PROGMEM tesmart7[6] = {0xAA,0xBB,0x03,0x01,0x07,0xEE};
-byte const PROGMEM tesmart8[6] = {0xAA,0xBB,0x03,0x01,0x08,0xEE};
-byte const PROGMEM tesmart9[6] = {0xAA,0xBB,0x03,0x01,0x09,0xEE};
-byte const PROGMEM tesmart10[6] = {0xAA,0xBB,0x03,0x01,0x0A,0xEE};
-byte const PROGMEM tesmart11[6] = {0xAA,0xBB,0x03,0x01,0x0B,0xEE};
-byte const PROGMEM tesmart12[6] = {0xAA,0xBB,0x03,0x01,0x0C,0xEE};
-byte const PROGMEM tesmart13[6] = {0xAA,0xBB,0x03,0x01,0x0D,0xEE};
-byte const PROGMEM tesmart14[6] = {0xAA,0xBB,0x03,0x01,0x0E,0xEE};
-byte const PROGMEM tesmart15[6] = {0xAA,0xBB,0x03,0x01,0x0F,0xEE};
-byte const PROGMEM tesmart16[6] = {0xAA,0xBB,0x03,0x01,0x10,0xEE};
+byte viki[4] = {0xA5,0x5A,0x00,0xCC};
+byte tesmart[6] = {0xAA,0xBB,0x03,0x01,0x01,0xEE};
 
 // LS timer variables
 unsigned long LScurrentTime = 0; 
@@ -480,10 +457,10 @@ void setup(){
     Serial.print(F("\r")); // clear RT4K Serial buffer
     extronSerial.begin(9600); // set the baud rate for the Extron sw1 Connection
     extronSerial.setTimeout(150); // sets the timeout for reading / saving into a string
-    if(automatrixSW1)extronSerialPwrite(VERB,5,1); // sets extron matrix switch to Verbose level 3
+    if(automatrixSW1)extronSerial.write(VERB,5); // sets extron matrix switch to Verbose level 3
     extronSerial2.begin(9600); // set the baud rate for Extron sw2 Connection
     extronSerial2.setTimeout(150); // sets the timeout for reading / saving into a string for the Extron sw2 Connection
-    if(automatrixSW2)extronSerialPwrite(VERB,5,2); // sets extron matrix switch to Verbose level 3
+    if(automatrixSW2)extronSerial2.write(VERB,5); // sets extron matrix switch to Verbose level 3
     pinMode(LED_BUILTIN, OUTPUT); // initialize builtin led for RTwake
 
 } // end of setup
@@ -565,7 +542,6 @@ void readExtron1(){
     }
     else if(ecap.substring(0,8) == "RECONFIG"){     // This is sent everytime a change is made on older Extron Crosspoints
       ExtronInputQuery(ExtronVideoOutputPortSW1,1); // Returns current input for "ExtronVideoOutputPortSW1" that is connected to port 1 of the DD
-      delay(20);
     }
     else if(ecap.substring(0,3) == "In0" && ecap.substring(4,7) != "All" && ecap.substring(5,8) != "All" && automatrixSW1){ // start of automatrix
       if(ecap.substring(0,4) == "In00"){
@@ -1129,7 +1105,6 @@ void readExtron2(){
     }
     else if(ecap.substring(0,8) == "RECONFIG"){     // This is sent everytime a change is made on older Extron Crosspoints.
       ExtronInputQuery(ExtronVideoOutputPortSW2,2); // Returns current input for "ExtronVideoOutputPortSW2" that is connected to port 2 of the DD
-      delay(20);
     }
     else if(ecap.substring(0,3) == "In0" && ecap.substring(4,7) != "All" && ecap.substring(5,8) != "All" && automatrixSW2){ // start of automatrix
       if(ecap.substring(0,4) == "In00"){
@@ -1807,109 +1782,109 @@ void readIR(){
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && extrabuttonprof == 1){ // if AUX8 was pressed and a profile button is pressed next,
       if(ir_recv_command == 11){ // profile button 1                                                         // load "SVS" profiles 1 - 12 (profile button 1 - 12).
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[0]);                                                               // Can be changed to "ANY" SVS profile in the OPTIONS section
-        else if(MTVir == 1){extronSerialPwrite(viki1,4,1);sendSVS(auxprof[0]);}
-        else if(MTVir == 2){extronSerialPwrite(viki1,4,2);sendSVS(auxprof[0]);}
-        if(TESmartir > 1){extronSerialPwrite(tesmart1,6,2);sendSVS(101);}                                                                   
+        else if(MTVir == 1){extronSerialEwrite("viki",1,1);currentMTVinput=1;sendSVS(auxprof[0]);}
+        else if(MTVir == 2){extronSerialEwrite("viki",1,2);currentMTVinput2=101;sendSVS(auxprof[0]);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",1,2);sendSVS(101);}                                                                   
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 7){ // profile button 2
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[1]);
-        else if(MTVir == 1){extronSerialPwrite(viki2,4,1);sendSVS(auxprof[1]);}
-        else if(MTVir == 2){extronSerialPwrite(viki2,4,2);sendSVS(auxprof[1]);}
-        if(TESmartir > 1){extronSerialPwrite(tesmart2,6,2);sendSVS(102);}
+        else if(MTVir == 1){extronSerialEwrite("viki",2,1);currentMTVinput=2;sendSVS(auxprof[1]);}
+        else if(MTVir == 2){extronSerialEwrite("viki",2,2);currentMTVinput2=102;sendSVS(auxprof[1]);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",2,2);sendSVS(102);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 3){ // profile button 3
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[2]);
-        else if(MTVir == 1){extronSerialPwrite(viki3,4,1);sendSVS(auxprof[2]);}
-        else if(MTVir == 2){extronSerialPwrite(viki3,4,2);sendSVS(auxprof[2]);}
-        if(TESmartir > 1){extronSerialPwrite(tesmart3,6,2);sendSVS(103);}
+        else if(MTVir == 1){extronSerialEwrite("viki",3,1);currentMTVinput=3;sendSVS(auxprof[2]);}
+        else if(MTVir == 2){extronSerialEwrite("viki",3,2);currentMTVinput2=103;sendSVS(auxprof[2]);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",3,2);sendSVS(103);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 10){ // profile button 4
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[3]);
-        else if(MTVir == 1){extronSerialPwrite(viki4,4,1);sendSVS(auxprof[3]);}
-        else if(MTVir == 2){extronSerialPwrite(viki4,4,2);sendSVS(auxprof[3]);}
-        if(TESmartir > 1){extronSerialPwrite(tesmart4,6,2);sendSVS(104);}
+        else if(MTVir == 1){extronSerialEwrite("viki",4,1);currentMTVinput=4;sendSVS(auxprof[3]);}
+        else if(MTVir == 2){extronSerialEwrite("viki",4,2);currentMTVinput2=104;sendSVS(auxprof[3]);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",4,2);sendSVS(104);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 6){ // profile button 5
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[4]);
-        else if(MTVir == 1){extronSerialPwrite(viki5,4,1);sendSVS(auxprof[4]);}
-        else if(MTVir == 2){extronSerialPwrite(viki5,4,2);sendSVS(auxprof[4]);}
-        if(TESmartir > 1){extronSerialPwrite(tesmart5,6,2);sendSVS(105);}
+        else if(MTVir == 1){extronSerialEwrite("viki",5,1);currentMTVinput=5;sendSVS(auxprof[4]);}
+        else if(MTVir == 2){extronSerialEwrite("viki",5,2);currentMTVinput2=105;sendSVS(auxprof[4]);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",5,2);sendSVS(105);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 2){ // profile button 6
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[5]);
-        else if(MTVir == 1){extronSerialPwrite(viki6,4,1);sendSVS(auxprof[5]);}
-        else if(MTVir == 2){extronSerialPwrite(viki6,4,2);sendSVS(auxprof[5]);}
-        if(TESmartir > 1){extronSerialPwrite(tesmart6,6,2);sendSVS(106);}
+        else if(MTVir == 1){extronSerialEwrite("viki",6,1);currentMTVinput=6;sendSVS(auxprof[5]);}
+        else if(MTVir == 2){extronSerialEwrite("viki",6,2);currentMTVinput2=106;sendSVS(auxprof[5]);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",6,2);sendSVS(106);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 9){ // profile button 7
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[6]);
-        else if(MTVir == 1){extronSerialPwrite(viki7,4,1);sendSVS(auxprof[6]);}
-        else if(MTVir == 2){extronSerialPwrite(viki7,4,2);sendSVS(auxprof[6]);}
-        if(TESmartir > 1){extronSerialPwrite(tesmart7,6,2);sendSVS(107);}
+        else if(MTVir == 1){extronSerialEwrite("viki",7,1);currentMTVinput=7;sendSVS(auxprof[6]);}
+        else if(MTVir == 2){extronSerialEwrite("viki",7,2);currentMTVinput2=107;sendSVS(auxprof[6]);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",7,2);sendSVS(107);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 5){ // profile button 8
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[7]);
-        else if(MTVir == 1){extronSerialPwrite(viki8,4,1);sendSVS(auxprof[7]);}
-        else if(MTVir == 2){extronSerialPwrite(viki8,4,2);sendSVS(auxprof[7]);}
-        if(TESmartir > 1){extronSerialPwrite(tesmart8,6,2);sendSVS(108);}
+        else if(MTVir == 1){extronSerialEwrite("viki",8,1);currentMTVinput=8;sendSVS(auxprof[7]);}
+        else if(MTVir == 2){extronSerialEwrite("viki",8,2);currentMTVinput2=108;sendSVS(auxprof[7]);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",8,2);sendSVS(108);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 1){ // profile button 9
         if(TESmartir < 2)sendSVS(auxprof[8]);
-        if(TESmartir > 1){extronSerialPwrite(tesmart9,6,2);sendSVS(109);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",9,2);sendSVS(109);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 37){ // profile button 10
         if(TESmartir < 2)sendSVS(auxprof[9]);
-        if(TESmartir > 1){extronSerialPwrite(tesmart10,6,2);sendSVS(110);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",10,2);sendSVS(110);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 38){ // profile button 11
         if(TESmartir < 2)sendSVS(auxprof[10]);
-        if(TESmartir > 1){extronSerialPwrite(tesmart11,6,2);sendSVS(111);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",11,2);sendSVS(111);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 39){ // profile button 12
         if(TESmartir < 2)sendSVS(auxprof[11]);
-        if(TESmartir > 1){extronSerialPwrite(tesmart12,6,2);sendSVS(112);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",12,2);sendSVS(112);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 56){ // aux1 button
-        if(TESmartir > 1){extronSerialPwrite(tesmart13,6,2);sendSVS(113);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",13,2);sendSVS(113);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 57){ // aux2 button
-        if(TESmartir > 1){extronSerialPwrite(tesmart14,6,2);sendSVS(114);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",14,2);sendSVS(114);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 58){ // aux3 button
-        if(TESmartir > 1){extronSerialPwrite(tesmart15,6,2);sendSVS(115);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",15,2);sendSVS(115);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 59){ // aux4 button
-        if(TESmartir > 1){extronSerialPwrite(tesmart16,6,2);sendSVS(116);}
+        if(TESmartir > 1){extronSerialEwrite("tesmart",16,2);sendSVS(116);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
@@ -1933,82 +1908,82 @@ void readIR(){
 
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && auxTESmart[0] == 1){ // if AUX7 was pressed and a profile button is pressed next
       if(ir_recv_command == 11){ // profile button 1
-        extronSerialPwrite(tesmart1,6,1);sendSVS(1);                                                                    
+        extronSerialEwrite("tesmart",1,1);sendSVS(1);                                                                    
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 7){ // profile button 2
-        extronSerialPwrite(tesmart2,6,1);sendSVS(2); 
+        extronSerialEwrite("tesmart",2,1);sendSVS(2); 
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 3){ // profile button 3
-        extronSerialPwrite(tesmart3,6,1);sendSVS(3); 
+        extronSerialEwrite("tesmart",3,1);sendSVS(3); 
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 10){ // profile button 4
-        extronSerialPwrite(tesmart4,6,1);sendSVS(4); 
+        extronSerialEwrite("tesmart",4,1);sendSVS(4); 
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 6){ // profile button 5
-        extronSerialPwrite(tesmart5,6,1);sendSVS(5); 
+        extronSerialEwrite("tesmart",5,1);sendSVS(5); 
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 2){ // profile button 6
-        extronSerialPwrite(tesmart6,6,1);sendSVS(6); 
+        extronSerialEwrite("tesmart",6,1);sendSVS(6); 
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 9){ // profile button 7
-        extronSerialPwrite(tesmart7,6,1);sendSVS(7); 
+        extronSerialEwrite("tesmart",7,1);sendSVS(7); 
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 5){ // profile button 8
-        extronSerialPwrite(tesmart8,6,1);sendSVS(8); 
+        extronSerialEwrite("tesmart",8,1);sendSVS(8); 
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 1){ // profile button 9
-        extronSerialPwrite(tesmart9,6,1);sendSVS(9); 
+        extronSerialEwrite("tesmart",9,1);sendSVS(9); 
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 37){ // profile button 10
-        extronSerialPwrite(tesmart10,6,1);sendSVS(10); 
+        extronSerialEwrite("tesmart",10,1);sendSVS(10); 
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 38){ // profile button 11
-        extronSerialPwrite(tesmart11,6,1);sendSVS(11); 
+        extronSerialEwrite("tesmart",11,1);sendSVS(11); 
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 39){ // profile button 12
-        extronSerialPwrite(tesmart12,6,1);sendSVS(12); 
+        extronSerialEwrite("tesmart",12,1);sendSVS(12); 
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 56){ // aux1 button
-        extronSerialPwrite(tesmart13,6,1);sendSVS(13); 
+        extronSerialEwrite("tesmart",13,1);sendSVS(13); 
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 57){ // aux2 button
-        extronSerialPwrite(tesmart14,6,1);sendSVS(14); 
+        extronSerialEwrite("tesmart",14,1);sendSVS(14); 
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 58){ // aux3 button
-        extronSerialPwrite(tesmart15,6,1);sendSVS(15); 
+        extronSerialEwrite("tesmart",15,1);sendSVS(15); 
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 59){ // aux4 button
-        extronSerialPwrite(tesmart16,6,1);sendSVS(16);
+        extronSerialEwrite("tesmart",16,1);sendSVS(16);
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
@@ -2646,14 +2621,7 @@ void MTVtime1(unsigned long eTime){
   if((MTVcurrentTime - MTVprevTime) >= eTime){ // If it's been longer than eTime, send MT-VIKI serial command for current input, see if it responds with disconnected, and reset the timer.
     MTVcurrentTime = 0;
     MTVprevTime = 0;
-    if(currentMTVinput == 1) extronSerialPwrite(viki1,4,1);
-    else if(currentMTVinput == 2) extronSerialPwrite(viki2,4,1);
-    else if(currentMTVinput == 3) extronSerialPwrite(viki3,4,1);
-    else if(currentMTVinput == 4) extronSerialPwrite(viki4,4,1);
-    else if(currentMTVinput == 5) extronSerialPwrite(viki5,4,1);
-    else if(currentMTVinput == 6) extronSerialPwrite(viki6,4,1);
-    else if(currentMTVinput == 7) extronSerialPwrite(viki7,4,1);
-    else if(currentMTVinput == 8) extronSerialPwrite(viki8,4,1);
+    extronSerialEwrite("viki",currentMTVinput,1);
     delay(50);
  }
 }  // end of MTVtime1()
@@ -2665,14 +2633,7 @@ void MTVtime2(unsigned long eTime){
   if((MTVcurrentTime2 - MTVprevTime2) >= eTime){ // If it's been longer than eTime, send MT-VIKI serial command for current input, see if it responds with disconnected, and reset the timer.
     MTVcurrentTime2 = 0;
     MTVprevTime2 = 0;
-    if(currentMTVinput2 == 101) extronSerialPwrite(viki1,4,2);
-    else if(currentMTVinput2 == 102) extronSerialPwrite(viki2,4,2);
-    else if(currentMTVinput2 == 103) extronSerialPwrite(viki3,4,2);
-    else if(currentMTVinput2 == 104) extronSerialPwrite(viki4,4,2);
-    else if(currentMTVinput2 == 105) extronSerialPwrite(viki5,4,2);
-    else if(currentMTVinput2 == 106) extronSerialPwrite(viki6,4,2);
-    else if(currentMTVinput2 == 107) extronSerialPwrite(viki7,4,2);
-    else if(currentMTVinput2 == 108) extronSerialPwrite(viki8,4,2);
+    extronSerialEwrite("viki",currentMTVinput2 - 100,2);
     delay(50);
  }
 } // end of MTVtime2()
@@ -2691,14 +2652,24 @@ void ExtronInputQuery(uint8_t outputNum, uint8_t sw){
     extronSerial.write((uint8_t *)cmd,len);
   else if(sw == 2)
     extronSerial2.write((uint8_t *)cmd,len);
+
+  delay(20);
 } // end of ExtronInputQuery()
 
-void extronSerialPwrite(const void* progmemData, uint8_t size, uint8_t sw)
-{
-  uint8_t buffer[size];
-  memcpy_P(buffer, progmemData, size);
-  if(sw == 1)
-    extronSerial.write(buffer, size);
-  else if(sw == 2)
-    extronSerial2.write(buffer, size);
-} // end of extronSerialPwrite()
+void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
+  if(type == "viki"){
+    viki[2] = byte(value - 1);
+    if(sw == 1)
+      extronSerial.write(viki, 4);
+    else if(sw == 2)
+      extronSerial2.write(viki, 4);
+  }
+  else if(type == "tesmart"){
+    tesmart[4] = byte(value);
+    if(sw == 1)
+      extronSerial.write(tesmart, 6);
+    else if(sw == 2)
+      extronSerial2.write(tesmart, 6);
+  }
+  delay(20);
+}  // end of extronSerialEwrite()
