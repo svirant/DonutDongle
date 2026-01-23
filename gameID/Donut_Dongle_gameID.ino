@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.2 (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.2a (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -23,15 +23,19 @@
 #define extronSerial2 Serial2
 #define Serial Serial0 // ** COMMENT OUT THIS LINE ** to see output in Serial Monitor. Disables Serial output to RT4K.
 
-
 #include <TinyIRReceiver.hpp>
 #include <IRremote.hpp>       // found in the built-in Library Manager
-#include <Arduino_JSON.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <WebServer.h>
+#include <SPIFFS.h>
+#include <ArduinoJson.h>
+#include <Arduino_JSON.h>
+#include <ESPmDNS.h>
 
 
 struct Console {
+  String Desc;
   String Address;
   int DefaultProf;
   int Prof;
@@ -44,7 +48,7 @@ struct Console {
 //    CONFIG     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 */
-                   // format as so: {console address, Default Profile for console, current profile state (leave 0), power state (leave 0), active state (leave 0)}
+                   // format as so: {Description, console address, Default Profile for console, current profile state (leave 0), power state (leave 0), active state (leave 0)}
                    //
                    // If using a "remote button profile" for the "Default Profile" which are valued 1 - 12, place a "-" before the profile number. 
                    // Example: -1 means "remote button profile 1"
@@ -53,14 +57,11 @@ struct Console {
                    //            1 means SVS profile 1
                    //           12 means SVS profile 12
                    //           etc...
-Console consoles[] = {{"http://ps1digital.local/gameid",-9,0,0,0}, // you can add more, but stay in this format
-                    //  {"http://10.0.1.120:8182/api/games/playing",400,0,0,0}, // replace the "mister1" part of the address with your MiSTer's IP or DomainName
-                                                                           // "MiSTer Extensions (wizzo)" must be turned on in the update_all script. 
-                                                                           // Afterwards the newly install "remote" service located in the Scripts folder must be started  
-                   //   {"http://10.0.1.53/api/currentState",-10,0,0,0},
-                   // {"http://ps2digital.local/gameid",102,0,0,0}, // remove leading "//" to uncomment and enable ps2digital
-                   // {"http://10.0.0.14/api/currentState",104,0,0,0}, // address format for MemCardPro. replace IP address with your MCP address
-                      {"http://n64digital.local/gameid",-7,0,0,0} // the last one in the list has no "," at the end
+Console consoles[] = {{"PS1","http://ps1digital.local/gameid",-9,0,0,0}, // you can add more, but stay in this format
+                   // {"Test","http://10.0.1.53/api/currentState",-10,0,0,0},
+                   // {"PS2","http://ps2digital.local/gameid",102,0,0,0}, // remove leading "//" to uncomment and enable ps2digital
+                   // {"MCP","http://10.0.0.14/api/currentState",104,0,0,0}, // address format for MemCardPro. replace IP address with your MCP address
+                      {"N64","http://n64digital.local/gameid",-7,0,0,0} // the last one in the list has no "," at the end
                       };
 
 
@@ -72,18 +73,18 @@ Console consoles[] = {{"http://ps1digital.local/gameid",-9,0,0,0}, // you can ad
                    //           12 means SVS profile 12
                    //           etc...
                    //                      
-                                 // {"<GAMEID>","PROFILE #"},
-String gameDB[][2] = {{"00000000-00000000---00","7"}, // 7 is the "SVS PROFILE", would translate to a S7_<USER_DEFINED>.rt4 named profile under RT4K-SDcard/profile/SVS/
-                      {"XSTATION","8"},               // XSTATION is the <GAMEID>
-                      {"GM4E0100","505"},             // GameCube
-                      {"3E5055B6-2E92DA52-N-45","501"}, // N64 MarioKart 64
-                      {"635A2BFF-8B022326-N-45","502"}, // N64 Mario 64
-                      {"DCBC50D1-09FD1AA3-N-45","503"}, // N64 Goldeneye 007
-                      {"492F4B61-04E5146A-N-45","504"}, // N64 Wave Race 64
-                      {"SLUS-00214","10"}, // PS1 Ridge Racer Revolution
-                      {"SCUS-94300","9"},
-                      {"MegaDrive","506"},
-                      {"Streets of Rage 2 (USA)","507"}}; // MiSTer, Genesis, Streets of Rage 2
+                                 // {"Description","<GAMEID>","PROFILE #"},
+String gameDB[][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 is the "SVS PROFILE", would translate to a S7_<USER_DEFINED>.rt4 named profile under RT4K-SDcard/profile/SVS/
+                      {"xstation","XSTATION","8"},               // XSTATION is the <GAMEID>
+                      {"GameCube","GM4E0100","505"},             // GameCube is the Description
+                      {"N64 MarioKart 64","3E5055B6-2E92DA52-N-45","501"},
+                      {"N64 Mario 64","635A2BFF-8B022326-N-45","502"},
+                      {"N64 GoldenEye 007","DCBC50D1-09FD1AA3-N-45","503"},
+                      {"N64 Wave Race 64","492F4B61-04E5146A-N-45","504"},
+                      {"PS1 Ridge Racer Revolution","SLUS-00214","10"},
+                      {"PS1 Ridge Racer","SCUS-94300","9"},
+                      {"MegaDrive","MegaDrive","506"},
+                      {"SoR2","Streets of Rage 2 (USA)","507"}};
 
 // WiFi config is below (line ~490)
 
@@ -95,8 +96,8 @@ String gameDB[][2] = {{"00000000-00000000---00","7"}, // 7 is the "SVS PROFILE",
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~603
-uint8_t const debugE2CAP = 0; // line ~1172
+uint8_t const debugE1CAP = 0; // line ~618
+uint8_t const debugE2CAP = 0; // line ~1187
 
 bool const S0_pwr = false;       // Load "S0_pwr_profile" when all consoles defined below are off. Defined below.
 
@@ -397,17 +398,27 @@ bool MTVdiscon2 = false;
 bool MTVddSW1 = false;
 bool MTVddSW2 = false;
 
-const int consolelen = sizeof(consoles) / sizeof(consoles[0]); // length of consoles DB, used frequently
-const int gameDBlen = sizeof(gameDB) / sizeof(gameDB[0]); // length of gameDB...
+int consolesSize = sizeof(consoles) / sizeof(consoles[0]); // length of consoles DB, used frequently
+int gameDBSize = sizeof(gameDB)/sizeof(gameDB[0]); // length of gameDB...
+
+WebServer server(80);
 
 void DDloop(void *pvParameters);
 void gameIDTimer(void *pvParameters);
+
+// ---- Web handler forward declarations ----
+void handleRoot();
+void handleGetConsoles();
+void handleUpdateConsoles();
+void handleGetGameDB();
+void handleUpdateGameDB();
+void loadGameDB();
+void testSPIFFS();
 
 void setup(){
 
   initPCIInterruptForTinyReceiver();            // for IR Receiver
   WiFi.begin("SSID","password"); // WiFi creds go here. MUST be a 2.4GHz WiFi AP. 5GHz is NOT supported by the Nano ESP32.
-  WiFi.setHostname("donutdongle.local"); // set hostname, call it whatever you like!
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LED_GREEN, OUTPUT); // GREEN led lights up for 1 second when a SVS profile is sent
   pinMode(LED_BLUE, OUTPUT); // BLUE led is a WiFi activity. Long periods of blue means one of the gameID servers is not connecting.
@@ -420,6 +431,23 @@ void setup(){
   extronSerial.setTimeout(150);                 // sets the timeout for reading / saving into a string
   extronSerial2.begin(9600,SERIAL_8N1,8,9);  // set the baud rate for Extron sw2 Connection
   extronSerial2.setTimeout(150);                // sets the timeout for reading / saving into a string for the Extron sw2 Connection
+  MDNS.begin("donutshop");
+  if (!SPIFFS.begin(true)) {
+    Serial.println("SPIFFS mount failed!");
+    return;
+  }
+  File f = SPIFFS.open("/test.txt", FILE_WRITE);
+
+  loadGameDB();
+  loadConsoles();
+
+  server.on("/",HTTP_GET,handleRoot);
+  server.on("/getConsoles",HTTP_GET,handleGetConsoles);
+  server.on("/updateConsoles",HTTP_POST,handleUpdateConsoles);
+  server.on("/getGameDB",HTTP_GET,handleGetGameDB);
+  server.on("/updateGameDB",HTTP_POST,handleUpdateGameDB);
+
+  server.begin();
 
   xTaskCreate(DDloop,"DDloop",4096,NULL,1,NULL);
   xTaskCreate(gameIDTimer,"gameIDTimer",4096,(void *)&gTime,1,NULL);
@@ -439,25 +467,19 @@ void DDloop(void *pvParameters){
     readIR();
     readExtron1();
     readExtron2();
-    if(RTwake)sendRTwake(10000); // 10000 is 10 seconds. After waking the RT4K, wait this amount of time before re-sending the latest profile change.
+    if(RTwake)sendRTwake(8000); // 8000 is 10 seconds. After waking the RT4K, wait this amount of time before re-sending the latest profile change.
+    server.handleClient();
   }
 } // end of DDloop
 
 
-int fetchGameIDProf(String gameID,String core,int dp){ // looks at gameDB for a gameID -> profile match
-  for(int i = 0; i < gameDBlen; i++){      // returns "DefaultProf" for console if nothing found and S0_gameID = true
-    if(gameDB[i][0] == gameID){            // returns "-1" (meaning dont change anything) if nothing found and S0_gameID = false
-      return gameDB[i][1].toInt();
+int fetchGameIDProf(String gameID,int dp){ // looks at gameDB for a gameID -> profile match
+  for(int i = 0; i < gameDBSize; i++){      // returns "DefaultProf" for console if nothing found and S0_gameID = true
+    if(gameDB[i][1] == gameID){            // returns "-1" (meaning dont change anything) if nothing found and S0_gameID = false
+      return gameDB[i][2].toInt();
       break;
    }
-  }
-  for(int i = 0; i < gameDBlen; i++){      // returns "core" profile for console if nothing found and S0_gameID = true
-    if(gameDB[i][0] == core){            // returns "-1" (meaning dont change anything) if nothing found and S0_gameID = false
-      return gameDB[i][1].toInt();
-      break;
-   }
-  }
-  
+  }  
 
   if(S0_gameID) return dp;
   else return -1;
@@ -465,9 +487,8 @@ int fetchGameIDProf(String gameID,String core,int dp){ // looks at gameDB for a 
 
 void readGameID(){ // queries addresses in "consoles" array for gameIDs
   String payload = "";
-  String cpayload = "";
   int result = 0;
-  for(int i = 0; i < consolelen; i++){
+  for(int i = 0; i < consolesSize; i++){
     if(WiFi.status() == WL_CONNECTED){ // wait for WiFi connection
       HTTPClient http;
       http.setConnectTimeout(2000); // give only 2 seconds per console to check gameID, is only honored for IP-based addresses
@@ -483,19 +504,13 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
             if(MCPjson.hasOwnProperty("gameID")){  // If JSON contains gameID, reset payload to it's value
               payload = (const char*) MCPjson["gameID"];
             }
-            else if(MCPjson.hasOwnProperty("core")){
-              cpayload = (const char*) MCPjson["core"];
-              if(MCPjson.hasOwnProperty("gameName")){
-                payload = (const char*) MCPjson["gameName"];
-              }
-            }
           }
-          result = fetchGameIDProf(payload,cpayload,consoles[i].DefaultProf);
+          result = fetchGameIDProf(payload,consoles[i].DefaultProf);
           consoles[i].On = 1;
           if(consoles[i].Prof != result && result != -1){ // gameID found for console, set as King, unset previous King, send profile change 
             consoles[i].Prof = result;
             consoles[i].King = 1;
-            for(int j=0;j < consolelen;j++){ // set previous King to 0
+            for(int j=0;j < consolesSize;j++){ // set previous King to 0
               if(i != j && consoles[j].King == 1)
                 consoles[j].King = 0;
             }
@@ -509,10 +524,10 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
         consoles[i].Prof = 33333;
         if(consoles[i].King == 1){
           currentProf = 33333;
-          for(int k=0;k < consolelen;k++){
+          for(int k=0;k < consolesSize;k++){
             if(i == k){
               consoles[k].King = 0;
-              for(int l=0;l < consolelen;l++){ // find next Console that is on
+              for(int l=0;l < consolesSize;l++){ // find next Console that is on
                 if(consoles[l].On == 1){
                   consoles[l].King = 1;
                   if(consoles[l].Prof >= 0) sendSVS(consoles[l].Prof);
@@ -525,10 +540,10 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
           } // end of for()
         } // end of if()
         int count = 0;
-        for(int m=0;m < consolelen;m++){
+        for(int m=0;m < consolesSize;m++){
           if(consoles[m].On == 0) count++;
         }
-        if(count == consolelen && S0_pwr){
+        if(count == consolesSize && S0_pwr){
           if(S0_pwr_profile >= 0) sendSVS(S0_pwr_profile);
           else sendRBP((-1) * S0_pwr_profile);
         }   
@@ -2328,3 +2343,451 @@ void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
   }
   delay(20);
 }  // end of extronSerialEwrite()
+
+
+void loadConsoles(){
+    if(!SPIFFS.exists("/consoles.json")) return;
+    File f = SPIFFS.open("/consoles.json", FILE_READ);
+    JsonDocument doc;
+    DeserializationError err = deserializeJson(doc,f);
+    if(err){ f.close(); return; }
+    JsonArray arr = doc.as<JsonArray>();
+    consolesSize = 0;
+    for(JsonObject obj: arr){
+        consoles[consolesSize].Desc = obj["Desc"].as<String>();
+        consoles[consolesSize].Address = obj["Address"].as<String>();
+        consoles[consolesSize].DefaultProf = obj["DefaultProf"].as<int>();
+        consoles[consolesSize].Prof = obj["Prof"].as<int>();
+        consoles[consolesSize].On = obj["On"].as<int>();
+        consoles[consolesSize].King = obj["King"].as<int>();
+        consolesSize++;
+    }
+    f.close();
+}
+
+void handleRoot(){
+  String page = R"rawliteral(
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <title>Donut Dongle Editor</title>
+    <style>
+      body { font-family: sans-serif; }
+      table { border-collapse: collapse; width: 80%; margin: 20px auto; }
+      th, td { border: 1px solid #999; padding: 6px 10px; }
+      th { background: #eee; }
+      input { width: 100%; }
+      button { margin: 2px; }
+      h2, h3 { text-align: center; }
+      .controls { text-align: center; }
+    </style>
+  </head>
+
+  <body>
+
+  <h2>Donut Shop</h2>
+
+  <div class="controls">
+    <button onclick="addConsole()">Add Console</button>
+    <button onclick="addProfile()">Add Profile</button>
+  </div>
+
+  <h3>Consoles</h3>
+  <table id="consoleTable">
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>Address</th>
+        <th>No Match Profile</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h3>gameDB</h3>
+  <table id="profileTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>gameID</th>
+        <th>SVS Profile #</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+  let consoles = [];
+  let gameProfiles = [];
+
+  // ---------------- LOAD DATA ----------------
+  async function loadData(){
+    const c = await fetch('/getConsoles');
+    consoles = await c.json();
+
+    const g = await fetch('/getGameDB');
+    gameProfiles = await g.json();
+
+    renderConsoles();
+    renderProfiles();
+  }
+
+  // ---------------- CONSOLES ----------------
+  function renderConsoles(){
+    const tbody = document.querySelector('#consoleTable tbody');
+    tbody.innerHTML = '';   // 🔴 critical
+
+    consoles.forEach((c, idx) => {
+      const tr = document.createElement('tr');
+
+      // --- Description ---
+      const tdDesc = document.createElement('td');
+      const descInput = document.createElement('input');
+      descInput.type = 'text';
+      descInput.value = c.Desc;
+      descInput.onchange = async () => {
+        if (!consoles[idx]) return;
+        consoles[idx].Desc = descInput.value;
+        await saveConsoles();
+      };
+      tdDesc.appendChild(descInput);
+      tr.appendChild(tdDesc);
+      
+      // --- Address ---
+      const tdAddr = document.createElement('td');
+      const addrInput = document.createElement('input');
+      addrInput.type = 'text';
+      addrInput.value = c.Address;
+      addrInput.onchange = async () => {
+        if (!consoles[idx]) return;
+        consoles[idx].Address = addrInput.value;
+        await saveConsoles();
+      };
+      tdAddr.appendChild(addrInput);
+      tr.appendChild(tdAddr);
+
+      // --- DefaultProf ---
+      const tdProf = document.createElement('td');
+      const profInput = document.createElement('input');
+      profInput.type = 'number';
+      profInput.value = c.DefaultProf;
+      profInput.onchange = async () => {
+        if (!consoles[idx]) return;
+        consoles[idx].DefaultProf = parseInt(profInput.value, 10) || 0;
+        await saveConsoles();
+      };
+      tdProf.appendChild(profInput);
+      tr.appendChild(tdProf);
+
+      // --- Delete ---
+      const tdDel = document.createElement('td');
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'Delete';
+      delBtn.onclick = () => deleteConsole(idx);
+      tdDel.appendChild(delBtn);
+      tr.appendChild(tdDel);
+
+      tbody.appendChild(tr);
+    });
+  }
+
+    async function saveConsoles(){
+      await fetch('/updateConsoles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(consoles)
+      });
+    }
+
+    async function addConsole(){
+      consoles.push({
+        Desc: "Console Name",
+        Address: "http://",
+        DefaultProf: 0,
+        Prof: 0,
+        On: 0,
+        King: 0
+      });
+
+      await saveConsoles();
+      loadData();
+    }
+
+    async function deleteConsole(idx) {
+      if (!confirm('Delete this console?')) return;
+
+      consoles.splice(idx, 1);
+
+      await fetch('/updateConsoles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(consoles)
+      });
+
+      renderConsoles();  // 🔴 REQUIRED
+    }
+
+
+    // ---------------- PROFILES ----------------
+    function renderProfiles(){
+      const tbody = document.querySelector('#profileTable tbody');
+      tbody.innerHTML = '';
+
+      gameProfiles.forEach((p, idx) => {
+        const tr = document.createElement('tr');
+
+        // Name (editable)
+        const tdName = document.createElement('td');
+        const nameInput = document.createElement('input');
+        nameInput.value = p[0];
+        nameInput.oninput = () => saveProfiles();
+        tdName.appendChild(nameInput);
+        tr.appendChild(tdName);
+
+        // GameID (editable)
+        const tdGameID = document.createElement('td');
+        const gameidInput = document.createElement('input');
+        gameidInput.value = p[1];
+        gameidInput.oninput = () => saveProfiles();
+        tdGameID.appendChild(gameidInput);
+        tr.appendChild(tdGameID);
+
+        // Value (editable)
+        const tdVal = document.createElement('td');
+        const valInput = document.createElement('input');
+        valInput.value = p[2];
+        valInput.oninput = () => saveProfiles();
+        tdVal.appendChild(valInput);
+        tr.appendChild(tdVal);
+
+        // Action
+        const tdAction = document.createElement('td');
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Delete';
+        delBtn.onclick = () => deleteProfile(idx);
+        tdAction.appendChild(delBtn);
+        tr.appendChild(tdAction);
+
+        // store refs
+        tr._gameid = gameidInput;
+        tr._name = nameInput;
+        tr._val = valInput;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function saveProfiles(){
+      const rows = document.querySelectorAll('#profileTable tbody tr');
+
+      rows.forEach((row, i) => {
+        gameProfiles[i][0] = row._name.value;
+        gameProfiles[i][1] = row._gameid.value;
+        gameProfiles[i][2] = row._val.value;
+      });
+
+      await fetch('/updateGameDB', {
+        method: 'POST',
+        body: JSON.stringify(gameProfiles)
+      });
+
+    }
+
+    async function addProfile(){
+      gameProfiles.push(["NewGame", "gameID", "999"]);
+
+      await saveProfiles();
+      loadData();
+    }
+
+    async function deleteProfile(idx) {
+      if (!confirm('Delete this profile?')) return;
+
+      gameProfiles.splice(idx, 1);
+
+      await fetch('/updateGameDB', {
+        method: 'POST',
+        body: JSON.stringify(gameProfiles)
+      });
+
+      loadData();
+    }
+
+    loadData();
+    </script>
+
+    </body>
+    </html>
+    )rawliteral";
+
+  server.send(200, "text/html", page);
+}
+
+void handleGetConsoles(){
+    JsonDocument doc;
+    JsonArray arr = doc.to<JsonArray>();
+    for(int i=0;i<consolesSize;i++){
+        JsonObject obj = arr.add<JsonObject>();
+        obj["Desc"] = consoles[i].Desc;
+        obj["Address"] = consoles[i].Address;
+        obj["DefaultProf"] = consoles[i].DefaultProf;
+        obj["Prof"] = consoles[i].Prof;
+        obj["On"] = consoles[i].On;
+        obj["King"] = consoles[i].King;
+    }
+    String out; serializeJson(doc,out);
+    server.send(200,"application/json",out);
+}
+
+void handleGetGameDB(){
+    JsonDocument doc;
+    JsonArray arr = doc.to<JsonArray>();
+    for(int i=0;i<gameDBSize;i++){
+        JsonArray item = arr.add<JsonArray>();
+        item.add(gameDB[i][0]);
+        item.add(gameDB[i][1]);
+        item.add(gameDB[i][2]);
+    }
+    String out; serializeJson(doc,out);
+    server.send(200,"application/json",out);
+}
+
+void saveGameDB(){
+  File f = SPIFFS.open("/gameDB.json", FILE_WRITE);
+  if (!f) {
+    Serial.println("saveGameDB(): failed to open file");
+    return;
+  }
+
+  JsonDocument doc;
+  JsonArray arr = doc.to<JsonArray>();
+
+  for (int i = 0; i < gameDBSize; i++) {
+    JsonArray item = arr.add<JsonArray>();
+    item.add(gameDB[i][0]);
+    item.add(gameDB[i][1]);
+    item.add(gameDB[i][2]);
+  }
+
+  serializeJson(doc, f);
+  f.close();
+}
+
+void handleUpdateGameDB(){
+  if (!server.hasArg("plain")) {
+    server.send(400, "application/json", "{\"error\":\"No data\"}");
+    return;
+  }
+
+  JsonDocument doc;
+  DeserializationError err = deserializeJson(doc, server.arg("plain"));
+  if (err) {
+    server.send(400, "application/json", "{\"error\":\"Bad JSON\"}");
+    return;
+  }
+
+  JsonArray arr = doc.as<JsonArray>();
+
+  gameDBSize = 0;  // REQUIRED
+  for (JsonArray item : arr) {
+    gameDB[gameDBSize][0] = item[0].as<String>();
+    gameDB[gameDBSize][1] = item[1].as<String>();
+    gameDB[gameDBSize][2] = item[2].as<String>();
+    gameDBSize++;
+  }
+
+  saveGameDB();  // REQUIRED
+
+  server.send(200, "application/json", "{\"status\":\"ok\"}");
+}
+
+void loadGameDB(){
+  if (!SPIFFS.exists("/gameDB.json")) {
+    Serial.println("gameDB.json not found, using default");
+    return; // keep your default array
+  }
+
+  File f = SPIFFS.open("/gameDB.json", FILE_READ);
+  if (!f) {
+    Serial.println("Failed to open gameDB.json");
+    return;
+  }
+
+  JsonDocument doc;
+  DeserializationError err = deserializeJson(doc, f);
+  f.close();
+
+  if (err) {
+    Serial.println("Failed to parse gameDB.json");
+    return;
+  }
+
+  JsonArray arr = doc.as<JsonArray>();
+  gameDBSize = 0;
+  for (JsonArray item : arr) {
+    gameDB[gameDBSize][0] = item[0].as<String>();
+    gameDB[gameDBSize][1] = item[1].as<String>();
+    gameDB[gameDBSize][2] = item[2].as<String>();
+    gameDBSize++;
+  }
+
+  Serial.println("gameDB loaded from SPIFFS");
+}
+
+void saveConsoles(){
+  File f = SPIFFS.open("/consoles.json", FILE_WRITE);
+  if (!f) return;
+
+  JsonDocument doc;
+  JsonArray arr = doc.to<JsonArray>();
+
+  for (int i = 0; i < consolesSize; i++) {
+    JsonObject obj = arr.add<JsonObject>();
+    obj["Desc"]        = consoles[i].Desc;
+    obj["Address"]     = consoles[i].Address;
+    obj["DefaultProf"] = consoles[i].DefaultProf;
+    obj["Prof"]        = consoles[i].Prof;
+    obj["On"]          = consoles[i].On;
+    obj["King"]        = consoles[i].King;
+  }
+
+  serializeJson(doc, f);
+  f.close();
+}
+
+void handleUpdateConsoles(){
+  if (!server.hasArg("plain")) {
+    server.send(400, "application/json", "{\"error\":\"No data\"}");
+    return;
+  }
+
+  JsonDocument doc;
+  DeserializationError err = deserializeJson(doc, server.arg("plain"));
+  if (err) {
+    server.send(400, "application/json", "{\"error\":\"Bad JSON\"}");
+    return;
+  }
+
+  JsonArray arr = doc.as<JsonArray>();
+
+  // Update consoles array in RAM
+  int newSize = 0;
+  for (JsonObject obj : arr) {
+    consoles[newSize].Desc        = obj["Desc"].as<String>();
+    consoles[newSize].Address     = obj["Address"].as<String>();
+    consoles[newSize].DefaultProf = obj["DefaultProf"].as<int>();
+    consoles[newSize].Prof        = obj["Prof"].as<int>();
+    consoles[newSize].On          = obj["On"].as<int>();
+    consoles[newSize].King        = obj["King"].as<int>();
+    newSize++;
+  }
+  consolesSize = newSize;
+
+  // Persist to SPIFFS
+  saveConsoles();
+
+  server.send(200, "application/json", "{\"status\":\"ok\"}");
+}
