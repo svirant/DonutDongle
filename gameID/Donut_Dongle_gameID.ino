@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.2a (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.2b (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -96,19 +96,19 @@ String gameDB[][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 is th
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~618
-uint8_t const debugE2CAP = 0; // line ~1187
+uint8_t const debugE1CAP = 0; // line ~612
+uint8_t const debugE2CAP = 0; // line ~1181
 
 bool const S0_pwr = false;       // Load "S0_pwr_profile" when all consoles defined below are off. Defined below.
 
-int const S0_pwr_profile = 0;    // When all consoles definied below are off, load this profile. set to 0 means that S0_<whatever>.rt4 profile will load.
+int const S0_pwr_profile = -12;    // When all consoles definied below are off, load this profile. set to 0 means that S0_<whatever>.rt4 profile will load.
                                  // "S0_pwr" must be set true
                                  //
                                  // If using a "remote button profile" which are valued 1 - 12, place a "-" before the profile number. 
                                  // Example: -1 means "remote button profile 1"
                                  //          -12 means "remote button profile 12"
 
-bool const S0_gameID = true;    // When a gameID match is not found for a powered on console, DefaultProf for that console will load
+bool S0_gameID = true;    // When a gameID match is not found for a powered on console, DefaultProf for that console will load
 
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
@@ -324,7 +324,6 @@ String const auxpower = "LG"; // AUX8 + Power button sends power off/on via IR E
 
 //////////////////
 
-int currentProf = 32222;  // current SVS profile number, set high initially
 unsigned long currentGameTime = 0;
 unsigned long prevGameTime = 0;
 
@@ -356,7 +355,7 @@ String svsbutton; // used to store 3 digit SVS profile when AUX8 is double press
 uint8_t nument = 0; // used to keep track of how many digits have been entered for 3 digit SVS profile
 
 // sendRTwake global variables
-uint16_t currWakeProf[2] = {1,0}; // first index: 0 = remote button profile, 1 = SVS profiles. second index: profile number
+uint16_t currentProf[2] = {1,32222}; // first index: 0 = remote button profile, 1 = SVS profiles. second index: profile number
 bool RTwake = false;
 unsigned long currentTime = 0;
 unsigned long prevTime = 0;
@@ -406,15 +405,6 @@ WebServer server(80);
 void DDloop(void *pvParameters);
 void gameIDTimer(void *pvParameters);
 
-// ---- Web handler forward declarations ----
-void handleRoot();
-void handleGetConsoles();
-void handleUpdateConsoles();
-void handleGetGameDB();
-void handleUpdateGameDB();
-void loadGameDB();
-void testSPIFFS();
-
 void setup(){
 
   initPCIInterruptForTinyReceiver();            // for IR Receiver
@@ -436,16 +426,18 @@ void setup(){
     Serial.println("SPIFFS mount failed!");
     return;
   }
-  File f = SPIFFS.open("/test.txt", FILE_WRITE);
 
   loadGameDB();
   loadConsoles();
+  loadS0Vars();
 
   server.on("/",HTTP_GET,handleRoot);
   server.on("/getConsoles",HTTP_GET,handleGetConsoles);
   server.on("/updateConsoles",HTTP_POST,handleUpdateConsoles);
   server.on("/getGameDB",HTTP_GET,handleGetGameDB);
   server.on("/updateGameDB",HTTP_POST,handleUpdateGameDB);
+  server.on("/updateS0Vars", HTTP_POST, handleUpdateS0Vars);
+  server.on("/getS0Vars", HTTP_GET, handleGetS0Vars);
 
   server.begin();
 
@@ -523,7 +515,7 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
         consoles[i].On = 0;
         consoles[i].Prof = 33333;
         if(consoles[i].King == 1){
-          currentProf = 33333;
+          currentProf[1] = 33333;
           for(int k=0;k < consolesSize;k++){
             if(i == k){
               consoles[k].King = 0;
@@ -543,10 +535,12 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
         for(int m=0;m < consolesSize;m++){
           if(consoles[m].On == 0) count++;
         }
-        if(count == consolesSize && S0_pwr){
-          if(S0_pwr_profile >= 0) sendSVS(S0_pwr_profile);
-          else sendRBP((-1) * S0_pwr_profile);
-        }   
+        // if(count == consolesSize && S0_pwr){
+        //   if(S0_pwr_profile < 0 && currentProf[0] == 0 && (-1)*S0_pwr_profile != currentProf[1]) sendSVS(S0_pwr_profile);
+        //   if(S0_pwr_profile >= 0 && currentProf[0] == 1 && S0_pwr_profile != currentProf[1]) sendSVS(S0_pwr_profile);
+        //   else if(S0_pwr_profile < 0 && currentProf[0] == 1) sendRBP((-1) * S0_pwr_profile);
+        //   else if((-1)*S0_pwr_profile != currentProf[1] && currentProf[0] == 0) sendRBP((-1) * S0_pwr_profile);
+        // }   
       } // end of else()
     http.end();
     analogWrite(LED_BLUE, 255);
@@ -710,11 +704,11 @@ void readExtron1(){
     // Without this, the profile would be resent when changes to other outputs are selected.
     if(einput.substring(0,2) == "IN"){
       if(einput.substring(3,4) == " "){
-        if(einput.substring(2,3).toInt() == currentProf)
+        if(einput.substring(2,3).toInt() == currentProf[1])
           einput = "XX00"; // if the input is still the same, set einput so that nothing triggers a profile send
       }
       else{
-        if(einput.substring(2,4).toInt() == currentProf)
+        if(einput.substring(2,4).toInt() == currentProf[1])
           einput = "XX00";
       }
     }
@@ -1272,11 +1266,11 @@ void readExtron2(){
     // Without this, the profile would be resent when changes to other outputs are selected.
     if(einput.substring(0,2) == "IN"){
       if(einput.substring(3,4) == " "){
-        if(einput.substring(2,3).toInt()+100 == currentProf)
+        if(einput.substring(2,3).toInt()+100 == currentProf[1])
           einput = "XX00"; // if the input is still the same, set einput so that nothing triggers a profile send
       }
       else{
-        if(einput.substring(2,4).toInt()+100 == currentProf)
+        if(einput.substring(2,4).toInt()+100 == currentProf[1])
           einput = "XX00";
       }
     }
@@ -2167,11 +2161,11 @@ void sendRTwake(uint16_t mil){
       currentTime = 0;
       RTwake = false;
       digitalWrite(LED_BUILTIN,LOW);
-      if((currWakeProf[0] == 1 && currWakeProf[1] != 0) || (currWakeProf[0] == 0 && currWakeProf[1] != 12)){
-        if(currWakeProf[0])
-          sendSVS(currWakeProf[1]);
+      if((currentProf[0] == 1 && currentProf[1] != 0) || (currentProf[0] == 0 && currentProf[1] != 12)){
+        if(currentProf[0])
+          sendSVS(currentProf[1]);
         else
-          sendRBP(currWakeProf[1]);
+          sendRBP(currentProf[1]);
       }
     }
     if(currentTime - prevBlinkTime >= 300){
@@ -2260,8 +2254,8 @@ void sendSVS(uint16_t num){
   else Serial.print(num);
   Serial.println(F("\r"));
 
-  currWakeProf[0] = 1; // 1 is SVS profile
-  currWakeProf[1] = num;
+  currentProf[0] = 1; // 1 is SVS profile
+  currentProf[1] = num;
   analogWrite(LED_GREEN,255);
 } // end of sendSVS()
 
@@ -2274,8 +2268,8 @@ void sendRBP(uint8_t prof){ // send Remote Button Profile
   Serial.print(prof);
   Serial.println(F("\r"));
 
-  currWakeProf[0] = 0; // 0 is Remote Button Profile
-  currWakeProf[1] = prof;
+  currentProf[0] = 0; // 0 is Remote Button Profile
+  currentProf[1] = prof;
   delay(1000);
   analogWrite(LED_GREEN,255);
 } // end of sendRBP()
@@ -2343,288 +2337,6 @@ void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
   }
   delay(20);
 }  // end of extronSerialEwrite()
-
-
-void loadConsoles(){
-    if(!SPIFFS.exists("/consoles.json")) return;
-    File f = SPIFFS.open("/consoles.json", FILE_READ);
-    JsonDocument doc;
-    DeserializationError err = deserializeJson(doc,f);
-    if(err){ f.close(); return; }
-    JsonArray arr = doc.as<JsonArray>();
-    consolesSize = 0;
-    for(JsonObject obj: arr){
-        consoles[consolesSize].Desc = obj["Desc"].as<String>();
-        consoles[consolesSize].Address = obj["Address"].as<String>();
-        consoles[consolesSize].DefaultProf = obj["DefaultProf"].as<int>();
-        consoles[consolesSize].Prof = obj["Prof"].as<int>();
-        consoles[consolesSize].On = obj["On"].as<int>();
-        consoles[consolesSize].King = obj["King"].as<int>();
-        consolesSize++;
-    }
-    f.close();
-}
-
-void handleRoot(){
-  String page = R"rawliteral(
-  <!DOCTYPE html>
-  <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Donut Dongle Editor</title>
-    <style>
-      body { font-family: sans-serif; }
-      table { border-collapse: collapse; width: 80%; margin: 20px auto; }
-      th, td { border: 1px solid #999; padding: 6px 10px; }
-      th { background: #eee; }
-      input { width: 100%; }
-      button { margin: 2px; }
-      h2, h3 { text-align: center; }
-      .controls { text-align: center; }
-    </style>
-  </head>
-
-  <body>
-
-  <h2>Donut Shop</h2>
-
-  <div class="controls">
-    <button onclick="addConsole()">Add Console</button>
-    <button onclick="addProfile()">Add Profile</button>
-  </div>
-
-  <h3>Consoles</h3>
-  <table id="consoleTable">
-    <thead>
-      <tr>
-        <th>Description</th>
-        <th>Address</th>
-        <th>No Match Profile</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <h3>gameDB</h3>
-  <table id="profileTable">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>gameID</th>
-        <th>SVS Profile #</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <script>
-  let consoles = [];
-  let gameProfiles = [];
-
-  // ---------------- LOAD DATA ----------------
-  async function loadData(){
-    const c = await fetch('/getConsoles');
-    consoles = await c.json();
-
-    const g = await fetch('/getGameDB');
-    gameProfiles = await g.json();
-
-    renderConsoles();
-    renderProfiles();
-  }
-
-  // ---------------- CONSOLES ----------------
-  function renderConsoles(){
-    const tbody = document.querySelector('#consoleTable tbody');
-    tbody.innerHTML = '';   // 🔴 critical
-
-    consoles.forEach((c, idx) => {
-      const tr = document.createElement('tr');
-
-      // --- Description ---
-      const tdDesc = document.createElement('td');
-      const descInput = document.createElement('input');
-      descInput.type = 'text';
-      descInput.value = c.Desc;
-      descInput.onchange = async () => {
-        if (!consoles[idx]) return;
-        consoles[idx].Desc = descInput.value;
-        await saveConsoles();
-      };
-      tdDesc.appendChild(descInput);
-      tr.appendChild(tdDesc);
-      
-      // --- Address ---
-      const tdAddr = document.createElement('td');
-      const addrInput = document.createElement('input');
-      addrInput.type = 'text';
-      addrInput.value = c.Address;
-      addrInput.onchange = async () => {
-        if (!consoles[idx]) return;
-        consoles[idx].Address = addrInput.value;
-        await saveConsoles();
-      };
-      tdAddr.appendChild(addrInput);
-      tr.appendChild(tdAddr);
-
-      // --- DefaultProf ---
-      const tdProf = document.createElement('td');
-      const profInput = document.createElement('input');
-      profInput.type = 'number';
-      profInput.value = c.DefaultProf;
-      profInput.onchange = async () => {
-        if (!consoles[idx]) return;
-        consoles[idx].DefaultProf = parseInt(profInput.value, 10) || 0;
-        await saveConsoles();
-      };
-      tdProf.appendChild(profInput);
-      tr.appendChild(tdProf);
-
-      // --- Delete ---
-      const tdDel = document.createElement('td');
-      const delBtn = document.createElement('button');
-      delBtn.textContent = 'Delete';
-      delBtn.onclick = () => deleteConsole(idx);
-      tdDel.appendChild(delBtn);
-      tr.appendChild(tdDel);
-
-      tbody.appendChild(tr);
-    });
-  }
-
-    async function saveConsoles(){
-      await fetch('/updateConsoles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(consoles)
-      });
-    }
-
-    async function addConsole(){
-      consoles.push({
-        Desc: "Console Name",
-        Address: "http://",
-        DefaultProf: 0,
-        Prof: 0,
-        On: 0,
-        King: 0
-      });
-
-      await saveConsoles();
-      loadData();
-    }
-
-    async function deleteConsole(idx) {
-      if (!confirm('Delete this console?')) return;
-
-      consoles.splice(idx, 1);
-
-      await fetch('/updateConsoles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(consoles)
-      });
-
-      renderConsoles();  // 🔴 REQUIRED
-    }
-
-
-    // ---------------- PROFILES ----------------
-    function renderProfiles(){
-      const tbody = document.querySelector('#profileTable tbody');
-      tbody.innerHTML = '';
-
-      gameProfiles.forEach((p, idx) => {
-        const tr = document.createElement('tr');
-
-        // Name (editable)
-        const tdName = document.createElement('td');
-        const nameInput = document.createElement('input');
-        nameInput.value = p[0];
-        nameInput.oninput = () => saveProfiles();
-        tdName.appendChild(nameInput);
-        tr.appendChild(tdName);
-
-        // GameID (editable)
-        const tdGameID = document.createElement('td');
-        const gameidInput = document.createElement('input');
-        gameidInput.value = p[1];
-        gameidInput.oninput = () => saveProfiles();
-        tdGameID.appendChild(gameidInput);
-        tr.appendChild(tdGameID);
-
-        // Value (editable)
-        const tdVal = document.createElement('td');
-        const valInput = document.createElement('input');
-        valInput.value = p[2];
-        valInput.oninput = () => saveProfiles();
-        tdVal.appendChild(valInput);
-        tr.appendChild(tdVal);
-
-        // Action
-        const tdAction = document.createElement('td');
-        const delBtn = document.createElement('button');
-        delBtn.textContent = 'Delete';
-        delBtn.onclick = () => deleteProfile(idx);
-        tdAction.appendChild(delBtn);
-        tr.appendChild(tdAction);
-
-        // store refs
-        tr._gameid = gameidInput;
-        tr._name = nameInput;
-        tr._val = valInput;
-
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function saveProfiles(){
-      const rows = document.querySelectorAll('#profileTable tbody tr');
-
-      rows.forEach((row, i) => {
-        gameProfiles[i][0] = row._name.value;
-        gameProfiles[i][1] = row._gameid.value;
-        gameProfiles[i][2] = row._val.value;
-      });
-
-      await fetch('/updateGameDB', {
-        method: 'POST',
-        body: JSON.stringify(gameProfiles)
-      });
-
-    }
-
-    async function addProfile(){
-      gameProfiles.push(["NewGame", "gameID", "999"]);
-
-      await saveProfiles();
-      loadData();
-    }
-
-    async function deleteProfile(idx) {
-      if (!confirm('Delete this profile?')) return;
-
-      gameProfiles.splice(idx, 1);
-
-      await fetch('/updateGameDB', {
-        method: 'POST',
-        body: JSON.stringify(gameProfiles)
-      });
-
-      loadData();
-    }
-
-    loadData();
-    </script>
-
-    </body>
-    </html>
-    )rawliteral";
-
-  server.send(200, "text/html", page);
-}
 
 void handleGetConsoles(){
     JsonDocument doc;
@@ -2790,4 +2502,455 @@ void handleUpdateConsoles(){
   saveConsoles();
 
   server.send(200, "application/json", "{\"status\":\"ok\"}");
+}
+
+String embedS0Vars() {
+  JsonDocument doc;
+  doc["S0_gameID"] = S0_gameID;
+  // doc["S0_pwr_profile"] = S0_pwr_profile;
+  // doc["S0_gameID"] = S0_gameID;
+  // doc["When no gameID entry for a Console is found, use the 'No Match Profile'"] = S0_gameID;
+
+  String json;
+  serializeJson(doc, json);
+
+  return "let S0Vars = " + json + ";";
+}
+
+void handleUpdateS0Vars() {
+  if (!server.hasArg("plain")) {
+    server.send(400, "text/plain", "No body");
+    return;
+  }
+
+  JsonDocument doc;
+  DeserializationError err = deserializeJson(doc, server.arg("plain"));
+
+  if (err) {
+    server.send(400, "text/plain", "Bad JSON");
+    return;
+  }
+
+  // if (doc["S0_pwr"].is<bool>()) {
+  //   S0_pwr = doc["S0_pwr"].as<bool>();
+  // }
+
+  // if (doc["S0_pwr_profile"].is<int>()) {
+  //   S0_pwr_profile = doc["S0_pwr_profile"].as<int>();
+  // }
+
+  if (doc["S0_gameID"].is<bool>()) {
+    S0_gameID = doc["S0_gameID"].as<bool>();
+  }
+
+  saveS0Vars();
+  server.send(200, "text/plain", "OK");
+}
+
+void saveS0Vars() {
+  JsonDocument doc;
+
+  // doc["S0_pwr"] = S0_pwr;
+  // doc["S0_pwr_profile"] = S0_pwr_profile;
+  doc["S0_gameID"] = S0_gameID;
+
+  File f = SPIFFS.open("/s0vars.json", FILE_WRITE);
+  if (!f) return;
+
+  serializeJson(doc, f);
+  f.close();
+}
+
+void loadS0Vars() {
+  if (!SPIFFS.exists("/s0vars.json")) {
+    Serial.println("S0 vars not found, using defaults");
+    return;
+  }
+
+  File f = SPIFFS.open("/s0vars.json", FILE_READ);
+  if (!f) return;
+
+  JsonDocument doc;
+  DeserializationError err = deserializeJson(doc, f);
+  f.close();
+
+  if (err) {
+    Serial.println("Failed to parse S0 JSON");
+    return;
+  }
+
+  // if (doc["S0_pwr"].is<bool>())
+  //   S0_pwr = doc["S0_pwr"].as<bool>();
+
+  // if (doc["S0_pwr_profile"].is<int>())
+  //   S0_pwr_profile = doc["S0_pwr_profile"].as<int>();
+
+  if (doc["S0_gameID"].is<bool>())
+    S0_gameID = doc["S0_gameID"].as<bool>();
+}
+
+void handleGetS0Vars() {
+  JsonDocument doc;
+
+  // doc["S0_pwr"] = S0_pwr;
+  // doc["S0_pwr_profile"] = S0_pwr_profile;
+  doc["S0_gameID"] = S0_gameID;
+
+  String out;
+  serializeJson(doc, out);
+  server.send(200, "application/json", out);
+}
+
+void loadConsoles(){
+    if(!SPIFFS.exists("/consoles.json")) return;
+    File f = SPIFFS.open("/consoles.json", FILE_READ);
+    JsonDocument doc;
+    DeserializationError err = deserializeJson(doc,f);
+    if(err){ f.close(); return; }
+    JsonArray arr = doc.as<JsonArray>();
+    consolesSize = 0;
+    for(JsonObject obj: arr){
+        consoles[consolesSize].Desc = obj["Desc"].as<String>();
+        consoles[consolesSize].Address = obj["Address"].as<String>();
+        consoles[consolesSize].DefaultProf = obj["DefaultProf"].as<int>();
+        consoles[consolesSize].Prof = obj["Prof"].as<int>();
+        consoles[consolesSize].On = obj["On"].as<int>();
+        consoles[consolesSize].King = obj["King"].as<int>();
+        consolesSize++;
+    }
+    f.close();
+}
+
+void handleRoot(){
+  String page = R"rawliteral(
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <title>Donut Dongle Editor</title>
+    <style>
+      body { font-family: sans-serif; }
+      table { border-collapse: collapse; width: 80%; margin: 20px auto; }
+      th, td { border: 1px solid #999; padding: 6px 10px; }
+      th { background: #eee; }
+      input { width: 100%; }
+      button { margin: 2px; }
+      h2, h3 { text-align: center; }
+      .controls { text-align: center; }
+    </style>
+  </head>
+
+  <body>
+
+  <center><h1>Donut Shop</h1></center>
+
+  <div class="controls">
+    <button onclick="addConsole()">Add Console</button>
+    <button onclick="addProfile()">Add Profile</button>
+  </div>
+
+  <h2>Consoles</h2>
+  <table id="consoleTable">
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>Address</th>
+        <th>No Match Profile</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h3></h3>
+  <table id="S0Table">
+    <thead><tr><th>No Match Profile</th><th>Enabled</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>gameDB</h2>
+  <table id="profileTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>gameID</th>
+        <th>SVS Profile #</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+  let consoles = [];
+  let gameProfiles = [];
+
+  // inject current S0 values
+  )rawliteral";
+
+  page += embedS0Vars();
+
+  // continue JS
+  page += R"rawliteral(
+
+  // ---------------- LOAD DATA ----------------
+  async function loadData(){
+    const c = await fetch('/getConsoles');
+    consoles = await c.json();
+
+    const g = await fetch('/getGameDB');
+    gameProfiles = await g.json();
+
+    renderConsoles();
+    renderProfiles();
+  }
+
+  // ---------------- CONSOLES ----------------
+  function renderConsoles(){
+    const tbody = document.querySelector('#consoleTable tbody');
+    tbody.innerHTML = '';
+
+    consoles.forEach((c, idx) => {
+      const tr = document.createElement('tr');
+
+      // --- Description ---
+      const tdDesc = document.createElement('td');
+      const descInput = document.createElement('input');
+      descInput.type = 'text';
+      descInput.value = c.Desc;
+      descInput.onchange = async () => {
+        if (!consoles[idx]) return;
+        consoles[idx].Desc = descInput.value;
+        await saveConsoles();
+      };
+      tdDesc.appendChild(descInput);
+      tr.appendChild(tdDesc);
+      
+      // --- Address ---
+      const tdAddr = document.createElement('td');
+      const addrInput = document.createElement('input');
+      addrInput.type = 'text';
+      addrInput.value = c.Address;
+      addrInput.onchange = async () => {
+        if (!consoles[idx]) return;
+        consoles[idx].Address = addrInput.value;
+        await saveConsoles();
+      };
+      tdAddr.appendChild(addrInput);
+      tr.appendChild(tdAddr);
+
+      // --- DefaultProf ---
+      const tdProf = document.createElement('td');
+      const profInput = document.createElement('input');
+      profInput.type = 'number';
+      profInput.value = c.DefaultProf;
+      profInput.onchange = async () => {
+        if (!consoles[idx]) return;
+        consoles[idx].DefaultProf = parseInt(profInput.value, 10) || 0;
+        await saveConsoles();
+      };
+      tdProf.appendChild(profInput);
+      tr.appendChild(tdProf);
+
+      // --- Delete ---
+      const tdDel = document.createElement('td');
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'Delete';
+      delBtn.onclick = () => deleteConsole(idx);
+      tdDel.appendChild(delBtn);
+      tr.appendChild(tdDel);
+
+      tbody.appendChild(tr);
+    });
+  }
+
+    async function saveConsoles(){
+      await fetch('/updateConsoles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(consoles)
+      });
+    }
+
+    async function addConsole(){
+      consoles.push({
+        Desc: "Console Name",
+        Address: "http://",
+        DefaultProf: 0,
+        Prof: 0,
+        On: 0,
+        King: 0
+      });
+
+      await saveConsoles();
+      loadData();
+    }
+
+    async function deleteConsole(idx) {
+      if (!confirm('Delete this console?')) return;
+
+      consoles.splice(idx, 1);
+
+      await fetch('/updateConsoles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(consoles)
+      });
+
+      renderConsoles();
+    }
+
+
+    // ---------------- PROFILES ----------------
+    function renderProfiles(){
+      const tbody = document.querySelector('#profileTable tbody');
+      tbody.innerHTML = '';
+
+      gameProfiles.forEach((p, idx) => {
+        const tr = document.createElement('tr');
+
+        // Name (editable)
+        const tdName = document.createElement('td');
+        const nameInput = document.createElement('input');
+        nameInput.value = p[0];
+        nameInput.oninput = () => saveProfiles();
+        tdName.appendChild(nameInput);
+        tr.appendChild(tdName);
+
+        // GameID (editable)
+        const tdGameID = document.createElement('td');
+        const gameidInput = document.createElement('input');
+        gameidInput.value = p[1];
+        gameidInput.oninput = () => saveProfiles();
+        tdGameID.appendChild(gameidInput);
+        tr.appendChild(tdGameID);
+
+        // Value (editable)
+        const tdVal = document.createElement('td');
+        const valInput = document.createElement('input');
+        valInput.value = p[2];
+        valInput.oninput = () => saveProfiles();
+        tdVal.appendChild(valInput);
+        tr.appendChild(tdVal);
+
+        // Action
+        const tdAction = document.createElement('td');
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Delete';
+        delBtn.onclick = () => deleteProfile(idx);
+        tdAction.appendChild(delBtn);
+        tr.appendChild(tdAction);
+
+        // store refs
+        tr._gameid = gameidInput;
+        tr._name = nameInput;
+        tr._val = valInput;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function saveProfiles(){
+      const rows = document.querySelectorAll('#profileTable tbody tr');
+
+      rows.forEach((row, i) => {
+        gameProfiles[i][0] = row._name.value;
+        gameProfiles[i][1] = row._gameid.value;
+        gameProfiles[i][2] = row._val.value;
+      });
+
+      await fetch('/updateGameDB', {
+        method: 'POST',
+        body: JSON.stringify(gameProfiles)
+      });
+
+    }
+
+    async function addProfile(){
+      gameProfiles.push(["NewGame", "gameID", "999"]);
+
+      await saveProfiles();
+      loadData();
+    }
+
+    async function deleteProfile(idx) {
+      if (!confirm('Delete this profile?')) return;
+
+      gameProfiles.splice(idx, 1);
+
+      await fetch('/updateGameDB', {
+        method: 'POST',
+        body: JSON.stringify(gameProfiles)
+      });
+
+      loadData();
+    }
+
+    // Render S0 table
+    function renderS0Vars() {
+      const tbody = document.querySelector('#S0Table tbody');
+      tbody.innerHTML = '';
+
+      Object.keys(S0Vars).forEach(key => {
+        const tr = document.createElement('tr');
+
+        // Name column
+        const tdName = document.createElement('td');
+        tdName.textContent = key;
+        tr.appendChild(tdName);
+
+        // Value column
+        const tdVal = document.createElement('td');
+        const input = document.createElement('input');
+
+        if (typeof S0Vars[key] === 'boolean') {
+          input.type = 'checkbox';
+          input.checked = S0Vars[key];
+          input.onchange = async () => {
+            S0Vars[key] = input.checked;
+            await fetch('/updateS0Vars', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(S0Vars)
+            });
+          };
+        } else {
+          input.type = 'number';
+          input.value = S0Vars[key];
+          input.onchange = async () => {
+            S0Vars[key] = parseInt(input.value, 10);
+            await fetch('/updateS0Vars', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(S0Vars)
+            });
+          };
+        }
+
+        tdVal.appendChild(input);
+        tr.appendChild(tdVal);
+        tbody.appendChild(tr);
+      });
+    }
+
+
+    // Auto-refresh every 3 seconds
+    async function refreshS0Vars() {
+      const res = await fetch('/getS0Vars');
+      const data = await res.json();
+      S0Vars = data;
+      renderS0Vars();
+    }
+
+    setInterval(refreshS0Vars, 3000);
+
+    renderS0Vars();  // S0 table
+    loadData();
+    </script>
+
+    </body>
+    </html>
+    )rawliteral";
+
+  server.send(200, "text/html", page);
 }
