@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.2c (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.2d (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -74,7 +74,7 @@ Console consoles[] = {{"PS1","http://ps1digital.local/gameid",-9,0,0,0}, // you 
                    //           etc...
                    //                      
                                  // {"Description","<GAMEID>","PROFILE #"},
-String gameDB[][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 is the "SVS PROFILE", would translate to a S7_<USER_DEFINED>.rt4 named profile under RT4K-SDcard/profile/SVS/
+String gameDB[100][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 is the "SVS PROFILE", would translate to a S7_<USER_DEFINED>.rt4 named profile under RT4K-SDcard/profile/SVS/
                       {"xstation","XSTATION","8"},               // XSTATION is the <GAMEID>
                       {"GameCube","GM4E0100","505"},             // GameCube is the Description
                       {"N64 MarioKart 64","3E5055B6-2E92DA52-N-45","501"},
@@ -326,6 +326,7 @@ String const auxpower = "LG"; // AUX8 + Power button sends power off/on via IR E
 
 //////////////////
 
+//int currentGProf = 32222;  // current SVS profile number, set high initially
 unsigned long currentGameTime = 0;
 unsigned long prevGameTime = 0;
 
@@ -357,7 +358,7 @@ String svsbutton; // used to store 3 digit SVS profile when AUX8 is double press
 uint8_t nument = 0; // used to keep track of how many digits have been entered for 3 digit SVS profile
 
 // sendRTwake global variables
-uint16_t currentProf[2] = {1,32222}; // first index: 0 = remote button profile, 1 = SVS profiles. second index: profile number
+uint16_t currentProf[2] = {1,0}; // first index: 0 = remote button profile, 1 = SVS profiles. second index: profile number
 bool RTwake = false;
 unsigned long currentTime = 0;
 unsigned long prevTime = 0;
@@ -438,10 +439,9 @@ void setup(){
   server.on("/updateConsoles",HTTP_POST,handleUpdateConsoles);
   server.on("/getGameDB",HTTP_GET,handleGetGameDB);
   server.on("/updateGameDB",HTTP_POST,handleUpdateGameDB);
-  server.on("/updateS0Vars", HTTP_POST, handleUpdateS0Vars);
   server.on("/getS0Vars", HTTP_GET, handleGetS0Vars);
+  server.on("/updateS0Vars", HTTP_POST, handleUpdateS0Vars);
   server.on("/getPayload", HTTP_GET, handleGetPayload);
-
 
   server.begin();
 
@@ -519,7 +519,7 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
         consoles[i].On = 0;
         consoles[i].Prof = 33333;
         if(consoles[i].King == 1){
-          currentProf[1] = 33333;
+          //currentGProf = 33333;
           for(int k=0;k < consolesSize;k++){
             if(i == k){
               consoles[k].King = 0;
@@ -2146,7 +2146,7 @@ void sendIR(String type, uint8_t prof, uint8_t repeat){
       irsend.sendNEC(0x00,0x00,0);
       irsend.sendNEC(0x00,0x00,0);
       irsend.sendNEC(0x00,0x00,0);
-      delay(30);
+      delay(60);
       irsend.sendNEC(0x04,0x08,0); // send once more
       irsend.sendNEC(0x00,0x00,0);
       irsend.sendNEC(0x00,0x00,0);
@@ -2407,7 +2407,7 @@ void handleUpdateGameDB(){
 
   JsonArray arr = doc.as<JsonArray>();
 
-  gameDBSize = 0;  // REQUIRED
+  gameDBSize = 0;
   for (JsonArray item : arr) {
     gameDB[gameDBSize][0] = item[0].as<String>();
     gameDB[gameDBSize][1] = item[1].as<String>();
@@ -2415,7 +2415,7 @@ void handleUpdateGameDB(){
     gameDBSize++;
   }
 
-  saveGameDB();  // REQUIRED
+  saveGameDB();
 
   server.send(200, "application/json", "{\"status\":\"ok\"}");
 }
@@ -2511,9 +2511,6 @@ void handleUpdateConsoles(){
 String embedS0Vars() {
   JsonDocument doc;
   doc["S0_gameID"] = S0_gameID;
-  // doc["S0_pwr_profile"] = S0_pwr_profile;
-  // doc["S0_gameID"] = S0_gameID;
-  // doc["When no gameID entry for a Console is found, use the 'No Match Profile'"] = S0_gameID;
 
   String json;
   serializeJson(doc, json);
@@ -2535,14 +2532,6 @@ void handleUpdateS0Vars() {
     return;
   }
 
-  // if (doc["S0_pwr"].is<bool>()) {
-  //   S0_pwr = doc["S0_pwr"].as<bool>();
-  // }
-
-  // if (doc["S0_pwr_profile"].is<int>()) {
-  //   S0_pwr_profile = doc["S0_pwr_profile"].as<int>();
-  // }
-
   if (doc["S0_gameID"].is<bool>()) {
     S0_gameID = doc["S0_gameID"].as<bool>();
   }
@@ -2554,8 +2543,6 @@ void handleUpdateS0Vars() {
 void saveS0Vars() {
   JsonDocument doc;
 
-  // doc["S0_pwr"] = S0_pwr;
-  // doc["S0_pwr_profile"] = S0_pwr_profile;
   doc["S0_gameID"] = S0_gameID;
 
   File f = SPIFFS.open("/s0vars.json", FILE_WRITE);
@@ -2583,12 +2570,6 @@ void loadS0Vars() {
     return;
   }
 
-  // if (doc["S0_pwr"].is<bool>())
-  //   S0_pwr = doc["S0_pwr"].as<bool>();
-
-  // if (doc["S0_pwr_profile"].is<int>())
-  //   S0_pwr_profile = doc["S0_pwr_profile"].as<int>();
-
   if (doc["S0_gameID"].is<bool>())
     S0_gameID = doc["S0_gameID"].as<bool>();
 }
@@ -2596,8 +2577,6 @@ void loadS0Vars() {
 void handleGetS0Vars() {
   JsonDocument doc;
 
-  // doc["S0_pwr"] = S0_pwr;
-  // doc["S0_pwr_profile"] = S0_pwr_profile;
   doc["S0_gameID"] = S0_gameID;
 
   String out;
@@ -2814,8 +2793,8 @@ void handleRoot(){
       const tbody = document.querySelector('#profileTable tbody');
       tbody.innerHTML = '';
 
-      gameProfiles.forEach((p, idx) => {
-        const tr = document.createElement('tr');
+      gameProfiles.reverse().forEach((p, idx) => {
+      const tr = document.createElement('tr');
 
         // Name (editable)
         const tdName = document.createElement('td');
@@ -2859,9 +2838,10 @@ void handleRoot(){
     }
 
     async function saveProfiles(){
-      const rows = document.querySelectorAll('#profileTable tbody tr');
+      
+      const rows = Array.from(document.querySelectorAll('#profileTable tbody tr'));
 
-      rows.forEach((row, i) => {
+      rows.reverse().forEach((row, i) => {
         gameProfiles[i][0] = row._name.value;
         gameProfiles[i][1] = row._gameid.value;
         gameProfiles[i][2] = row._val.value;
@@ -2926,7 +2906,8 @@ void handleRoot(){
               body: JSON.stringify(S0Vars)
             });
           };
-        } else {
+        }
+         else {
           input.type = 'number';
           input.value = S0Vars[key];
           input.onchange = async () => {
@@ -2945,18 +2926,7 @@ void handleRoot(){
       });
     }
 
-
-    // Auto-refresh every 3 seconds
-    async function refreshS0Vars() {
-      const res = await fetch('/getS0Vars');
-      const data = await res.json();
-      S0Vars = data;
-      renderS0Vars();
-    }
-
-    setInterval(refreshS0Vars, 3000);
-
-    renderS0Vars();  // S0 table
+    renderS0Vars();
     loadData();
     </script>
 
