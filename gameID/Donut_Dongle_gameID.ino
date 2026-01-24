@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.2d (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.2e (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -64,6 +64,7 @@ Console consoles[] = {{"PS1","http://ps1digital.local/gameid",-9,0,0,0}, // you 
                       {"N64","http://n64digital.local/gameid",-7,0,0,0} // the last one in the list has no "," at the end
                       };
 
+int consolesSize = sizeof(consoles) / sizeof(consoles[0]); // length of consoles DB. can grow dynamically
 
                    // If using a "remote button profile" for the "PROFILE" which are valued 1 - 12, place a "-" before the profile number. 
                    // Example: -1 means "remote button profile 1"
@@ -74,7 +75,7 @@ Console consoles[] = {{"PS1","http://ps1digital.local/gameid",-9,0,0,0}, // you 
                    //           etc...
                    //                      
                                  // {"Description","<GAMEID>","PROFILE #"},
-String gameDB[100][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 is the "SVS PROFILE", would translate to a S7_<USER_DEFINED>.rt4 named profile under RT4K-SDcard/profile/SVS/
+String gameDB[1000][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 is the "SVS PROFILE", would translate to a S7_<USER_DEFINED>.rt4 named profile under RT4K-SDcard/profile/SVS/
                       {"xstation","XSTATION","8"},               // XSTATION is the <GAMEID>
                       {"GameCube","GM4E0100","505"},             // GameCube is the Description
                       {"N64 MarioKart 64","3E5055B6-2E92DA52-N-45","501"},
@@ -85,6 +86,8 @@ String gameDB[100][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 is
                       {"PS1 Ridge Racer","SCUS-94300","9"},
                       {"MegaDrive","MegaDrive","506"},
                       {"SoR2","Streets of Rage 2 (USA)","507"}};
+
+int gameDBSize = 11; // array can hold 1000 entries, but only set to current size so the UI doesnt show 989 blank entries :)
 
 // WiFi config is below (line ~490)
 
@@ -399,9 +402,6 @@ bool MTVdiscon = false;
 bool MTVdiscon2 = false;
 bool MTVddSW1 = false;
 bool MTVddSW2 = false;
-
-int consolesSize = sizeof(consoles) / sizeof(consoles[0]); // length of consoles DB, used frequently
-int gameDBSize = sizeof(gameDB)/sizeof(gameDB[0]); // length of gameDB...
 
 WebServer server(80);
 
@@ -2619,11 +2619,12 @@ void handleRoot(){
       body { font-family: sans-serif; }
       table { border-collapse: collapse; width: 80%; margin: 20px auto; }
       th, td { border: 1px solid #999; padding: 6px 10px; }
-      th { background: #eee; }
+      th { background: #eee; cursor: pointer; user-select: none; }
       input { width: 100%; }
       button { margin: 2px; }
       h2, h3 { text-align: center; }
       .controls { text-align: center; }
+      .arrow { font-size: 0.8em; margin-left: 4px; color: #555; }
     </style>
   </head>
 
@@ -2659,9 +2660,9 @@ void handleRoot(){
   <table id="profileTable">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>gameID</th>
-        <th>SVS Profile #</th>
+        <th onclick="sortProfiles(0)">Name <span class="arrow" id="arrow0">▲▼</span></th>
+        <th onclick="sortProfiles(1)">gameID <span class="arrow" id="arrow1">▲▼</span></th>
+        <th onclick="sortProfiles(2)">SVS Profile # <span class="arrow" id="arrow2">▲▼</span></th>
         <th>Action</th>
       </tr>
     </thead>
@@ -2672,12 +2673,14 @@ void handleRoot(){
   let consoles = [];
   let gameProfiles = [];
 
+  let currentSortCol = null;
+  let currentSortDir = 'asc';
+
   // inject current S0 values
   )rawliteral";
 
   page += embedS0Vars();
 
-  // continue JS
   page += R"rawliteral(
 
   // ---------------- LOAD DATA ----------------
@@ -2690,6 +2693,7 @@ void handleRoot(){
 
     renderConsoles();
     renderProfiles();
+    updateArrows();
   }
 
   // ---------------- CONSOLES ----------------
@@ -2751,188 +2755,228 @@ void handleRoot(){
     });
   }
 
-    async function saveConsoles(){
-      await fetch('/updateConsoles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(consoles)
-      });
-    }
+  async function saveConsoles(){
+    await fetch('/updateConsoles', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(consoles)
+    });
+  }
 
-    async function addConsole(){
-      consoles.push({
-        Desc: "Console Name",
-        Address: "http://",
-        DefaultProf: 0,
-        Prof: 0,
-        On: 0,
-        King: 0
-      });
+  async function addConsole(){
+    consoles.push({
+      Desc: "Console Name",
+      Address: "http://",
+      DefaultProf: 0,
+      Prof: 0,
+      On: 0,
+      King: 0
+    });
 
-      await saveConsoles();
-      loadData();
-    }
+    await saveConsoles();
+    loadData();
+  }
 
-    async function deleteConsole(idx) {
-      if (!confirm('Delete this console?')) return;
+  async function deleteConsole(idx) {
+    if (!confirm('Delete this console?')) return;
 
-      consoles.splice(idx, 1);
+    consoles.splice(idx, 1);
 
-      await fetch('/updateConsoles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(consoles)
-      });
+    await fetch('/updateConsoles', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(consoles)
+    });
 
-      renderConsoles();
-    }
+    renderConsoles();
+  }
 
 
-    // ---------------- PROFILES ----------------
-    function renderProfiles(){
-      const tbody = document.querySelector('#profileTable tbody');
-      tbody.innerHTML = '';
+  // ---------------- PROFILES ----------------
+  function renderProfiles(){
+    const tbody = document.querySelector('#profileTable tbody');
+    tbody.innerHTML = '';
 
-      gameProfiles.reverse().forEach((p, idx) => {
+    gameProfiles.forEach((p, idx) => {
       const tr = document.createElement('tr');
 
-        // Name (editable)
-        const tdName = document.createElement('td');
-        const nameInput = document.createElement('input');
-        nameInput.value = p[0];
-        nameInput.oninput = () => saveProfiles();
-        tdName.appendChild(nameInput);
-        tr.appendChild(tdName);
+      // Name (editable)
+      const tdName = document.createElement('td');
+      const nameInput = document.createElement('input');
+      nameInput.value = p[0];
+      nameInput.oninput = () => saveProfiles();
+      tdName.appendChild(nameInput);
+      tr.appendChild(tdName);
 
-        // GameID (editable)
-        const tdGameID = document.createElement('td');
-        const gameidInput = document.createElement('input');
-        gameidInput.value = p[1];
-        gameidInput.oninput = () => saveProfiles();
-        tdGameID.appendChild(gameidInput);
-        tr.appendChild(tdGameID);
+      // GameID (editable)
+      const tdGameID = document.createElement('td');
+      const gameidInput = document.createElement('input');
+      gameidInput.value = p[1];
+      gameidInput.oninput = () => saveProfiles();
+      tdGameID.appendChild(gameidInput);
+      tr.appendChild(tdGameID);
 
-        // Value (editable)
-        const tdVal = document.createElement('td');
-        const valInput = document.createElement('input');
-        valInput.value = p[2];
-        valInput.oninput = () => saveProfiles();
-        tdVal.appendChild(valInput);
-        tr.appendChild(tdVal);
+      // Value (editable)
+      const tdVal = document.createElement('td');
+      const valInput = document.createElement('input');
+      valInput.value = p[2];
+      valInput.oninput = () => saveProfiles();
+      tdVal.appendChild(valInput);
+      tr.appendChild(tdVal);
 
-        // Action
-        const tdAction = document.createElement('td');
-        const delBtn = document.createElement('button');
-        delBtn.textContent = 'Delete';
-        delBtn.onclick = () => deleteProfile(idx);
-        tdAction.appendChild(delBtn);
-        tr.appendChild(tdAction);
+      // Action
+      const tdAction = document.createElement('td');
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'Delete';
+      delBtn.onclick = () => deleteProfile(idx);
+      tdAction.appendChild(delBtn);
+      tr.appendChild(tdAction);
 
-        // store refs
-        tr._gameid = gameidInput;
-        tr._name = nameInput;
-        tr._val = valInput;
+      // store refs
+      tr._gameid = gameidInput;
+      tr._name = nameInput;
+      tr._val = valInput;
 
-        tbody.appendChild(tr);
-      });
-    }
+      tbody.appendChild(tr);
+    });
+  }
 
-    async function saveProfiles(){
-      
-      const rows = Array.from(document.querySelectorAll('#profileTable tbody tr'));
+  async function saveProfiles(){
+    const rows = document.querySelectorAll('#profileTable tbody tr');
 
-      rows.reverse().forEach((row, i) => {
-        gameProfiles[i][0] = row._name.value;
-        gameProfiles[i][1] = row._gameid.value;
-        gameProfiles[i][2] = row._val.value;
-      });
+    rows.forEach((row, i) => {
+      gameProfiles[i][0] = row._name.value;
+      gameProfiles[i][1] = row._gameid.value;
+      gameProfiles[i][2] = row._val.value;
+    });
 
-      await fetch('/updateGameDB', {
-        method: 'POST',
-        body: JSON.stringify(gameProfiles)
-      });
+    await fetch('/updateGameDB', {
+      method: 'POST',
+      body: JSON.stringify(gameProfiles)
+    });
+  }
 
-    }
+  async function addProfile() {
+    const response = await fetch("/getPayload");
+    const payload = await response.text();
 
+    // always sort oldest → newest first before adding
+    gameProfiles.sort((a,b) => 0); // placeholder for oldest first if needed
+    gameProfiles.unshift(["CurrentGame", payload, "999"]);
 
-    async function addProfile() {
-      const response = await fetch("/getPayload");
-      const payload = await response.text();
-      gameProfiles.push(["CurrentGame", payload, "999"]);
+    await fetch('/updateGameDB', {
+      method: 'POST',
+      body: JSON.stringify(gameProfiles)
+    });
+    renderProfiles();
+    updateArrows();
+  }
 
-      await saveProfiles();
-      loadData();
-    }
+  async function deleteProfile(idx) {
+    if (!confirm('Delete this profile?')) return;
 
+    gameProfiles.splice(idx, 1);
 
-    async function deleteProfile(idx) {
-      if (!confirm('Delete this profile?')) return;
+    await fetch('/updateGameDB', {
+      method: 'POST',
+      body: JSON.stringify(gameProfiles)
+    });
 
-      gameProfiles.splice(idx, 1);
-
-      await fetch('/updateGameDB', {
-        method: 'POST',
-        body: JSON.stringify(gameProfiles)
-      });
-
-      loadData();
-    }
-
-    // Render S0 table
-    function renderS0Vars() {
-      const tbody = document.querySelector('#S0Table tbody');
-      tbody.innerHTML = '';
-
-      Object.keys(S0Vars).forEach(key => {
-        const tr = document.createElement('tr');
-
-        // Name column
-        const tdName = document.createElement('td');
-        tdName.textContent = key;
-        tr.appendChild(tdName);
-
-        // Value column
-        const tdVal = document.createElement('td');
-        const input = document.createElement('input');
-
-        if (typeof S0Vars[key] === 'boolean') {
-          input.type = 'checkbox';
-          input.checked = S0Vars[key];
-          input.onchange = async () => {
-            S0Vars[key] = input.checked;
-            await fetch('/updateS0Vars', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(S0Vars)
-            });
-          };
-        }
-         else {
-          input.type = 'number';
-          input.value = S0Vars[key];
-          input.onchange = async () => {
-            S0Vars[key] = parseInt(input.value, 10);
-            await fetch('/updateS0Vars', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(S0Vars)
-            });
-          };
-        }
-
-        tdVal.appendChild(input);
-        tr.appendChild(tdVal);
-        tbody.appendChild(tr);
-      });
-    }
-
-    renderS0Vars();
     loadData();
-    </script>
+  }
 
-    </body>
-    </html>
-    )rawliteral";
+  // ---------------- SORTING ----------------
+  function sortProfiles(col) {
+    if (currentSortCol === col) {
+      currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      currentSortCol = col;
+      currentSortDir = 'asc';
+    }
+
+    gameProfiles.sort((a, b) => {
+      let valA = a[col], valB = b[col];
+
+      if (!isNaN(valA) && !isNaN(valB)) {
+        valA = Number(valA);
+        valB = Number(valB);
+      } else {
+        valA = valA.toString().toLowerCase();
+        valB = valB.toString().toLowerCase();
+      }
+
+      if (valA < valB) return currentSortDir === 'asc' ? -1 : 1;
+      if (valA > valB) return currentSortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    renderProfiles();
+    updateArrows();
+  }
+
+  function updateArrows() {
+    for (let i = 0; i < 3; i++) {
+      const arrow = document.getElementById('arrow' + i);
+      if (i === currentSortCol) {
+        arrow.textContent = currentSortDir === 'asc' ? '▲' : '▼';
+      } else {
+        arrow.textContent = '▲▼';
+      }
+    }
+  }
+
+  // Render S0 table
+  function renderS0Vars() {
+    const tbody = document.querySelector('#S0Table tbody');
+    tbody.innerHTML = '';
+
+    Object.keys(S0Vars).forEach(key => {
+      const tr = document.createElement('tr');
+
+      const tdName = document.createElement('td');
+      tdName.textContent = key;
+      tr.appendChild(tdName);
+
+      const tdVal = document.createElement('td');
+      const input = document.createElement('input');
+
+      if (typeof S0Vars[key] === 'boolean') {
+        input.type = 'checkbox';
+        input.checked = S0Vars[key];
+        input.onchange = async () => {
+          S0Vars[key] = input.checked;
+          await fetch('/updateS0Vars', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(S0Vars)
+          });
+        };
+      } else {
+        input.type = 'number';
+        input.value = S0Vars[key];
+        input.onchange = async () => {
+          S0Vars[key] = parseInt(input.value, 10);
+          await fetch('/updateS0Vars', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(S0Vars)
+          });
+        };
+      }
+
+      tdVal.appendChild(input);
+      tr.appendChild(tdVal);
+      tbody.appendChild(tr);
+    });
+  }
+
+  renderS0Vars();
+  loadData();
+  </script>
+
+  </body>
+  </html>
+  )rawliteral";
 
   server.send(200, "text/html", page);
 }
