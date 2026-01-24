@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.2b (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.2c (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -96,8 +96,8 @@ String gameDB[][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 is th
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~612
-uint8_t const debugE2CAP = 0; // line ~1181
+uint8_t const debugE1CAP = 0; // line ~616
+uint8_t const debugE2CAP = 0; // line ~1185
 
 bool const S0_pwr = false;       // Load "S0_pwr_profile" when all consoles defined below are off. Defined below.
 
@@ -109,6 +109,8 @@ int const S0_pwr_profile = -12;    // When all consoles definied below are off, 
                                  //          -12 means "remote button profile 12"
 
 bool S0_gameID = true;    // When a gameID match is not found for a powered on console, DefaultProf for that console will load
+
+String payload = ""; 
 
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
@@ -142,7 +144,7 @@ uint8_t const SVS = 1; //     "Remote" profiles are profiles that are assigned t
                       //  ** If S0 below is set to true, create "/profile/SVS/S0_<user defined>.rt4" for when all ports are in-active. Ex: S0_HDMI.rt4
                       //
 
-bool const S0  = false;  // (Profile 0) default is false 
+bool const S0 = false;  // (Profile 0) default is false 
                          //
                          //  ** Recommended to remove any /profile/SVS/S0_<user defined>.rt4 profiles and leave this option "false" if using in tandem with the Scalable Video Switch. **
                          //  ** Does not work with MT-VIKI / TESmart HDMI switches **
@@ -438,6 +440,8 @@ void setup(){
   server.on("/updateGameDB",HTTP_POST,handleUpdateGameDB);
   server.on("/updateS0Vars", HTTP_POST, handleUpdateS0Vars);
   server.on("/getS0Vars", HTTP_GET, handleGetS0Vars);
+  server.on("/getPayload", HTTP_GET, handleGetPayload);
+
 
   server.begin();
 
@@ -478,7 +482,7 @@ int fetchGameIDProf(String gameID,int dp){ // looks at gameDB for a gameID -> pr
 }  // end of fetchGameIDProf()
 
 void readGameID(){ // queries addresses in "consoles" array for gameIDs
-  String payload = "";
+
   int result = 0;
   for(int i = 0; i < consolesSize; i++){
     if(WiFi.status() == WL_CONNECTED){ // wait for WiFi connection
@@ -2621,13 +2625,17 @@ void loadConsoles(){
     f.close();
 }
 
+void handleGetPayload() {
+  server.send(200, "text/plain", payload);
+}
+
 void handleRoot(){
   String page = R"rawliteral(
   <!DOCTYPE html>
   <html>
   <head>
     <meta charset="utf-8">
-    <title>Donut Dongle Editor</title>
+    <title>Donut Shop</title>
     <style>
       body { font-family: sans-serif; }
       table { border-collapse: collapse; width: 80%; margin: 20px auto; }
@@ -2866,12 +2874,16 @@ void handleRoot(){
 
     }
 
-    async function addProfile(){
-      gameProfiles.push(["NewGame", "gameID", "999"]);
+
+    async function addProfile() {
+      const response = await fetch("/getPayload");
+      const payload = await response.text();
+      gameProfiles.push(["CurrentGame", payload, "999"]);
 
       await saveProfiles();
       loadData();
     }
+
 
     async function deleteProfile(idx) {
       if (!confirm('Delete this profile?')) return;
