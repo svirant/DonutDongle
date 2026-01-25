@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.2f (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.2g (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -418,7 +418,7 @@ void setup(){
   pinMode(LED_BLUE, OUTPUT); // BLUE led is a WiFi activity. Long periods of blue means one of the gameID servers is not connecting.
   analogWrite(LED_GREEN,255);
   analogWrite(LED_BLUE,255);
-  uint16_t gTime = 2000;
+  uint16_t gTime = 4000;
 
   Serial.begin(9600);                           // set the baud rate for the RT4K VGA serial connection
   extronSerial.begin(9600,SERIAL_8N1,3,4);   // set the baud rate for the Extron sw1 Connection
@@ -2372,9 +2372,6 @@ void handleGetConsoles(){
         obj["Desc"] = consoles[i].Desc;
         obj["Address"] = consoles[i].Address;
         obj["DefaultProf"] = consoles[i].DefaultProf;
-        obj["Prof"] = consoles[i].Prof;
-        obj["On"] = consoles[i].On;
-        obj["King"] = consoles[i].King;
         obj["Enabled"] = consoles[i].Enabled;
     }
 
@@ -2489,9 +2486,6 @@ void saveConsoles(){
     obj["Desc"]        = consoles[i].Desc;
     obj["Address"]     = consoles[i].Address;
     obj["DefaultProf"] = consoles[i].DefaultProf;
-    obj["Prof"]        = consoles[i].Prof;
-    obj["On"]          = consoles[i].On;
-    obj["King"]        = consoles[i].King;
     obj["Enabled"]      = consoles[i].Enabled;
   }
 
@@ -2520,9 +2514,6 @@ void handleUpdateConsoles(){
     consoles[newSize].Desc        = obj["Desc"].as<String>();
     consoles[newSize].Address     = obj["Address"].as<String>();
     consoles[newSize].DefaultProf = obj["DefaultProf"].as<int>();
-    consoles[newSize].Prof        = obj["Prof"].as<int>();
-    consoles[newSize].On          = obj["On"].as<int>();
-    consoles[newSize].King        = obj["King"].as<int>();
     consoles[newSize].Enabled      = obj["Enabled"].as<bool>();
     newSize++;
   }
@@ -2622,9 +2613,6 @@ void loadConsoles(){
         consoles[consolesSize].Desc = obj["Desc"].as<String>();
         consoles[consolesSize].Address = obj["Address"].as<String>();
         consoles[consolesSize].DefaultProf = obj["DefaultProf"].as<int>();
-        consoles[consolesSize].Prof = obj["Prof"].as<int>();
-        consoles[consolesSize].On = obj["On"].as<int>();
-        consoles[consolesSize].King = obj["King"].as<int>();
         consoles[consolesSize].Enabled = obj["Enabled"].as<bool>();
         consolesSize++;
     }
@@ -2635,7 +2623,7 @@ void handleGetPayload() {
   server.send(200, "text/plain", payload);
 }
 
-void handleRoot(){
+void handleRoot() {
   String page = R"rawliteral(
   <!DOCTYPE html>
   <html>
@@ -2671,16 +2659,14 @@ void handleRoot(){
         <th>Enabled</th>
         <th>Description</th>
         <th>Address</th>
-        <th>No Match Profile</th>
+        <th>
+          No Match Profile
+          <input type="checkbox" id="S0_gameID" style="margin-left:5px;"
+                 onchange="updateS0GameID(this)">
+        </th>
         <th>Action</th>
       </tr>
     </thead>
-    <tbody></tbody>
-  </table>
-
-  <h3></h3>
-  <table id="S0Table">
-    <thead><tr><th>No Match Profile</th><th>Enabled</th></tr></thead>
     <tbody></tbody>
   </table>
 
@@ -2707,7 +2693,7 @@ void handleRoot(){
   // inject current S0 values
   )rawliteral";
 
-  page += embedS0Vars();
+  page += embedS0Vars(); // make sure S0Vars['S0_gameID'] exists
 
   page += R"rawliteral(
 
@@ -2722,6 +2708,12 @@ void handleRoot(){
     renderConsoles();
     renderProfiles();
     updateArrows();
+
+    // set initial state of S0_gameID checkbox
+    const s0cb = document.getElementById('S0_gameID');
+    if (s0cb && S0Vars['S0_gameID'] !== undefined) {
+      s0cb.checked = S0Vars['S0_gameID'];
+    }
   }
 
   // ---------------- CONSOLES ----------------
@@ -2736,7 +2728,7 @@ void handleRoot(){
       const tdEnable = document.createElement('td');
       const enableCheckbox = document.createElement('input');
       enableCheckbox.type = 'checkbox';
-      enableCheckbox.checked = !!c.Enabled; // reflect model value
+      enableCheckbox.checked = !!c.Enabled;
       enableCheckbox.onchange = async () => {
         consoles[idx].Enabled = enableCheckbox.checked;
         await saveConsoles();
@@ -2756,7 +2748,7 @@ void handleRoot(){
       };
       tdDesc.appendChild(descInput);
       tr.appendChild(tdDesc);
-      
+
       // --- Address ---
       const tdAddr = document.createElement('td');
       const addrInput = document.createElement('input');
@@ -2770,7 +2762,7 @@ void handleRoot(){
       tdAddr.appendChild(addrInput);
       tr.appendChild(tdAddr);
 
-      // --- DefaultProf ---
+      // --- DefaultProf (No Match Profile column) ---
       const tdProf = document.createElement('td');
       const profInput = document.createElement('input');
       profInput.type = 'number';
@@ -2808,9 +2800,6 @@ void handleRoot(){
       Desc: "Console Name",
       Address: "http://",
       DefaultProf: 0,
-      Prof: 0,
-      On: 0,
-      King: 0,
       Enabled: true
     });
 
@@ -2822,7 +2811,6 @@ void handleRoot(){
     if (!confirm('Delete this console?')) return;
 
     consoles.splice(idx, 1);
-
     await fetch('/updateConsoles', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2832,7 +2820,6 @@ void handleRoot(){
     renderConsoles();
   }
 
-
   // ---------------- PROFILES ----------------
   function renderProfiles(){
     const tbody = document.querySelector('#profileTable tbody');
@@ -2841,7 +2828,6 @@ void handleRoot(){
     gameProfiles.forEach((p, idx) => {
       const tr = document.createElement('tr');
 
-      // Name (editable)
       const tdName = document.createElement('td');
       const nameInput = document.createElement('input');
       nameInput.value = p[0];
@@ -2849,7 +2835,6 @@ void handleRoot(){
       tdName.appendChild(nameInput);
       tr.appendChild(tdName);
 
-      // GameID (editable)
       const tdGameID = document.createElement('td');
       const gameidInput = document.createElement('input');
       gameidInput.value = p[1];
@@ -2857,7 +2842,6 @@ void handleRoot(){
       tdGameID.appendChild(gameidInput);
       tr.appendChild(tdGameID);
 
-      // Value (editable)
       const tdVal = document.createElement('td');
       const valInput = document.createElement('input');
       valInput.value = p[2];
@@ -2865,7 +2849,6 @@ void handleRoot(){
       tdVal.appendChild(valInput);
       tr.appendChild(tdVal);
 
-      // Action
       const tdAction = document.createElement('td');
       const delBtn = document.createElement('button');
       delBtn.textContent = 'Delete';
@@ -2873,7 +2856,6 @@ void handleRoot(){
       tdAction.appendChild(delBtn);
       tr.appendChild(tdAction);
 
-      // store refs
       tr._gameid = gameidInput;
       tr._name = nameInput;
       tr._val = valInput;
@@ -2884,13 +2866,11 @@ void handleRoot(){
 
   async function saveProfiles(){
     const rows = document.querySelectorAll('#profileTable tbody tr');
-
     rows.forEach((row, i) => {
       gameProfiles[i][0] = row._name.value;
       gameProfiles[i][1] = row._gameid.value;
       gameProfiles[i][2] = row._val.value;
     });
-
     await fetch('/updateGameDB', {
       method: 'POST',
       body: JSON.stringify(gameProfiles)
@@ -2900,11 +2880,8 @@ void handleRoot(){
   async function addProfile() {
     const response = await fetch("/getPayload");
     const payload = await response.text();
-
-    // always sort oldest → newest first before adding
-    gameProfiles.sort((a,b) => 0); // placeholder for oldest first if needed
+    gameProfiles.sort((a,b) => 0);
     gameProfiles.unshift(["CurrentGame", payload, "999"]);
-
     await fetch('/updateGameDB', {
       method: 'POST',
       body: JSON.stringify(gameProfiles)
@@ -2915,14 +2892,11 @@ void handleRoot(){
 
   async function deleteProfile(idx) {
     if (!confirm('Delete this profile?')) return;
-
     gameProfiles.splice(idx, 1);
-
     await fetch('/updateGameDB', {
       method: 'POST',
       body: JSON.stringify(gameProfiles)
     });
-
     loadData();
   }
 
@@ -2934,10 +2908,8 @@ void handleRoot(){
       currentSortCol = col;
       currentSortDir = 'asc';
     }
-
     gameProfiles.sort((a, b) => {
       let valA = a[col], valB = b[col];
-
       if (!isNaN(valA) && !isNaN(valB)) {
         valA = Number(valA);
         valB = Number(valB);
@@ -2945,12 +2917,10 @@ void handleRoot(){
         valA = valA.toString().toLowerCase();
         valB = valB.toString().toLowerCase();
       }
-
       if (valA < valB) return currentSortDir === 'asc' ? -1 : 1;
       if (valA > valB) return currentSortDir === 'asc' ? 1 : -1;
       return 0;
     });
-
     renderProfiles();
     updateArrows();
   }
@@ -2966,52 +2936,17 @@ void handleRoot(){
     }
   }
 
-  // Render S0 table
-  function renderS0Vars() {
-    const tbody = document.querySelector('#S0Table tbody');
-    tbody.innerHTML = '';
-
-    Object.keys(S0Vars).forEach(key => {
-      const tr = document.createElement('tr');
-
-      const tdName = document.createElement('td');
-      tdName.textContent = key;
-      tr.appendChild(tdName);
-
-      const tdVal = document.createElement('td');
-      const input = document.createElement('input');
-
-      if (typeof S0Vars[key] === 'boolean') {
-        input.type = 'checkbox';
-        input.checked = S0Vars[key];
-        input.onchange = async () => {
-          S0Vars[key] = input.checked;
-          await fetch('/updateS0Vars', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(S0Vars)
-          });
-        };
-      } else {
-        input.type = 'number';
-        input.value = S0Vars[key];
-        input.onchange = async () => {
-          S0Vars[key] = parseInt(input.value, 10);
-          await fetch('/updateS0Vars', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(S0Vars)
-          });
-        };
-      }
-
-      tdVal.appendChild(input);
-      tr.appendChild(tdVal);
-      tbody.appendChild(tr);
+  // ---------------- S0_gameID HANDLER ----------------
+  function updateS0GameID(cb) {
+    S0Vars['S0_gameID'] = cb.checked;
+    fetch('/updateS0Vars', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(S0Vars)
     });
   }
 
-  renderS0Vars();
+  // ---------------- INITIALIZE ----------------
   loadData();
   </script>
 
