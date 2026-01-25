@@ -2831,21 +2831,22 @@ void handleRoot() {
       const tdName = document.createElement('td');
       const nameInput = document.createElement('input');
       nameInput.value = p[0];
-      nameInput.oninput = () => saveProfiles();
+      nameInput.onchange = async () => await saveProfiles();
       tdName.appendChild(nameInput);
       tr.appendChild(tdName);
 
       const tdGameID = document.createElement('td');
       const gameidInput = document.createElement('input');
       gameidInput.value = p[1];
-      gameidInput.oninput = () => saveProfiles();
+      gameidInput.onchange = async () => await saveProfiles();
       tdGameID.appendChild(gameidInput);
       tr.appendChild(tdGameID);
 
       const tdVal = document.createElement('td');
       const valInput = document.createElement('input');
+      valInput.type = 'number';
       valInput.value = p[2];
-      valInput.oninput = () => saveProfiles();
+      valInput.onchange = async () =>  await saveProfiles();
       tdVal.appendChild(valInput);
       tr.appendChild(tdVal);
 
