@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.2g (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.3 (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -407,18 +407,18 @@ bool MTVddSW2 = false;
 WebServer server(80);
 
 void DDloop(void *pvParameters);
-void gameIDTimer(void *pvParameters);
+void GIDloop(void *pvParameters);
+uint16_t gTime = 2000;
 
 void setup(){
 
-  initPCIInterruptForTinyReceiver();            // for IR Receiver
+  initPCIInterruptForTinyReceiver(); // for IR Receiver
   WiFi.begin("SSID","password"); // WiFi creds go here. MUST be a 2.4GHz WiFi AP. 5GHz is NOT supported by the Nano ESP32.
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LED_GREEN, OUTPUT); // GREEN led lights up for 1 second when a SVS profile is sent
   pinMode(LED_BLUE, OUTPUT); // BLUE led is a WiFi activity. Long periods of blue means one of the gameID servers is not connecting.
   analogWrite(LED_GREEN,255);
   analogWrite(LED_BLUE,255);
-  uint16_t gTime = 4000;
 
   Serial.begin(9600);                           // set the baud rate for the RT4K VGA serial connection
   extronSerial.begin(9600,SERIAL_8N1,3,4);   // set the baud rate for the Extron sw1 Connection
@@ -447,7 +447,7 @@ void setup(){
   server.begin();
 
   xTaskCreate(DDloop,"DDloop",4096,NULL,1,NULL);
-  xTaskCreate(gameIDTimer,"gameIDTimer",4096,(void *)&gTime,1,NULL);
+  xTaskCreate(GIDloop,"GIDloop",4096,NULL,1,NULL);
   
 }  // end of setup
 
@@ -469,6 +469,13 @@ void DDloop(void *pvParameters){
   }
 } // end of DDloop
 
+void GIDloop(void *pvParameters){
+  (void)pvParameters;
+
+  for(;;){
+    readGameID();
+  }
+} // end of DDloop
 
 int fetchGameIDProf(String gameID,int dp){ // looks at gameDB for a gameID -> profile match
   for(int i = 0; i < gameDBSize; i++){      // returns "DefaultProf" for console if nothing found and S0_gameID = true
@@ -483,111 +490,104 @@ int fetchGameIDProf(String gameID,int dp){ // looks at gameDB for a gameID -> pr
 }  // end of fetchGameIDProf()
 
 void readGameID(){ // queries addresses in "consoles" array for gameIDs
+  currentGameTime = millis();  // Init timer
+  if(prevGameTime == 0)       // If previous timer not initialized, do so now.
+    prevGameTime = millis();
+  if((currentGameTime - prevGameTime) >= gTime){ // make sure at least gTime has passed before continuing
 
-  int result = 0;
-  for(int i = 0; i < consolesSize; i++){
-    if(WiFi.status() == WL_CONNECTED && consoles[i].Enabled){ // wait for WiFi connection
-      HTTPClient http;
-      http.setConnectTimeout(2000); // give only 2 seconds per console to check gameID, is only honored for IP-based addresses
-      http.begin(consoles[i].Address);
-      analogWrite(LED_BLUE,222);
-      int httpCode = http.GET();             // start connection and send HTTP header
-      if(httpCode > 0 || httpCode == -11){   // httpCode will be negative on error, let the read error slide...
-        if(httpCode == HTTP_CODE_OK){        // console is healthy // HTTP header has been sent and Server response header has been handled
-          consoles[i].Address = replaceDomainWithIP(consoles[i].Address); // replace Domain with IP in consoles array. this allows setConnectTimeout to be honored
-          payload = http.getString();        
-          JSONVar MCPjson = JSON.parse(payload); // 
-          if(JSON.typeof(MCPjson) != "undefined"){ // If the response is JSON, continue
-            if(MCPjson.hasOwnProperty("gameID")){  // If JSON contains gameID, reset payload to it's value
-              payload = (const char*) MCPjson["gameID"];
-            }
-          }
-          result = fetchGameIDProf(payload,consoles[i].DefaultProf);
-          consoles[i].On = 1;
-          if(consoles[i].Prof != result && result != -1){ // gameID found for console, set as King, unset previous King, send profile change 
-            consoles[i].Prof = result;
-            consoles[i].King = 1;
-            for(int j=0;j < consolesSize;j++){ // set previous King to 0
-              if(i != j && consoles[j].King == 1)
-                consoles[j].King = 0;
-            }
-            if(consoles[i].Prof >= 0) sendSVS(consoles[i].Prof);
-            else sendRBP((-1) * consoles[i].Prof);
-          }
-       } 
-      } // end of if(httpCode > 0 || httpCode == -11)
-      else{ // console is off, set attributes to 0, find a console that is On starting at the top of the gameID list, set as King, send profile
-        consoles[i].On = 0;
-        consoles[i].Prof = 33333;
-        if(consoles[i].King == 1){
-          //currentGProf = 33333;
-          for(int k=0;k < consolesSize;k++){
-            if(i == k){
-              consoles[k].King = 0;
-              for(int l=0;l < consolesSize;l++){ // find next Console that is on
-                if(consoles[l].On == 1){
-                  consoles[l].King = 1;
-                  if(consoles[l].Prof >= 0) sendSVS(consoles[l].Prof);
-                  else sendRBP((-1) * consoles[l].Prof);
-                  break;
-                }
+    int result = 0;
+    for(int i = 0; i < consolesSize; i++){
+      if(WiFi.status() == WL_CONNECTED && consoles[i].Enabled){ // wait for WiFi connection
+        Serial.println(consoles[i].Desc);
+        HTTPClient http;
+        http.setConnectTimeout(2000); // give only 2 seconds per console to check gameID, is only honored for IP-based addresses
+        http.begin(consoles[i].Address);
+        analogWrite(LED_BLUE,222);
+        int httpCode = http.GET();             // start connection and send HTTP header
+        if(httpCode > 0 || httpCode == -11){   // httpCode will be negative on error, let the read error slide...
+          if(httpCode == HTTP_CODE_OK){        // console is healthy // HTTP header has been sent and Server response header has been handled
+            consoles[i].Address = replaceDomainWithIP(consoles[i].Address); // replace Domain with IP in consoles array. this allows setConnectTimeout to be honored
+            payload = http.getString();        
+            JSONVar MCPjson = JSON.parse(payload); // 
+            if(JSON.typeof(MCPjson) != "undefined"){ // If the response is JSON, continue
+              if(MCPjson.hasOwnProperty("gameID")){  // If JSON contains gameID, reset payload to it's value
+                payload = (const char*) MCPjson["gameID"];
               }
             }
-   
-          } // end of for()
-        } // end of if()
-        int count = 0;
-        for(int m=0;m < consolesSize;m++){
-          if(consoles[m].On == 0) count++;
-        }
-        // if(count == consolesSize && S0_pwr){
-        //   if(S0_pwr_profile < 0 && currentProf[0] == 0 && (-1)*S0_pwr_profile != currentProf[1]) sendSVS(S0_pwr_profile);
-        //   if(S0_pwr_profile >= 0 && currentProf[0] == 1 && S0_pwr_profile != currentProf[1]) sendSVS(S0_pwr_profile);
-        //   else if(S0_pwr_profile < 0 && currentProf[0] == 1) sendRBP((-1) * S0_pwr_profile);
-        //   else if((-1)*S0_pwr_profile != currentProf[1] && currentProf[0] == 0) sendRBP((-1) * S0_pwr_profile);
-        // }   
-      } // end of else()
-    http.end();
-    analogWrite(LED_BLUE, 255);
-    }  // end of WiFi connection
-    else if(!consoles[i].Enabled){ // console is disabled in web ui, set attributes to 0, find a console that is On starting at the top of the gameID list, set as King, send profile
-        consoles[i].On = 0;
-        consoles[i].Prof = 33333;
-        if(consoles[i].King == 1){
-          //currentGProf = 33333;
-          for(int k=0;k < consolesSize;k++){
-            if(i == k){
-              consoles[k].King = 0;
-              for(int l=0;l < consolesSize;l++){ // find next Console that is on
-                if(consoles[l].On == 1){
-                  consoles[l].King = 1;
-                  if(consoles[l].Prof >= 0) sendSVS(consoles[l].Prof);
-                  else sendRBP((-1) * consoles[l].Prof);
-                  break;
+            result = fetchGameIDProf(payload,consoles[i].DefaultProf);
+            consoles[i].On = 1;
+            if(consoles[i].Prof != result && result != -1){ // gameID found for console, set as King, unset previous King, send profile change 
+              consoles[i].Prof = result;
+              consoles[i].King = 1;
+              for(int j=0;j < consolesSize;j++){ // set previous King to 0
+                if(i != j && consoles[j].King == 1)
+                  consoles[j].King = 0;
+              }
+              if(consoles[i].Prof >= 0) sendSVS(consoles[i].Prof);
+              else sendRBP((-1) * consoles[i].Prof);
+            }
+        } 
+        } // end of if(httpCode > 0 || httpCode == -11)
+        else{ // console is off, set attributes to 0, find a console that is On starting at the top of the gameID list, set as King, send profile
+          consoles[i].On = 0;
+          consoles[i].Prof = 33333;
+          if(consoles[i].King == 1){
+            //currentGProf = 33333;
+            for(int k=0;k < consolesSize;k++){
+              if(i == k){
+                consoles[k].King = 0;
+                for(int l=0;l < consolesSize;l++){ // find next Console that is on
+                  if(consoles[l].On == 1){
+                    consoles[l].King = 1;
+                    if(consoles[l].Prof >= 0) sendSVS(consoles[l].Prof);
+                    else sendRBP((-1) * consoles[l].Prof);
+                    break;
+                  }
                 }
               }
-            }
-   
-          } // end of for()
-        } // end of if()
-    } // end of if else()
+    
+            } // end of for()
+          } // end of if()
+          int count = 0;
+          for(int m=0;m < consolesSize;m++){
+            if(consoles[m].On == 0) count++;
+          }
+          // if(count == consolesSize && S0_pwr){
+          //   if(S0_pwr_profile < 0 && currentProf[0] == 0 && (-1)*S0_pwr_profile != currentProf[1]) sendSVS(S0_pwr_profile);
+          //   if(S0_pwr_profile >= 0 && currentProf[0] == 1 && S0_pwr_profile != currentProf[1]) sendSVS(S0_pwr_profile);
+          //   else if(S0_pwr_profile < 0 && currentProf[0] == 1) sendRBP((-1) * S0_pwr_profile);
+          //   else if((-1)*S0_pwr_profile != currentProf[1] && currentProf[0] == 0) sendRBP((-1) * S0_pwr_profile);
+          // }   
+        } // end of else()
+      http.end();
+      analogWrite(LED_BLUE, 255);
+      }  // end of WiFi connection
+      else if(!consoles[i].Enabled){ // console is disabled in web ui, set attributes to 0, find a console that is On starting at the top of the gameID list, set as King, send profile
+          consoles[i].On = 0;
+          consoles[i].Prof = 33333;
+          if(consoles[i].King == 1){
+            //currentGProf = 33333;
+            for(int k=0;k < consolesSize;k++){
+              if(i == k){
+                consoles[k].King = 0;
+                for(int l=0;l < consolesSize;l++){ // find next Console that is on
+                  if(consoles[l].On == 1){
+                    consoles[l].King = 1;
+                    if(consoles[l].Prof >= 0) sendSVS(consoles[l].Prof);
+                    else sendRBP((-1) * consoles[l].Prof);
+                    break;
+                  }
+                }
+              }
+    
+            } // end of for()
+          } // end of if()
+      } // end of if else()
+    }
+    currentGameTime = 0;
+    prevGameTime = 0;
   }
 }  // end of readGameID()
-
-void gameIDTimer(void *pvParameters){
-  uint16_t gTime = *((uint16_t *)pvParameters);
-
-  for (;;){
-    currentGameTime = millis();  // Init timer
-    if(prevGameTime == 0)       // If previous timer not initialized, do so now.
-      prevGameTime = millis();
-    if((currentGameTime - prevGameTime) >= gTime){ // If it's been longer than gIDTime, readGameID() and reset the timer.
-      currentGameTime = 0;
-      prevGameTime = 0;
-      readGameID();
-    }
- }
-}  // end of gameIDTimer()
 
 String replaceDomainWithIP(String input){
   String result = input;
