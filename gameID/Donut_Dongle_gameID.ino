@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.2e (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.2f (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -41,6 +41,7 @@ struct Console {
   int Prof;
   int On;
   int King;
+  bool Enabled;
 };
 
 /*
@@ -57,11 +58,11 @@ struct Console {
                    //            1 means SVS profile 1
                    //           12 means SVS profile 12
                    //           etc...
-Console consoles[] = {{"PS1","http://ps1digital.local/gameid",-9,0,0,0}, // you can add more, but stay in this format
-                   // {"Test","http://10.0.1.53/api/currentState",-10,0,0,0},
-                   // {"PS2","http://ps2digital.local/gameid",102,0,0,0}, // remove leading "//" to uncomment and enable ps2digital
-                   // {"MCP","http://10.0.0.14/api/currentState",104,0,0,0}, // address format for MemCardPro. replace IP address with your MCP address
-                      {"N64","http://n64digital.local/gameid",-7,0,0,0} // the last one in the list has no "," at the end
+Console consoles[] = {{"PS1","http://ps1digital.local/gameid",-9,0,0,0,1}, // you can add more, but stay in this format
+                      {"MemCardPro","http://10.0.1.52/api/currentState",-10,0,0,0,1},
+                   // {"PS2","http://ps2digital.local/gameid",102,0,0,0,1}, // remove leading "//" to uncomment and enable ps2digital
+                   // {"MCP","http://10.0.0.14/api/currentState",104,0,0,0,1}, // address format for MemCardPro. replace IP address with your MCP address
+                      {"N64","http://n64digital.local/gameid",-7,0,0,0,1} // the last one in the list has no "," at the end
                       };
 
 int consolesSize = sizeof(consoles) / sizeof(consoles[0]); // length of consoles DB. can grow dynamically
@@ -99,8 +100,8 @@ int gameDBSize = 11; // array can hold 1000 entries, but only set to current siz
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~616
-uint8_t const debugE2CAP = 0; // line ~1185
+uint8_t const debugE1CAP = 0; // line ~638
+uint8_t const debugE2CAP = 0; // line ~1207
 
 bool const S0_pwr = false;       // Load "S0_pwr_profile" when all consoles defined below are off. Defined below.
 
@@ -485,7 +486,7 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
 
   int result = 0;
   for(int i = 0; i < consolesSize; i++){
-    if(WiFi.status() == WL_CONNECTED){ // wait for WiFi connection
+    if(WiFi.status() == WL_CONNECTED && consoles[i].Enabled){ // wait for WiFi connection
       HTTPClient http;
       http.setConnectTimeout(2000); // give only 2 seconds per console to check gameID, is only honored for IP-based addresses
       http.begin(consoles[i].Address);
@@ -549,6 +550,27 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
     http.end();
     analogWrite(LED_BLUE, 255);
     }  // end of WiFi connection
+    else if(!consoles[i].Enabled){ // console is disabled in web ui, set attributes to 0, find a console that is On starting at the top of the gameID list, set as King, send profile
+        consoles[i].On = 0;
+        consoles[i].Prof = 33333;
+        if(consoles[i].King == 1){
+          //currentGProf = 33333;
+          for(int k=0;k < consolesSize;k++){
+            if(i == k){
+              consoles[k].King = 0;
+              for(int l=0;l < consolesSize;l++){ // find next Console that is on
+                if(consoles[l].On == 1){
+                  consoles[l].King = 1;
+                  if(consoles[l].Prof >= 0) sendSVS(consoles[l].Prof);
+                  else sendRBP((-1) * consoles[l].Prof);
+                  break;
+                }
+              }
+            }
+   
+          } // end of for()
+        } // end of if()
+    } // end of if else()
   }
 }  // end of readGameID()
 
@@ -2353,7 +2375,9 @@ void handleGetConsoles(){
         obj["Prof"] = consoles[i].Prof;
         obj["On"] = consoles[i].On;
         obj["King"] = consoles[i].King;
+        obj["Enabled"] = consoles[i].Enabled;
     }
+
     String out; serializeJson(doc,out);
     server.send(200,"application/json",out);
 }
@@ -2468,6 +2492,7 @@ void saveConsoles(){
     obj["Prof"]        = consoles[i].Prof;
     obj["On"]          = consoles[i].On;
     obj["King"]        = consoles[i].King;
+    obj["Enabled"]      = consoles[i].Enabled;
   }
 
   serializeJson(doc, f);
@@ -2498,6 +2523,7 @@ void handleUpdateConsoles(){
     consoles[newSize].Prof        = obj["Prof"].as<int>();
     consoles[newSize].On          = obj["On"].as<int>();
     consoles[newSize].King        = obj["King"].as<int>();
+    consoles[newSize].Enabled      = obj["Enabled"].as<bool>();
     newSize++;
   }
   consolesSize = newSize;
@@ -2599,6 +2625,7 @@ void loadConsoles(){
         consoles[consolesSize].Prof = obj["Prof"].as<int>();
         consoles[consolesSize].On = obj["On"].as<int>();
         consoles[consolesSize].King = obj["King"].as<int>();
+        consoles[consolesSize].Enabled = obj["Enabled"].as<bool>();
         consolesSize++;
     }
     f.close();
@@ -2641,6 +2668,7 @@ void handleRoot(){
   <table id="consoleTable">
     <thead>
       <tr>
+        <th>Enabled</th>
         <th>Description</th>
         <th>Address</th>
         <th>No Match Profile</th>
@@ -2662,7 +2690,7 @@ void handleRoot(){
       <tr>
         <th onclick="sortProfiles(0)">Name <span class="arrow" id="arrow0">▲▼</span></th>
         <th onclick="sortProfiles(1)">gameID <span class="arrow" id="arrow1">▲▼</span></th>
-        <th onclick="sortProfiles(2)">SVS Profile # <span class="arrow" id="arrow2">▲▼</span></th>
+        <th onclick="sortProfiles(2)">Profile # <span class="arrow" id="arrow2">▲▼</span></th>
         <th>Action</th>
       </tr>
     </thead>
@@ -2703,6 +2731,18 @@ void handleRoot(){
 
     consoles.forEach((c, idx) => {
       const tr = document.createElement('tr');
+
+      // --- Enable checkbox column ---
+      const tdEnable = document.createElement('td');
+      const enableCheckbox = document.createElement('input');
+      enableCheckbox.type = 'checkbox';
+      enableCheckbox.checked = !!c.Enabled; // reflect model value
+      enableCheckbox.onchange = async () => {
+        consoles[idx].Enabled = enableCheckbox.checked;
+        await saveConsoles();
+      };
+      tdEnable.appendChild(enableCheckbox);
+      tr.appendChild(tdEnable);
 
       // --- Description ---
       const tdDesc = document.createElement('td');
@@ -2770,7 +2810,8 @@ void handleRoot(){
       DefaultProf: 0,
       Prof: 0,
       On: 0,
-      King: 0
+      King: 0,
+      Enabled: true
     });
 
     await saveConsoles();
