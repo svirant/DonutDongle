@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.3 (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.3a (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -498,7 +498,6 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
     int result = 0;
     for(int i = 0; i < consolesSize; i++){
       if(WiFi.status() == WL_CONNECTED && consoles[i].Enabled){ // wait for WiFi connection
-        Serial.println(consoles[i].Desc);
         HTTPClient http;
         http.setConnectTimeout(2000); // give only 2 seconds per console to check gameID, is only honored for IP-based addresses
         http.begin(consoles[i].Address);
