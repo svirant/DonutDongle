@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.7
+* Donut Dongle beta v1.7a
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -32,7 +32,7 @@
 */
 
 uint8_t const debugE1CAP = 0; // line ~437
-uint8_t const debugE2CAP = 0; // line ~1008
+uint8_t const debugE2CAP = 0; // line ~1007
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -122,7 +122,7 @@ uint8_t const ExtronVideoOutputPortSW2 = 1; // can also be used for auto matrix 
 
 ///////////////////////////////
 
-uint8_t const vinMatrix[] = {0,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 defined above)
+uint8_t const vinMatrix[65] = {0,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 defined above)
                                                         // set to 0 for the auto switched input to tie to all outputs
                                                         // set to 1 for the auto switched input to trigger a Preset
                                                         // set to 2 for the auto switched input to tie to "ExtronVideoOutputPortSW1" / "ExtronVideoOutputPortSW2"
@@ -322,7 +322,7 @@ int currentInputSW2 = -1;
 byte const VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
 
 // MT-VIKI / TESmart serial commands
-byte viki[4] = {0xA5,0x5A,0x00,0xCC};
+byte viki[4] = {0xA5,0x5A,0x07,0xCC};
 byte tesmart[6] = {0xAA,0xBB,0x03,0x01,0x01,0xEE};
 
 // LS timer variables
@@ -420,15 +420,15 @@ void readExtron1(){
     String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
     String einput = "000000000000000000000000000000000000"; // used to store Extron input
 
-    if(automatrixSW1){ // if automatrixSW1 is set "true" in options, then "0LS" is sent every 500ms to see if an input has changed
+  #if automatrixSW1 // if automatrixSW1 is set "true" in options, then "0LS" is sent every 500ms to see if an input has changed
       LS0time1(500);
-    }
+  #endif
 
-#if !automatrixSW1
+  #if !automatrixSW1
     if(MTVddSW1){            // if a MT-VIKI switch has been detected on SW1, then the currently active MT-VIKI hdmi port is checked for disconnection
       MTVtime1(1500);
     }
-#endif
+  #endif
 
     // listens to the Extron sw1 Port for changes
     // SIS Command Responses reference - Page 77 https://media.extron.com/public/download/files/userman/XP300_Matrix_B.pdf
@@ -670,7 +670,7 @@ void readExtron1(){
     }
 
 
-#if !automatrixSW1
+  #if !automatrixSW1
     // VIKI Manual Switch Detection (created by: https://github.com/Arthrimus)
     // ** hdmi output must be connected when powering on switch for ITE messages to appear, thus manual button detection working **
 
@@ -978,7 +978,7 @@ void readExtron1(){
           else sendSVS(9);
       }
     }
-#endif
+  #endif
       // set ecapbytes to 0 for next read
   memset(ecapbytes,0,sizeof(ecapbytes)); // ecapbytes is local variable, but superstitious clearing regardless :)
 
@@ -995,11 +995,11 @@ void readExtron2(){
       LS0time2(500);
     }
 
-#if !automatrixSW2
-    if(MTVddSW2){            // if a MT-VIKI switch has been detected on SW2, then the currently active MT-VIKI hdmi port is checked for disconnection
-      MTVtime2(1500);
-    }
-#endif
+    #if !automatrixSW2
+      if(MTVddSW2){            // if a MT-VIKI switch has been detected on SW2, then the currently active MT-VIKI hdmi port is checked for disconnection
+        MTVtime2(1500);
+      }
+    #endif
 
     // listens to the Extron sw2 Port for changes
     if(extronSerial2.available() > 0){ // if there is data available for reading, read
@@ -1137,7 +1137,7 @@ void readExtron2(){
     }
 
 
-#if !automatrixSW2
+  #if !automatrixSW2
     // VIKI Manual Switch Detection (created by: https://github.com/Arthrimus)
     // ** hdmi output must be connected when powering on switch for ITE messages to appear, thus manual button detection working **
 
@@ -1341,7 +1341,7 @@ void readExtron2(){
         sendSVS(109);
       }
     }
-#endif
+  #endif
     // set ecapbytes to 0 for next read
     memset(ecapbytes,0,sizeof(ecapbytes)); // ecapbytes is local variable, but superstitious clearing regardless :) 
 
