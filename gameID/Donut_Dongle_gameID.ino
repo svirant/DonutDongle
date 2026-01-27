@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.3b (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.3c (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,6 @@
 #include <WebServer.h>
 #include <SPIFFS.h>
 #include <ArduinoJson.h>
-#include <Arduino_JSON.h>
 #include <ESPmDNS.h>
 
 
@@ -508,10 +507,11 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
           if(httpCode == HTTP_CODE_OK){        // console is healthy // HTTP header has been sent and Server response header has been handled
             consoles[i].Address = replaceDomainWithIP(consoles[i].Address); // replace Domain with IP in consoles array. this allows setConnectTimeout to be honored
             payload = http.getString();        
-            JSONVar MCPjson = JSON.parse(payload); // 
-            if(JSON.typeof(MCPjson) != "undefined"){ // If the response is JSON, continue
-              if(MCPjson.hasOwnProperty("gameID")){  // If JSON contains gameID, reset payload to it's value
-                payload = (const char*) MCPjson["gameID"];
+            JsonDocument doc; 
+            DeserializationError error = deserializeJson(doc, payload);
+            if(!error){ // If the response is JSON, continue
+              if(!doc["gameID"].isNull()) {  // If payload contains gameID, 
+                payload = doc["gameID"].as<String>(); // reset payload to it's value
               }
             }
             result = fetchGameIDProf(payload,consoles[i].DefaultProf);
@@ -2505,8 +2505,7 @@ void handleUpdateS0Vars(){
     return;
   }
 
-  JsonDocument doc;
-  DeserializationError err = deserializeJson(doc, server.arg("plain"));
+  JsonDocument doc; deserializeJson(doc, server.arg("plain"));
 
   S0_gameID = doc["S0_gameID"].as<bool>();
 
@@ -2528,8 +2527,7 @@ void saveS0Vars(){
 void loadS0Vars(){
   File f = SPIFFS.open("/s0vars.json", FILE_READ);
 
-  JsonDocument doc;
-  DeserializationError err = deserializeJson(doc, f);
+  JsonDocument doc; deserializeJson(doc, f);
   f.close();
 
   S0_gameID = doc["S0_gameID"].as<bool>();
