@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.3a (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.3b (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -58,14 +58,15 @@ struct Console {
                    //            1 means SVS profile 1
                    //           12 means SVS profile 12
                    //           etc...
-Console consoles[] = {{"PS1","http://ps1digital.local/gameid",-9,0,0,0,1}, // you can add more, but stay in this format
+Console consoles[10] = {{"PS1 Digital","http://ps1digital.local/gameid",-9,0,0,0,1}, // you can add more, but stay in this format
                       {"MemCardPro","http://10.0.1.52/api/currentState",-10,0,0,0,1},
                    // {"PS2","http://ps2digital.local/gameid",102,0,0,0,1}, // remove leading "//" to uncomment and enable ps2digital
                    // {"MCP","http://10.0.0.14/api/currentState",104,0,0,0,1}, // address format for MemCardPro. replace IP address with your MCP address
-                      {"N64","http://n64digital.local/gameid",-7,0,0,0,1} // the last one in the list has no "," at the end
+                      {"N64 Digital","http://n64digital.local/gameid",-7,0,0,0,1} // the last one in the list has no "," at the end
                       };
 
-int consolesSize = sizeof(consoles) / sizeof(consoles[0]); // length of consoles DB. can grow dynamically
+int consolesSize = 3; // Can hold 10 entries, but only set for 3 so the UI doesnt show 7 blank entries :)
+
 
                    // If using a "remote button profile" for the "PROFILE" which are valued 1 - 12, place a "-" before the profile number. 
                    // Example: -1 means "remote button profile 1"
@@ -426,8 +427,8 @@ void setup(){
   extronSerial2.begin(9600,SERIAL_8N1,8,9);  // set the baud rate for Extron sw2 Connection
   extronSerial2.setTimeout(150);                // sets the timeout for reading / saving into a string for the Extron sw2 Connection
   MDNS.begin("donutshop");
-  if (!SPIFFS.begin(true)) {
-    Serial.println("SPIFFS mount failed!");
+  if(!SPIFFS.begin(true)){
+    Serial.println(F("SPIFFS mount failed!"));
     return;
   }
 
@@ -593,7 +594,7 @@ String replaceDomainWithIP(String input){
   int startIndex = 0;
   while(startIndex < result.length()){
     int httpPos = result.indexOf("http://",startIndex); // Look for "http://"
-    if (httpPos == -1) break;  // No "http://" found
+    if(httpPos == -1) break;  // No "http://" found
     int domainStart = httpPos + 7; // Set the position right after "http://"
     int domainEnd = result.indexOf('/',domainStart);  // Find the end of the domain (start of the path)
     if(domainEnd == -1) domainEnd = result.length();  // If no path, consider till the end of the string
@@ -2374,7 +2375,8 @@ void handleGetConsoles(){
         obj["Enabled"] = consoles[i].Enabled;
     }
 
-    String out; serializeJson(doc,out);
+    String out; 
+    serializeJson(doc,out);
     server.send(200,"application/json",out);
 }
 
@@ -2387,21 +2389,18 @@ void handleGetGameDB(){
         item.add(gameDB[i][1]);
         item.add(gameDB[i][2]);
     }
-    String out; serializeJson(doc,out);
+    String out; 
+    serializeJson(doc,out);
     server.send(200,"application/json",out);
 }
 
 void saveGameDB(){
   File f = SPIFFS.open("/gameDB.json", FILE_WRITE);
-  if (!f) {
-    Serial.println("saveGameDB(): failed to open file");
-    return;
-  }
 
   JsonDocument doc;
   JsonArray arr = doc.to<JsonArray>();
 
-  for (int i = 0; i < gameDBSize; i++) {
+  for(int i = 0; i < gameDBSize; i++){
     JsonArray item = arr.add<JsonArray>();
     item.add(gameDB[i][0]);
     item.add(gameDB[i][1]);
@@ -2413,22 +2412,16 @@ void saveGameDB(){
 }
 
 void handleUpdateGameDB(){
-  if (!server.hasArg("plain")) {
+  if(!server.hasArg("plain")){
     server.send(400, "application/json", "{\"error\":\"No data\"}");
     return;
   }
 
-  JsonDocument doc;
-  DeserializationError err = deserializeJson(doc, server.arg("plain"));
-  if (err) {
-    server.send(400, "application/json", "{\"error\":\"Bad JSON\"}");
-    return;
-  }
-
+  JsonDocument doc; deserializeJson(doc, server.arg("plain"));
   JsonArray arr = doc.as<JsonArray>();
 
   gameDBSize = 0;
-  for (JsonArray item : arr) {
+  for(JsonArray item : arr){
     gameDB[gameDBSize][0] = item[0].as<String>();
     gameDB[gameDBSize][1] = item[1].as<String>();
     gameDB[gameDBSize][2] = item[2].as<String>();
@@ -2436,51 +2429,32 @@ void handleUpdateGameDB(){
   }
 
   saveGameDB();
-
   server.send(200, "application/json", "{\"status\":\"ok\"}");
 }
 
 void loadGameDB(){
-  if (!SPIFFS.exists("/gameDB.json")) {
-    Serial.println("gameDB.json not found, using default");
-    return; // keep your default array
-  }
-
   File f = SPIFFS.open("/gameDB.json", FILE_READ);
-  if (!f) {
-    Serial.println("Failed to open gameDB.json");
-    return;
-  }
 
-  JsonDocument doc;
-  DeserializationError err = deserializeJson(doc, f);
+  JsonDocument doc; deserializeJson(doc, f);
   f.close();
-
-  if (err) {
-    Serial.println("Failed to parse gameDB.json");
-    return;
-  }
 
   JsonArray arr = doc.as<JsonArray>();
   gameDBSize = 0;
-  for (JsonArray item : arr) {
+  for(JsonArray item : arr){
     gameDB[gameDBSize][0] = item[0].as<String>();
     gameDB[gameDBSize][1] = item[1].as<String>();
     gameDB[gameDBSize][2] = item[2].as<String>();
     gameDBSize++;
   }
-
-  Serial.println("gameDB loaded from SPIFFS");
 }
 
 void saveConsoles(){
   File f = SPIFFS.open("/consoles.json", FILE_WRITE);
-  if (!f) return;
 
   JsonDocument doc;
   JsonArray arr = doc.to<JsonArray>();
 
-  for (int i = 0; i < consolesSize; i++) {
+  for(int i = 0; i < consolesSize; i++){
     JsonObject obj = arr.add<JsonObject>();
     obj["Desc"]        = consoles[i].Desc;
     obj["Address"]     = consoles[i].Address;
@@ -2493,23 +2467,16 @@ void saveConsoles(){
 }
 
 void handleUpdateConsoles(){
-  if (!server.hasArg("plain")) {
+  if(!server.hasArg("plain")){
     server.send(400, "application/json", "{\"error\":\"No data\"}");
     return;
   }
 
-  JsonDocument doc;
-  DeserializationError err = deserializeJson(doc, server.arg("plain"));
-  if (err) {
-    server.send(400, "application/json", "{\"error\":\"Bad JSON\"}");
-    return;
-  }
-
+  JsonDocument doc; deserializeJson(doc, server.arg("plain"));
   JsonArray arr = doc.as<JsonArray>();
 
-  // Update consoles array in RAM
-  int newSize = 0;
-  for (JsonObject obj : arr) {
+  int newSize = 0;   // Update consoles array in RAM
+  for(JsonObject obj : arr){
     consoles[newSize].Desc        = obj["Desc"].as<String>();
     consoles[newSize].Address     = obj["Address"].as<String>();
     consoles[newSize].DefaultProf = obj["DefaultProf"].as<int>();
@@ -2518,13 +2485,11 @@ void handleUpdateConsoles(){
   }
   consolesSize = newSize;
 
-  // Persist to SPIFFS
-  saveConsoles();
-
+  saveConsoles();  // save to SPIFFS
   server.send(200, "application/json", "{\"status\":\"ok\"}");
 }
 
-String embedS0Vars() {
+String embedS0Vars(){
   JsonDocument doc;
   doc["S0_gameID"] = S0_gameID;
 
@@ -2534,8 +2499,8 @@ String embedS0Vars() {
   return "let S0Vars = " + json + ";";
 }
 
-void handleUpdateS0Vars() {
-  if (!server.hasArg("plain")) {
+void handleUpdateS0Vars(){
+  if(!server.hasArg("plain")){
     server.send(400, "text/plain", "No body");
     return;
   }
@@ -2543,54 +2508,34 @@ void handleUpdateS0Vars() {
   JsonDocument doc;
   DeserializationError err = deserializeJson(doc, server.arg("plain"));
 
-  if (err) {
-    server.send(400, "text/plain", "Bad JSON");
-    return;
-  }
-
-  if (doc["S0_gameID"].is<bool>()) {
-    S0_gameID = doc["S0_gameID"].as<bool>();
-  }
+  S0_gameID = doc["S0_gameID"].as<bool>();
 
   saveS0Vars();
   server.send(200, "text/plain", "OK");
 }
 
-void saveS0Vars() {
+void saveS0Vars(){
   JsonDocument doc;
 
   doc["S0_gameID"] = S0_gameID;
 
   File f = SPIFFS.open("/s0vars.json", FILE_WRITE);
-  if (!f) return;
 
   serializeJson(doc, f);
   f.close();
 }
 
-void loadS0Vars() {
-  if (!SPIFFS.exists("/s0vars.json")) {
-    Serial.println("S0 vars not found, using defaults");
-    return;
-  }
-
+void loadS0Vars(){
   File f = SPIFFS.open("/s0vars.json", FILE_READ);
-  if (!f) return;
 
   JsonDocument doc;
   DeserializationError err = deserializeJson(doc, f);
   f.close();
 
-  if (err) {
-    Serial.println("Failed to parse S0 JSON");
-    return;
-  }
-
-  if (doc["S0_gameID"].is<bool>())
-    S0_gameID = doc["S0_gameID"].as<bool>();
+  S0_gameID = doc["S0_gameID"].as<bool>();
 }
 
-void handleGetS0Vars() {
+void handleGetS0Vars(){
   JsonDocument doc;
 
   doc["S0_gameID"] = S0_gameID;
@@ -2601,11 +2546,10 @@ void handleGetS0Vars() {
 }
 
 void loadConsoles(){
-    if(!SPIFFS.exists("/consoles.json")) return;
     File f = SPIFFS.open("/consoles.json", FILE_READ);
-    JsonDocument doc;
-    DeserializationError err = deserializeJson(doc,f);
-    if(err){ f.close(); return; }
+
+    JsonDocument doc; deserializeJson(doc,f);
+
     JsonArray arr = doc.as<JsonArray>();
     consolesSize = 0;
     for(JsonObject obj: arr){
@@ -2618,11 +2562,11 @@ void loadConsoles(){
     f.close();
 }
 
-void handleGetPayload() {
+void handleGetPayload(){
   server.send(200, "text/plain", payload);
 }
 
-void handleRoot() {
+void handleRoot(){
   String page = R"rawliteral(
   <!DOCTYPE html>
   <html>
@@ -2639,6 +2583,59 @@ void handleRoot() {
       h2, h3 { text-align: center; }
       .controls { text-align: center; }
       .arrow { font-size: 0.8em; margin-left: 4px; color: #555; }
+      /* ---------- TOOLTIP SYSTEM ---------- */
+      .tooltip {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        cursor: help;
+      }
+
+      .tooltip .tooltip-bubble {
+        position: absolute;
+        z-index: 20;
+        min-width: 180px;
+        max-width: 280px;
+
+        background: #2f2f2f;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 6px;
+
+        font-size: 0.85em;
+        line-height: 1.3;
+        text-align: center;
+
+        opacity: 0;
+        visibility: hidden;
+        transform: translate(-50%, -4px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+
+        left: 50%;
+        bottom: 125%;
+        pointer-events: none;
+      }
+
+      /* show on hover + keyboard focus */
+      .tooltip:hover .tooltip-bubble,
+      .tooltip:focus-within .tooltip-bubble {
+        opacity: 1;
+        visibility: visible;
+        transform: translate(-50%, -8px);
+      }
+
+      /* arrow */
+      .tooltip .tooltip-bubble::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 6px;
+        border-style: solid;
+        border-color: #2f2f2f transparent transparent transparent;
+      }
+
     </style>
   </head>
 
@@ -2648,19 +2645,55 @@ void handleRoot() {
 
   <div class="controls">
     <button onclick="addConsole()">Add Console</button>
-    <button onclick="addProfile()">Add Profile</button>
+    <span class="tooltip">
+      <button onclick="addProfile()">
+        Add Profile
+      </button>
+      <span class="tooltip-bubble">
+      Will populate gameID if found.
+      </span>
+    </span>
   </div>
 
   <h2>Consoles</h2>
   <table id="consoleTable">
     <thead>
       <tr>
-        <th>Enabled</th>
-        <th>Description</th>
-        <th>Address</th>
         <th>
-          No Match Profile
-          <input type="checkbox" id="S0_gameID" style="margin-left:5px;"
+          <span class="tooltip" tabindex="0">
+            Enabled
+            <span class="tooltip-bubble">
+            gameID is checked by looping through "Enabled" Consoles. 
+            There is a 2 second pause after each loop.
+            </span>
+          </span>
+        </th>
+        <th>
+          <span class="tooltip" tabindex="0">
+            Description
+            <span class="tooltip-bubble">
+            Any name or description can be used.
+            </span>
+          </span>
+        </th>
+        <th>
+          <span class="tooltip" tabindex="0">
+            Address
+            <span class="tooltip-bubble">
+            Will automatically get converted to IP if Domain based, in order to timeout after a 2 second gameID query.
+            </span>
+          </span>
+        </th>
+        <th>
+          <span class="tooltip" tabindex="0">
+            No Match Profile
+            <span class="tooltip-bubble">
+            Profile used when a gameDB entry is not found.
+            </span>
+          </span>
+          <input type="checkbox" 
+                 id="S0_gameID" 
+                 style="margin-left:5px;"
                  onchange="updateS0GameID(this)">
         </th>
         <th>Action</th>
@@ -2673,9 +2706,26 @@ void handleRoot() {
   <table id="profileTable">
     <thead>
       <tr>
-        <th onclick="sortProfiles(0)">Name <span class="arrow" id="arrow0">▲▼</span></th>
+        <th onclick="sortProfiles(0)">
+          <span class="tooltip" tabindex="0">
+            Name
+            <span class="tooltip-bubble">
+            Any name or description can be used
+            </span>
+          </span>
+          <span class="arrow" id="arrow0">▲▼</span>
+        </th>
         <th onclick="sortProfiles(1)">gameID <span class="arrow" id="arrow1">▲▼</span></th>
-        <th onclick="sortProfiles(2)">Profile # <span class="arrow" id="arrow2">▲▼</span></th>
+        <th onclick="sortProfiles(2)">
+          <span class="tooltip" tabindex="0">
+            Profile #
+            <span class="tooltip-bubble">
+            Negative numbers represent a Remote Button Profile. Positive are SVS.
+            </span>
+          </span>
+          <span class="arrow" id="arrow2">▲▼</span>
+        </th>
+
         <th>Action</th>
       </tr>
     </thead>
@@ -2881,7 +2931,7 @@ void handleRoot() {
     const response = await fetch("/getPayload");
     const payload = await response.text();
     gameProfiles.sort((a,b) => 0);
-    gameProfiles.unshift(["CurrentGame", payload, "999"]);
+    gameProfiles.unshift(["Current Game", payload, "999"]);
     await fetch('/updateGameDB', {
       method: 'POST',
       body: JSON.stringify(gameProfiles)
