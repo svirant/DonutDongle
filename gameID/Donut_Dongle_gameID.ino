@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.3c (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.3d (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -28,10 +28,9 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <WebServer.h>
-#include <SPIFFS.h>
+#include <LittleFS.h>
 #include <ArduinoJson.h>
 #include <ESPmDNS.h>
-
 
 struct Console {
   String Desc;
@@ -59,8 +58,6 @@ struct Console {
                    //           etc...
 Console consoles[10] = {{"PS1 Digital","http://ps1digital.local/gameid",-9,0,0,0,1}, // you can add more, but stay in this format
                       {"MemCardPro","http://10.0.1.52/api/currentState",-10,0,0,0,1},
-                   // {"PS2","http://ps2digital.local/gameid",102,0,0,0,1}, // remove leading "//" to uncomment and enable ps2digital
-                   // {"MCP","http://10.0.0.14/api/currentState",104,0,0,0,1}, // address format for MemCardPro. replace IP address with your MCP address
                       {"N64 Digital","http://n64digital.local/gameid",-7,0,0,0,1} // the last one in the list has no "," at the end
                       };
 
@@ -88,7 +85,7 @@ String gameDB[1000][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 i
                       {"MegaDrive","MegaDrive","506"},
                       {"SoR2","Streets of Rage 2 (USA)","507"}};
 
-int gameDBSize = 11; // array can hold 1000 entries, but only set to current size so the UI doesnt show 989 blank entries :)
+uint16_t gameDBSize = 11; // array can hold 1000 entries, but only set to current size so the UI doesnt show 989 blank entries :)
 
 // WiFi config is below (line ~490)
 
@@ -100,8 +97,8 @@ int gameDBSize = 11; // array can hold 1000 entries, but only set to current siz
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~638
-uint8_t const debugE2CAP = 0; // line ~1207
+uint8_t const debugE1CAP = 0; // line ~635
+uint8_t const debugE2CAP = 0; // line ~1204
 
 bool const S0_pwr = false;       // Load "S0_pwr_profile" when all consoles defined below are off. Defined below.
 
@@ -186,7 +183,7 @@ uint8_t const ExtronVideoOutputPortSW2 = 1; // can also be used for auto matrix 
 
 ///////////////////////////////
 
-uint8_t const vinMatrix[] = {0,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 defined above)
+uint8_t const vinMatrix[65] = {0,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 defined above)
                                                         // set to 0 for the auto switched input to tie to all outputs
                                                         // set to 1 for the auto switched input to trigger a Preset
                                                         // set to 2 for the auto switched input to tie to "ExtronVideoOutputPortSW1" / "ExtronVideoOutputPortSW2"
@@ -426,8 +423,8 @@ void setup(){
   extronSerial2.begin(9600,SERIAL_8N1,8,9);  // set the baud rate for Extron sw2 Connection
   extronSerial2.setTimeout(150);                // sets the timeout for reading / saving into a string for the Extron sw2 Connection
   MDNS.begin("donutshop");
-  if(!SPIFFS.begin(true)){
-    Serial.println(F("SPIFFS mount failed!"));
+  if(!LittleFS.begin(true)){ // format if mount fails
+    Serial.println(F("LittleFS mount failed!"));
     return;
   }
 
@@ -1191,15 +1188,15 @@ void readExtron2(){
     String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
     String einput = "000000000000000000000000000000000000"; // used to store Extron input
 
-    if(automatrixSW2){ // if automatrixSW2 is set "true" in options, then "0LS" is sent every 500ms to see if an input has changed
+#if automatrixSW2// if automatrixSW2 is set "true" in options, then "0LS" is sent every 500ms to see if an input has changed
       LS0time2(500);
-    }
+#endif
 
-    #if !automatrixSW2
-      if(MTVddSW2){            // if a MT-VIKI switch has been detected on SW2, then the currently active MT-VIKI hdmi port is checked for disconnection
-        MTVtime2(1500);
-      }
-    #endif
+#if !automatrixSW2
+    if(MTVddSW2){            // if a MT-VIKI switch has been detected on SW2, then the currently active MT-VIKI hdmi port is checked for disconnection
+      MTVtime2(1500);
+    }
+#endif
 
     // listens to the Extron sw2 Port for changes
     if(extronSerial2.available() > 0){ // if there is data available for reading, read
@@ -2395,7 +2392,7 @@ void handleGetGameDB(){
 }
 
 void saveGameDB(){
-  File f = SPIFFS.open("/gameDB.json", FILE_WRITE);
+  File f = LittleFS.open("/gameDB.json", FILE_WRITE);
 
   JsonDocument doc;
   JsonArray arr = doc.to<JsonArray>();
@@ -2433,7 +2430,8 @@ void handleUpdateGameDB(){
 }
 
 void loadGameDB(){
-  File f = SPIFFS.open("/gameDB.json", FILE_READ);
+  if(!LittleFS.exists("/gameDB.json")) return; // if file does not exist yet, load from .ino
+  File f = LittleFS.open("/gameDB.json", FILE_READ);
 
   JsonDocument doc; deserializeJson(doc, f);
   f.close();
@@ -2449,7 +2447,7 @@ void loadGameDB(){
 }
 
 void saveConsoles(){
-  File f = SPIFFS.open("/consoles.json", FILE_WRITE);
+  File f = LittleFS.open("/consoles.json", FILE_WRITE);
 
   JsonDocument doc;
   JsonArray arr = doc.to<JsonArray>();
@@ -2518,14 +2516,15 @@ void saveS0Vars(){
 
   doc["S0_gameID"] = S0_gameID;
 
-  File f = SPIFFS.open("/s0vars.json", FILE_WRITE);
+  File f = LittleFS.open("/s0vars.json", FILE_WRITE);
 
   serializeJson(doc, f);
   f.close();
 }
 
 void loadS0Vars(){
-  File f = SPIFFS.open("/s0vars.json", FILE_READ);
+  if (!LittleFS.exists("/s0vars.json")) return; // if file does not exist yet, load from .ino
+  File f = LittleFS.open("/s0vars.json", FILE_READ);
 
   JsonDocument doc; deserializeJson(doc, f);
   f.close();
@@ -2544,20 +2543,21 @@ void handleGetS0Vars(){
 }
 
 void loadConsoles(){
-    File f = SPIFFS.open("/consoles.json", FILE_READ);
+  if(!LittleFS.exists("/consoles.json")) return; // if file does not exist yet, load from .ino
+  File f = LittleFS.open("/consoles.json", FILE_READ);
 
-    JsonDocument doc; deserializeJson(doc,f);
+  JsonDocument doc; deserializeJson(doc,f);
 
-    JsonArray arr = doc.as<JsonArray>();
-    consolesSize = 0;
-    for(JsonObject obj: arr){
-        consoles[consolesSize].Desc = obj["Desc"].as<String>();
-        consoles[consolesSize].Address = obj["Address"].as<String>();
-        consoles[consolesSize].DefaultProf = obj["DefaultProf"].as<int>();
-        consoles[consolesSize].Enabled = obj["Enabled"].as<bool>();
-        consolesSize++;
-    }
-    f.close();
+  JsonArray arr = doc.as<JsonArray>();
+  consolesSize = 0;
+  for(JsonObject obj: arr){
+      consoles[consolesSize].Desc = obj["Desc"].as<String>();
+      consoles[consolesSize].Address = obj["Address"].as<String>();
+      consoles[consolesSize].DefaultProf = obj["DefaultProf"].as<int>();
+      consoles[consolesSize].Enabled = obj["Enabled"].as<bool>();
+      consolesSize++;
+  }
+  f.close();
 }
 
 void handleGetPayload(){
@@ -2661,8 +2661,8 @@ void handleRoot(){
           <span class="tooltip" tabindex="0">
             Enabled
             <span class="tooltip-bubble">
-            gameID is checked by looping through "Enabled" Consoles. 
-            There is a 2 second pause after each loop.
+            gameID is checked by cycling through "Enabled" Consoles. 
+            There is a 2 second pause after each cycle.
             </span>
           </span>
         </th>
