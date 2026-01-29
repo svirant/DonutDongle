@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.3d (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.3e (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -57,7 +57,7 @@ struct Console {
                    //           12 means SVS profile 12
                    //           etc...
 Console consoles[10] = {{"PS1 Digital","http://ps1digital.local/gameid",-9,0,0,0,1}, // you can add more, but stay in this format
-                      {"MemCardPro","http://10.0.1.52/api/currentState",-10,0,0,0,1},
+                      {"MemCardPro","http://10.0.1.52/api/currentState",-5,0,0,0,1},
                       {"N64 Digital","http://n64digital.local/gameid",-7,0,0,0,1} // the last one in the list has no "," at the end
                       };
 
@@ -2368,6 +2368,8 @@ void handleGetConsoles(){
         JsonObject obj = arr.add<JsonObject>();
         obj["Desc"] = consoles[i].Desc;
         obj["Address"] = consoles[i].Address;
+        obj["On"] = consoles[i].On;
+        obj["King"] = consoles[i].King;
         obj["DefaultProf"] = consoles[i].DefaultProf;
         obj["Enabled"] = consoles[i].Enabled;
     }
@@ -2581,6 +2583,10 @@ void handleRoot(){
       h2, h3 { text-align: center; }
       .controls { text-align: center; }
       .arrow { font-size: 0.8em; margin-left: 4px; color: #555; }
+      #consoleTable th:nth-child(3),
+      #consoleTable td:nth-child(3) {
+         width: 320px;
+      }
       /* ---------- TOOLTIP SYSTEM ---------- */
       .tooltip {
         position: relative;
@@ -2634,6 +2640,25 @@ void handleRoot(){
         border-color: #2f2f2f transparent transparent transparent;
       }
 
+      .status-icon {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 6px;
+      }
+      .leader-icon {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        border-radius: 0%;
+        margin-right: 6px;
+        transform: rotate(45deg);
+      }
+      .leader-icon.on { background-color: #4CAF50; }
+      .status-icon.on { background-color: #4CAF50; }
+      .status-icon.off { background-color: red; }
+
     </style>
   </head>
 
@@ -2648,7 +2673,7 @@ void handleRoot(){
         Add Profile
       </button>
       <span class="tooltip-bubble">
-      Will populate gameID if found.
+      Will populate with last gameID found.
       </span>
     </span>
   </div>
@@ -2731,6 +2756,7 @@ void handleRoot(){
   </table>
 
   <script>
+  let updatingConsoles = false;
   let consoles = [];
   let gameProfiles = [];
 
@@ -2740,7 +2766,7 @@ void handleRoot(){
   // inject current S0 values
   )rawliteral";
 
-  page += embedS0Vars(); // make sure S0Vars['S0_gameID'] exists
+  page += embedS0Vars();
 
   page += R"rawliteral(
 
@@ -2753,6 +2779,7 @@ void handleRoot(){
     gameProfiles = await g.json();
 
     renderConsoles();
+    consoles.forEach((c, i) => updateStatusIcon(i));
     renderProfiles();
     updateArrows();
 
@@ -2801,13 +2828,14 @@ void handleRoot(){
       const addrInput = document.createElement('input');
       addrInput.type = 'text';
       addrInput.value = c.Address;
+      addrInput.style.width = '87%';
       addrInput.onchange = async () => {
-        if (!consoles[idx]) return;
-        consoles[idx].Address = addrInput.value;
-        await saveConsoles();
+          consoles[idx].Address = addrInput.value;  // update consoles array
+          await saveConsoles();                    // persist to server
       };
+
       tdAddr.appendChild(addrInput);
-      tr.appendChild(tdAddr);
+      tr.appendChild(tdAddr); 
 
       // --- DefaultProf (No Match Profile column) ---
       const tdProf = document.createElement('td');
@@ -2834,12 +2862,13 @@ void handleRoot(){
     });
   }
 
-  async function saveConsoles(){
+  async function saveConsoles() {
+    updatingConsoles = true;
     await fetch('/updateConsoles', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(consoles)
     });
+    updatingConsoles = false;
   }
 
   async function addConsole(){
@@ -2865,6 +2894,7 @@ void handleRoot(){
     });
 
     renderConsoles();
+    consoles.forEach((c, i) => updateStatusIcon(i));
   }
 
   // ---------------- PROFILES ----------------
@@ -2984,6 +3014,34 @@ void handleRoot(){
     }
   }
 
+    function updateStatusIcon(idx) {
+    const row = document.querySelectorAll('#consoleTable tbody tr')[idx];
+    if (!row) return;
+
+    const td = row.children[2]; // Address column
+    const input = td.querySelector('input');
+    if (!input) return;
+
+    // Remove old icon if it exists
+    const oldIcon = td.querySelector('span');
+    if (oldIcon) td.removeChild(oldIcon);
+
+    // Create new icon based on current state
+    const icon = document.createElement('span');
+    const c = consoles[idx];
+
+    if (c.On === 1 && c.King === 1) {
+      icon.className = 'leader-icon on'; // diamond green
+    } else if (c.On === 1) {
+      icon.className = 'status-icon on'; // circle green
+    } else {
+      icon.className = 'status-icon off'; // circle red
+    }
+
+    // Insert icon before input
+    td.insertBefore(icon, input);
+  }
+
   // ---------------- S0_gameID HANDLER ----------------
   function updateS0GameID(cb) {
     S0Vars['S0_gameID'] = cb.checked;
@@ -2996,6 +3054,22 @@ void handleRoot(){
 
   // ---------------- INITIALIZE ----------------
   loadData();
+
+  setInterval(async () => {
+    if (updatingConsoles) return; // skip refresh if updating
+
+    const res = await fetch('/getConsoles');
+    const updated = await res.json();
+
+    updated.forEach((c, i) => {
+      if (consoles[i].On !== c.On || consoles[i].King !== c.King) {
+        consoles[i].On = c.On;
+        consoles[i].King = c.King;
+        updateStatusIcon(i);
+      }
+    });
+  }, 2500);
+
   </script>
 
   </body>
