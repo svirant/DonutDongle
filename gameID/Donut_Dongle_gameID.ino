@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.3e (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.3f (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -2449,7 +2449,11 @@ void loadGameDB(){
 }
 
 void saveConsoles(){
-  File f = LittleFS.open("/consoles.json", FILE_WRITE);
+  File f = LittleFS.open("/consoles.tmp", "w");
+  if(!f){
+    Serial.println("Failed to open /consoles.tmp for writing");
+    return;
+  }
 
   JsonDocument doc;
   JsonArray arr = doc.to<JsonArray>();
@@ -2464,6 +2468,15 @@ void saveConsoles(){
 
   serializeJson(doc, f);
   f.close();
+
+  if(LittleFS.exists("/consoles.json")){
+    LittleFS.remove("/consoles.json");
+  }
+
+  if(!LittleFS.rename("/consoles.tmp", "/consoles.json")){
+    Serial.println("Failed to rename /consoles.tmp to /consoles.json");
+  }
+
 }
 
 void handleUpdateConsoles(){
@@ -2837,15 +2850,20 @@ void handleRoot(){
       tdAddr.appendChild(addrInput);
       tr.appendChild(tdAddr); 
 
-      // --- DefaultProf (No Match Profile column) ---
+      // --- DefaultProf ---
       const tdProf = document.createElement('td');
+      tdProf.classList.add('console-default-prof-cell');
       const profInput = document.createElement('input');
       profInput.type = 'number';
       profInput.value = c.DefaultProf;
+      profInput.classList.add('console-default-prof');
       profInput.onchange = async () => {
-        if (!consoles[idx]) return;
-        consoles[idx].DefaultProf = parseInt(profInput.value, 10) || 0;
-        await saveConsoles();
+        consoles[idx].DefaultProf = parseInt(profInput.value, 10) || 0; 
+        if (consoles[idx].King === 1) {
+          activeProfileNumber = consoles[idx].DefaultProf;
+          highlightProfileRow();
+        }
+        await saveConsoles(); 
       };
       tdProf.appendChild(profInput);
       tr.appendChild(tdProf);
@@ -2864,10 +2882,28 @@ void handleRoot(){
 
   async function saveConsoles() {
     updatingConsoles = true;
-    await fetch('/updateConsoles', {
-      method: 'POST',
-      body: JSON.stringify(consoles)
-    });
+
+    const payload = consoles.map(c => ({
+      Desc: c.Desc,
+      Address: c.Address,
+      DefaultProf: c.DefaultProf,
+      Enabled: c.Enabled
+    }));
+
+    try {
+      const res = await fetch('/updateConsoles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }, // <--- important
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        console.error('Failed to save consoles:', res.statusText);
+      }
+    } catch (err) {
+      console.error('Network error while saving consoles:', err);
+    }
+
     updatingConsoles = false;
   }
 
@@ -3045,30 +3081,49 @@ void handleRoot(){
   // ---------------- S0_gameID HANDLER ----------------
   function updateS0GameID(cb) {
     S0Vars['S0_gameID'] = cb.checked;
-    fetch('/updateS0Vars', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(S0Vars)
-    });
+    saveS0Vars();
+  }
+
+  function saveS0Vars() { 
+    fetch('/updateS0Vars',{
+      method:'POST',
+      body:JSON.stringify(S0Vars)
+    }); 
   }
 
   // ---------------- INITIALIZE ----------------
   loadData();
 
   setInterval(async () => {
-    if (updatingConsoles) return; // skip refresh if updating
+      if (updatingConsoles) return; // skip refresh if user is editing
 
-    const res = await fetch('/getConsoles');
-    const updated = await res.json();
+      try {
+        const res = await fetch('/getConsoles');
+        const updated = await res.json();
 
-    updated.forEach((c, i) => {
-      if (consoles[i].On !== c.On || consoles[i].King !== c.King) {
-        consoles[i].On = c.On;
-        consoles[i].King = c.King;
-        updateStatusIcon(i);
+        // Sync the local consoles array with backend
+        for (let i = 0; i < Math.min(updated.length, consoles.length); i++) {
+          const local = consoles[i];
+          const remote = updated[i];
+
+          // Only update fields that the backend controls
+          local.On = remote.On;
+          local.Enabled = remote.Enabled;
+          local.King = remote.King;
+          local.Prof = remote.Prof;
+          // You can add more fields if needed
+        }
+
+        // If new consoles were added or removed, replace the array
+        if (updated.length !== consoles.length) {
+          consoles = updated;
+        }
+
+        consoles.forEach((c, i) => updateStatusIcon(i)); // Update icons
+      } catch (err) {
+        console.error("Error refreshing consoles:", err);
       }
-    });
-  }, 2500);
+    }, 2500);
 
   </script>
 
