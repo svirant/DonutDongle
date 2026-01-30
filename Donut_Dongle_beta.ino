@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.7a
+* Donut Dongle beta v1.7b
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -112,7 +112,7 @@ bool const S0 = false;  // (Profile 0) default is false
 #define automatrixSW1 false // set true for auto matrix switching on "SW1" port
 #define automatrixSW2 false // set true for auto matrix switching on "SW2" port
 
-uint8_t const amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16,32
+uint8_t const amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16
 uint8_t const amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
 
 ///////////////////////////////
@@ -122,7 +122,7 @@ uint8_t const ExtronVideoOutputPortSW2 = 1; // can also be used for auto matrix 
 
 ///////////////////////////////
 
-uint8_t const vinMatrix[65] = {0,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 defined above)
+uint8_t const vinMatrix[33] = {0,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 defined above)
                                                         // set to 0 for the auto switched input to tie to all outputs
                                                         // set to 1 for the auto switched input to trigger a Preset
                                                         // set to 2 for the auto switched input to tie to "ExtronVideoOutputPortSW1" / "ExtronVideoOutputPortSW2"
@@ -145,22 +145,22 @@ uint8_t const vinMatrix[65] = {0,  // MATRIX switchers  // When auto matrix mode
                            14,  // input 14
                            15,  // input 15
                            16,  // input 16
-                           17,  // input 17
-                           18,  // input 18
-                           19,  // input 19
-                           20,  // input 20
-                           21,  // input 21
-                           22,  // input 22
-                           23,  // input 23
-                           24,  // input 24
-                           25,  // input 25
-                           26,  // input 26
-                           27,  // input 27
-                           28,  // input 28
-                           29,  // input 29
-                           30,  // input 30
-                           30,  // input 31
-                           30,  // input 32
+                          //  17,  // input 17
+                          //  18,  // input 18
+                          //  19,  // input 19
+                          //  20,  // input 20
+                          //  21,  // input 21
+                          //  22,  // input 22
+                          //  23,  // input 23
+                          //  24,  // input 24
+                          //  25,  // input 25
+                          //  26,  // input 26
+                          //  27,  // input 27
+                          //  28,  // input 28
+                          //  29,  // input 29
+                          //  30,  // input 30
+                          //  30,  // input 31
+                          //  30,  // input 32
                                //
                                // ONLY USE FOR 2ND MATRIX SWITCH on SW2
                            1,  // 2ND MATRIX SWITCH input 1 SW2
@@ -179,22 +179,22 @@ uint8_t const vinMatrix[65] = {0,  // MATRIX switchers  // When auto matrix mode
                            14,  // 2ND MATRIX SWITCH input 14
                            15,  // 2ND MATRIX SWITCH input 15
                            16,  // 2ND MATRIX SWITCH input 16
-                           17,  // 2ND MATRIX SWITCH input 17
-                           18,  // 2ND MATRIX SWITCH input 18
-                           19,  // 2ND MATRIX SWITCH input 19
-                           20,  // 2ND MATRIX SWITCH input 20
-                           21,  // 2ND MATRIX SWITCH input 21
-                           22,  // 2ND MATRIX SWITCH input 22
-                           23,  // 2ND MATRIX SWITCH input 23
-                           24,  // 2ND MATRIX SWITCH input 24
-                           25,  // 2ND MATRIX SWITCH input 25
-                           26,  // 2ND MATRIX SWITCH input 26
-                           27,  // 2ND MATRIX SWITCH input 27
-                           28,  // 2ND MATRIX SWITCH input 28
-                           29,  // 2ND MATRIX SWITCH input 29
-                           30,  // 2ND MATRIX SWITCH input 30
-                           30,  // 2ND MATRIX SWITCH input 31
-                           30,  // 2ND MATRIX SWITCH input 32
+                          //  17,  // 2ND MATRIX SWITCH input 17
+                          //  18,  // 2ND MATRIX SWITCH input 18
+                          //  19,  // 2ND MATRIX SWITCH input 19
+                          //  20,  // 2ND MATRIX SWITCH input 20
+                          //  21,  // 2ND MATRIX SWITCH input 21
+                          //  22,  // 2ND MATRIX SWITCH input 22
+                          //  23,  // 2ND MATRIX SWITCH input 23
+                          //  24,  // 2ND MATRIX SWITCH input 24
+                          //  25,  // 2ND MATRIX SWITCH input 25
+                          //  26,  // 2ND MATRIX SWITCH input 26
+                          //  27,  // 2ND MATRIX SWITCH input 27
+                          //  28,  // 2ND MATRIX SWITCH input 28
+                          //  29,  // 2ND MATRIX SWITCH input 29
+                          //  30,  // 2ND MATRIX SWITCH input 30
+                          //  30,  // 2ND MATRIX SWITCH input 31
+                          //  30,  // 2ND MATRIX SWITCH input 32
                            };
 
 
@@ -374,7 +374,9 @@ bool MTVdiscon = false;
 bool MTVdiscon2 = false;
 bool MTVddSW1 = false;
 bool MTVddSW2 = false;
-
+String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
+String einput = "000000000000000000000000000000000000"; // used to store Extron input
+byte ecapbytes[44] = {0}; // used to store first 44 bytes / messages for Extron capture
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -416,9 +418,9 @@ void loop(){
 
 void readExtron1(){
 
-    byte ecapbytes[44]; // used to store first 44 captured bytes / messages for Extron                
-    String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
-    String einput = "000000000000000000000000000000000000"; // used to store Extron input
+    //byte ecapbytes[44]; // used to store first 44 captured bytes / messages for Extron                
+    // String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
+    // String einput = "000000000000000000000000000000000000"; // used to store Extron input
 
   #if automatrixSW1 // if automatrixSW1 is set "true" in options, then "0LS" is sent every 500ms to see if an input has changed
       LS0time1(500);
@@ -979,17 +981,18 @@ void readExtron1(){
       }
     }
   #endif
-      // set ecapbytes to 0 for next read
-  memset(ecapbytes,0,sizeof(ecapbytes)); // ecapbytes is local variable, but superstitious clearing regardless :)
 
+  memset(ecapbytes,0,sizeof(ecapbytes)); // reset capture to all 0s
+  ecap = "00000000000000000000000000000000000000000000";
+  einput = "000000000000000000000000000000000000";
 
 } // end of readExtron1()
 
 void readExtron2(){
     
-    byte ecapbytes[44]; // used to store first 13 captured bytes / messages for Extron                
-    String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
-    String einput = "000000000000000000000000000000000000"; // used to store Extron input
+    //byte ecapbytes[44]; // used to store first 44 captured bytes / messages for Extron                
+    // String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
+    // String einput = "000000000000000000000000000000000000"; // used to store Extron input
 
     if(automatrixSW2){ // if automatrixSW2 is set "true" in options, then "0LS" is sent every 500ms to see if an input has changed
       LS0time2(500);
@@ -1058,7 +1061,7 @@ void readExtron2(){
           if(einput[i] != '0'){
             currentInputSW2 = i+1;
             if(vinMatrix[0] == 1){
-              recallPreset(vinMatrix[currentInputSW2 + 32],2);
+              recallPreset(vinMatrix[currentInputSW2 + 16],2);
             }
             else if(vinMatrix[0] == 0 || vinMatrix[0] == 2){
               setTie(currentInputSW2,2);
@@ -1342,8 +1345,10 @@ void readExtron2(){
       }
     }
   #endif
-    // set ecapbytes to 0 for next read
-    memset(ecapbytes,0,sizeof(ecapbytes)); // ecapbytes is local variable, but superstitious clearing regardless :) 
+
+  memset(ecapbytes,0,sizeof(ecapbytes)); // reset capture to 0s
+  ecap = "00000000000000000000000000000000000000000000";
+  einput = "000000000000000000000000000000000000";
 
 }// end of readExtron2()
 
@@ -1723,64 +1728,64 @@ void readIR(){
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && extrabuttonprof == 1){ // if AUX8 was pressed and a profile button is pressed next,
       if(ir_recv_command == 11){ // profile button 1                                                         // load "SVS" profiles 1 - 12 (profile button 1 - 12).
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[0]);                                                               // Can be changed to "ANY" SVS profile in the OPTIONS section
-        else if(MTVir == 1){extronSerialEwrite("viki",1,1);currentMTVinput=1;sendSVS(auxprof[0]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",1,2);currentMTVinput2=101;sendSVS(auxprof[0]);}
+        if(MTVir == 1){extronSerialEwrite("viki",1,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",1,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",1,2);sendSVS(101);}                                                                   
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 7){ // profile button 2
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[1]);
-        else if(MTVir == 1){extronSerialEwrite("viki",2,1);currentMTVinput=2;sendSVS(auxprof[1]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",2,2);currentMTVinput2=102;sendSVS(auxprof[1]);}
+        if(MTVir == 1){extronSerialEwrite("viki",2,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",2,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",2,2);sendSVS(102);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 3){ // profile button 3
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[2]);
-        else if(MTVir == 1){extronSerialEwrite("viki",3,1);currentMTVinput=3;sendSVS(auxprof[2]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",3,2);currentMTVinput2=103;sendSVS(auxprof[2]);}
+        if(MTVir == 1){extronSerialEwrite("viki",3,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",3,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",3,2);sendSVS(103);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 10){ // profile button 4
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[3]);
-        else if(MTVir == 1){extronSerialEwrite("viki",4,1);currentMTVinput=4;sendSVS(auxprof[3]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",4,2);currentMTVinput2=104;sendSVS(auxprof[3]);}
+        if(MTVir == 1){extronSerialEwrite("viki",4,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",4,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",4,2);sendSVS(104);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 6){ // profile button 5
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[4]);
-        else if(MTVir == 1){extronSerialEwrite("viki",5,1);currentMTVinput=5;sendSVS(auxprof[4]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",5,2);currentMTVinput2=105;sendSVS(auxprof[4]);}
+        if(MTVir == 1){extronSerialEwrite("viki",5,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",5,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",5,2);sendSVS(105);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 2){ // profile button 6
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[5]);
-        else if(MTVir == 1){extronSerialEwrite("viki",6,1);currentMTVinput=6;sendSVS(auxprof[5]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",6,2);currentMTVinput2=106;sendSVS(auxprof[5]);}
+        if(MTVir == 1){extronSerialEwrite("viki",6,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",6,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",6,2);sendSVS(106);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 9){ // profile button 7
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[6]);
-        else if(MTVir == 1){extronSerialEwrite("viki",7,1);currentMTVinput=7;sendSVS(auxprof[6]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",7,2);currentMTVinput2=107;sendSVS(auxprof[6]);}
+        if(MTVir == 1){extronSerialEwrite("viki",7,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",7,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",7,2);sendSVS(107);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 5){ // profile button 8
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[7]);
-        else if(MTVir == 1){extronSerialEwrite("viki",8,1);currentMTVinput=8;sendSVS(auxprof[7]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",8,2);currentMTVinput2=108;sendSVS(auxprof[7]);}
+        if(MTVir == 1){extronSerialEwrite("viki",8,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",8,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",8,2);sendSVS(108);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
@@ -2614,7 +2619,7 @@ void ExtronOutputQuery(uint8_t outputNum, uint8_t sw){
   else if(sw == 2)
     extronSerial2.write((uint8_t *)cmd,len);
 
-  delay(20);
+  delay(50);
 } // end of ExtronOutputQuery()
 
 void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
@@ -2632,5 +2637,5 @@ void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
     else if(sw == 2)
       extronSerial2.write(tesmart,6);
   }
-  delay(20);
-}  // end of extronSerialEwrite()
+  delay(50);
+} // end of extronSerialEwrite()
