@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.3g (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.3h (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -440,6 +440,8 @@ void setup(){
   server.on("/getS0Vars", HTTP_GET, handleGetS0Vars);
   server.on("/updateS0Vars", HTTP_POST, handleUpdateS0Vars);
   server.on("/getPayload", HTTP_GET, handleGetPayload);
+  server.on("/exportAll", HTTP_GET, handleExportAll);
+  server.on("/importAll", HTTP_POST, handleImportAll);
 
   server.begin();
 
@@ -1615,64 +1617,64 @@ void readIR(){
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && extrabuttonprof == 1){ // if AUX8 was pressed and a profile button is pressed next,
       if(ir_recv_command == 11){ // profile button 1                                                         // load "SVS" profiles 1 - 12 (profile button 1 - 12).
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[0]);                                                               // Can be changed to "ANY" SVS profile in the OPTIONS section
-        else if(MTVir == 1){extronSerialEwrite("viki",1,1);currentMTVinput=1;sendSVS(auxprof[0]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",1,2);currentMTVinput2=101;sendSVS(auxprof[0]);}
+        if(MTVir == 1){extronSerialEwrite("viki",1,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",1,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",1,2);sendSVS(101);}                                                                   
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 7){ // profile button 2
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[1]);
-        else if(MTVir == 1){extronSerialEwrite("viki",2,1);currentMTVinput=2;sendSVS(auxprof[1]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",2,2);currentMTVinput2=102;sendSVS(auxprof[1]);}
+        if(MTVir == 1){extronSerialEwrite("viki",2,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",2,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",2,2);sendSVS(102);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 3){ // profile button 3
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[2]);
-        else if(MTVir == 1){extronSerialEwrite("viki",3,1);currentMTVinput=3;sendSVS(auxprof[2]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",3,2);currentMTVinput2=103;sendSVS(auxprof[2]);}
+        if(MTVir == 1){extronSerialEwrite("viki",3,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",3,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",3,2);sendSVS(103);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 10){ // profile button 4
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[3]);
-        else if(MTVir == 1){extronSerialEwrite("viki",4,2);currentMTVinput=4;sendSVS(auxprof[3]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",4,2);currentMTVinput2=104;sendSVS(auxprof[3]);}
+        if(MTVir == 1){extronSerialEwrite("viki",4,2);}
+        if(MTVir == 2){extronSerialEwrite("viki",4,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",4,2);sendSVS(104);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 6){ // profile button 5
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[4]);
-        else if(MTVir == 1){extronSerialEwrite("viki",5,1);currentMTVinput=5;sendSVS(auxprof[4]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",5,2);currentMTVinput2=105;sendSVS(auxprof[4]);}
+        if(MTVir == 1){extronSerialEwrite("viki",5,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",5,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",5,2);sendSVS(105);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 2){ // profile button 6
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[5]);
-        else if(MTVir == 1){extronSerialEwrite("viki",6,1);currentMTVinput=6;sendSVS(auxprof[5]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",6,2);currentMTVinput2=106;sendSVS(auxprof[5]);}
+        if(MTVir == 1){extronSerialEwrite("viki",6,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",6,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",6,2);sendSVS(106);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 9){ // profile button 7
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[6]);
-        else if(MTVir == 1){extronSerialEwrite("viki",7,1);currentMTVinput=7;sendSVS(auxprof[6]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",7,2);currentMTVinput2=107;sendSVS(auxprof[6]);}
+        if(MTVir == 1){extronSerialEwrite("viki",7,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",7,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",7,2);sendSVS(107);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 5){ // profile button 8
         if(MTVir == 0 && TESmartir < 2)sendSVS(auxprof[7]);
-        else if(MTVir == 1){extronSerialEwrite("viki",8,1);currentMTVinput=8;sendSVS(auxprof[7]);}
-        else if(MTVir == 2){extronSerialEwrite("viki",8,2);currentMTVinput2=108;sendSVS(auxprof[7]);}
+        if(MTVir == 1){extronSerialEwrite("viki",8,1);}
+        if(MTVir == 2){extronSerialEwrite("viki",8,2);}
         if(TESmartir > 1){extronSerialEwrite("tesmart",8,2);sendSVS(108);}
         ir_recv_command = 0;
         extrabuttonprof = 0;
@@ -2340,7 +2342,7 @@ void ExtronOutputQuery(uint8_t outputNum, uint8_t sw){
   else if(sw == 2)
     extronSerial2.write((uint8_t *)cmd,len);
 
-  delay(20);
+  delay(50);
 } // end of ExtronOutputQuery()
 
 void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
@@ -2358,7 +2360,7 @@ void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
     else if(sw == 2)
       extronSerial2.write(tesmart,6);
   }
-  delay(20);
+  delay(50);
 }  // end of extronSerialEwrite()
 
 void handleGetConsoles(){
@@ -2580,6 +2582,69 @@ void handleGetPayload(){
   server.send(200, "text/plain", payload);
 }
 
+void handleImportAll() {
+  if (!server.hasArg("plain")) {
+    server.send(400, "application/json", "{\"error\":\"No data\"}");
+    return;
+  }
+
+  JsonDocument doc;
+  deserializeJson(doc, server.arg("plain"));
+
+  // Restore consoles
+  JsonArray consolesArr = doc["consoles"].as<JsonArray>();
+  consolesSize = 0;
+  for (JsonObject o : consolesArr) {
+    consoles[consolesSize].Desc = o["Desc"].as<String>();
+    consoles[consolesSize].Address = o["Address"].as<String>();
+    consoles[consolesSize].DefaultProf = o["DefaultProf"].as<int>();
+    consoles[consolesSize].Enabled = o["Enabled"].as<bool>();
+    consolesSize++;
+  }
+  saveConsoles();
+  delay(200);
+  // Restore gameDB
+  JsonArray gameArr = doc["gameDB"].as<JsonArray>();
+  gameDBSize = 0;
+  for (JsonArray item : gameArr) {
+    gameDB[gameDBSize][0] = item[0].as<String>();
+    gameDB[gameDBSize][1] = item[1].as<String>();
+    gameDB[gameDBSize][2] = item[2].as<String>();
+    gameDBSize++;
+  }
+  saveGameDB();
+
+  server.send(200, "application/json", "{\"status\":\"ok\"}");
+}
+
+void handleExportAll() {
+  JsonDocument doc;
+
+  // consoles.json
+  JsonArray consolesArr = doc.createNestedArray("consoles");
+  for (int i = 0; i < consolesSize; i++) {
+    JsonObject o = consolesArr.createNestedObject();
+    o["Desc"] = consoles[i].Desc;
+    o["Address"] = consoles[i].Address;
+    o["DefaultProf"] = consoles[i].DefaultProf;
+    o["Enabled"] = consoles[i].Enabled;
+  }
+
+  // gameDB.json
+  JsonArray gameArr = doc.createNestedArray("gameDB");
+  for (int i = 0; i < gameDBSize; i++) {
+    JsonArray item = gameArr.createNestedArray();
+    item.add(gameDB[i][0]);
+    item.add(gameDB[i][1]);
+    item.add(gameDB[i][2]);
+  }
+
+  String out;
+  serializeJsonPretty(doc, out);
+  server.sendHeader("Content-Disposition", "attachment; filename=donutshop_config.json");
+  server.send(200, "application/json", out);
+}
+
 void handleRoot(){
   String page = R"rawliteral(
   <!DOCTYPE html>
@@ -2684,12 +2749,25 @@ void handleRoot(){
       .console-prof-cell-match {
         background-color: #4CAF50;
       }
+      .topbar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        padding: 8px;
+      }
+      button {
+        margin-left: 4px;
+      }
 
     </style>
   </head>
 
   <body>
-
+    <div class="topbar">
+      <input type="file" id="importJson" style="display:none" accept=".json" onchange="importData(event)">
+      <button onclick="document.getElementById('importJson').click()">Import Config</button>
+      <button onclick="exportData()">Export Config</button>
+    </div>
   <center><h1>Donut Shop</h1></center>
 
   <div class="controls">
@@ -2782,6 +2860,7 @@ void handleRoot(){
   </table>
 
   <script>
+  let refreshInterval = null;
   let activeProfileNumber = null;
   let updatingConsoles = false;
   let consoles = [];
@@ -3156,7 +3235,7 @@ void handleRoot(){
   // ---------------- INITIALIZE ----------------
   loadData();
 
-  setInterval(async () => {
+  refreshInterval = setInterval(async () => {
     if (updatingConsoles) return; // skip refresh if user is editing
 
     try {
@@ -3237,6 +3316,44 @@ void handleRoot(){
         cell.style.backgroundColor = '#4CAF50';
       }
     });
+  }
+
+  function exportData() {
+    window.open('/exportAll', '_blank');
+  }
+
+  function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    //Pause background polling during import
+    if (refreshInterval) {
+      clearInterval(refreshInterval);
+      refreshInterval = null;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      fetch('/importAll', {
+        method: 'POST',
+        body: reader.result,
+        headers: {'Content-Type': 'application/json'}
+      })
+      .then(resp => {
+        if (!resp.ok) throw new Error("Import failed");
+        alert('Import successful!');
+        window.location.reload(); // reload restarts interval cleanly
+      })
+      .catch(err => {
+        alert('Import failed: ' + err);
+
+        //Resume polling if import fails
+        if (!refreshInterval) {
+          refreshInterval = setInterval(() => location.reload(), 2500);
+        }
+      });
+    };
+    reader.readAsText(file);
   }
 
   </script>
