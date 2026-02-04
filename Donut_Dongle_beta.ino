@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.7c
+* Donut Dongle beta v1.7d
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -45,8 +45,8 @@ uint8_t mswitchSize = 4;
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~437
-uint8_t const debugE2CAP = 0; // line ~1007
+uint8_t const debugE1CAP = 0; // line ~445
+uint8_t const debugE2CAP = 0; // line ~948
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -1003,7 +1003,7 @@ void readExtron2(){
             }
             else if(vinMatrix[0] == 0 || vinMatrix[0] == 2){
               setTie(currentInputSW2,2);
-              sendSVS(currentInputSW2 + 100);
+              sendProfile(currentInputSW2 + 100,EXTRON2,1);
             }
           }
         }
@@ -2533,8 +2533,9 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
       if(i != sname && mswitch[i].King == 1)
         mswitch[i].King = 0;
     }
-    if(SVS == 0 || SVS == 2){ sendRBP(mswitch[sname].Prof); }
-    else { sendSVS(mswitch[sname].Prof); }
+    if(SVS == 0 && sname == EXTRON1 && mswitch[sname].Prof > 0 && mswitch[sname].Prof < 13){ sendRBP(mswitch[sname].Prof); }
+    else if(SVS == 2 && (sname == GSCART1 || sname == GSCART2) && mswitch[sname].Prof > 200 && mswitch[sname].Prof < 213){ sendRBP(mswitch[sname].Prof - 200); }
+    else{ sendSVS(mswitch[sname].Prof); }
   }
   else if(sprof == 0){ // all inputs are off, set attributes to 0, find a console that is On starting at the top of the list, set as King, send profile
     mswitch[sname].On = 0;
@@ -2546,7 +2547,8 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
           for(uint8_t l=0;l < mswitchSize;l++){ // find next Switch that has an active console
             if(mswitch[l].On == 1){
               mswitch[l].King = 1;
-              if(mswitch[l].Prof < 0){ sendRBP((-1)*mswitch[l].Prof); }
+              if(SVS == 0 && mswitch[l].Prof > 0 && mswitch[l].Prof < 13){ sendRBP(mswitch[l].Prof); }
+              else if(SVS == 2 && mswitch[l].Prof > 200 && mswitch[l].Prof < 213){ sendRBP(mswitch[l].Prof - 200); }
               else{ sendSVS(mswitch[l].Prof); }
               break;
             }
@@ -2558,9 +2560,8 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
     for(uint8_t m=0;m < mswitchSize;m++){
       if(mswitch[m].On == 0) count++;
     }
-    if(S0 && (count == mswitchSize) && currentProf[1] != 0){ // of S0 is true, send S0 or "remote prof12" when all consoles are off
-      if(SVS == 0 || SVS == 2){ sendRBP(12); }
-      else if(SVS == 1){ sendSVS(0); }
-    }  
+    if(S0 && (SVS == 0 || SVS == 2) && (count == mswitchSize) && currentProf[1] != 12){ sendRBP(12); } // of S0 is true, send S0 or "remote prof12" when all consoles are off
+    else if(S0 && SVS == 1 && (count == mswitchSize) && currentProf[1] != 0){ sendSVS(0); } 
+  
   } // end of else if prof == 0
 } // end of sendProfile()
