@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.3i (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.3j (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -25,9 +25,10 @@
 
 #define EXTRON1 0
 #define EXTRON2 1
+#define GAMEID1 2
 
-#include <TinyIRReceiver.hpp>
-#include <IRremote.hpp>       // found in the built-in Library Manager
+#include <TinyIRReceiver.hpp> // all can be found in the built-in Library Manager
+#include <IRremote.hpp>
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <WebServer.h>
@@ -51,8 +52,8 @@ struct profileorder {
   uint8_t King;
 };
 
-profileorder mswitch[2] = {{0,0,0},{0,0,0}};
-uint8_t mswitchSize = 2;
+profileorder mswitch[3] = {{0,0,0},{0,0,0},{0,0,0}};
+uint8_t mswitchSize = 3;
 
 /*
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,17 +110,8 @@ uint16_t gameDBSize = 11; // array can hold 1000 entries, but only set to curren
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~638
-uint8_t const debugE2CAP = 0; // line ~1141
-
-bool const S0_pwr = false;       // Load "S0_pwr_profile" when all consoles defined below are off. Defined below.
-
-int const S0_pwr_profile = -12;    // When all consoles definied below are off, load this profile. set to 0 means that S0_<whatever>.rt4 profile will load.
-                                 // "S0_pwr" must be set true
-                                 //
-                                 // If using a "remote button profile" which are valued 1 - 12, place a "-" before the profile number. 
-                                 // Example: -1 means "remote button profile 1"
-                                 //          -12 means "remote button profile 12"
+uint8_t const debugE1CAP = 0; // line ~628
+uint8_t const debugE2CAP = 0; // line ~1130
 
 bool S0_gameID = true;    // When a gameID match is not found for a powered on console, DefaultProf for that console will load
 
@@ -339,7 +331,6 @@ String const auxpower = "LG"; // AUX8 + Power button sends power off/on via IR E
 
 //////////////////
 
-//int currentGProf = 32222;  // current SVS profile number, set high initially
 unsigned long currentGameTime = 0;
 unsigned long prevGameTime = 0;
 
@@ -355,7 +346,6 @@ byte const VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbos
 // MT-VIKI / TESmart serial commands
 byte viki[4] = {0xA5,0x5A,0x00,0xCC};
 byte tesmart[6] = {0xAA,0xBB,0x03,0x01,0x01,0xEE};
-
 
 // LS timer variables
 unsigned long LScurrentTime = 0; 
@@ -425,8 +415,10 @@ void setup(){
   Serial.begin(9600);                           // set the baud rate for the RT4K VGA serial connection
   extronSerial.begin(9600,SERIAL_8N1,3,4);   // set the baud rate for the Extron sw1 Connection
   extronSerial.setTimeout(150);                 // sets the timeout for reading / saving into a string
+  if(automatrixSW1)extronSerial.write(VERB,5); // sets extron matrix switch to Verbose level 3
   extronSerial2.begin(9600,SERIAL_8N1,8,9);  // set the baud rate for Extron sw2 Connection
   extronSerial2.setTimeout(150);                // sets the timeout for reading / saving into a string for the Extron sw2 Connection
+  if(automatrixSW2)extronSerial2.write(VERB,5); // sets extron matrix switch to Verbose level 3
   MDNS.begin("donutshop");
   if(!LittleFS.begin(true)){ // format if mount fails
     Serial.println(F("LittleFS mount failed!"));
@@ -527,8 +519,7 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
                 if(i != j && consoles[j].King == 1)
                   consoles[j].King = 0;
               }
-              if(consoles[i].Prof >= 0) sendSVS(consoles[i].Prof);
-              else sendRBP((-1) * consoles[i].Prof);
+              sendProfile(consoles[i].Prof,GAMEID1,0);
             }
         } 
         } // end of if(httpCode > 0 || httpCode == -11)
@@ -536,15 +527,13 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
           consoles[i].On = 0;
           consoles[i].Prof = 33333;
           if(consoles[i].King == 1){
-            //currentGProf = 33333;
             for(int k=0;k < consolesSize;k++){
               if(i == k){
                 consoles[k].King = 0;
                 for(int l=0;l < consolesSize;l++){ // find next Console that is on
                   if(consoles[l].On == 1){
                     consoles[l].King = 1;
-                    if(consoles[l].Prof >= 0) sendSVS(consoles[l].Prof);
-                    else sendRBP((-1) * consoles[l].Prof);
+                    sendProfile(consoles[l].Prof,GAMEID1,0);
                     break;
                   }
                 }
@@ -556,6 +545,9 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
           for(int m=0;m < consolesSize;m++){
             if(consoles[m].On == 0) count++;
           }
+          if(count == consolesSize){
+            sendProfile(0,GAMEID1,0);
+          }
         } // end of else()
       http.end();
       analogWrite(LED_BLUE, 255);
@@ -564,15 +556,13 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
           consoles[i].On = 0;
           consoles[i].Prof = 33333;
           if(consoles[i].King == 1){
-            //currentGProf = 33333;
             for(int k=0;k < consolesSize;k++){
               if(i == k){
                 consoles[k].King = 0;
                 for(int l=0;l < consolesSize;l++){ // find next Console that is on
                   if(consoles[l].On == 1){
                     consoles[l].King = 1;
-                    if(consoles[l].Prof >= 0) sendSVS(consoles[l].Prof);
-                    else sendRBP((-1) * consoles[l].Prof);
+                    sendProfile(consoles[l].Prof,GAMEID1,0);
                     break;
                   }
                 }
@@ -696,8 +686,7 @@ void readExtron1(){
               if(RT5Xir && OSSCir)delay(500);
               if(OSSCir == 1)sendIR("ossc",currentInputSW1,3); // OSSC profile
 
-              if(SVS==0)sendRBP(currentInputSW1); 
-              else sendSVS(currentInputSW1);
+              sendProfile(currentInputSW1,EXTRON1,1);
             }
           }
         }
@@ -2281,7 +2270,9 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
       if(i != sname && mswitch[i].King == 1)
         mswitch[i].King = 0;
     }
-    sendSVS(mswitch[sname].Prof);
+    if(SVS == 0 && sname == EXTRON1 && mswitch[sname].Prof > 0 && mswitch[sname].Prof < 13){ sendRBP(mswitch[sname].Prof); }
+    else if(mswitch[sname].Prof < 0){ sendRBP((-1)*mswitch[sname].Prof); }
+    else { sendSVS(mswitch[sname].Prof); }
   }
   else if(sprof == 0){ // all inputs are off, set attributes to 0, find a console that is On starting at the top of the list, set as King, send profile
     mswitch[sname].On = 0;
@@ -2293,7 +2284,9 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
           for(uint8_t l=0;l < mswitchSize;l++){ // find next Switch that has an active console
             if(mswitch[l].On == 1){
               mswitch[l].King = 1;
-              sendSVS(mswitch[l].Prof);
+              if(SVS == 0 && l == EXTRON1 && mswitch[l].Prof > 0 && mswitch[l].Prof < 13){ sendRBP(mswitch[l].Prof); }
+              else if(mswitch[l].Prof < 0){ sendRBP((-1)*mswitch[l].Prof); }
+              else{ sendSVS(mswitch[l].Prof); }
               break;
             }
           }
@@ -2304,9 +2297,9 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
     for(uint8_t m=0;m < mswitchSize;m++){
       if(mswitch[m].On == 0) count++;
     }
-    if(S0 && (count == mswitchSize) && currentProf[1] != 0){ // of S0 is true, send S0 or "remote prof12" when all consoles are off
-      sendSVS(0);
-    }  
+    if(S0 && SVS == 0 && (count == mswitchSize) && currentProf[1] != 12){ sendRBP(12); } // of S0 is true, send S0 or "remote prof12" when all consoles are off
+    else if(S0 && SVS == 1 && (count == mswitchSize) && currentProf[1] != 0){ sendSVS(0); }
+
   } // end of else if prof == 0
 } // end of sendProfile()
 
