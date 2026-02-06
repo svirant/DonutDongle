@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.3k (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.3l (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -110,9 +110,9 @@ uint16_t gameDBSize = 11; // array can hold 1000 entries, but only set to curren
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~641
-uint8_t const debugE2CAP = 0; // line ~1143
-uint8_t const debugState = 0; // line ~475
+uint8_t const debugE1CAP = 0; // line ~644
+uint8_t const debugE2CAP = 0; // line ~1189
+uint8_t const debugState = 0; // line ~478
 
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
@@ -269,6 +269,9 @@ uint8_t const RT5Xir = 0;     // 0 = disables IR Emitter for RetroTink 5x
                               //
                               // 3 = enabled for Extron sw2 / alt sw2, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected 
                               //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
+                              //
+                              // 4 = enabled for Otaku Games Scart Switch that is connected to Extron sw1 / alt sw1 with another Otaku via headphone splitter.
+                              //      this 2nd Otaku has been flashed to repsond with "remote prof13" - "remote prof22", and "remote prof24" when all ports are off.
 
 uint8_t const OSSCir = 0;     // 0 = disables IR Emitter for OSSC
                               // 1 = enabled for Extron sw1 switch, TESmart HDMI, or Otaku Games Scart Switch if connected
@@ -368,7 +371,7 @@ String svsbutton; // used to store 3 digit SVS profile when AUX8 is double press
 uint8_t nument = 0; // used to keep track of how many digits have been entered for 3 digit SVS profile
 
 // sendRTwake global variables
-uint16_t currentProf[2] = {1,0}; // first index: 0 = remote button profile, 1 = SVS profiles. second index: profile number
+int currentProf = 0; // negative numbers for Remote Button profiles, positive for SVS profiles
 bool RTwake = false;
 unsigned long currentTime = 0;
 unsigned long prevTime = 0;
@@ -474,9 +477,9 @@ void DDloop(void *pvParameters){
     server.handleClient();
     if(debugState){
       delay(100);
-      Serial.print(F("GAMEID1"));Serial.print(F(" On: "));Serial.print(mswitch[GAMEID1].On);Serial.print(F(" King: "));Serial.print(mswitch[GAMEID1].King);Serial.print(F(" Prof: "));Serial.println(mswitch[GAMEID1].Prof);
-      Serial.print(F("EXTRON1"));Serial.print(F(" On: "));Serial.print(mswitch[EXTRON1].On);Serial.print(F(" King: "));Serial.print(mswitch[EXTRON1].King);Serial.print(F(" Prof: "));Serial.println(mswitch[EXTRON1].Prof);
-      Serial.print(F("EXTRON2"));Serial.print(F(" On: "));Serial.print(mswitch[EXTRON2].On);Serial.print(F(" King: "));Serial.print(mswitch[EXTRON2].King);Serial.print(F(" Prof: "));Serial.println(mswitch[EXTRON2].Prof);
+      Serial.print(F("GAMEID1 "));Serial.print(F(" On: "));Serial.print(mswitch[GAMEID1].On);Serial.print(F(" King: "));Serial.print(mswitch[GAMEID1].King);Serial.print(F(" Prof: "));Serial.println(mswitch[GAMEID1].Prof);
+      Serial.print(F("EXTRON1 "));Serial.print(F(" On: "));Serial.print(mswitch[EXTRON1].On);Serial.print(F(" King: "));Serial.print(mswitch[EXTRON1].King);Serial.print(F(" Prof: "));Serial.println(mswitch[EXTRON1].Prof);
+      Serial.print(F("EXTRON2 "));Serial.print(F(" On: "));Serial.print(mswitch[EXTRON2].On);Serial.print(F(" King: "));Serial.print(mswitch[EXTRON2].King);Serial.print(F(" Prof: "));Serial.println(mswitch[EXTRON2].Prof);
     }
   }
 } // end of DDloop
@@ -540,7 +543,7 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
         } // end of if(httpCode > 0 || httpCode == -11)
         else{ // console is off, set attributes to 0, find a console that is On starting at the top of the gameID list, set as King, send profile
           consoles[i].On = 0;
-          consoles[i].Prof = 33333;
+          consoles[i].Prof = 0;
           if(consoles[i].King == 1){
             for(int k=0;k < consolesSize;k++){
               if(i == k){
@@ -569,7 +572,7 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
       }  // end of WiFi connection
       else if(!consoles[i].Enabled){ // console is disabled in web ui, set attributes to 0, find a console that is On starting at the top of the gameID list, set as King, send profile
           consoles[i].On = 0;
-          consoles[i].Prof = 33333;
+          consoles[i].Prof = 0;
           if(consoles[i].King == 1){
             for(int k=0;k < consolesSize;k++){
               if(i == k){
@@ -711,7 +714,7 @@ void readExtron1(){
 
         currentInputSW1 = 0;
         setTie(currentInputSW1,1);
-        sendProfile(0,EXTRON1,0);
+        sendProfile(0,EXTRON1,1);
 
       }
     } // end of automatrix
@@ -725,11 +728,11 @@ void readExtron1(){
     // Without this, the profile would be resent when changes to other outputs are selected.
     if(einput.substring(0,2) == "IN"){
       if(einput.substring(3,4) == " "){
-        if(einput.substring(2,3).toInt() == currentProf[1])
+        if(einput.substring(2,3).toInt() == currentProf)
           einput = "XX00"; // if the input is still the same, set einput so that nothing triggers a profile send
       }
       else{
-        if(einput.substring(2,4).toInt() == currentProf[1])
+        if(einput.substring(2,4).toInt() == currentProf)
           einput = "XX00";
       }
     }
@@ -832,7 +835,7 @@ void readExtron1(){
         sendProfile(einput.substring(2,4).toInt(),EXTRON1,1);
       }
       else if(einput == "IN0" || einput == "In0 " || einput == "In00"){
-        sendProfile(0,EXTRON1,0);
+        sendProfile(0,EXTRON1,1);
       }
     }
 
@@ -1034,7 +1037,7 @@ void readExtron1(){
       if(RT5Xir && OSSCir)delay(500);
       if(OSSCir == 1)sendIR("ossc",currentMTVinput[0],3); // OSSC profile 1
 
-      sendProfile(currentMTVinput[0],EXTRON1,0);
+      sendProfile(currentMTVinput[0],EXTRON1,1);
     }
 
 
@@ -1050,6 +1053,49 @@ void readExtron1(){
       else if(ecap.substring(0,13) == "remote prof12"){
           sendProfile(0,EXTRON1,1);
       }
+      else if(ecap.substring(0,13) == "remote prof13"){
+        if(RT5Xir == 4)sendIR("5x",1,2); // RT5X profile 1
+        sendProfile(13,EXTRON1,1);
+      }
+      else if(ecap.substring(0,13) == "remote prof14"){
+        if(RT5Xir == 4)sendIR("5x",2,2); // RT5X profile 2
+        sendProfile(14,EXTRON1,1);
+      }
+      else if(ecap.substring(0,13) == "remote prof15"){
+        if(RT5Xir == 4)sendIR("5x",3,2); // RT5X profile 3
+        sendProfile(15,EXTRON1,1);
+      }
+      else if(ecap.substring(0,13) == "remote prof16"){
+        if(RT5Xir == 4)sendIR("5x",4,2); // RT5X profile 4
+        sendProfile(16,EXTRON1,1);
+      }
+      else if(ecap.substring(0,13) == "remote prof17"){
+        if(RT5Xir == 4)sendIR("5x",5,2); // RT5X profile 5
+        sendProfile(17,EXTRON1,1);
+      }
+      else if(ecap.substring(0,13) == "remote prof18"){
+        if(RT5Xir == 4)sendIR("5x",6,2); // RT5X profile 6
+        sendProfile(18,EXTRON1,1);
+      }
+      else if(ecap.substring(0,13) == "remote prof19"){
+        if(RT5Xir == 4)sendIR("5x",7,2); // RT5X profile 7
+        sendProfile(19,EXTRON1,1);
+      }
+      else if(ecap.substring(0,13) == "remote prof20"){
+        if(RT5Xir == 4)sendIR("5x",8,2); // RT5X profile 8
+        sendProfile(20,EXTRON1,1);
+      }
+      else if(ecap.substring(0,13) == "remote prof21"){
+        if(RT5Xir == 4)sendIR("5x",9,2); // RT5X profile 9
+        sendProfile(21,EXTRON1,1);
+      }
+      else if(ecap.substring(0,13) == "remote prof22"){
+        if(RT5Xir == 4)sendIR("5x",10,2); // RT5X profile 10
+        sendProfile(22,EXTRON1,1);
+      }
+      // else if(ecap.substring(0,13) == "remote prof24"){
+      //     sendProfile(0,EXTRON1,1);
+      // }
       else if(ecap.substring(0,12) == "remote prof1"){
           if(RT5Xir == 1)sendIR("5x",1,2); // RT5X profile 1 
           if(RT5Xir && OSSCir)delay(500);
@@ -1208,7 +1254,7 @@ void readExtron2(){
 
         currentInputSW2 = 0;
         setTie(currentInputSW2,2);
-        sendProfile(0,EXTRON2,0);
+        sendProfile(0,EXTRON2,1);
 
       }
     } // end of automatrix
@@ -1221,11 +1267,11 @@ void readExtron2(){
     // Without this, the profile would be resent when changes to other outputs are selected.
     if(einput.substring(0,2) == "IN"){
       if(einput.substring(3,4) == " "){
-        if(einput.substring(2,3).toInt()+100 == currentProf[1])
+        if(einput.substring(2,3).toInt()+100 == currentProf)
           einput = "XX00"; // if the input is still the same, set einput so that nothing triggers a profile send
       }
       else{
-        if(einput.substring(2,4).toInt()+100 == currentProf[1])
+        if(einput.substring(2,4).toInt()+100 == currentProf)
           einput = "XX00";
       }
     }
@@ -1242,7 +1288,7 @@ void readExtron2(){
           sendProfile(einput.substring(2,4).toInt()+100,EXTRON2,1);
       }
       else if(einput == "IN0" || einput == "In0 " || einput == "In00"){
-        sendProfile(0,EXTRON2,0);
+        sendProfile(0,EXTRON2,1);
       }
 
     }
@@ -1393,7 +1439,7 @@ void readExtron2(){
     else if(ecap.substring(24,41) != "IS_NON_INPUT_PORT" && ecap.substring(0,11) == "Uart_RxData" && MTVdiscon[1]){
       MTVdiscon[1] = false;
       if(RT5Xir == 3)sendIR("5x",currentMTVinput[1],2);
-      sendProfile(currentMTVinput[1],EXTRON2,0);
+      sendProfile(currentMTVinput[1],EXTRON2,1);
 
     }    
     
@@ -2072,7 +2118,7 @@ void sendIR(String type, uint8_t prof, uint8_t repeat){
       irsend.sendNEC(0x00,0x00,0);
       irsend.sendNEC(0x00,0x00,0);
       irsend.sendNEC(0x00,0x00,0);
-      delay(30);
+      delay(45);
       irsend.sendNEC(0x04,0x08,0); // send once more
       irsend.sendNEC(0x00,0x00,0);
       irsend.sendNEC(0x00,0x00,0);
@@ -2091,11 +2137,11 @@ void sendRTwake(uint16_t mil){
       currentTime = 0;
       RTwake = false;
       digitalWrite(LED_BUILTIN,LOW);
-      if((currentProf[0] == 1 && currentProf[1] != 0) || (currentProf[0] == 0 && currentProf[1] != 12)){
-        if(currentProf[0])
-          sendSVS(currentProf[1]);
+      if((SVS == 1 && currentProf != 0) || (SVS == 0 && currentProf != -12)){
+        if(currentProf > 0)
+          sendSVS(currentProf);
         else
-          sendRBP(currentProf[1]);
+          sendRBP(-1*currentProf);
       }
     }
     if(currentTime - prevBlinkTime >= 300){
@@ -2138,7 +2184,7 @@ void DStime(unsigned long eTime){
     DSprevTime = 0;
     delaySend = false;
     sendProfile(delayProf,GAMEID1,1);
-    delayProf = 33333;
+    delayProf = 0;
  }
 } // end of DStime()
 
@@ -2197,12 +2243,11 @@ void sendSVS(uint16_t num){
   else Serial.print(num);
   Serial.println(F("\r"));
 
-  currentProf[0] = 1; // 1 is SVS profile
-  currentProf[1] = num;
+  currentProf = num;
   analogWrite(LED_GREEN,255);
 } // end of sendSVS()
 
-void sendRBP(uint8_t prof){ // send Remote Button Profile
+void sendRBP(int prof){ // send Remote Button Profile
   analogWrite(LED_RED,255);
   analogWrite(LED_BLUE,255);
   analogWrite(LED_GREEN,222);
@@ -2211,8 +2256,7 @@ void sendRBP(uint8_t prof){ // send Remote Button Profile
   Serial.print(prof);
   Serial.println(F("\r"));
 
-  currentProf[0] = 0; // 0 is Remote Button Profile
-  currentProf[1] = prof;
+  currentProf = -1*prof; // always store remote button profiles as negative numbers
   delay(1000);
   analogWrite(LED_GREEN,255);
 } // end of sendRBP()
@@ -2284,44 +2328,57 @@ void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
 
 void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
 
+  // make sure the "No Match Profile" in DonutShop matches it's switch's auto-profile for fallback to work properly
   if(mswitch[GAMEID1].On){
     int gprof;
     int gdprof;
     for(uint8_t i=0;i < consolesSize;i++){
       if(consoles[i].King == 1){
-        // if(consoles[i].DefaultProf < 0 && SVS == 0 && sprof > 0 && sprof < 13){
         if(SVS == 0 && sprof > 0 && sprof < 13){
             gdprof = (-1)*consoles[i].DefaultProf;
             gprof = consoles[i].Prof;
         }
-        // else if(consoles[i].DefaultProf > 0 && SVS == 0 && sprof > 0 && sprof < 13){
-        //     gdprof = (-1)*consoles[i].DefaultProf;
-        //     gprof = consoles[i].Prof;
-        // }
         else{
           gdprof = consoles[i].DefaultProf;
           gprof = consoles[i].Prof;
         }
       }
     }
-    if((sname == EXTRON1 || sname == EXTRON2) && gdprof == sprof){
-      mswitch[EXTRON1].King = 0;
-      mswitch[EXTRON2].King = 0;
-      mswitch[GAMEID1].King = 1;
+    if(sname != GAMEID1 && sprof == gdprof){
+      for(uint8_t i=0;i < mswitchSize;i++){
+        if(i != GAMEID1){
+          mswitch[i].King = 0;
+        }
+      }
       delaySend = true; 
       delayProf = gprof;
       return;
     }
   }
 
+  // if GAMEID1 profile is the same as current profile, do not resend profile
+  for(uint8_t i=0;i < mswitchSize;i++){
+    if(sname == GAMEID1 && i != GAMEID1 && sprof == mswitch[i].Prof && mswitch[i].King == 1){
+      mswitch[i].King = 0;
+      mswitch[GAMEID1].On = 1;
+      mswitch[GAMEID1].King = 1;
+      mswitch[GAMEID1].Prof = sprof;
+      return;
+    }
+  }
+
   if(sprof != 0){
     mswitch[sname].On = 1;
-    mswitch[sname].Prof = sprof;
+    if(SVS == 0 && sname == EXTRON1 && sprof > 0 && sprof < 13){ // save RBP as negative number
+      mswitch[sname].Prof = -1*sprof;
+    }
+    else mswitch[sname].Prof = sprof;
+
     if(soverride == 1){
       mswitch[sname].King = 1;
     }
     else{
-      if(mswitch[sname].Prof != currentProf[1]){
+      if(sprof != currentProf){
         mswitch[sname].King = 1;
       }
       else return;
@@ -2330,13 +2387,13 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
       if(i != sname && mswitch[i].King == 1)
         mswitch[i].King = 0;
     }
-    if(SVS == 0 && sname == EXTRON1 && mswitch[sname].Prof > 0 && mswitch[sname].Prof < 13){ sendRBP(mswitch[sname].Prof); } // only when SVS == 0
-    else if(mswitch[sname].Prof < 0){ sendRBP((-1)*mswitch[sname].Prof); } // only RBP from GAMEID
-    else { sendSVS(mswitch[sname].Prof); } // everything else
+    if(SVS == 0 && sname == EXTRON1 && sprof > 0 && sprof < 13){ sendRBP(sprof); } // only when SVS == 0
+    else if(sprof < 0){ sendRBP(-1*sprof); } // only RBP from GAMEID
+    else { sendSVS(sprof); } // everything else
   }
   else if(sprof == 0){ // all inputs are off, set attributes to 0, find a console that is On starting at the top of the list, set as King, send profile
     mswitch[sname].On = 0;
-    mswitch[sname].Prof = 33333;
+    mswitch[sname].Prof = 0;
     if(mswitch[sname].King == 1){
       for(uint8_t k=0;k < mswitchSize;k++){
         if(sname == k){
@@ -2344,8 +2401,8 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
           for(uint8_t l=0;l < mswitchSize;l++){ // find next Switch that has an active console
             if(mswitch[l].On == 1){
               mswitch[l].King = 1;
-              if(SVS == 0 && l == EXTRON1 && mswitch[l].Prof > 0 && mswitch[l].Prof < 13){ sendRBP(mswitch[l].Prof); }
-              else if(mswitch[l].Prof < 0){ sendRBP((-1)*mswitch[l].Prof); }
+              //if(SVS == 0 && l == EXTRON1 && mswitch[l].Prof > 0 && mswitch[l].Prof < 13){ sendRBP(-1*mswitch[l].Prof); }
+              if(mswitch[l].Prof < 0){ sendRBP((-1)*mswitch[l].Prof); }
               else{ sendSVS(mswitch[l].Prof); }
               break;
             }
@@ -2357,8 +2414,8 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
     for(uint8_t m=0;m < mswitchSize;m++){
       if(mswitch[m].On == 0) count++;
     }
-    if(S0 && SVS == 0 && (count == mswitchSize) && currentProf[1] != 12){ sendRBP(12); } // of S0 is true, send S0 or "remote prof12" when all consoles are off
-    else if(S0 && SVS == 1 && (count == mswitchSize) && currentProf[1] != 0){ sendSVS(0); }
+    if(S0 && SVS == 0 && (count == mswitchSize) && currentProf != -12){ sendRBP(12); } // of S0 is true, send S0 or "remote prof12" when all consoles are off
+    else if(S0 && SVS == 1 && (count == mswitchSize) && currentProf != 0){ sendSVS(0); }
 
   } // end of else if prof == 0
 } // end of sendProfile()
