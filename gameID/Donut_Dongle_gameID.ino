@@ -413,6 +413,7 @@ WebServer server(80);
 void DDloop(void *pvParameters);
 void GIDloop(void *pvParameters);
 uint16_t gTime = 2000;
+uint8_t RMTuse = 0;
 
 void setup(){
 
@@ -1504,6 +1505,8 @@ void readIR(){
 
     ir_recv_command = TinyIRReceiverData.Command;
     ir_recv_address = TinyIRReceiverData.Address;
+
+    if(ir_recv_command != 0) RMTuse = 1;
         
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && extrabuttonprof == 2){
       if(ir_recv_command == 11){ // profile button 1
@@ -2330,8 +2333,8 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
 
   // make sure the "No Match Profile" in DonutShop matches it's switch's auto-profile for fallback to work properly
   if(mswitch[GAMEID1].On){
-    int gprof;
-    int gdprof;
+    int gprof = 0;
+    int gdprof = 0;
     for(uint8_t i=0;i < consolesSize;i++){
       if(consoles[i].King == 1){
         if(SVS == 0 && sprof > 0 && sprof < 13){
@@ -2414,8 +2417,11 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
     for(uint8_t m=0;m < mswitchSize;m++){
       if(mswitch[m].On == 0) count++;
     }
-    if(S0 && SVS == 0 && (count == mswitchSize) && currentProf != -12){ sendRBP(12); } // of S0 is true, send S0 or "remote prof12" when all consoles are off
-    else if(S0 && SVS == 1 && (count == mswitchSize) && currentProf != 0){ sendSVS(0); }
+    if(count < mswitchSize){RMTuse = 0;} //This prevents the S0 / remote prof12 profile from constantly overriding any profile loaded with the remote when all consoles are off.
+                                         
+
+    if(S0 && !RMTuse && SVS == 0 && (count == mswitchSize) && currentProf != -12){ sendRBP(12); } // send S0 or "remote prof12" when all consoles are off
+    else if(S0 && !RMTuse && SVS == 1 && (count == mswitchSize) && currentProf != 0){ sendSVS(0); }
 
   } // end of else if prof == 0
 } // end of sendProfile()
