@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.3l (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.3m (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -50,9 +50,10 @@ struct profileorder {
   int Prof;
   uint8_t On;
   uint8_t King;
+  uint8_t Order;
 };
 
-profileorder mswitch[3] = {{0,0,0},{0,0,0},{0,0,0}};
+profileorder mswitch[3] = {{0,0,0,0},{0,0,0,1},{0,0,0,2}};
 uint8_t mswitchSize = 3;
 
 /*
@@ -60,7 +61,7 @@ uint8_t mswitchSize = 3;
 //    CONFIG     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 */
-                   // format as so: {Description, console address, Default Profile for console, current profile state (leave 0), power state (leave 0), active state (leave 0)}
+                   // format as so: {Description, console address, Default Profile for console, current profile state (leave 0), power state (leave 0), active state (leave 0), Enabled}
                    //
                    // If using a "remote button profile" for the "Default Profile" which are valued 1 - 12, place a "-" before the profile number. 
                    // Example: -1 means "remote button profile 1"
@@ -110,9 +111,9 @@ uint16_t gameDBSize = 11; // array can hold 1000 entries, but only set to curren
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~644
-uint8_t const debugE2CAP = 0; // line ~1189
-uint8_t const debugState = 0; // line ~478
+uint8_t const debugE1CAP = 0; // line ~646
+uint8_t const debugE2CAP = 0; // line ~1191
+uint8_t const debugState = 0; // line ~480
 
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
@@ -2375,20 +2376,20 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
     if(SVS == 0 && sname == EXTRON1 && sprof > 0 && sprof < 13){ // save RBP as negative number
       mswitch[sname].Prof = -1*sprof;
     }
-    else mswitch[sname].Prof = sprof;
-
-    if(soverride == 1){
-      mswitch[sname].King = 1;
-    }
     else{
-      if(sprof != currentProf){
-        mswitch[sname].King = 1;
-      }
-      else return;
+      mswitch[sname].Prof = sprof;
     }
-    for(int i=0;i < mswitchSize;i++){ // set previous King to 0
-      if(i != sname && mswitch[i].King == 1)
+    if(mswitch[sname].Prof == currentProf && !soverride) return;
+    uint8_t prevOrder = mswitch[sname].Order;
+    for(uint8_t i = 0;i < mswitchSize;i++){
+      if(i == sname){
+        mswitch[i].Order = 0;
+        mswitch[i].King = 1;
+      }
+      else{
         mswitch[i].King = 0;
+        if(mswitch[i].Order < prevOrder) mswitch[i].Order++;
+      }
     }
     if(SVS == 0 && sname == EXTRON1 && sprof > 0 && sprof < 13){ sendRBP(sprof); } // only when SVS == 0
     else if(sprof < 0){ sendRBP(-1*sprof); } // only RBP from GAMEID
@@ -2398,28 +2399,30 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
     mswitch[sname].On = 0;
     mswitch[sname].Prof = 0;
     if(mswitch[sname].King == 1){
-      for(uint8_t k=0;k < mswitchSize;k++){
-        if(sname == k){
-          mswitch[k].King = 0;
-          for(uint8_t l=0;l < mswitchSize;l++){ // find next Switch that has an active console
-            if(mswitch[l].On == 1){
-              mswitch[l].King = 1;
-              //if(SVS == 0 && l == EXTRON1 && mswitch[l].Prof > 0 && mswitch[l].Prof < 13){ sendRBP(-1*mswitch[l].Prof); }
-              if(mswitch[l].Prof < 0){ sendRBP((-1)*mswitch[l].Prof); }
-              else{ sendSVS(mswitch[l].Prof); }
-              break;
-            }
-          }
+      int bestIdx = -1;
+      uint8_t bestO = mswitchSize;
+      for(uint8_t i=0;i < mswitchSize;i++){
+        if(mswitch[i].On && mswitch[i].Order < bestO){
+          bestO = mswitch[i].Order;
+          bestIdx = i;
         }
-      } // end of for()
+      }
+      for(uint8_t i=0;i < mswitchSize;i++){
+        mswitch[i].King = 0;
+      }
+      if(bestIdx != -1){ 
+        mswitch[bestIdx].King = 1;
+        if(mswitch[bestIdx].Prof < 0) sendRBP(-1*mswitch[bestIdx].Prof); 
+        else sendSVS(mswitch[bestIdx].Prof);
+        return;
+      }
     } // end of if King == 1
     uint8_t count = 0;
     for(uint8_t m=0;m < mswitchSize;m++){
       if(mswitch[m].On == 0) count++;
     }
-    if(count < mswitchSize){RMTuse = 0;} //This prevents the S0 / remote prof12 profile from constantly overriding any profile loaded with the remote when all consoles are off.
-                                         
-
+    if(count < mswitchSize){ RMTuse = 0; } //This prevents the S0 / remote prof12 profile from constantly overriding any profile loaded with the remote when all consoles are off.
+                                          
     if(S0 && !RMTuse && SVS == 0 && (count == mswitchSize) && currentProf != -12){ sendRBP(12); } // send S0 or "remote prof12" when all consoles are off
     else if(S0 && !RMTuse && SVS == 1 && (count == mswitchSize) && currentProf != 0){ sendSVS(0); }
 
