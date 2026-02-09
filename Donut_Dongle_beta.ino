@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.7e
+* Donut Dongle beta v1.7f
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -46,9 +46,9 @@ uint8_t mswitchSize = 4;
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~445
-uint8_t const debugE2CAP = 0; // line ~948
-uint8_t const debugState = 0; // line ~425
+uint8_t const debugE1CAP = 0; // line ~458
+uint8_t const debugE2CAP = 0; // line ~738
+uint8_t const debugState = 0; // line ~429
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -127,9 +127,6 @@ bool const S0 = false;  // (Profile 0) default is false
 #define automatrixSW1 false // set true for auto matrix switching on "SW1" port
 #define automatrixSW2 false // set true for auto matrix switching on "SW2" port
 
-uint8_t const amSizeSW1 = 8; // number of input ports for auto matrix switching on SW1. Ex: 8,12,16
-uint8_t const amSizeSW2 = 8; // number of input ports for auto matrix switching on SW2. ...
-
 ///////////////////////////////
 
 uint8_t const ExtronVideoOutputPortSW1 = 1; // For certain Extron Matrix models, must specify the video output port that connects to RT4K
@@ -137,7 +134,7 @@ uint8_t const ExtronVideoOutputPortSW2 = 1; // can also be used for auto matrix 
 
 ///////////////////////////////
 
-uint8_t const vinMatrix[33] = {0,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 defined above)
+uint8_t const vinMatrix[65] = {0,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 defined above)
                                                         // set to 0 for the auto switched input to tie to all outputs
                                                         // set to 1 for the auto switched input to trigger a Preset
                                                         // set to 2 for the auto switched input to tie to "ExtronVideoOutputPortSW1" / "ExtronVideoOutputPortSW2"
@@ -160,22 +157,22 @@ uint8_t const vinMatrix[33] = {0,  // MATRIX switchers  // When auto matrix mode
                            14,  // input 14
                            15,  // input 15
                            16,  // input 16
-                          //  17,  // input 17
-                          //  18,  // input 18
-                          //  19,  // input 19
-                          //  20,  // input 20
-                          //  21,  // input 21
-                          //  22,  // input 22
-                          //  23,  // input 23
-                          //  24,  // input 24
-                          //  25,  // input 25
-                          //  26,  // input 26
-                          //  27,  // input 27
-                          //  28,  // input 28
-                          //  29,  // input 29
-                          //  30,  // input 30
-                          //  30,  // input 31
-                          //  30,  // input 32
+                           17,  // input 17
+                           18,  // input 18
+                           19,  // input 19
+                           20,  // input 20
+                           21,  // input 21
+                           22,  // input 22
+                           23,  // input 23
+                           24,  // input 24
+                           25,  // input 25
+                           26,  // input 26
+                           27,  // input 27
+                           28,  // input 28
+                           29,  // input 29
+                           30,  // input 30
+                           30,  // input 31
+                           30,  // input 32
                                //
                                // ONLY USE FOR 2ND MATRIX SWITCH on SW2
                            1,  // 2ND MATRIX SWITCH input 1 SW2
@@ -194,22 +191,22 @@ uint8_t const vinMatrix[33] = {0,  // MATRIX switchers  // When auto matrix mode
                            14,  // 2ND MATRIX SWITCH input 14
                            15,  // 2ND MATRIX SWITCH input 15
                            16,  // 2ND MATRIX SWITCH input 16
-                          //  17,  // 2ND MATRIX SWITCH input 17
-                          //  18,  // 2ND MATRIX SWITCH input 18
-                          //  19,  // 2ND MATRIX SWITCH input 19
-                          //  20,  // 2ND MATRIX SWITCH input 20
-                          //  21,  // 2ND MATRIX SWITCH input 21
-                          //  22,  // 2ND MATRIX SWITCH input 22
-                          //  23,  // 2ND MATRIX SWITCH input 23
-                          //  24,  // 2ND MATRIX SWITCH input 24
-                          //  25,  // 2ND MATRIX SWITCH input 25
-                          //  26,  // 2ND MATRIX SWITCH input 26
-                          //  27,  // 2ND MATRIX SWITCH input 27
-                          //  28,  // 2ND MATRIX SWITCH input 28
-                          //  29,  // 2ND MATRIX SWITCH input 29
-                          //  30,  // 2ND MATRIX SWITCH input 30
-                          //  30,  // 2ND MATRIX SWITCH input 31
-                          //  30,  // 2ND MATRIX SWITCH input 32
+                           17,  // 2ND MATRIX SWITCH input 17
+                           18,  // 2ND MATRIX SWITCH input 18
+                           19,  // 2ND MATRIX SWITCH input 19
+                           20,  // 2ND MATRIX SWITCH input 20
+                           21,  // 2ND MATRIX SWITCH input 21
+                           22,  // 2ND MATRIX SWITCH input 22
+                           23,  // 2ND MATRIX SWITCH input 23
+                           24,  // 2ND MATRIX SWITCH input 24
+                           25,  // 2ND MATRIX SWITCH input 25
+                           26,  // 2ND MATRIX SWITCH input 26
+                           27,  // 2ND MATRIX SWITCH input 27
+                           28,  // 2ND MATRIX SWITCH input 28
+                           29,  // 2ND MATRIX SWITCH input 29
+                           30,  // 2ND MATRIX SWITCH input 30
+                           30,  // 2ND MATRIX SWITCH input 31
+                           30,  // 2ND MATRIX SWITCH input 32
                            };
 
 
@@ -293,6 +290,15 @@ uint8_t const gctl = 0; // 1 = Enables gscart/gcomp manual input selection
 char const auxpower[] = "LG"; // AUX8 + Power button sends power off/on via IR Emitter. "LG" OLEX CX is the only one implemented atm. 
 
 
+// automatrix variables
+#if automatrixSW1 || automatrixSW2
+uint8_t AMstate[32];
+uint32_t prevAMstate = 0;
+int  AMstateTop = -1;
+uint8_t amSizeSW1 = 8; // 8 by default, but updates if a different size is discovered
+uint8_t amSizeSW2 = 8; // ...
+
+#endif
 
 // gscart / gcomp adjustment variables for port detection
 float const highsamvolt[2] = {1.6,1.6}; // for gscart sw1,sw2 rise above this voltage for a high sample
@@ -327,11 +333,12 @@ AltSoftSerial extronSerial2; // setup yet another serial port for listening to E
 
 // Extron Global variables
 uint8_t eoutput[2]; // used to store Extron output
-char const sstack[] = "00000000000000000000000000000000"; // static stack of 32 "0" used for comparisons
-char stack1[] = "00000000000000000000000000000000"; 
-char stack2[] = "00000000000000000000000000000000"; 
 int currentInputSW1 = -1;
 int currentInputSW2 = -1;
+int currentProf = 0; // negative numbers for Remote Button profiles, positive for SVS profiles
+String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
+String einput = "000000000000000000000000000000000000"; // used to store Extron input
+byte ecapbytes[44] = {0}; // used to store first 44 bytes / messages for Extron capture
 byte const VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
 
 // MT-VIKI / TESmart serial commands
@@ -350,7 +357,6 @@ String svsbutton; // used to store 3 digit SVS profile when AUX8 is double press
 uint8_t nument = 0; // used to keep track of how many digits have been entered for 3 digit SVS profile
 
 // sendRTwake global variables
-int currentProf = 0; // negative numbers for Remote Button profiles, positive for SVS profiles
 bool RTwake = false;
 unsigned long currentTime = 0;
 unsigned long prevTime = 0;
@@ -382,9 +388,7 @@ uint8_t currentMTVinput[2] = {0,0};
 bool MTVdiscon[2] = {false,false};
 bool MTVddSW1 = false;
 bool MTVddSW2 = false;
-String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
-String einput = "000000000000000000000000000000000000"; // used to store Extron input
-byte ecapbytes[44] = {0}; // used to store first 44 bytes / messages for Extron capture
+
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -483,6 +487,10 @@ void readExtron1(){
       einput = ecap.substring(0,5);
       eoutput[0] = 1;
     }
+    else if(ecap.substring(0,8) == "RECONFIG"){     // This is received everytime a change is made on older Extron Crosspoints
+      ExtronOutputQuery(ExtronVideoOutputPortSW1,1); // Finds current input for "ExtronVideoOutputPortSW1" that is connected to port 1 of the DD
+    }
+#if automatrixSW1
     else if(ecap.substring(amSizeSW1 + 6,amSizeSW1 + 9) == "Rpr"){ // detect if a Preset has been used 
       einput = ecap.substring(amSizeSW1 + 6,amSizeSW1 + 11);
       eoutput[0] = 1;
@@ -491,47 +499,36 @@ void readExtron1(){
       einput = ecap.substring(amSizeSW1 + 7,amSizeSW1 + 12);
       eoutput[0] = 1;
     }
-    else if(ecap.substring(0,8) == "RECONFIG"){     // This is received everytime a change is made on older Extron Crosspoints
-      ExtronOutputQuery(ExtronVideoOutputPortSW1,1); // Finds current input for "ExtronVideoOutputPortSW1" that is connected to port 1 of the DD
-    }
-    else if(ecap.substring(0,3) == "In0" && ecap.substring(4,7) != "All" && ecap.substring(5,8) != "All" && automatrixSW1){ // start of automatrix
+    else if(ecap.substring(0,3) == "In0" && ecap.substring(4,7) != "All" && ecap.substring(5,8) != "All"){ // start of automatrix
       if(ecap.substring(0,4) == "In00"){
+        amSizeSW1 = ecap.length() - 7;
         einput = ecap.substring(5,amSizeSW1 + 5);
-      }else 
+      }
+      else{
+        amSizeSW1 = ecap.length() - 6;
         einput = ecap.substring(4,amSizeSW1 + 4);
-      for(uint8_t i=0;i<amSizeSW1;i++){
-        if(einput[i] != stack1[i] || einput[currentInputSW1 - 1] == '0'){ // check to see if anything changed
-          stack1[i] = einput[i];
-          if(einput[i] != '0'){
-            currentInputSW1 = i+1;
-            if(vinMatrix[0] == 1){
-              recallPreset(vinMatrix[currentInputSW1],1);
-            }
-            else if(vinMatrix[0] == 0 || vinMatrix[0] == 2){
-              setTie(currentInputSW1,1);
-              if(RT5Xir == 1)sendIR("5x",currentInputSW1,2); // RT5X profile
-              if(RT5Xir && OSSCir)delay(500);
-              if(OSSCir == 1)sendIR("ossc",currentInputSW1,3); // OSSC profile
-
-              sendProfile(currentInputSW1,EXTRON1,1);
-            }
-          }
+      }
+      uint8_t check = readAMstate(einput,amSizeSW1);
+      if(check != currentInputSW1){
+        currentInputSW1 = check;
+        if(currentInputSW1 == 0){
+          setTie(currentInputSW1,1);
+          sendProfile(0,EXTRON1,1);
         }
-      } //end of for loop
-      if(einput.substring(0,amSizeSW1) == String(sstack).substring(0,amSizeSW1) 
-        && String(stack1).substring(0,amSizeSW1) == String(sstack).substring(0,amSizeSW1) && currentInputSW1 != 0){ // check for all inputs being off
-
-        currentInputSW1 = 0;
-        setTie(currentInputSW1,1);
-        sendProfile(0,EXTRON1,1);
-
+        else if(vinMatrix[0] == 1){
+          recallPreset(vinMatrix[currentInputSW1],1);
+        }
+        else if(vinMatrix[0] == 0 || vinMatrix[0] == 2){
+          setTie(currentInputSW1,1);          
+          sendProfile(currentInputSW1,EXTRON1,1);
+        }
       }
     } // end of automatrix
+#endif
     else{                             // less complex switches only report input status, no output status
       einput = ecap.substring(0,4);
       eoutput[0] = 1;
     }
-
 
     // For older Extron Crosspoints, where "RECONFIG" is sent when changes are made, the profile is only changed when a different input is selected for the defined output. (ExtronVideoOutputPortSW1)
     // Without this, the profile would be resent when changes to other outputs are selected.
@@ -548,97 +545,12 @@ void readExtron1(){
 
     // for Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references eoutput[0]
     if(((einput.substring(0,2) == "IN" || einput.substring(0,2) == "In") && eoutput[0] && !automatrixSW1) || (einput.substring(0,3) == "Rpr")){
-      if(einput.substring(2,4) == "1 " || einput.substring(2,4) == "01" || einput.substring(3,5) == "01"){
-        if(RT5Xir == 1)sendIR("5x",1,2); // RT5X profile 1 
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",1,3); // OSSC profile 1
-
-        sendProfile(1,EXTRON1,1);
-      }
-      else if(einput.substring(2,4) == "2 " || einput.substring(2,4) == "02" || einput.substring(3,5) == "02"){
-        if(RT5Xir == 1)sendIR("5x",2,2); // RT5X profile 2
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",2,3); // OSSC profile 2
-
-        sendProfile(2,EXTRON1,1);
-      }
-      else if(einput.substring(2,4) == "3 " || einput.substring(2,4) == "03" || einput.substring(3,5) == "03"){
-        if(RT5Xir == 1)sendIR("5x",3,2); // RT5X profile 3
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",3,3); // OSSC profile 3
-
-        sendProfile(3,EXTRON1,1);
-      }
-      else if(einput.substring(2,4) == "4 " || einput.substring(2,4) == "04" || einput.substring(3,5) == "04"){
-        if(RT5Xir == 1)sendIR("5x",4,2); // RT5X profile 4
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",4,3); // OSSC profile 4
-
-        sendProfile(4,EXTRON1,1);
-      }
-      else if(einput.substring(2,4) == "5 " || einput.substring(2,4) == "05" || einput.substring(3,5) == "05"){
-        if(RT5Xir == 1)sendIR("5x",5,2); // RT5X profile 5
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",5,3); // OSSC profile 5
-
-        sendProfile(5,EXTRON1,1);
-      }
-      else if(einput.substring(2,4) == "6 " || einput.substring(2,4) == "06" || einput.substring(3,5) == "06"){
-        if(RT5Xir == 1)sendIR("5x",6,2); // RT5X profile 6
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",6,3); // OSSC profile 6
-
-        sendProfile(6,EXTRON1,1);
-      }
-      else if(einput.substring(2,4) == "7 " || einput.substring(2,4) == "07" || einput.substring(3,5) == "07"){
-        if(RT5Xir == 1)sendIR("5x",7,2); // RT5X profile 7
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",7,3); // OSSC profile 7
-
-        sendProfile(7,EXTRON1,1);
-      }
-      else if(einput.substring(2,4) == "8 " || einput.substring(2,4) == "08" || einput.substring(3,5) == "08"){
-        if(RT5Xir == 1)sendIR("5x",8,2); // RT5X profile 8
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",8,3); // OSSC profile 8
-
-        sendProfile(8,EXTRON1,1);
-      }
-      else if(einput.substring(2,4) == "9 " || einput.substring(2,4) == "09" || einput.substring(3,5) == "09"){
-        if(RT5Xir == 1)sendIR("5x",9,2); // RT5X profile 9
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",9,3); // OSSC profile 9
-
-        sendProfile(9,EXTRON1,1);
-      }
-      else if(einput.substring(2,4) == "10" || einput.substring(3,5) == "10"){
-        if(RT5Xir == 1)sendIR("5x",10,2); // RT5X profile 10
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",10,3); // OSSC profile 10
-
-        sendProfile(10,EXTRON1,1);
-      }
-      else if(einput.substring(2,4) == "11" || einput.substring(3,5) == "11"){
-        if(OSSCir == 1)sendIR("ossc",11,3); // OSSC profile 11
-
-        sendProfile(11,EXTRON1,1);
+      if(einput.substring(0,3) == "Rpr"){
+        sendProfile(einput.substring(3,5).toInt(),EXTRON1,1);
       }
       else if(einput.substring(2,4) == "12" || einput.substring(3,5) == "12"){
-        if(OSSCir == 1)sendIR("ossc",12,3); // OSSC profile 12
-
         if(SVS==0 && !S0)sendProfile(12,EXTRON1,1); // okay to use this profile if S0 is set to false
         else sendProfile(12,EXTRON1,1);
-      }
-      else if(einput.substring(2,4) == "13" || einput.substring(3,5) == "13"){
-        if(OSSCir == 1)sendIR("ossc",13,3); // OSSC profile 13
-        sendProfile(13,EXTRON1,1);
-      }
-      else if(einput.substring(2,4) == "14" || einput.substring(3,5) == "14"){
-        if(OSSCir == 1)sendIR("ossc",14,3); // OSSC profile 14
-        sendProfile(14,EXTRON1,1);
-      }
-      else if(einput.substring(0,3) == "Rpr"){
-        sendProfile(einput.substring(3,5).toInt(),EXTRON1,1);
       }
       else if(einput != "IN0 " && einput != "In0 " && einput != "In00"){ // for inputs 13-99 (SVS only)
         sendProfile(einput.substring(2,4).toInt(),EXTRON1,1);
@@ -646,11 +558,9 @@ void readExtron1(){
       else if(einput == "IN0" || einput == "In0 " || einput == "In00"){
         sendProfile(0,EXTRON1,1);
       }
-
     }
 
-
-  #if !automatrixSW1
+#if !automatrixSW1
     // VIKI Manual Switch Detection (created by: https://github.com/Arthrimus)
     // ** hdmi output must be connected when powering on switch for ITE messages to appear, thus manual button detection working **
 
@@ -711,122 +621,62 @@ void readExtron1(){
     // for TESmart 4K60 / TESmart 4K30 / MT-VIKI HDMI switch on SW1
     if(ecapbytes[4] == 17 || ecapbytes[3] == 17 || ecap.substring(0,5) == "Auto_" || ecap.substring(15,20) == "Auto_" || ITEinputnum[0] > 0){
       if(ecapbytes[6] == 22 || ecapbytes[5] == 22 || ecapbytes[11] == 48 || ecapbytes[26] == 48 || ITEinputnum[0] == 1){
-        if(RT5Xir == 1)sendIR("5x",1,2); // RT5X profile 1 
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",1,3); // OSSC profile 1
-
         sendProfile(1,EXTRON1,1);
-
         currentMTVinput[0] = 1;
         MTVdiscon[0] = false;
       }
       else if(ecapbytes[6] == 23 || ecapbytes[5] == 23 || ecapbytes[11] == 49 || ecapbytes[26] == 49 || ITEinputnum[0] == 2){
-        if(RT5Xir == 1)sendIR("5x",2,2); // RT5X profile 2
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",2,3); // OSSC profile 2
-
         sendProfile(2,EXTRON1,1);
-
         currentMTVinput[0] = 2;
         MTVdiscon[0] = false;
       }
       else if(ecapbytes[6] == 24 || ecapbytes[5] == 24 || ecapbytes[11] == 50 || ecapbytes[26] == 50 || ITEinputnum[0] == 3){
-        if(RT5Xir == 1)sendIR("5x",3,2); // RT5X profile 3
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",3,3); // OSSC profile 3
-
         sendProfile(3,EXTRON1,1);
-
         currentMTVinput[0] = 3;
         MTVdiscon[0] = false;
       }
       else if(ecapbytes[6] == 25 || ecapbytes[5] == 25 || ecapbytes[11] == 51 || ecapbytes[26] == 51 || ITEinputnum[0] == 4){
-        if(RT5Xir == 1)sendIR("5x",4,2); // RT5X profile 4
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",4,3); // OSSC profile 4
-
         sendProfile(4,EXTRON1,1);
-
         currentMTVinput[0] = 4;
         MTVdiscon[0] = false;
       }
       else if(ecapbytes[6] == 26 || ecapbytes[5] == 26 || ecapbytes[11] == 52 || ecapbytes[26] == 52 || ITEinputnum[0] == 5){
-        if(RT5Xir == 1)sendIR("5x",5,2); // RT5X profile 5
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",5,3); // OSSC profile 5
-
         sendProfile(5,EXTRON1,1);
-
         currentMTVinput[0] = 5;
         MTVdiscon[0] = false;
       }
       else if(ecapbytes[6] == 27 || ecapbytes[5] == 27 || ecapbytes[11] == 53 || ecapbytes[26] == 53 || ITEinputnum[0] == 6){
-        if(RT5Xir == 1)sendIR("5x",6,2); // RT5X profile 6
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",6,3); // OSSC profile 6
-
         sendProfile(6,EXTRON1,1);
-
         currentMTVinput[0] = 6;
         MTVdiscon[0] = false;
       }
       else if(ecapbytes[6] == 28 || ecapbytes[5] == 28 || ecapbytes[11] == 54 || ecapbytes[26] == 54 || ITEinputnum[0] == 7){
-        if(RT5Xir == 1)sendIR("5x",7,2); // RT5X profile 7
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",7,3); // OSSC profile 7
-
         sendProfile(7,EXTRON1,1);
-
         currentMTVinput[0] = 7;
         MTVdiscon[0] = false;
       }
       else if(ecapbytes[6] == 29 || ecapbytes[5] == 29 || ecapbytes[11] == 55 || ecapbytes[26] == 55 || ITEinputnum[0] == 8){
-        if(RT5Xir == 1)sendIR("5x",8,2); // RT5X profile 8
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",8,3); // OSSC profile 8
-
         sendProfile(8,EXTRON1,1);
-
         currentMTVinput[0] = 8;
         MTVdiscon[0] = false;
       }
       else if(ecapbytes[6] == 30 || ecapbytes[5] == 30){
-        if(RT5Xir == 1)sendIR("5x",9,2); // RT5X profile 9
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",9,3); // OSSC profile 9
-
         sendProfile(9,EXTRON1,1);
       }
       else if(ecapbytes[6] == 31 || ecapbytes[5] == 31){
-        if(RT5Xir == 1)sendIR("5x",10,2); // RT5X profile 10
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 1)sendIR("ossc",10,3); // OSSC profile 10
-
         sendProfile(10,EXTRON1,1);
       }
       else if(ecapbytes[6] == 32 || ecapbytes[5] == 32){
-        if(OSSCir == 1)sendIR("ossc",11,3); // OSSC profile 11
-
         sendProfile(11,EXTRON1,1);
       }
       else if(ecapbytes[6] == 33 || ecapbytes[5] == 33){
-        if(OSSCir == 1)sendIR("ossc",12,3); // OSSC profile 12
-
         if(SVS==0 && !S0)sendProfile(12,EXTRON1,1); // okay to use this profile if S0 is set to false
         else sendProfile(12,EXTRON1,1);
       }
-      else if(ecapbytes[6] == 34 || ecapbytes[5] == 34){
-        if(OSSCir == 1)sendIR("ossc",13,3); // OSSC profile 13
-        sendProfile(13,EXTRON1,1);
-      }
-      else if(ecapbytes[6] == 35 || ecapbytes[5] == 35){
-        if(OSSCir == 1)sendIR("ossc",14,3); // OSSC profile 14
-        sendProfile(14,EXTRON1,1);
-      }
-      else if(ecapbytes[6] > 35 && ecapbytes[6] < 38){
+      else if(ecapbytes[6] > 33 && ecapbytes[6] < 38){
         sendProfile(ecapbytes[6] - 21,EXTRON1,1);
       }
-      else if(ecapbytes[5] > 35 && ecapbytes[5] < 38){
+      else if(ecapbytes[5] > 33 && ecapbytes[5] < 38){
         sendProfile(ecapbytes[5] - 21,EXTRON1,1);
       }
 
@@ -843,91 +693,26 @@ void readExtron1(){
     }
     else if(ecap.substring(24,41) != "IS_NON_INPUT_PORT" && ecap.substring(0,11) == "Uart_RxData" && MTVdiscon[0]){
       MTVdiscon[0] = false;
-      if(RT5Xir == 1)sendIR("5x",currentMTVinput[0],2); // RT5X profile 1 
-      if(RT5Xir && OSSCir)delay(500);
-      if(OSSCir == 1)sendIR("ossc",currentMTVinput[0],3); // OSSC profile 1
-
       sendProfile(currentMTVinput[0],EXTRON1,0);
     }
 
 
     // for Otaku Games Scart Switch 1
-    if(ecap.substring(0,6) == "remote"){
+    if(ecap.substring(0,11) == "remote prof"){
       if(ecap.substring(0,13) == "remote prof10"){
-          if(RT5Xir == 1)sendIR("5x",10,2); // RT5X profile 10
-          if(RT5Xir && OSSCir)delay(500);
-          if(OSSCir == 1)sendIR("ossc",10,3); // OSSC profile 10
-
-          sendProfile(10,EXTRON1,1);
+        sendProfile(10,EXTRON1,1);
       }
       else if(ecap.substring(0,13) == "remote prof12"){
         sendProfile(0,EXTRON1,1);
       }
-      else if(ecap.substring(0,12) == "remote prof1"){
-          if(RT5Xir == 1)sendIR("5x",1,2); // RT5X profile 1 
-          if(RT5Xir && OSSCir)delay(500);
-          if(OSSCir == 1)sendIR("ossc",1,3); // OSSC profile 1
-
-          sendProfile(1,EXTRON1,1);
+      else if(ecap.substring(11,13).toInt() > 12){
+        sendProfile(ecap.substring(11,13).toInt(),EXTRON1,1);
       }
-      else if(ecap.substring(0,12) == "remote prof2"){
-          if(RT5Xir == 1)sendIR("5x",2,2); // RT5X profile 2
-          if(RT5Xir && OSSCir)delay(500);
-          if(OSSCir == 1)sendIR("ossc",2,3); // OSSC profile 2
-
-          sendProfile(2,EXTRON1,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof3"){
-          if(RT5Xir == 1)sendIR("5x",3,2); // RT5X profile 3
-          if(RT5Xir && OSSCir)delay(500);
-          if(OSSCir == 1)sendIR("ossc",3,3); // OSSC profile 3
-
-          sendProfile(3,EXTRON1,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof4"){
-          if(RT5Xir == 1)sendIR("5x",4,2); // RT5X profile 4
-          if(RT5Xir && OSSCir)delay(500);
-          if(OSSCir == 1)sendIR("ossc",4,3); // OSSC profile 4
-
-          sendProfile(4,EXTRON1,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof5"){
-          if(RT5Xir == 1)sendIR("5x",5,2); // RT5X profile 5
-          if(RT5Xir && OSSCir)delay(500);
-          if(OSSCir == 1)sendIR("ossc",5,3); // OSSC profile 5
-
-          sendProfile(5,EXTRON1,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof6"){
-          if(RT5Xir == 1)sendIR("5x",6,2); // RT5X profile 6
-          if(RT5Xir && OSSCir)delay(500);
-          if(OSSCir == 1)sendIR("ossc",6,3); // OSSC profile 6
-
-          sendProfile(6,EXTRON1,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof7"){
-          if(RT5Xir == 1)sendIR("5x",7,2); // RT5X profile 7
-          if(RT5Xir && OSSCir)delay(500);
-          if(OSSCir == 1)sendIR("ossc",7,3); // OSSC profile 7
-
-          sendProfile(7,EXTRON1,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof8"){
-          if(RT5Xir == 1)sendIR("5x",8,2); // RT5X profile 8
-          if(RT5Xir && OSSCir)delay(500);
-          if(OSSCir == 1)sendIR("ossc",8,3); // OSSC profile 8
-
-          sendProfile(8,EXTRON1,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof9"){
-          if(RT5Xir == 1)sendIR("5x",9,2); // RT5X profile 9
-          if(RT5Xir && OSSCir)delay(500);
-          if(OSSCir == 1)sendIR("ossc",9,3); // OSSC profile 9
-
-          sendProfile(9,EXTRON1,1);
+      else{
+        sendProfile(ecap.substring(11,12).toInt(),EXTRON1,1);
       }
     }
-  #endif
+#endif
 
   memset(ecapbytes,0,sizeof(ecapbytes)); // reset capture to all 0s
   ecap = "00000000000000000000000000000000000000000000";
@@ -937,15 +722,15 @@ void readExtron1(){
 
 void readExtron2(){
     
-  #if automatrixSW1 // if automatrixSW2 is set "true" in options, then "0LS" is sent every 500ms to see if an input has changed
+#if automatrixSW2 // if automatrixSW2 is set "true" in options, then "0LS" is sent every 500ms to see if an input has changed
       LS0time2(500);
-  #endif
+#endif
 
-  #if !automatrixSW2
+#if !automatrixSW2
     if(MTVddSW2){            // if a MT-VIKI switch has been detected on SW2, then the currently active MT-VIKI hdmi port is checked for disconnection
       MTVtime2(1500);
     }
-  #endif
+#endif
 
     // listens to the Extron sw2 Port for changes
     if(extronSerial2.available() > 0){ // if there is data available for reading, read
@@ -982,6 +767,10 @@ void readExtron2(){
       einput = ecap.substring(0,5);
       eoutput[1] = 1;
     }
+    else if(ecap.substring(0,8) == "RECONFIG"){     // This is received everytime a change is made on older Extron Crosspoints.
+      ExtronOutputQuery(ExtronVideoOutputPortSW2,2); // Finds current input for "ExtronVideoOutputPortSW2" that is connected to port 2 of the DD
+    }
+#if automatrixSW2
     else if(ecap.substring(amSizeSW2 + 6,amSizeSW2 + 9) == "Rpr"){ // detect if a Preset has been used 
       einput = ecap.substring(amSizeSW2 + 6,amSizeSW2 + 11);
       eoutput[1] = 1;
@@ -990,38 +779,32 @@ void readExtron2(){
       einput = ecap.substring(amSizeSW2 + 7,amSizeSW2 + 12);
       eoutput[1] = 1;
     }
-    else if(ecap.substring(0,8) == "RECONFIG"){     // This is received everytime a change is made on older Extron Crosspoints.
-      ExtronOutputQuery(ExtronVideoOutputPortSW2,2); // Finds current input for "ExtronVideoOutputPortSW2" that is connected to port 2 of the DD
-    }
-    else if(ecap.substring(0,3) == "In0" && ecap.substring(4,7) != "All" && ecap.substring(5,8) != "All" && automatrixSW2){ // start of automatrix
+    else if(ecap.substring(0,3) == "In0" && ecap.substring(4,7) != "All" && ecap.substring(5,8) != "All"){ // start of automatrix
       if(ecap.substring(0,4) == "In00"){
+        amSizeSW2 = ecap.length() - 7;
         einput = ecap.substring(5,amSizeSW2 + 5);
-      }else 
+      }
+      else{
+        amSizeSW2 = ecap.length() - 6;
         einput = ecap.substring(4,amSizeSW2 + 4);
-      for(uint8_t i=0;i<amSizeSW2;i++){
-        if(einput[i] != stack2[i] || einput[currentInputSW2 - 1] == '0'){ // check to see if anything changed
-          stack2[i] = einput[i];
-          if(einput[i] != '0'){
-            currentInputSW2 = i+1;
-            if(vinMatrix[0] == 1){
-              recallPreset(vinMatrix[currentInputSW2 + 16],2);
-            }
-            else if(vinMatrix[0] == 0 || vinMatrix[0] == 2){
-              setTie(currentInputSW2,2);
-              sendProfile(currentInputSW2 + 100,EXTRON2,1);
-            }
-          }
+      }
+      uint8_t check2 = readAMstate(einput,amSizeSW2);
+      if(check2 != currentInputSW2){
+        currentInputSW2 = check2;
+        if(currentInputSW2 == 0){
+          setTie(currentInputSW2,2);
+          sendProfile(0,EXTRON2,1);
         }
-      } //end of for loop
-      if(einput.substring(0,amSizeSW2) == String(sstack).substring(0,amSizeSW2) 
-        && String(stack2).substring(0,amSizeSW2) == String(sstack).substring(0,amSizeSW2) && currentInputSW2 != 0){ // check for all inputs being off
-
-        currentInputSW2 = 0;
-        setTie(currentInputSW2,2);
-        sendProfile(0,EXTRON2,1);
-
+        else if(vinMatrix[0] == 1){
+          recallPreset(vinMatrix[currentInputSW2 + 32],2);
+        }
+        else if(vinMatrix[0] == 0 || vinMatrix[0] == 2){
+          setTie(currentInputSW2,2);          
+          sendProfile(currentInputSW2 + 100,EXTRON2,1);
+        }
       }
     } // end of automatrix
+#endif
     else{                              // less complex switches only report input status, no output status
       einput = ecap.substring(0,4);
       eoutput[1] = 1;
@@ -1119,73 +902,49 @@ void readExtron2(){
     // for TESmart 4K60 / TESmart 4K30 / MT-VIKI HDMI switch on SW2
     if(ecapbytes[4] == 17 || ecapbytes[3] == 17 || ecap.substring(0,5) == "Auto_" || ecap.substring(15,20) == "Auto_" || ITEinputnum[1] > 0){
       if(ecapbytes[6] == 22 || ecapbytes[5] == 22 || ecapbytes[11] == 48 || ecapbytes[26] == 48 || ITEinputnum[1] == 1){
-        if(RT5Xir == 3)sendIR("5x",1,2); // RT5X profile 1 
         sendProfile(101,EXTRON2,1);
-
         currentMTVinput[1] = 101;
         MTVdiscon[1] = false;
       }
       else if(ecapbytes[6] == 23 || ecapbytes[5] == 23 || ecapbytes[11] == 49 || ecapbytes[26] == 49 || ITEinputnum[1] == 2){
-        if(RT5Xir == 3)sendIR("5x",2,2); // RT5X profile 2
         sendProfile(102,EXTRON2,1);
-
         currentMTVinput[1] = 102;
         MTVdiscon[1] = false;
       }
       else if(ecapbytes[6] == 24 || ecapbytes[5] == 24 || ecapbytes[11] == 50 || ecapbytes[26] == 50 || ITEinputnum[1] == 3){
-        if(RT5Xir == 3)sendIR("5x",3,2); // RT5X profile 3
         sendProfile(103,EXTRON2,1);
-
         currentMTVinput[1] = 103;
         MTVdiscon[1] = false;
       }
       else if(ecapbytes[6] == 25 || ecapbytes[5] == 25 || ecapbytes[11] == 51 || ecapbytes[26] == 51 || ITEinputnum[1] == 4){
-        if(RT5Xir == 3)sendIR("5x",4,2); // RT5X profile 4
         sendProfile(104,EXTRON2,1);
-
         currentMTVinput[1] = 104;
         MTVdiscon[1] = false;
       }
       else if(ecapbytes[6] == 26 || ecapbytes[5] == 26 || ecapbytes[11] == 52 || ecapbytes[26] == 52 || ITEinputnum[1] == 5){
-        if(RT5Xir == 3)sendIR("5x",5,2); // RT5X profile 5
         sendProfile(105,EXTRON2,1);
-
         currentMTVinput[1] = 105;
         MTVdiscon[1] = false;
       }
       else if(ecapbytes[6] == 27 || ecapbytes[5] == 27 || ecapbytes[11] == 53 || ecapbytes[26] == 53 || ITEinputnum[1] == 6){
-        if(RT5Xir == 3)sendIR("5x",6,2); // RT5X profile 6
         sendProfile(106,EXTRON2,1);
-
         currentMTVinput[1] = 106;
         MTVdiscon[1] = false;
       }
       else if(ecapbytes[6] == 28 || ecapbytes[5] == 28 || ecapbytes[11] == 54 || ecapbytes[26] == 54 || ITEinputnum[1] == 7){
-        if(RT5Xir == 3)sendIR("5x",7,2); // RT5X profile 7
         sendProfile(107,EXTRON2,1);
-
         currentMTVinput[1] = 107;
         MTVdiscon[1] = false;
       }
       else if(ecapbytes[6] == 29 || ecapbytes[5] == 29 || ecapbytes[11] == 55 || ecapbytes[26] == 55 || ITEinputnum[1] == 8){
-        if(RT5Xir == 3)sendIR("5x",8,2); // RT5X profile 8
         sendProfile(108,EXTRON2,1);
-
         currentMTVinput[1] = 108;
         MTVdiscon[1] = false;
       }
-      else if(ecapbytes[6] == 30 || ecapbytes[5] == 30){
-        if(RT5Xir == 3)sendIR("5x",9,2); // RT5X profile 9
-        sendProfile(109,EXTRON2,1);
-      }
-      else if(ecapbytes[6] == 31 || ecapbytes[5] == 31){
-        if(RT5Xir == 3)sendIR("5x",10,2); // RT5X profile 10
-        sendProfile(110,EXTRON2,1);
-      }
-      else if(ecapbytes[6] > 31 && ecapbytes[6] < 38){
+      else if(ecapbytes[6] > 29 && ecapbytes[6] < 38){
         sendProfile(ecapbytes[6] + 79,EXTRON2,1);
       }
-      else if(ecapbytes[5] > 31 && ecapbytes[5] < 38){
+      else if(ecapbytes[5] > 29 && ecapbytes[5] < 38){
         sendProfile(ecapbytes[5] + 79,EXTRON2,1);
       }
 
@@ -1202,55 +961,19 @@ void readExtron2(){
     }
     else if(ecap.substring(24,41) != "IS_NON_INPUT_PORT" && ecap.substring(0,11) == "Uart_RxData" && MTVdiscon[1]){
       MTVdiscon[1] = false;
-      if(RT5Xir == 3)sendIR("5x",currentMTVinput[1],2);
       sendProfile(currentMTVinput[1],EXTRON2,1);
-
     }    
     
     // for Otaku Games Scart Switch 2
-    if(ecap.substring(0,6) == "remote"){
+    if(ecap.substring(0,11) == "remote prof"){
       if(ecap.substring(0,13) == "remote prof10"){
-        if(RT5Xir == 3)sendIR("5x",10,2); // RT5X profile 10
         sendProfile(110,EXTRON2,1);
       }
       else if(ecap.substring(0,13) == "remote prof12"){
         sendProfile(0,EXTRON2,1);
       }
-      else if(ecap.substring(0,12) == "remote prof1"){
-        if(RT5Xir == 3)sendIR("5x",1,2); // RT5X profile 1 
-        sendProfile(101,EXTRON2,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof2"){
-        if(RT5Xir == 3)sendIR("5x",2,2); // RT5X profile 2
-        sendProfile(102,EXTRON2,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof3"){
-        if(RT5Xir == 3)sendIR("5x",3,2); // RT5X profile 3
-        sendProfile(103,EXTRON2,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof4"){
-        if(RT5Xir == 3)sendIR("5x",4,2); // RT5X profile 4
-        sendProfile(104,EXTRON2,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof5"){
-        if(RT5Xir == 3)sendIR("5x",5,2); // RT5X profile 5
-        sendProfile(105,EXTRON2,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof6"){
-        if(RT5Xir == 3)sendIR("5x",6,2); // RT5X profile 6
-        sendProfile(106,EXTRON2,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof7"){
-        if(RT5Xir == 3)sendIR("5x",7,2); // RT5X profile 7
-        sendProfile(107,EXTRON2,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof8"){
-        if(RT5Xir == 3)sendIR("5x",8,2); // RT5X profile 8
-        sendProfile(108,EXTRON2,1);
-      }
-      else if(ecap.substring(0,12) == "remote prof9"){
-        if(RT5Xir == 3)sendIR("5x",9,2); // RT5X profile 9
-        sendProfile(109,EXTRON2,1);
+      else{
+        sendProfile(ecap.substring(11,12).toInt()+100,EXTRON2,1);
       }
     }
   #endif
@@ -1312,63 +1035,30 @@ void readGscart1(){
   }
 
 
-
   if(((bit[2] != bitprev[0][2] || bit[1] != bitprev[0][1] || bit[0] != bitprev[0][0]) || (allgscartoff[0] == 1)) && (samcc[0] == samsize) && !(fpdc)){
     //Detect which scart port is now active and change profile accordingly
     if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
-      if(RT5Xir == 2)sendIR("5x",1,2); // RT5X profile 1 
-      if(RT5Xir && OSSCir)delay(500);
-      if(OSSCir == 2)sendIR("ossc",1,3); // OSSC profile 1
-
       sendProfile(201,GSCART1,0);
     } 
     else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){ // 0 0 1
-      if(RT5Xir == 2)sendIR("5x",2,2); // RT5X profile 2
-      if(RT5Xir && OSSCir)delay(500);
-      if(OSSCir == 2)sendIR("ossc",2,3); // OSSC profile 2
-
       sendProfile(202,GSCART1,0);
     }
     else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){ // 0 1 0
-      if(RT5Xir == 2)sendIR("5x",3,2); // RT5X profile 3
-      if(RT5Xir && OSSCir)delay(500);
-      if(OSSCir == 2)sendIR("ossc",3,3); // OSSC profile 3
-
       sendProfile(203,GSCART1,0);
     }
     else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
-      if(RT5Xir == 2)sendIR("5x",4,2); // RT5X profile 4
-      if(RT5Xir && OSSCir)delay(500);
-      if(OSSCir == 2)sendIR("ossc",4,3); // OSSC profile 4
-
       sendProfile(204,GSCART1,0);
     }
     else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0)){ // 1 0 0
-      if(RT5Xir == 2)sendIR("5x",5,2); // RT5X profile 5
-      if(RT5Xir && OSSCir)delay(500);
-      if(OSSCir == 2)sendIR("ossc",5,3); // OSSC profile 5
-
       sendProfile(205,GSCART1,0);
     } 
     else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1)){ // 1 0 1
-      if(RT5Xir == 2)sendIR("5x",6,2); // RT5X profile 6
-      if(RT5Xir && OSSCir)delay(500);
-      if(OSSCir == 2)sendIR("ossc",6,3); // OSSC profile 6
-
       sendProfile(206,GSCART1,0);
     }   
     else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0)){ // 1 1 0
-      if(RT5Xir == 2)sendIR("5x",7,2); // RT5X profile 7
-      if(RT5Xir && OSSCir)delay(500);
-      if(OSSCir == 2)sendIR("ossc",7,3); // OSSC profile 7
-
       sendProfile(207,GSCART1,0);
     } 
     else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1)){ // 1 1 1
-      if(RT5Xir == 2)sendIR("5x",8,2); // RT5X profile 8
-      if(RT5Xir && OSSCir)delay(500);
-      if(OSSCir == 2)sendIR("ossc",8,3); // OSSC profile 8
-
       sendProfile(208,GSCART1,0);
     }
     
@@ -1464,35 +1154,21 @@ void readGscart2(){
   if(((bit[2] != bitprev[1][2] || bit[1] != bitprev[1][1] || bit[0] != bitprev[1][0]) || (allgscartoff[1] == 1)) && (samcc[1] == samsize) && !(fpdc)){
         //Detect which scart port is now active and change profile accordingly
         if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
-          if(RT5Xir == 2)sendIR("5x",9,2); // RT5X profile 9
-          if(RT5Xir && OSSCir)delay(500);
-          if(OSSCir == 2)sendIR("ossc",9,3); // OSSC profile 9
-
           sendProfile(209,GSCART2,0);
         } 
         else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){ // 0 0 1
-          if(RT5Xir == 2)sendIR("5x",10,2); // RT5X profile 10
-          if(RT5Xir && OSSCir)delay(500);
-          if(OSSCir == 2)sendIR("ossc",10,3); // OSSC profile 10
-
           sendProfile(210,GSCART2,0);
         }
         else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){ // 0 1 0
-          if(OSSCir == 2)sendIR("ossc",11,3); // OSSC profile 11
-
           sendProfile(211,GSCART2,0);
         }
         else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
-          if(OSSCir == 2)sendIR("ossc",12,3); // OSSC profile 12
-
           sendProfile(212,GSCART2,0);
         }
         else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0)){ // 1 0 0
-          if(OSSCir == 2)sendIR("ossc",13,3); // OSSC profile 13
           sendProfile(213,GSCART2,0);
         }
         else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1)){ // 1 0 1
-          if(OSSCir == 2)sendIR("ossc",14,3); // OSSC profile 14
           sendProfile(214,GSCART2,0);
         }
         else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0))sendProfile(215,GSCART2,0); // 1 1 0
@@ -2541,6 +2217,34 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
         if(mswitch[i].Order < prevOrder) mswitch[i].Order++;
       }
     }
+
+    if(sname == EXTRON1){ // sendIR to RT5X / OSSC
+      if(sprof < 11){
+        if(RT5Xir == 1)sendIR("5x",sprof,2); // RT5X profile
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 1)sendIR("ossc",sprof,3); // OSSC profile
+      }
+      else if(OSSCir == 1 && sprof > 11 && sprof < 15){
+        sendIR("ossc",sprof,3); // OSSC profile
+      }
+      else if(RT5Xir == 4){
+        sendIR("5x",sprof - 12,2); // RT5X profile
+      }
+    }
+    else if(sname == EXTRON2 && RT5Xir == 3 && sprof < 11){
+      sendIR("5x",sprof,2); // RT5X profile 1
+    }
+    else if(sname == GSCART1 || sname == GSCART2){
+      if(sprof < 211){
+        if(RT5Xir == 2)sendIR("5x",sprof - 200,2); // RT5X profile 
+        if(RT5Xir && OSSCir)delay(500);
+        if(OSSCir == 2)sendIR("ossc",sprof - 200,3); // OSSC profile
+      }
+      else if(sprof < 215){
+        if(OSSCir == 2)sendIR("ossc",sprof - 200,3); // OSSC profile
+      }
+    }
+
     if(SVS == 0 && sname == EXTRON1 && sprof > 0 && sprof < 13){ sendRBP(sprof); }
     else if(SVS == 2 && (sname == GSCART1 || sname == GSCART2) && sprof > 200 && sprof < 213){ sendRBP(sprof - 200); }
     else{ sendSVS(sprof); }
@@ -2576,3 +2280,49 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
   
   } // end of else if prof == 0
 } // end of sendProfile()
+
+#if automatrixSW1 || automatrixSW2
+uint8_t readAMstate(String& sinput, uint8_t size){
+
+  uint32_t newAMstate = 0;
+  for(uint8_t i=0;i < size;i++){
+    char c = sinput.charAt(i);
+    if(c >= '1' && c <= '9'){
+      newAMstate |= (1UL << (size - 1 - i));
+    }
+  }
+
+  uint32_t changed = newAMstate ^ prevAMstate;
+
+  for(uint8_t bitPos = 0;bitPos < size;bitPos++){
+    uint32_t bit = 1UL << (size - 1 - bitPos);
+    uint8_t input = bitPos + 1;
+    if(changed & bit){
+      if(newAMstate & bit){ // input on
+        bool exists = false;
+        for(int j=0;j <= AMstateTop;j++){
+          if(AMstate[j] == input){
+            exists = true;
+            break;
+          }
+        }
+        if(!exists && AMstateTop < (size - 1)) AMstate[++AMstateTop] = input;
+      } // end of input on
+      else{ // input off
+        for(int j=0;j <= AMstateTop;j++){
+          if(AMstate[j] == input){
+            for(int k = j;k < AMstateTop;k++){
+              AMstate[k] = AMstate[k + 1];
+            }
+            AMstateTop--;
+            break;
+          }
+        }
+      } // end of input off
+    } // end of changed ?
+  } // end of for
+
+  prevAMstate = newAMstate;
+  return AMstate[AMstateTop];
+} // end of readAMstate()
+#endif
