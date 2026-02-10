@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.7f
+* Donut Dongle beta v1.7g
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -46,9 +46,9 @@ uint8_t mswitchSize = 4;
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~458
-uint8_t const debugE2CAP = 0; // line ~738
-uint8_t const debugState = 0; // line ~429
+uint8_t const debugE1CAP = 0; // line ~454
+uint8_t const debugE2CAP = 0; // line ~714
+uint8_t const debugState = 0; // line ~425
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -289,16 +289,7 @@ uint8_t const gctl = 0; // 1 = Enables gscart/gcomp manual input selection
 
 char const auxpower[] = "LG"; // AUX8 + Power button sends power off/on via IR Emitter. "LG" OLEX CX is the only one implemented atm. 
 
-
-// automatrix variables
-#if automatrixSW1 || automatrixSW2
-uint8_t AMstate[32];
-uint32_t prevAMstate = 0;
-int  AMstateTop = -1;
-uint8_t amSizeSW1 = 8; // 8 by default, but updates if a different size is discovered
-uint8_t amSizeSW2 = 8; // ...
-
-#endif
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // gscart / gcomp adjustment variables for port detection
 float const highsamvolt[2] = {1.6,1.6}; // for gscart sw1,sw2 rise above this voltage for a high sample
@@ -308,8 +299,16 @@ uint8_t const dcl = 5; // (duty cycle low) at least this many high samples and l
 uint8_t const samsize = 20; // total number of ADC samples required to capture at least 1 period
 uint8_t const fpdccountmax = 3; // number of periods required when in the 50% duty cycle state before a Profile 0 is triggered.
 
-
 ////////////////////////////////////////////////////////////////////////
+
+// automatrix variables
+#if automatrixSW1 || automatrixSW2
+uint8_t AMstate[32];
+uint32_t prevAMstate = 0;
+int AMstateTop = -1;
+uint8_t amSizeSW1 = 8; // 8 by default, updates if a different size is discovered
+uint8_t amSizeSW2 = 8; // ...
+#endif
 
 // gscart / gcomp Global variables
 uint8_t fpdcprev[2] = {0,0}; // stores 50% duty cycle detection
@@ -339,11 +338,11 @@ int currentProf = 0; // negative numbers for Remote Button profiles, positive fo
 String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
 String einput = "000000000000000000000000000000000000"; // used to store Extron input
 byte ecapbytes[44] = {0}; // used to store first 44 bytes / messages for Extron capture
-byte const VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
 
-// MT-VIKI / TESmart serial commands
+// Serial commands
 byte viki[4] = {0xA5,0x5A,0x07,0xCC};
 byte tesmart[6] = {0xAA,0xBB,0x03,0x01,0x01,0xEE};
+byte const VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
 
 // LS timer variables
 unsigned long LScurrentTime = 0; 
@@ -388,9 +387,6 @@ uint8_t currentMTVinput[2] = {0,0};
 bool MTVdiscon[2] = {false,false};
 bool MTVddSW1 = false;
 bool MTVddSW2 = false;
-
-
-////////////////////////////////////////////////////////////////////////
 
 void setup(){
 
@@ -533,24 +529,16 @@ void readExtron1(){
     // For older Extron Crosspoints, where "RECONFIG" is sent when changes are made, the profile is only changed when a different input is selected for the defined output. (ExtronVideoOutputPortSW1)
     // Without this, the profile would be resent when changes to other outputs are selected.
     if(einput.substring(0,2) == "IN"){
-      if(einput.substring(3,4) == " "){
-        if(einput.substring(2,3).toInt() == currentProf)
-          einput = "XX00"; // if the input is still the same, set einput so that nothing triggers a profile send
-      }
-      else{
-        if(einput.substring(2,4).toInt() == currentProf)
-          einput = "XX00";
-      }
+      int temp = einput.substring(2,4).toInt();
+      if(SVS == 0 && !S0 && temp > 0 && temp < 13 && temp == -1*currentProf) einput = "XX00";
+      else if(SVS == 0 && S0 && temp > 0 && temp < 12 && temp == -1*currentProf) einput = "XX00";
+      else if(temp == currentProf) einput = "XX00"; 
     }
 
     // for Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references eoutput[0]
     if(((einput.substring(0,2) == "IN" || einput.substring(0,2) == "In") && eoutput[0] && !automatrixSW1) || (einput.substring(0,3) == "Rpr")){
       if(einput.substring(0,3) == "Rpr"){
         sendProfile(einput.substring(3,5).toInt(),EXTRON1,1);
-      }
-      else if(einput.substring(2,4) == "12" || einput.substring(3,5) == "12"){
-        if(SVS==0 && !S0)sendProfile(12,EXTRON1,1); // okay to use this profile if S0 is set to false
-        else sendProfile(12,EXTRON1,1);
       }
       else if(einput != "IN0 " && einput != "In0 " && einput != "In00"){ // for inputs 13-99 (SVS only)
         sendProfile(einput.substring(2,4).toInt(),EXTRON1,1);
@@ -660,23 +648,10 @@ void readExtron1(){
         currentMTVinput[0] = 8;
         MTVdiscon[0] = false;
       }
-      else if(ecapbytes[6] == 30 || ecapbytes[5] == 30){
-        sendProfile(9,EXTRON1,1);
-      }
-      else if(ecapbytes[6] == 31 || ecapbytes[5] == 31){
-        sendProfile(10,EXTRON1,1);
-      }
-      else if(ecapbytes[6] == 32 || ecapbytes[5] == 32){
-        sendProfile(11,EXTRON1,1);
-      }
-      else if(ecapbytes[6] == 33 || ecapbytes[5] == 33){
-        if(SVS==0 && !S0)sendProfile(12,EXTRON1,1); // okay to use this profile if S0 is set to false
-        else sendProfile(12,EXTRON1,1);
-      }
-      else if(ecapbytes[6] > 33 && ecapbytes[6] < 38){
+      else if(ecapbytes[6] > 29 && ecapbytes[6] < 38){
         sendProfile(ecapbytes[6] - 21,EXTRON1,1);
       }
-      else if(ecapbytes[5] > 33 && ecapbytes[5] < 38){
+      else if(ecapbytes[5] > 29 && ecapbytes[5] < 38){
         sendProfile(ecapbytes[5] - 21,EXTRON1,1);
       }
 
@@ -812,16 +787,7 @@ void readExtron2(){
 
     // For older Extron Crosspoints, where "RECONFIG" is sent when changes are made, the profile is only changed when a different input is selected for the defined output. (ExtronVideoOutputPortSW2)
     // Without this, the profile would be resent when changes to other outputs are selected.
-    if(einput.substring(0,2) == "IN"){
-      if(einput.substring(3,4) == " "){
-        if(einput.substring(2,3).toInt()+100 == currentProf)
-          einput = "XX00"; // if the input is still the same, set einput so that nothing triggers a profile send
-      }
-      else{
-        if(einput.substring(2,4).toInt()+100 == currentProf)
-          einput = "XX00";
-      }
-    }
+    if(einput.substring(0,2) == "IN" && einput.substring(2,4).toInt()+100 == currentProf) einput = "XX00";
 
     // For Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references eoutput[1]
     if(((einput.substring(0,2) == "IN" || einput.substring(0,2) == "In") && eoutput[1] && !automatrixSW2) || (einput.substring(0,3) == "Rpr")){
@@ -829,10 +795,7 @@ void readExtron2(){
         sendProfile(einput.substring(3,5).toInt()+100,EXTRON2,1);
       }
       else if(einput != "IN0 " && einput != "In0 " && einput != "In00"){ // much easier method for switch 2 since ALL inputs will respond with SVS commands regardless of SVS option above
-        if(einput.substring(3,4) == " ") 
-          sendProfile(einput.substring(2,3).toInt()+100,EXTRON2,1);
-        else 
-          sendProfile(einput.substring(2,4).toInt()+100,EXTRON2,1);
+        sendProfile(einput.substring(2,4).toInt()+100,EXTRON2,1);
       }
       else if(einput == "IN0" || einput == "In0 " || einput == "In00"){
         sendProfile(0,EXTRON2,1);
@@ -1034,50 +997,29 @@ void readGscart1(){
     }
   }
 
-
   if(((bit[2] != bitprev[0][2] || bit[1] != bitprev[0][1] || bit[0] != bitprev[0][0]) || (allgscartoff[0] == 1)) && (samcc[0] == samsize) && !(fpdc)){
     //Detect which scart port is now active and change profile accordingly
-    if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
-      sendProfile(201,GSCART1,0);
-    } 
-    else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){ // 0 0 1
-      sendProfile(202,GSCART1,0);
-    }
-    else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){ // 0 1 0
-      sendProfile(203,GSCART1,0);
-    }
-    else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
-      sendProfile(204,GSCART1,0);
-    }
-    else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0)){ // 1 0 0
-      sendProfile(205,GSCART1,0);
-    } 
-    else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1)){ // 1 0 1
-      sendProfile(206,GSCART1,0);
-    }   
-    else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0)){ // 1 1 0
-      sendProfile(207,GSCART1,0);
-    } 
-    else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1)){ // 1 1 1
-      sendProfile(208,GSCART1,0);
-    }
+    if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0))sendProfile(201,GSCART1,0); // 0 0 0
+    else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1))sendProfile(202,GSCART1,0); // 0 0 1
+    else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0))sendProfile(203,GSCART1,0); // 0 1 0
+    else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1))sendProfile(204,GSCART1,0); // 0 1 1
+    else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0))sendProfile(205,GSCART1,0); // 1 0 0
+    else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1))sendProfile(206,GSCART1,0); // 1 0 1
+    else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0))sendProfile(207,GSCART1,0); // 1 1 0
+    else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1))sendProfile(208,GSCART1,0); // 1 1 1
     
     if(allgscartoff[0]) allgscartoff[0] = 0;
     bitprev[0][0] = bit[0];
     bitprev[0][1] = bit[1];
     bitprev[0][2] = bit[2];
     fpdcprev[0] = fpdc;
-
   }
 
   if((fpdccount[0] == (fpdccountmax - 1)) && (fpdc != fpdcprev[0]) && (samcc[0] == samsize)){ // if no active port has been detected for fpdccountmax periods
-    
     allgscartoff[0] = 1;
     memset(bitprev[0],0,sizeof(bitprev[0]));
     fpdcprev[0] = fpdc;
-
     sendProfile(0,GSCART1,0);
-
   }
 
   if(fpdc && (samcc[0] == samsize)){ // if no active port has been detected, loop counter until active port
@@ -1090,8 +1032,7 @@ void readGscart1(){
     fpdccount[0] = 0;
   }
 
-  if(samcc[0] < samsize) // increment counter until "samsize" has been reached then reset counter and "highcount[0]"
-    samcc[0]++;
+  if(samcc[0] < samsize) samcc[0]++;// increment counter until "samsize" has been reached then reset counter and "highcount[0]"
   else{
     samcc[0] = 1;
     memset(highcount[0],0,sizeof(highcount[0]));
@@ -1127,7 +1068,6 @@ void readGscart2(){
   // Port7  1     1     0
   // Port8  1     1     1
 
-
   uint8_t fpdc = 0;
   uint8_t bit[3] = {0,0,0};
   float val[3] = {0,0,0};
@@ -1150,46 +1090,29 @@ void readGscart2(){
     }
   }
 
-
   if(((bit[2] != bitprev[1][2] || bit[1] != bitprev[1][1] || bit[0] != bitprev[1][0]) || (allgscartoff[1] == 1)) && (samcc[1] == samsize) && !(fpdc)){
-        //Detect which scart port is now active and change profile accordingly
-        if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0)){ // 0 0 0
-          sendProfile(209,GSCART2,0);
-        } 
-        else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1)){ // 0 0 1
-          sendProfile(210,GSCART2,0);
-        }
-        else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0)){ // 0 1 0
-          sendProfile(211,GSCART2,0);
-        }
-        else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1)){ // 0 1 1
-          sendProfile(212,GSCART2,0);
-        }
-        else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0)){ // 1 0 0
-          sendProfile(213,GSCART2,0);
-        }
-        else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1)){ // 1 0 1
-          sendProfile(214,GSCART2,0);
-        }
-        else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0))sendProfile(215,GSCART2,0); // 1 1 0
-        else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1))sendProfile(216,GSCART2,0); // 1 1 1
+    //Detect which scart port is now active and change profile accordingly
+    if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 0))sendProfile(209,GSCART2,0); // 0 0 0
+    else if((bit[2] == 0) && (bit[1] == 0) && (bit[0] == 1))sendProfile(210,GSCART2,0); // 0 0 1
+    else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 0))sendProfile(211,GSCART2,0); // 0 1 0
+    else if((bit[2] == 0) && (bit[1] == 1) && (bit[0] == 1))sendProfile(212,GSCART2,0); // 0 1 1
+    else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 0))sendProfile(213,GSCART2,0); // 1 0 0
+    else if((bit[2] == 1) && (bit[1] == 0) && (bit[0] == 1))sendProfile(214,GSCART2,0); // 1 0 1
+    else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 0))sendProfile(215,GSCART2,0); // 1 1 0
+    else if((bit[2] == 1) && (bit[1] == 1) && (bit[0] == 1))sendProfile(216,GSCART2,0); // 1 1 1
 
-        if(allgscartoff[1]) allgscartoff[1] = 0;
-        bitprev[1][0] = bit[0];
-        bitprev[1][1] = bit[1];
-        bitprev[1][2] = bit[2];
-        fpdcprev[1] = fpdc;
-
+    if(allgscartoff[1]) allgscartoff[1] = 0;
+    bitprev[1][0] = bit[0];
+    bitprev[1][1] = bit[1];
+    bitprev[1][2] = bit[2];
+    fpdcprev[1] = fpdc;
   }
 
   if((fpdccount[1] == (fpdccountmax - 1)) && (fpdc != fpdcprev[1]) && (samcc[1] == samsize)){ // if all in-active ports flag has been detected for "fpdccountmax" periods 
-    
     allgscartoff[1] = 1;
     memset(bitprev[1],0,sizeof(bitprev[1]));
     fpdcprev[1] = fpdc;
-    
     sendProfile(0,GSCART2,0);
-
   }
 
   if(fpdc && (samcc[1] == samsize)){
@@ -1202,9 +1125,7 @@ void readGscart2(){
     fpdccount[1] = 0;
   }
 
-
-  if(samcc[1] < samsize) 
-    samcc[1]++;
+  if(samcc[1] < samsize) samcc[1]++;
   else{
     samcc[1] = 1;
     memset(highcount[1],0,sizeof(highcount[1]));
@@ -1878,11 +1799,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
       digitalWrite(A2,HIGH);digitalWrite(A1,HIGH);digitalWrite(A0,HIGH); // 111
     }
     if(lastginput == port || lastginput == 9){
-      if(RT5Xir == 2){sendIR("5x",port,1);delay(30);sendIR("5x",port,1);} // RT5X profile 1 - 8 (based on port#)
-      if(RT5Xir && OSSCir)delay(500);
-      if(OSSCir == 2)sendIR("ossc",port,3); // OSSC profile 1 - 8 (based on port#)
-      if(SVS==2)sendRBP(port);
-      else sendSVS(200 + port);
+      sendProfile(200 + port,GSCART1,1);
     }
     lastginput = port;
   }
@@ -1894,63 +1811,49 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
     if(port == 9){
       digitalWrite(A5,LOW);digitalWrite(A4,LOW);digitalWrite(A3,LOW); // 000
       if(lastginput == port || lastginput == 1){
-        if(RT5Xir == 2){sendIR("5x",port,1);delay(30);sendIR("5x",port,1);} // RT5X profile 9
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 2)sendIR("ossc",port,3); // OSSC profile 9
-        if(SVS==2)sendRBP(port);
-        else sendSVS(200 + port);
+        sendProfile(200 + port,GSCART2,1);
       }
       lastginput = port;
     }
     else if(port == 10){
       digitalWrite(A5,LOW);digitalWrite(A4,LOW);digitalWrite(A3,HIGH); // 001
       if(lastginput == port){
-        if(RT5Xir == 2){sendIR("5x",port,1);delay(30);sendIR("5x",port,1);} // RT5X profile 10
-        if(RT5Xir && OSSCir)delay(500);
-        if(OSSCir == 2)sendIR("ossc",port,3); // OSSC profile 10
-        if(SVS==2)sendRBP(port);
-        else sendSVS(200 + port);
+        sendProfile(200 + port,GSCART2,1);
       }
       lastginput = port;
     }
     else if(port == 11){
       digitalWrite(A5,LOW);digitalWrite(A4,HIGH);digitalWrite(A3,LOW); // 010
       if(lastginput == port){
-        if(OSSCir == 2)sendIR("ossc",port,3); // OSSC profile 11
-        if(SVS==2)sendRBP(port);
-        else sendSVS(200 + port);
+        sendProfile(200 + port,GSCART2,1);
       }
       lastginput = port;
     }
     else if(port == 12){
       digitalWrite(A5,LOW);digitalWrite(A4,HIGH);digitalWrite(A3,HIGH); // 011
       if(lastginput == port){
-        if(OSSCir == 2)sendIR("ossc",port,3); // OSSC profile 12
-        if(SVS==2 && !S0)sendRBP(port);
-        else sendSVS(200 + port);
+        sendProfile(200 + port,GSCART2,1);
       }
       lastginput = port;
     }
     else if(port == 13){
       digitalWrite(A5,HIGH);digitalWrite(A4,LOW);digitalWrite(A3,LOW); // 100
-      if(OSSCir == 2)sendIR("ossc",port,3); // OSSC profile 13
-      if(lastginput == port)sendSVS(200 + port);
+      if(lastginput == port)sendProfile(200 + port,GSCART2,1);
       lastginput = port;
     }
     else if(port == 14){
       digitalWrite(A5,HIGH);digitalWrite(A4,LOW);digitalWrite(A3,HIGH); // 101
-      if(OSSCir == 2)sendIR("ossc",port,3); // OSSC profile 14
-      if(lastginput == port)sendSVS(200 + port);
+      if(lastginput == port)sendProfile(200 + port,GSCART2,1);
       lastginput = port;
     }
     else if(port == 15){
       digitalWrite(A5,HIGH);digitalWrite(A4,HIGH);digitalWrite(A3,LOW); // 110
-      if(lastginput == port)sendSVS(200 + port);
+      if(lastginput == port)sendProfile(200 + port,GSCART2,1);
       lastginput = port;
     }
     else if(port == 16){
       digitalWrite(A5,HIGH);digitalWrite(A4,HIGH);digitalWrite(A3,HIGH); // 111
-      if(lastginput == port)sendSVS(200 + port);
+      if(lastginput == port)sendProfile(200 + port,GSCART2,1);
       lastginput = port;
     }
   }
@@ -2032,7 +1935,7 @@ void sendIR(String type, uint8_t prof, uint8_t repeat){
       irsend.sendNEC(0x00,0x00,0);
       irsend.sendNEC(0x00,0x00,0);
       irsend.sendNEC(0x00,0x00,0);
-      delay(30);
+      delay(50);
       irsend.sendNEC(0x04,0x08,0); // send once more
       irsend.sendNEC(0x00,0x00,0);
       irsend.sendNEC(0x00,0x00,0);
@@ -2196,7 +2099,7 @@ void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
 void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
   if(sprof != 0){
     mswitch[sname].On = 1;
-    if(SVS == 0 && sname == EXTRON1 && sprof > 0 && sprof < 13){ // save RBP as negative number
+    if(SVS == 0 && sname == EXTRON1 && sprof > 0 && sprof < 12){ // save RBP as negative number
       mswitch[sname].Prof = -1*sprof;
     }
     else if(SVS == 2 && (sname == GSCART1 || sname == GSCART2) && sprof > 200 && sprof < 213){
@@ -2245,8 +2148,10 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
       }
     }
 
-    if(SVS == 0 && sname == EXTRON1 && sprof > 0 && sprof < 13){ sendRBP(sprof); }
-    else if(SVS == 2 && (sname == GSCART1 || sname == GSCART2) && sprof > 200 && sprof < 213){ sendRBP(sprof - 200); }
+    if(SVS == 0 && !S0 && sname == EXTRON1 && sprof > 0 && sprof < 13){ sendRBP(sprof); }
+    else if(SVS == 0 && S0 && sname == EXTRON1 && sprof > 0 && sprof < 12){ sendRBP(sprof); }
+    else if(SVS == 2 && !S0 && (sname == GSCART1 || sname == GSCART2) && sprof > 200 && sprof < 213){ sendRBP(sprof - 200); }
+    else if(SVS == 2 && S0 && (sname == GSCART1 || sname == GSCART2) && sprof > 200 && sprof < 212){ sendRBP(sprof - 200); }
     else{ sendSVS(sprof); }
   }
   else if(sprof == 0){ // all inputs are off, set attributes to 0, find a console that is On starting at the top of the list, set as King, send profile
