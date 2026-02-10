@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.3n (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.3o (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -23,9 +23,6 @@
 #define extronSerial2 Serial2
 #define Serial Serial0 // ** COMMENT OUT THIS LINE ** to see output in Serial Monitor. Disables Serial output to RT4K.
 
-#define GAMEID1 0
-#define EXTRON1 1
-#define EXTRON2 2
 
 #include <TinyIRReceiver.hpp> // all can be found in the built-in Library Manager
 #include <IRremote.hpp>
@@ -35,75 +32,16 @@
 #include <LittleFS.h>
 #include <ArduinoJson.h>
 #include <ESPmDNS.h>
+#include <ArduinoOTA.h>
 
-struct Console {
-  String Desc;
-  String Address;
-  int DefaultProf;
-  int Prof;
-  int On;
-  int King;
-  bool Enabled;
-};
+/////////////////////////////////////////////////// WIFI // WIFI // WIFI // WIFI /////////////////////////////////////////////////////////
 
-struct profileorder {
-  int Prof;
-  uint8_t On;
-  uint8_t King;
-  uint8_t Order;
-};
+/**--- WIFI / setup ---**/
+const char* donuthostname = "donutshop";      // hostname, by default: http://donutshop.local
+const char* ssid = "SSID";                    // Wifi Network goes here in quotes ""  Note: MUST be a 2.4GHz WiFi AP. 5GHz is NOT supported by the Nano ESP32.
+const char* password = "password";            // replace "password" with your Wifi password including quotes ""
+const char* updatepassword = "update123";     // password for updating firmware over Wifi via Arduino IDE 2.x. include quotes ""
 
-profileorder mswitch[3] = {{0,0,0,0},{0,0,0,1},{0,0,0,2}};
-uint8_t mswitchSize = 3;
-
-/*
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//    CONFIG     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-*/
-                   // format as so: {Description, console address, Default Profile for console, current profile state (leave 0), power state (leave 0), active state (leave 0), Enabled}
-                   //
-                   // If using a "remote button profile" for the "Default Profile" which are valued 1 - 12, place a "-" before the profile number. 
-                   // Example: -1 means "remote button profile 1"
-                   //          -12 means "remote button profile 12"
-                   //            0 means SVS profile 0
-                   //            1 means SVS profile 1
-                   //           12 means SVS profile 12
-                   //           etc...
-Console consoles[10] = {{"PS1 Digital","http://ps1digital.local/gameid",-9,0,0,0,1}, // you can add more, but stay in this format
-                      {"MemCardPro","http://10.0.1.52/api/currentState",-5,0,0,0,1},
-                      {"N64 Digital","http://n64digital.local/gameid",-7,0,0,0,1} // the last one in the list has no "," at the end
-                      };
-
-int consolesSize = 3; // Can hold 10 entries, but only set for 3 so the UI doesnt show 7 blank entries :)
-
-
-                   // If using a "remote button profile" for the "PROFILE" which are valued 1 - 12, place a "-" before the profile number. 
-                   // Example: -1 means "remote button profile 1"
-                   //          -12 means "remote button profile 12"
-                   //            0 means SVS profile 0
-                   //            1 means SVS profile 1
-                   //           12 means SVS profile 12
-                   //           etc...
-                   //                      
-                                 // {"Description","<GAMEID>","PROFILE #"},
-String gameDB[1000][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 is the "SVS PROFILE", would translate to a S7_<USER_DEFINED>.rt4 named profile under RT4K-SDcard/profile/SVS/
-                      {"xstation","XSTATION","8"},               // XSTATION is the <GAMEID>
-                      {"GameCube","GM4E0100","505"},             // GameCube is the Description
-                      {"N64 MarioKart 64","3E5055B6-2E92DA52-N-45","501"},
-                      {"N64 Mario 64","635A2BFF-8B022326-N-45","502"},
-                      {"N64 GoldenEye 007","DCBC50D1-09FD1AA3-N-45","503"},
-                      {"N64 Wave Race 64","492F4B61-04E5146A-N-45","504"},
-                      {"PS1 Ridge Racer Revolution","SLUS-00214","10"},
-                      {"PS1 Ridge Racer","SCUS-94300","9"},
-                      {"MegaDrive","MegaDrive","506"},
-                      {"SoR2","Streets of Rage 2 (USA)","507"}};
-
-uint16_t gameDBSize = 11; // array can hold 1000 entries, but only set to current size so the UI doesnt show 989 blank entries :)
-
-// WiFi config is below (line ~490)
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
 ////////////////////
@@ -111,9 +49,9 @@ uint16_t gameDBSize = 11; // array can hold 1000 entries, but only set to curren
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~651
-uint8_t const debugE2CAP = 0; // line ~933
-uint8_t const debugState = 0; // line ~489
+uint8_t const debugE1CAP = 0; // line ~637
+uint8_t const debugE2CAP = 0; // line ~898
+uint8_t const debugState = 0; // line ~495
 
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
@@ -328,6 +266,77 @@ uint8_t const auxprof[12] =   // Assign SVS profiles to IR remote profile button
 
 String const auxpower = "LG"; // AUX8 + Power button sends power off/on via IR Emitter. "LG" OLEX CX is the only one implemented atm.
 
+#define GAMEID1 0
+#define EXTRON1 1
+#define EXTRON2 2
+
+/*
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//    GAMEID CONFIG     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+*/
+
+struct Console {
+  String Desc;
+  String Address;
+  int DefaultProf;
+  int Prof;
+  int On;
+  int King;
+  bool Enabled;
+};
+
+struct profileorder {
+  int Prof;
+  uint8_t On;
+  uint8_t King;
+  uint8_t Order;
+};
+
+profileorder mswitch[3] = {{0,0,0,0},{0,0,0,1},{0,0,0,2}};
+uint8_t mswitchSize = 3;
+
+                   // format as so: {Description, console address, Default Profile for console, current profile state (leave 0), power state (leave 0), active state (leave 0), Enabled}
+                   //
+                   // If using a "remote button profile" for the "Default Profile" which are valued 1 - 12, place a "-" before the profile number. 
+                   // Example: -1 means "remote button profile 1"
+                   //          -12 means "remote button profile 12"
+                   //            0 means SVS profile 0
+                   //            1 means SVS profile 1
+                   //           12 means SVS profile 12
+                   //           etc...
+Console consoles[10] = {{"PS1 Digital","http://ps1digital.local/gameid",-9,0,0,0,1}, // you can add more, but stay in this format
+                      {"MemCardPro","http://10.0.1.52/api/currentState",-5,0,0,0,1},
+                      {"N64 Digital","http://n64digital.local/gameid",-7,0,0,0,1} // the last one in the list has no "," at the end
+                      };
+
+int consolesSize = 3; // Can hold 10 entries, but only set for 3 so the UI doesnt show 7 blank entries :)
+
+
+                   // If using a "remote button profile" for the "PROFILE" which are valued 1 - 12, place a "-" before the profile number. 
+                   // Example: -1 means "remote button profile 1"
+                   //          -12 means "remote button profile 12"
+                   //            0 means SVS profile 0
+                   //            1 means SVS profile 1
+                   //           12 means SVS profile 12
+                   //           etc...
+                   //                      
+                                 // {"Description","<GAMEID>","PROFILE #"},
+String gameDB[1000][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 is the "SVS PROFILE", would translate to a S7_<USER_DEFINED>.rt4 named profile under RT4K-SDcard/profile/SVS/
+                      {"xstation","XSTATION","8"},               // XSTATION is the <GAMEID>
+                      {"GameCube","GM4E0100","505"},             // GameCube is the Description
+                      {"N64 MarioKart 64","3E5055B6-2E92DA52-N-45","501"},
+                      {"N64 Mario 64","635A2BFF-8B022326-N-45","502"},
+                      {"N64 GoldenEye 007","DCBC50D1-09FD1AA3-N-45","503"},
+                      {"N64 Wave Race 64","492F4B61-04E5146A-N-45","504"},
+                      {"PS1 Ridge Racer Revolution","SLUS-00214","10"},
+                      {"PS1 Ridge Racer","SCUS-94300","9"},
+                      {"MegaDrive","MegaDrive","506"},
+                      {"SoR2","Streets of Rage 2 (USA)","507"}};
+
+uint16_t gameDBSize = 11; // array can hold 1000 entries, but only set to current size so the UI doesnt show 989 blank entries :)
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // automatrix variables
 #if automatrixSW1 || automatrixSW2
@@ -336,15 +345,11 @@ uint32_t prevAMstate = 0;
 int  AMstateTop = -1;
 uint8_t amSizeSW1 = 8; // 8 by default, but updates if a different size is discovered
 uint8_t amSizeSW2 = 8; // ...
-
 #endif
 
+// GAMEID variables
 bool S0_gameID = true;    // When a gameID match is not found for a powered on console, DefaultProf for that console will load
-
 String payload = ""; 
-
-//////////////////
-
 unsigned long currentGameTime = 0;
 unsigned long prevGameTime = 0;
 
@@ -355,11 +360,11 @@ int currentInputSW2 = -1;
 String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
 String einput = "000000000000000000000000000000000000"; // used to store Extron input
 byte ecapbytes[44] = {0}; // used to store first 44 bytes / messages for Extron capture
-byte const VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
 
-// MT-VIKI / TESmart serial commands
+// Serial commands
 byte viki[4] = {0xA5,0x5A,0x00,0xCC};
 byte tesmart[6] = {0xAA,0xBB,0x03,0x01,0x01,0xEE};
+byte const VERB[5] = {0x57,0x33,0x43,0x56,0x7C}; // sets matrix switch to verbose level 3
 
 // LS timer variables
 unsigned long LScurrentTime = 0; 
@@ -428,7 +433,7 @@ uint8_t RMTuse = 0;
 void setup(){
 
   initPCIInterruptForTinyReceiver(); // for IR Receiver
-  WiFi.begin("SSID","password"); // WiFi creds go here. MUST be a 2.4GHz WiFi AP. 5GHz is NOT supported by the Nano ESP32.
+  WiFi.begin(ssid,password); // WiFi creds are defined around line 40 at the top
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LED_GREEN, OUTPUT); // GREEN led lights up for 1 second when a SVS profile is sent
   pinMode(LED_BLUE, OUTPUT); // BLUE led is a WiFi activity. Long periods of blue means one of the gameID servers is not connecting.
@@ -442,11 +447,12 @@ void setup(){
   extronSerial2.begin(9600,SERIAL_8N1,8,9);  // set the baud rate for Extron sw2 Connection
   extronSerial2.setTimeout(150);                // sets the timeout for reading / saving into a string for the Extron sw2 Connection
   if(automatrixSW2)extronSerial2.write(VERB,5); // sets extron matrix switch to Verbose level 3
-  MDNS.begin("donutshop");
+  MDNS.begin(donuthostname); // defined around line 40 at the top
   if(!LittleFS.begin(true)){ // format if mount fails
     Serial.println(F("LittleFS mount failed!"));
     return;
   }
+  OTAsetup();
 
   loadGameDB();
   loadConsoles();
@@ -492,6 +498,7 @@ void DDloop(void *pvParameters){
       Serial.print(F("EXTRON1 "));Serial.print(F(" On: "));Serial.print(mswitch[EXTRON1].On);Serial.print(F(" King: "));Serial.print(mswitch[EXTRON1].King);Serial.print(F(" Prof: "));Serial.println(mswitch[EXTRON1].Prof);
       Serial.print(F("EXTRON2 "));Serial.print(F(" On: "));Serial.print(mswitch[EXTRON2].On);Serial.print(F(" King: "));Serial.print(mswitch[EXTRON2].King);Serial.print(F(" Prof: "));Serial.println(mswitch[EXTRON2].Prof);
     }
+    ArduinoOTA.handle();
   }
 } // end of DDloop
 
@@ -503,17 +510,21 @@ void GIDloop(void *pvParameters){
   }
 } // end of GIDloop
 
-int fetchGameIDProf(String gameID,int dp){ // looks at gameDB for a gameID -> profile match
-  for(int i = 0; i < gameDBSize; i++){      // returns "DefaultProf" for console if nothing found and S0_gameID = true
-    if(gameDB[i][1] == gameID){            // returns "-1" (meaning dont change anything) if nothing found and S0_gameID = false
-      return gameDB[i][2].toInt();
-      break;
-   }
-  }  
+void OTAsetup(){
+  ArduinoOTA.setHostname(donuthostname);
+  ArduinoOTA.setPassword(updatepassword);
 
-  if(S0_gameID) return dp;
-  else return -1;
-}  // end of fetchGameIDProf()
+  ArduinoOTA
+    .onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) Serial.println("OTA Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) Serial.println("OTA Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) Serial.println("OTA Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) Serial.println("OTA Receive Failed");
+      else if (error == OTA_END_ERROR) Serial.println("OTA End Failed");
+    });
+  ArduinoOTA.begin();
+} // end of OTAsetup()
 
 void readGameID(){ // queries addresses in "consoles" array for gameIDs
   currentGameTime = millis();  // Init timer
@@ -606,31 +617,6 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
   }
 }  // end of readGameID()
 
-String replaceDomainWithIP(String input){
-  String result = input;
-  int startIndex = 0;
-  while(startIndex < result.length()){
-    int httpPos = result.indexOf("http://",startIndex); // Look for "http://"
-    if(httpPos == -1) break;  // No "http://" found
-    int domainStart = httpPos + 7; // Set the position right after "http://"
-    int domainEnd = result.indexOf('/',domainStart);  // Find the end of the domain (start of the path)
-    if(domainEnd == -1) domainEnd = result.length();  // If no path, consider till the end of the string
-    String domain = result.substring(domainStart,domainEnd);
-    if(!isIPAddress(domain)){ // If the domain is not an IP address, replace it
-      IPAddress ipAddress;
-      if(WiFi.hostByName(domain.c_str(),ipAddress)){  // Perform DNS lookup
-        result.replace(domain,ipAddress.toString()); // Replace the Domain with the IP address
-      }
-    }
-    startIndex = domainEnd;  // Continue searching after the domain
-  } // end of while()
-  return result;
-} // end of replaceDomainWithIP()
-
-bool isIPAddress(String str){
-  IPAddress ip;
-  return ip.fromString(str);  // Returns true if the string is a valid IP address
-} // end of isIPAddress()
 
 void readExtron1(){
 
@@ -728,23 +714,15 @@ void readExtron1(){
     // For older Extron Crosspoints, where "RECONFIG" is sent when changes are made, the profile is only changed when a different input is selected for the defined output. (ExtronVideoOutputPortSW1)
     // Without this, the profile would be resent when changes to other outputs are selected.
     if(einput.substring(0,2) == "IN"){
-      if(einput.substring(3,4) == " "){
-        if(einput.substring(2,3).toInt() == currentProf)
-          einput = "XX00"; // if the input is still the same, set einput so that nothing triggers a profile send
-      }
-      else{
-        if(einput.substring(2,4).toInt() == currentProf)
-          einput = "XX00";
-      }
+      int temp = einput.substring(2,4).toInt();
+      if(SVS == 0 && !S0 && temp > 0 && temp < 13 && temp == -1*currentProf) einput = "XX00";
+      else if(SVS == 0 && S0 && temp > 0 && temp < 12 && temp == -1*currentProf) einput = "XX00";
+      else if(temp == currentProf) einput = "XX00"; 
     }
 
     // for Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references eoutput[0]
     if(((einput.substring(0,2) == "IN" || einput.substring(0,2) == "In") && eoutput[0] && !automatrixSW1) || (einput.substring(0,3) == "Rpr")){
-      if(einput.substring(2,4) == "12" || einput.substring(3,5) == "12"){
-        if(SVS==0 && !S0)sendProfile(12,EXTRON1,1); // okay to use this profile if S0 is set to false
-        else sendProfile(12,EXTRON1,1);
-      }
-      else if(einput.substring(0,3) == "Rpr"){
+      if(einput.substring(0,3) == "Rpr"){
         sendProfile(einput.substring(3,5).toInt(),EXTRON1,1);
       }
       else if(einput != "IN0 " && einput != "In0 " && einput != "In00"){ // for inputs 13-99 (SVS only)
@@ -855,23 +833,10 @@ void readExtron1(){
         currentMTVinput[0] = 8;
         MTVdiscon[0] = false;
       }
-      else if(ecapbytes[6] == 30 || ecapbytes[5] == 30){
-        sendProfile(9,EXTRON1,1);
-      }
-      else if(ecapbytes[6] == 31 || ecapbytes[5] == 31){
-        sendProfile(10,EXTRON1,1);
-      }
-      else if(ecapbytes[6] == 32 || ecapbytes[5] == 32){
-        sendProfile(11,EXTRON1,1);
-      }
-      else if(ecapbytes[6] == 33 || ecapbytes[5] == 33){
-        if(SVS==0 && !S0)sendProfile(12,EXTRON1,1); // okay to use this profile if S0 is set to false
-        else sendProfile(12,EXTRON1,1);
-      }
-      else if(ecapbytes[6] > 33 && ecapbytes[6] < 38){
+      else if(ecapbytes[6] > 29 && ecapbytes[6] < 38){
         sendProfile(ecapbytes[6] - 21,EXTRON1,1);
       }
-      else if(ecapbytes[5] > 33 && ecapbytes[5] < 38){
+      else if(ecapbytes[5] > 29 && ecapbytes[5] < 38){
         sendProfile(ecapbytes[5] - 21,EXTRON1,1);
       }
 
@@ -1007,16 +972,7 @@ void readExtron2(){
 
     // For older Extron Crosspoints, where "RECONFIG" is sent when changes are made, the profile is only changed when a different input is selected for the defined output. (ExtronVideoOutputPortSW2)
     // Without this, the profile would be resent when changes to other outputs are selected.
-    if(einput.substring(0,2) == "IN"){
-      if(einput.substring(3,4) == " "){
-        if(einput.substring(2,3).toInt()+100 == currentProf)
-          einput = "XX00"; // if the input is still the same, set einput so that nothing triggers a profile send
-      }
-      else{
-        if(einput.substring(2,4).toInt()+100 == currentProf)
-          einput = "XX00";
-      }
-    }
+    if(einput.substring(0,2) == "IN" && einput.substring(2,4).toInt()+100 == currentProf) einput = "XX00";
 
     // For Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references eoutput[1]
     if(((einput.substring(0,2) == "IN" || einput.substring(0,2) == "In") && eoutput[1] && !automatrixSW2) || (einput.substring(0,3) == "Rpr")){
@@ -1024,10 +980,7 @@ void readExtron2(){
         sendProfile(einput.substring(3,5).toInt()+100,EXTRON2,1);
       }
       else if(einput != "IN0 " && einput != "In0 " && einput != "In00"){ // much easier method for switch 2 since ALL inputs will respond with SVS commands regardless of SVS option above
-        if(einput.substring(3,4) == " ") 
-          sendProfile(einput.substring(2,3).toInt()+100,EXTRON2,1);
-        else 
-          sendProfile(einput.substring(2,4).toInt()+100,EXTRON2,1);
+        sendProfile(einput.substring(2,4).toInt()+100,EXTRON2,1);
       }
       else if(einput == "IN0" || einput == "In0 " || einput == "In00"){
         sendProfile(0,EXTRON2,1);
@@ -1805,7 +1758,7 @@ void sendIR(String type, uint8_t prof, uint8_t repeat){
       irsend.sendNEC(0x00,0x00,0);
       irsend.sendNEC(0x00,0x00,0);
       irsend.sendNEC(0x00,0x00,0);
-      delay(45);
+      delay(50);
       irsend.sendNEC(0x04,0x08,0); // send once more
       irsend.sendNEC(0x00,0x00,0);
       irsend.sendNEC(0x00,0x00,0);
@@ -1813,6 +1766,44 @@ void sendIR(String type, uint8_t prof, uint8_t repeat){
   }
   
 } // end of sendIR()
+
+int fetchGameIDProf(String gameID,int dp){ // looks at gameDB for a gameID -> profile match
+  for(int i = 0; i < gameDBSize; i++){      // returns "DefaultProf" for console if nothing found and S0_gameID = true
+    if(gameDB[i][1] == gameID){            // returns "-1" (meaning dont change anything) if nothing found and S0_gameID = false
+      return gameDB[i][2].toInt();
+      break;
+   }
+  }  
+
+  if(S0_gameID) return dp;
+  else return -1;
+}  // end of fetchGameIDProf()
+
+String replaceDomainWithIP(String input){
+  String result = input;
+  int startIndex = 0;
+  while(startIndex < result.length()){
+    int httpPos = result.indexOf("http://",startIndex); // Look for "http://"
+    if(httpPos == -1) break;  // No "http://" found
+    int domainStart = httpPos + 7; // Set the position right after "http://"
+    int domainEnd = result.indexOf('/',domainStart);  // Find the end of the domain (start of the path)
+    if(domainEnd == -1) domainEnd = result.length();  // If no path, consider till the end of the string
+    String domain = result.substring(domainStart,domainEnd);
+    if(!isIPAddress(domain)){ // If the domain is not an IP address, replace it
+      IPAddress ipAddress;
+      if(WiFi.hostByName(domain.c_str(),ipAddress)){  // Perform DNS lookup
+        result.replace(domain,ipAddress.toString()); // Replace the Domain with the IP address
+      }
+    }
+    startIndex = domainEnd;  // Continue searching after the domain
+  } // end of while()
+  return result;
+} // end of replaceDomainWithIP()
+
+bool isIPAddress(String str){
+  IPAddress ip;
+  return ip.fromString(str);  // Returns true if the string is a valid IP address
+} // end of isIPAddress()
 
 void sendRTwake(uint16_t mil){
     currentTime = millis();
@@ -2021,7 +2012,7 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
     int gdprof = 0;
     for(uint8_t i=0;i < consolesSize;i++){
       if(consoles[i].King == 1){
-        if(SVS == 0 && sprof > 0 && sprof < 13){
+        if(SVS == 0 && sprof > 0 && sprof < 12){
             gdprof = (-1)*consoles[i].DefaultProf;
             gprof = consoles[i].Prof;
         }
@@ -2056,7 +2047,7 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
 
   if(sprof != 0){
     mswitch[sname].On = 1;
-    if(SVS == 0 && sname == EXTRON1 && sprof > 0 && sprof < 13){ // save RBP as negative number
+    if(SVS == 0 && sname == EXTRON1 && sprof > 0 && sprof < 12){ // save RBP as negative number
       mswitch[sname].Prof = -1*sprof;
     }
     else{
@@ -2092,7 +2083,8 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
       sendIR("5x",sprof,2); // RT5X profile 1
     }
 
-    if(SVS == 0 && sname == EXTRON1 && sprof > 0 && sprof < 13){ sendRBP(sprof); } // only when SVS == 0
+    if(SVS == 0 && !S0 && sname == EXTRON1 && sprof > 0 && sprof < 13){ sendRBP(sprof); }
+    else if(SVS == 0 && S0 && sname == EXTRON1 && sprof > 0 && sprof < 12){ sendRBP(sprof); }
     else if(sprof < 0){ sendRBP(-1*sprof); } // only RBP from GAMEID
     else { sendSVS(sprof); } // everything else
   }
@@ -2632,6 +2624,7 @@ void handleRoot(){
   let gameProfiles = [];
   let currentSortCol = null;
   let currentSortDir = 'asc';
+  
 
   // inject current S0 values
   )rawliteral";
