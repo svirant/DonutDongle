@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.3o (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.3p (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -2416,16 +2416,30 @@ void handleRoot(){
       table { border-collapse: collapse; width: 80%; margin: 20px auto; }
       th, td { border: 1px solid #999; padding: 6px 10px; }
       th { background: #eee; cursor: pointer; user-select: none; }
-      input { width: 100%; }
+      input { width: 95%; }
       button { margin: 2px; }
       h2, h3 { text-align: center; }
+
+      #consoleTable td:first-child {
+        text-align: center;
+        width: 90px;
+      }
+
+      #consoleTable td:last-child,
+      #profileTable td:last-child {
+        width: 90px;
+        text-align: center;
+      }
+
+      #profileTable input {
+        display: block;
+        margin: 0 auto;
+        width: 97%;
+        text-align: left;
+      }
+
       .controls { text-align: center; }
       .arrow { font-size: 0.8em; margin-left: 4px; color: #555; }
-      #consoleTable th:nth-child(3),
-      #consoleTable td:nth-child(3) {
-         width: 320px;
-      }
-      /* ---------- TOOLTIP SYSTEM ---------- */
       .tooltip {
         position: relative;
         display: inline-flex;
@@ -2458,7 +2472,6 @@ void handleRoot(){
         pointer-events: none;
       }
 
-      /* show on hover + keyboard focus */
       .tooltip:hover .tooltip-bubble,
       .tooltip:focus-within .tooltip-bubble {
         opacity: 1;
@@ -2466,7 +2479,6 @@ void handleRoot(){
         transform: translate(-50%, -8px);
       }
 
-      /* arrow */
       .tooltip .tooltip-bubble::after {
         content: "";
         position: absolute;
@@ -2485,6 +2497,7 @@ void handleRoot(){
         border-radius: 50%;
         margin-right: 6px;
       }
+
       .leader-icon {
         display: inline-block;
         width: 9px;
@@ -2493,19 +2506,23 @@ void handleRoot(){
         margin-right: 6px;
         transform: rotate(45deg);
       }
+
       .leader-icon.on { background-color: #4CAF50; }
       .status-icon.on { background-color: #4CAF50; }
       .status-icon.off { background-color: red; }
       .profile-match td {
         background-color: #4CAF50;
       }
+
       .profile-match td input {
         -webkit-appearance: none;
         appearance: none;
       }
+
       .console-prof-cell-match {
         background-color: #4CAF50;
       }
+
       .topbar {
         position: fixed;
         top: 0;
@@ -2516,15 +2533,92 @@ void handleRoot(){
         margin-left: 4px;
       }
 
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 42px;
+        height: 22px;
+        vertical-align: middle;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background-color: #ccc;
+        transition: 0.25s;
+        border-radius: 22px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        transition: 0.25s;
+        border-radius: 50%;
+      }
+
+      .switch input:checked + .slider {
+        background-color: #4CAF50;
+      }
+
+      .switch input:checked + .slider:before {
+        transform: translateX(20px);
+      }
+
+      .topbar .tooltip .tooltip-bubble {
+        position: absolute;
+        bottom: -32px;
+        right: 0;
+        left: auto;
+        transform: translate(0, 0);
+        white-space: nowrap;
+        z-index: 50;
+        min-width: 20px;
+      }
+
+      .topbar .tooltip .tooltip-bubble::after {
+        content: "";
+        position: absolute;
+        top: -6px;
+        right: 6px;
+        left: auto;
+        border-width: 6px;
+        border-style: solid;
+        border-color: transparent transparent #2f2f2f transparent;
+      }
+
+      .topbar .tooltip {
+        cursor: default;
+        position: relative;
+      }
+
+
     </style>
   </head>
 
   <body>
-    <div class="topbar">
-      <input type="file" id="importJson" style="display:none" accept=".json" onchange="importData(event)">
-      <button onclick="document.getElementById('importJson').click()">Import Config</button>
-      <button onclick="exportData()">Export Config</button>
-    </div>
+  <div class="topbar" style="display:flex; justify-content:flex-end; gap:2px; background:white; padding:8px;">
+    <input type="file" id="importJson" style="display:none" accept=".json" onchange="importData(event)">
+    <button onclick="document.getElementById('importJson').click()">
+      <span class="tooltip">📂<span class="tooltip-bubble">Import Config</span>
+      </span>
+    </button>
+    <button onclick="exportData()">
+      <span class="tooltip">💾<span class="tooltip-bubble">Export Config</span>
+      </span>
+    </button>
+  </div>
 
   <center><h1>Donut Shop</h1></center>
   <div class="controls">
@@ -2575,10 +2669,12 @@ void handleRoot(){
             Profile used when a gameDB entry is not found.
             </span>
           </span>
-          <input type="checkbox" 
-                 id="S0_gameID" 
-                 style="margin-left:5px;"
-                 onchange="updateS0GameID(this)">
+          <label class="switch" style="margin-left:5px;">
+            <input type="checkbox"
+                  id="S0_gameID"
+                  onchange="updateS0GameID(this)">
+            <span class="slider"></span>
+          </label>
         </th>
         <th>Action</th>
       </tr>
@@ -2661,8 +2757,12 @@ void handleRoot(){
     consoles.forEach((c, idx) => {
       const tr = document.createElement('tr');
 
-      // --- Enable checkbox column ---
+      // --- Enable switch column ---
       const tdEnable = document.createElement('td');
+
+      const label = document.createElement('label');
+      label.className = 'switch';
+
       const enableCheckbox = document.createElement('input');
       enableCheckbox.type = 'checkbox';
       enableCheckbox.checked = !!c.Enabled;
@@ -2670,8 +2770,15 @@ void handleRoot(){
         consoles[idx].Enabled = enableCheckbox.checked;
         await saveConsoles();
       };
-      tdEnable.appendChild(enableCheckbox);
+
+      const slider = document.createElement('span');
+      slider.className = 'slider';
+
+      label.appendChild(enableCheckbox);
+      label.appendChild(slider);
+      tdEnable.appendChild(label);
       tr.appendChild(tdEnable);
+
 
       // --- Description ---
       const tdDesc = document.createElement('td');
