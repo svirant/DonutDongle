@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.3p (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.4 (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 #define IR_RECEIVE_PIN 2  // Optional IR Receiver on pin D2
 #define extronSerial Serial1
 #define extronSerial2 Serial2
-#define Serial Serial0 // ** COMMENT OUT THIS LINE ** to see output in Serial Monitor. Disables Serial output to RT4K.
+#define Serial Serial0 // ** COMMENT OUT THIS LINE ** to see output in Serial Monitor. Disables Serial output to RT4K. usbMode must also be set to "false"
 
 
 #include <TinyIRReceiver.hpp> // all can be found in the built-in Library Manager
@@ -34,13 +34,19 @@
 #include <ESPmDNS.h>
 #include <ArduinoOTA.h>
 
-/////////////////////////////////////////////////// WIFI // WIFI // WIFI // WIFI /////////////////////////////////////////////////////////
+//////////////////////////////////////////  WIFI & Setup //  WIFI & Setup //  WIFI & Setup // WIFI & Setup //////////////////////////////////////////
 
-/**--- WIFI / setup ---**/
-const char* donuthostname = "donutshop";      // hostname, by default: http://donutshop.local
+/**--- WIFI & Setup ---**/
+const char* donuthostname = "donutshop";      // hostname, by default: http://donutshop.local include quotes ""
 const char* ssid = "SSID";                    // Wifi Network goes here in quotes ""  Note: MUST be a 2.4GHz WiFi AP. 5GHz is NOT supported by the Nano ESP32.
 const char* password = "password";            // replace "password" with your Wifi password including quotes ""
 const char* updatepassword = "update123";     // password for updating firmware over Wifi via Arduino IDE 2.x. include quotes ""
+
+#define usbMode false              // USB Serial Command mode. set true to enable. requires OTG adapter. normal Serial mode will be active regardless of setting.
+                                   // https://github.com/wakwak-koba/EspUsbHost will also need to be installed in order to have FTDI support for the RT4K usb serial port.
+                                   // This is the easiest method...
+                                   // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
+                                   // Step 2 - In Arudino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
 
 
 /*
@@ -49,9 +55,9 @@ const char* updatepassword = "update123";     // password for updating firmware 
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~637
-uint8_t const debugE2CAP = 0; // line ~898
-uint8_t const debugState = 0; // line ~495
+uint8_t const debugE1CAP = 0; // line ~700
+uint8_t const debugE2CAP = 0; // line ~961
+uint8_t const debugState = 0; // line ~555
 
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
@@ -112,7 +118,6 @@ bool const S0 = false;  // (Profile 0) default is false
 // For Extron Matrix switches that support DSVP. RGBS and HDMI/DVI video types.
 #define automatrixSW1 false // set true for auto matrix switching on "SW1" port
 #define automatrixSW2 false // set true for auto matrix switching on "SW2" port
-
 
 ///////////////////////////////
 
@@ -430,10 +435,65 @@ void GIDloop(void *pvParameters);
 uint16_t gTime = 2000;
 uint8_t RMTuse = 0;
 
+#if usbMode
+#include <EspUsbHostSerial_FTDI.h> // https://github.com/wakwak-koba/EspUsbHost in order to have FTDI support for the RT4K usb serial port, this is the easiest method.
+                                   // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
+                                   // Step 2 - In Arudino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
+
+class SerialFTDI : public EspUsbHostSerial_FTDI {
+  public:
+  String cprof = "null";
+  String tcprof = "null";
+  String tcmd = "null";
+  int tp = 0;
+  virtual void task(void) override {
+    EspUsbHost::task();
+    if(this->isReady()){
+      usb_host_transfer_submit(this->usbTransfer_recv);
+      if(cprof != "null"){
+        tp = cprof.toInt();
+        analogWrite(LED_GREEN,222);
+        if(tp >= 0){
+          if(offset > 0) cprof = String(tp + offset);
+          tcprof = "\rSVS NEW INPUT=" + cprof + "\r";
+          submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcprof[0]), tcprof.length()); // usb response
+          Serial.print(F("\rSVS NEW INPUT=")); // serial response
+          if(tp != 0)Serial.print(tp + offset);
+          else Serial.print(tp);;
+          Serial.println(F("\r"));
+          delay(1000);
+          tcprof = "\rSVS CURRENT INPUT=" + cprof + "\r"; // serial response
+          Serial.print(F("\rSVS CURRENT INPUT="));
+          if(tp != 0)Serial.print(tp + offset);
+          else Serial.print(tp);
+          Serial.println(F("\r"));      
+        }
+        if(tp < 0){
+          tcprof = "\rremote prof" + String((-1)*tp) + "\r";
+        }
+        submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcprof[0]), tcprof.length()); // usb response
+        if(tp < 0) delay(1000); // only added so the green led stays lit for 1 second for "remote prof" commands
+        analogWrite(LED_GREEN,255);
+        tcprof,cprof = "null";
+      }
+      else if(tcmd != "null"){
+        submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcmd[0]), tcmd.length());
+        tcmd = "null";
+      }
+    }
+  }
+};
+
+SerialFTDI usbHost;
+#endif
+
 void setup(){
 
   initPCIInterruptForTinyReceiver(); // for IR Receiver
   WiFi.begin(ssid,password); // WiFi creds are defined around line 40 at the top
+  #if usbMode
+  usbHost.begin(115200); // leave at 115200 for RT4K usb connection
+  #endif
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LED_GREEN, OUTPUT); // GREEN led lights up for 1 second when a SVS profile is sent
   pinMode(LED_BLUE, OUTPUT); // BLUE led is a WiFi activity. Long periods of blue means one of the gameID servers is not connecting.
@@ -499,6 +559,9 @@ void DDloop(void *pvParameters){
       Serial.print(F("EXTRON2 "));Serial.print(F(" On: "));Serial.print(mswitch[EXTRON2].On);Serial.print(F(" King: "));Serial.print(mswitch[EXTRON2].King);Serial.print(F(" Prof: "));Serial.println(mswitch[EXTRON2].Prof);
     }
     ArduinoOTA.handle();
+    #if usbMode
+    usbHost.task();  // used for RT4K usb serial communications
+    #endif
   }
 } // end of DDloop
 
@@ -1315,7 +1378,7 @@ void readIR(){
         extrabuttonprof = 0;
       }
       else if(ir_recv_command == 26){ // Power button
-        sendIR(auxpower,0,0);
+        sendIR(auxpower,0,1);
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
@@ -1432,81 +1495,84 @@ void readIR(){
       if(ir_recv_command == 63){
         //Serial.println(F("\rremote aux8\r")); aux8
         if(extrabuttonprof < 3)extrabuttonprof++;
-        else Serial.println(F("\rremote aux8\r"));
+        else{ 
+          dualSerialPrintln("remote aux8");
+        }
       }
       else if(ir_recv_command == 62){
         if(TESmartir == 1 || TESmartir == 3)auxTESmart = 1;
-        else Serial.println(F("\rremote aux7\r"));
+        else{
+          dualSerialPrintln("remote aux7");
+        }
       }
       else if(ir_recv_command == 61){
-        Serial.println(F("\rremote aux6\r"));
+        dualSerialPrintln("remote aux6");
       }
       else if(ir_recv_command == 60){
-        Serial.println(F("\rremote aud\r")); // remote aux5
+        dualSerialPrintln("remote aud"); // remote aux5
       }
       else if(ir_recv_command == 59){
-        Serial.println(F("\rremote col\r")); // remote aux4
+        dualSerialPrintln("remote col"); // remote aux4
       }
       else if(ir_recv_command == 58){
-        Serial.println(F("\rremote aux3\r"));
+        dualSerialPrintln("remote aux3");
       }
       else if(ir_recv_command == 57){
-        Serial.println(F("\rremote aux2\r"));
+        dualSerialPrintln("remote aux2");
       }
       else if(ir_recv_command == 56){
-        Serial.println(F("\rremote aux1\r"));
+        dualSerialPrintln("remote aux1");
       }
       else if(ir_recv_command == 52){
-        Serial.println(F("\rremote res1\r"));
+        dualSerialPrintln("remote res1");
       }
       else if(ir_recv_command == 53){
-        Serial.println(F("\rremote res2\r"));
+        dualSerialPrintln("remote res2");
       }
       else if(ir_recv_command == 54){
-        Serial.println(F("\rremote res3\r"));
+        dualSerialPrintln("remote res3");
       }
       else if(ir_recv_command == 55){
-        Serial.println(F("\rremote res4\r"));
+        dualSerialPrintln("remote res4");
       }
       else if(ir_recv_command == 51){
-        Serial.println(F("\rremote res480p\r"));
+        dualSerialPrintln("remote res480p");
       }
       else if(ir_recv_command == 50){
-        Serial.println(F("\rremote res1440p\r"));
+        dualSerialPrintln("remote res1440p");
       }
       else if(ir_recv_command == 49){
-        Serial.println(F("\rremote res1080p\r"));
+        dualSerialPrintln("remote res1080p");
       }
       else if(ir_recv_command == 48){
-        Serial.println(F("\rremote res4k\r"));
+        dualSerialPrintln("remote res4k");
       }
       else if(ir_recv_command == 47){
-        Serial.println(F("\rremote buffer\r"));
+        dualSerialPrintln("remote buffer");
       }
       else if(ir_recv_command == 44){
-        Serial.println(F("\rremote genlock\r"));
+        dualSerialPrintln("remote genlock");
       }
       else if(ir_recv_command == 46){
-        Serial.println(F("\rremote safe\r"));
+        dualSerialPrintln("remote safe");
       }
       else if(ir_recv_command == 86){
-        Serial.println(F("\rremote pause\r"));
+        dualSerialPrintln("remote pause");
       }
       else if(ir_recv_command == 45){
-        Serial.println(F("\rremote phase\r"));
+        dualSerialPrintln("remote phase");
       }
       else if(ir_recv_command == 43){
-        Serial.println(F("\rremote gain\r"));
+        dualSerialPrintln("remote gain");
       }
       else if(ir_recv_command == 36){
-        Serial.println(F("\rremote prof\r"));
+        dualSerialPrintln("remote prof");
       }
       else if(ir_recv_command == 11){
         sendRBP(1);
         if(RT5Xir >= 1){sendIR("5x",1,1);delay(30);sendIR("5x",1,1);} // RT5X profile 1
         if(RT5Xir && OSSCir)delay(500);
         if(OSSCir == 1){sendIR("ossc",1,3);} // OSSC profile 1
-        ir_recv_command = 0;
       }
       else if(ir_recv_command == 7){
         sendRBP(2);
@@ -1563,85 +1629,85 @@ void readIR(){
         if(OSSCir == 1){sendIR("ossc",10,3);} // OSSC profile 10
       }
       else if(ir_recv_command == 38){
-        if(OSSCir == 1){sendIR("ossc",11,3);} // OSSC profile 11
         sendRBP(11);
+        if(OSSCir == 1){sendIR("ossc",11,3);} // OSSC profile 11
       }
       else if(ir_recv_command == 39){
-        if(OSSCir == 1){sendIR("ossc",12,3);} // OSSC profile 12
         sendRBP(12);
+        if(OSSCir == 1){sendIR("ossc",12,3);} // OSSC profile 12
       }
       else if(ir_recv_command == 35){
-        Serial.println(F("\rremote adc\r"));
+        dualSerialPrintln("remote adc");
       }
       else if(ir_recv_command == 34){
-        Serial.println(F("\rremote sfx\r"));
+        dualSerialPrintln("remote sfx");
       }
       else if(ir_recv_command == 33){
-        Serial.println(F("\rremote scaler\r"));
+        dualSerialPrintln("remote scaler");
       }
       else if(ir_recv_command == 32){
-        Serial.println(F("\rremote output\r"));
+        dualSerialPrintln("remote output");
       }
       else if(ir_recv_command == 17){
-        Serial.println(F("\rremote input\r"));
+        dualSerialPrintln("remote input");
       }
       else if(ir_recv_command == 41){
-        Serial.println(F("\rremote stat\r"));
+        dualSerialPrintln("remote stat");
       }
       else if(ir_recv_command == 40){
-        Serial.println(F("\rremote diag\r"));
+        dualSerialPrintln("remote diag");
       }
       else if(ir_recv_command == 66){
-        Serial.println(F("\rremote back\r"));
+        dualSerialPrintln("remote back");
       }
       else if(ir_recv_command == 83){
-        Serial.println(F("\rremote ok\r"));
+        dualSerialPrintln("remote ok");
       }
       else if(ir_recv_command == 79){
-        Serial.println(F("\rremote right\r"));
+        dualSerialPrintln("remote right");
       }
       else if(ir_recv_command == 16){
-        Serial.println(F("\rremote down\r"));
+        dualSerialPrintln("remote down");
       }
       else if(ir_recv_command == 87){
-        Serial.println(F("\rremote left\r"));
+        dualSerialPrintln("remote left");
       }
       else if(ir_recv_command == 24){
-        Serial.println(F("\rremote up\r"));
+        dualSerialPrintln("remote up");
       }
       else if(ir_recv_command == 92){
-        Serial.println(F("\rremote menu\r"));
+        dualSerialPrintln("remote menu");
       }
       else if(ir_recv_command == 26){
-        Serial.println(F("\rpwr on\r")); // wake
-        Serial.println(F("\rremote pwr\r")); // sleep
+        dualSerialPrintln("pwr on"); // wake
+        dualSerialPrintln("remote pwr"); // sleep
         RTwake = true;
       }
     }
     else if(ir_recv_address == 73 && repeatcount > 4){ // directional buttons have to be held down for just a bit before repeating
       if(ir_recv_command == 24){
-        Serial.println(F("\rremote up\r"));
+        dualSerialPrintln("remote up");
       }
       else if(ir_recv_command == 16){
-        Serial.println(F("\rremote down\r"));
+        dualSerialPrintln("remote down");
       }
       else if(ir_recv_command == 87){
-        Serial.println(F("\rremote left\r"));
+        dualSerialPrintln("remote left");
       }
       else if(ir_recv_command == 79){
-        Serial.println(F("\rremote right\r"));
+        dualSerialPrintln("remote right");
       }
     } // end of if(ir_recv_address
     
     if(ir_recv_address == 73 && repeatcount > 15){ // when directional buttons are held down for even longer... turbo directional mode
       if(ir_recv_command == 87){
         for(uint8_t i=0;i<4;i++){
-          Serial.println(F("\rremote left\r"));
+          dualSerialPrintln("remote left");
         }
       }
       else if(ir_recv_command == 79){
         for(uint8_t i=0;i<4;i++){
-          Serial.println(F("\rremote right\r"));
+          dualSerialPrintln("remote right");
         }
       }
     } // end of turbo directional mode
@@ -1754,15 +1820,11 @@ void sendIR(String type, uint8_t prof, uint8_t repeat){
     else if(prof == 14){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x47C,0x97,repeat);} // OSSC profile 14
   }
   else if(type == "LG"){ // LG TV
-      irsend.sendNEC(0x04,0x08,0); // Power button
-      irsend.sendNEC(0x00,0x00,0);
-      irsend.sendNEC(0x00,0x00,0);
-      irsend.sendNEC(0x00,0x00,0);
+      irsend.sendNEC(0x04,0x08,repeat); // Power button
+      irsend.sendNEC(0x00,0x00,3);
       delay(50);
-      irsend.sendNEC(0x04,0x08,0); // send once more
-      irsend.sendNEC(0x00,0x00,0);
-      irsend.sendNEC(0x00,0x00,0);
-      irsend.sendNEC(0x00,0x00,0);
+      irsend.sendNEC(0x04,0x08,repeat); // send once more
+      irsend.sendNEC(0x00,0x00,3);
   }
   
 } // end of sendIR()
@@ -1907,6 +1969,10 @@ void recallPreset(uint8_t num, uint8_t sw){
 } // end of recallPreset()
 
 void sendSVS(uint16_t num){
+  #if usbMode 
+  usbHost.cprof = String(num); 
+  #endif
+  #if !usbMode
   analogWrite(LED_RED,255);
   analogWrite(LED_BLUE,255);
   analogWrite(LED_GREEN,222);
@@ -1921,23 +1987,35 @@ void sendSVS(uint16_t num){
   else Serial.print(num);
   Serial.println(F("\r"));
 
-  currentProf = num;
   analogWrite(LED_GREEN,255);
+  #endif
+  currentProf = num;
 } // end of sendSVS()
 
 void sendRBP(int prof){ // send Remote Button Profile
-  analogWrite(LED_RED,255);
-  analogWrite(LED_BLUE,255);
-  analogWrite(LED_GREEN,222);
-
+  #if usbMode
+  usbHost.cprof = String(-1*prof);
+  #endif
   Serial.print(F("\rremote prof"));
   Serial.print(prof);
   Serial.println(F("\r"));
-
   currentProf = -1*prof; // always store remote button profiles as negative numbers
+  #if !usbMode
+  analogWrite(LED_RED,255);
+  analogWrite(LED_BLUE,255);
+  analogWrite(LED_GREEN,222);
   delay(1000);
   analogWrite(LED_GREEN,255);
+  #endif
 } // end of sendRBP()
+
+void dualSerialPrintln(String str){
+  str = "\r" + str + "\r";
+  Serial.println(str);
+  #if usbMode
+  usbHost.tcmd = str;
+  #endif
+} // end of dualSerialPrintln()
 
 #if !automatrixSW1
 void MTVtime1(unsigned long eTime){
