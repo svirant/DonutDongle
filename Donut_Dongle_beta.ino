@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.7h
+* Donut Dongle beta v1.7g
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -354,7 +354,6 @@ unsigned long LSprevTime2 = 0;
 uint8_t repeatcount = 0; // used to help emulate the repeat nature of directional button presses
 String svsbutton; // used to store 3 digit SVS profile when AUX8 is double pressed
 uint8_t nument = 0; // used to keep track of how many digits have been entered for 3 digit SVS profile
-uint8_t RMTuse = 0;
 
 // sendRTwake global variables
 bool RTwake = false;
@@ -1143,9 +1142,7 @@ void readIR(){
 
     ir_recv_command = TinyIRReceiverData.Command;
     ir_recv_address = TinyIRReceiverData.Address;
-
-    if(ir_recv_command != 0) RMTuse = 1;
-
+        
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && extrabuttonprof == 2){
       if(ir_recv_command == 11){ // profile button 1
         svsbutton += 1;
@@ -2100,9 +2097,6 @@ void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
 } // end of extronSerialEwrite()
 
 void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
-
-  uint8_t count = 0;
-
   if(sprof != 0){
     mswitch[sname].On = 1;
     if(SVS == 0 && sname == EXTRON1 && sprof > 0 && sprof < 12){ // save RBP as negative number
@@ -2182,20 +2176,14 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
         return;
       }
     } // end of if King == 1    
-    
+    uint8_t count = 0;
     for(uint8_t m=0;m < mswitchSize;m++){
       if(mswitch[m].On == 0) count++;
     }
-    if(S0 && !RMTuse && (SVS == 0 || SVS == 2) && (count == mswitchSize) && currentProf != -12){ sendRBP(12); } // of S0 is true, send S0 or "remote prof12" when all consoles are off
-    else if(S0 && !RMTuse && SVS == 1 && (count == mswitchSize) && currentProf != 0){ sendSVS(0); } 
+    if(S0 && (SVS == 0 || SVS == 2) && (count == mswitchSize) && currentProf != -12){ sendRBP(12); } // of S0 is true, send S0 or "remote prof12" when all consoles are off
+    else if(S0 && SVS == 1 && (count == mswitchSize) && currentProf != 0){ sendSVS(0); } 
   
   } // end of else if prof == 0
-  
-  for(uint8_t m=0;m < mswitchSize;m++){ //This prevents the S0 / remote prof12 profile from constantly overriding any profile loaded with the remote when all consoles are off.
-    if(mswitch[m].On == 0) count++;
-  }
-  if(count < mswitchSize){ RMTuse = 0; }
-
 } // end of sendProfile()
 
 #if automatrixSW1 || automatrixSW2
