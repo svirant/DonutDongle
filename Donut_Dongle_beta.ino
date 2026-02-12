@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.7g
+* Donut Dongle beta v1.7h
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -663,12 +663,12 @@ void readExtron1(){
    
     // if a MT-VIKI active port disconnection is detected, and then later a reconnection, resend the profile.
     if(ecap.substring(24,41) == "IS_NON_INPUT_PORT"){
+      if(!MTVdiscon[0]) sendProfile(0,EXTRON1,0);
       MTVdiscon[0] = true;
-      sendProfile(0,EXTRON1,0);
     }
     else if(ecap.substring(24,41) != "IS_NON_INPUT_PORT" && ecap.substring(0,11) == "Uart_RxData" && MTVdiscon[0]){
       MTVdiscon[0] = false;
-      sendProfile(currentMTVinput[0],EXTRON1,0);
+      sendProfile(currentMTVinput[0],EXTRON1,1);
     }
 
 
@@ -919,8 +919,8 @@ void readExtron2(){
 
     // if a MT-VIKI active port disconnection is detected, and then later a reconnection, resend the profile.
     if(ecap.substring(24,41) == "IS_NON_INPUT_PORT"){
+      if(!MTVdiscon[1]) sendProfile(0,EXTRON2,0);
       MTVdiscon[1] = true;
-      sendProfile(0,EXTRON2,1);
     }
     else if(ecap.substring(24,41) != "IS_NON_INPUT_PORT" && ecap.substring(0,11) == "Uart_RxData" && MTVdiscon[1]){
       MTVdiscon[1] = false;
@@ -1142,7 +1142,8 @@ void readIR(){
 
     ir_recv_command = TinyIRReceiverData.Command;
     ir_recv_address = TinyIRReceiverData.Address;
-        
+
+
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && extrabuttonprof == 2){
       if(ir_recv_command == 11){ // profile button 1
         svsbutton += 1;
