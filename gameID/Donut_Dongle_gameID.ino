@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.4a (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.4b (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -15,14 +15,12 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
-
 #define SEND_LEDC_CHANNEL 0
 #define IR_SEND_PIN 11    // Optional IR LED Emitter for RT5X compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2  // Optional IR Receiver on pin D2
 #define extronSerial Serial1
 #define extronSerial2 Serial2
 #define Serial Serial0 // ** COMMENT OUT THIS LINE ** to see output in Serial Monitor. Disables Serial output to RT4K. usbMode must also be set to "false"
-
 
 #include <TinyIRReceiver.hpp> // all can be found in the built-in Library Manager
 #include <IRremote.hpp>
@@ -33,6 +31,7 @@
 #include <ArduinoJson.h>
 #include <ESPmDNS.h>
 #include <ArduinoOTA.h>
+// <EspUsbHostSerial_FTDI.h> is listed further down with instructions on how to install
 
 //////////////////////////////////////////  WIFI & Setup //  WIFI & Setup //  WIFI & Setup // WIFI & Setup //////////////////////////////////////////
 
@@ -47,7 +46,6 @@ const char* updatepassword = "update123";     // password for updating firmware 
                                    // This is the easiest method...
                                    // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
                                    // Step 2 - In Arudino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
-
 
 /*
 ////////////////////
@@ -311,7 +309,7 @@ uint8_t mswitchSize = 3;
                    //           12 means SVS profile 12
                    //           etc...
 Console consoles[10] = {{"PS1 Digital","http://ps1digital.local/gameid",-9,0,0,0,1}, // you can add more, but stay in this format
-                      {"MemCardPro","http://10.0.1.52/api/currentState",-5,0,0,0,1},
+                      {"MemCardPro","https://10.0.1.52/api/currentState",-5,0,0,0,1},
                       {"N64 Digital","http://n64digital.local/gameid",-7,0,0,0,1} // the last one in the list has no "," at the end
                       };
 
@@ -341,6 +339,8 @@ String gameDB[1000][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 i
 
 uint16_t gameDBSize = 11; // array can hold 1000 entries, but only set to current size so the UI doesnt show 989 blank entries :)
 
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // automatrix variables
@@ -354,9 +354,12 @@ uint8_t amSizeSW2 = 8; // ...
 
 // GAMEID variables
 bool S0_gameID = true;    // When a gameID match is not found for a powered on console, DefaultProf for that console will load
+bool S0_pwr = true;
+int S0_pwr_profile = 0;
 String payload = ""; 
 unsigned long currentGameTime = 0;
 unsigned long prevGameTime = 0;
+bool showS0row = true;
 
 // Extron Global variables
 uint8_t eoutput[2]; // used to store Extron output
@@ -661,8 +664,8 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
           for(int m=0;m < consolesSize;m++){
             if(consoles[m].On == 0) count++;
           }
-          if(count == consolesSize){
-            sendProfile(0,GAMEID1,1);
+          if(count == consolesSize && S0_pwr){
+            sendProfile(S0_pwr_profile,GAMEID1,0); // override needs to stay 0 to prevent it from constantly sending
           }
         } // end of else()
       http.end();
@@ -924,8 +927,8 @@ void readExtron1(){
    
     // if a MT-VIKI active port disconnection is detected, and then later a reconnection, resend the profile.
     if(ecap.substring(24,41) == "IS_NON_INPUT_PORT"){
+      if(!MTVdiscon[0]) sendProfile(0,EXTRON1,0);
       MTVdiscon[0] = true;
-      sendProfile(0,EXTRON1,0);
     }
     else if(ecap.substring(24,41) != "IS_NON_INPUT_PORT" && ecap.substring(0,11) == "Uart_RxData" && MTVdiscon[0]){
       MTVdiscon[0] = false;
@@ -1180,13 +1183,12 @@ void readExtron2(){
 
     // if a MT-VIKI active port disconnection is detected, and then later a reconnection, resend the profile.
     if(ecap.substring(24,41) == "IS_NON_INPUT_PORT"){
+      if(!MTVdiscon[1]) sendProfile(0,EXTRON2,0);
       MTVdiscon[1] = true;
-      sendProfile(0,EXTRON2,0);
     }
     else if(ecap.substring(24,41) != "IS_NON_INPUT_PORT" && ecap.substring(0,11) == "Uart_RxData" && MTVdiscon[1]){
       MTVdiscon[1] = false;
       sendProfile(currentMTVinput[1],EXTRON2,1);
-
     }    
     
     // for Otaku Games Scart Switch 2
@@ -2099,6 +2101,8 @@ void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
 
 void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
 
+  uint8_t count = 0;
+
   // make sure the "No Match Profile" in DonutShop matches it's switch's auto-profile for fallback to work properly
   if(mswitch[GAMEID1].On){
     int gprof = 0;
@@ -2159,6 +2163,12 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
       }
     }
 
+    if(mswitch[EXTRON1].On == 1 || mswitch[EXTRON2].On == 1){
+      showS0row = false;
+      S0_pwr = true;
+      S0_pwr_profile = 0;
+    }
+
     if(sname == EXTRON1){ // sendIR to RT5X / OSSC
       if(sprof < 11){
         if(RT5Xir == 1)sendIR("5x",sprof,2); // RT5X profile
@@ -2203,16 +2213,20 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
         return;
       }
     } // end of if King == 1
-    uint8_t count = 0;
     for(uint8_t m=0;m < mswitchSize;m++){
       if(mswitch[m].On == 0) count++;
-    }
-    if(count < mswitchSize){ RMTuse = 0; } //This prevents the S0 / remote prof12 profile from constantly overriding any profile loaded with the remote when all consoles are off.
-                                          
-    if(S0 && !RMTuse && SVS == 0 && (count == mswitchSize) && currentProf != -12){ sendRBP(12); } // send S0 or "remote prof12" when all consoles are off
+    }                                       
+    if(S0 && !RMTuse && (SVS == 0 || SVS == 2) && (count == mswitchSize) && currentProf != -12){ sendRBP(12); } // send S0 or "remote prof12" when all consoles are off
     else if(S0 && !RMTuse && SVS == 1 && (count == mswitchSize) && currentProf != 0){ sendSVS(0); }
+    else if(!RMTuse && (count == mswitchSize) && currentProf != 0 && currentProf != -12){ sendSVS(0); }
 
   } // end of else if prof == 0
+
+  for(uint8_t m=0;m < mswitchSize;m++){ //This prevents the S0 / remote prof12 profile from constantly overriding any profile loaded with the remote when all consoles are off.
+    if(mswitch[m].On == 0) count++;
+  }
+  if(count < mswitchSize){ RMTuse = 0; }
+
 } // end of sendProfile()
 
 // --------------------- WEB UI FUNCTIONS --------------------- //
@@ -2360,6 +2374,8 @@ void handleUpdateConsoles(){
 String embedS0Vars(){
   JsonDocument doc;
   doc["S0_gameID"] = S0_gameID;
+  doc["S0_pwr"] = S0_pwr;
+  doc["S0_pwr_profile"] = S0_pwr_profile;
 
   String json;
   serializeJson(doc, json);
@@ -2376,6 +2392,8 @@ void handleUpdateS0Vars(){
   JsonDocument doc; deserializeJson(doc, server.arg("plain"));
 
   S0_gameID = doc["S0_gameID"].as<bool>();
+  S0_pwr = doc["S0_pwr"].as<bool>();
+  S0_pwr_profile = doc["S0_pwr_profile"].as<int>();
 
   saveS0Vars();
   server.send(200, "text/plain", "OK");
@@ -2385,6 +2403,8 @@ void saveS0Vars(){
   JsonDocument doc;
 
   doc["S0_gameID"] = S0_gameID;
+  doc["S0_pwr"] = S0_pwr;
+  doc["S0_pwr_profile"] = S0_pwr_profile;
 
   File f = LittleFS.open("/s0vars.json", FILE_WRITE);
 
@@ -2400,12 +2420,16 @@ void loadS0Vars(){
   f.close();
 
   S0_gameID = doc["S0_gameID"].as<bool>();
+  S0_pwr = doc["S0_pwr"].as<bool>();
+  S0_pwr_profile = doc["S0_pwr_profile"].as<int>();
 } // end of loadS0Vars()
 
 void handleGetS0Vars(){
   JsonDocument doc;
 
   doc["S0_gameID"] = S0_gameID;
+  doc["S0_pwr"] = S0_pwr;
+  doc["S0_pwr_profile"] = S0_pwr_profile;
 
   String out;
   serializeJson(doc, out);
@@ -2533,6 +2557,15 @@ void handleRoot(){
 
       .controls { text-align: center; }
       .arrow { font-size: 0.8em; margin-left: 4px; color: #555; }
+      .s0-row { background-color: #eee; font-weight: bold; }
+      .s0-row td:nth-last-child(-n+3) {
+        background-color: white;
+        border: none;
+      }
+      .s0-row td:nth-child(2) {
+        border-left: none;
+        border-top: none;
+      }
       .tooltip {
         position: relative;
         display: inline-flex;
@@ -2926,6 +2959,85 @@ void handleRoot(){
       tr.appendChild(tdDel);
       tbody.appendChild(tr);
     });
+
+    // --- S0 row ---
+    const trS0 = document.createElement('tr');
+    trS0.className = 's0-row';
+
+    // --- Enabled switch column ---
+    const tdEnableS0 = document.createElement('td');
+    tdEnableS0.style.padding = '6px 10px'; // match other cells
+
+    const label = document.createElement('label');
+    label.className = 'switch';
+
+    const s0cb = document.createElement('input'); 
+    s0cb.type = 'checkbox';
+    s0cb.checked = !!S0Vars['S0_pwr'];
+    s0cb.onchange = async () => { 
+      S0Vars['S0_pwr'] = s0cb.checked; 
+      s0profile.disabled = !s0cb.checked; 
+      saveS0Vars(); 
+    };
+
+    const slider = document.createElement('span');
+    slider.className = 'slider';
+
+    label.appendChild(s0cb);
+    label.appendChild(slider);
+    tdEnableS0.appendChild(label);
+    trS0.appendChild(tdEnableS0);
+
+    // --- Description + number input column ---
+    const tdDescS0 = document.createElement('td');
+    tdDescS0.style.whiteSpace = 'nowrap';
+    tdDescS0.style.padding = '6px 10px'; // match other cells
+    tdDescS0.style.verticalAlign = 'middle';
+
+    // label with tooltip
+    const labelSpan = document.createElement('span');
+    labelSpan.textContent = "All Powered Off Profile: ";
+    labelSpan.classList.add('tooltip');
+
+    const bubble = document.createElement('span');
+    bubble.className = 'tooltip-bubble';
+    bubble.textContent = "Must have at least 1 Enabled and unreachable. Disabled do not count.";
+    bubble.style.whiteSpace = 'normal';
+    bubble.style.maxWidth = '280px';
+    bubble.style.textAlign = 'center';
+    labelSpan.appendChild(bubble);
+    tdDescS0.appendChild(labelSpan);
+
+    // number input
+    const s0profile = document.createElement('input'); 
+    s0profile.type = 'number'; 
+    s0profile.id = 'S0_pwr_profile';
+    s0profile.value = S0Vars['S0_pwr_profile'] || 0;
+    s0profile.disabled = !s0cb.checked;
+    s0profile.style.width = '40px';
+    s0profile.style.marginLeft = '8px';
+    s0profile.onchange = async () => { 
+      S0Vars['S0_pwr_profile'] = parseInt(s0profile.value) || 0; 
+      saveS0Vars(); 
+    };
+    tdDescS0.appendChild(s0profile);
+
+    trS0.appendChild(tdDescS0);
+
+    // --- fill remaining columns ---
+    ['', '', ''].forEach(() => {
+      const td = document.createElement('td');
+      td.style.backgroundColor = 'white';
+      td.style.border = 'none';
+      trS0.appendChild(td);
+    });
+
+  )rawliteral";
+
+  if(showS0row)page += "tbody.appendChild(trS0);";
+  
+  page += R"rawliteral(
+
   }
 
   async function saveConsoles(){
