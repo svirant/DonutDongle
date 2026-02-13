@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.4c (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.4d (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -359,7 +359,7 @@ int S0_pwr_profile = 0;
 String payload = ""; 
 unsigned long currentGameTime = 0;
 unsigned long prevGameTime = 0;
-bool showS0row = true;
+bool enableS0 = true;
 
 // Extron Global variables
 uint8_t eoutput[2]; // used to store Extron output
@@ -664,7 +664,8 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
           for(int m=0;m < consolesSize;m++){
             if(consoles[m].On == 0) count++;
           }
-          if(count == consolesSize && S0_pwr){
+          if(count == consolesSize){
+            if(!S0_pwr) S0_pwr_profile = 0;
             sendProfile(S0_pwr_profile,GAMEID1,0); // override needs to stay 0 to prevent it from constantly sending
           }
         } // end of else()
@@ -2162,8 +2163,8 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
     }
 
     if(mswitch[EXTRON1].On == 1 || mswitch[EXTRON2].On == 1){
-      showS0row = false;
-      S0_pwr = true;
+      enableS0 = false;
+      S0_pwr = false;
       S0_pwr_profile = 0;
     }
 
@@ -2217,9 +2218,17 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
     }
     if(count < mswitchSize){ RMTuse = 0; }
 
-    if(S0 && !RMTuse && (SVS == 0 || SVS == 2) && (count == mswitchSize) && currentProf != -12){ sendRBP(12); } // send S0 or "remote prof12" when all consoles are off
-    else if(S0 && !RMTuse && SVS == 1 && (count == mswitchSize) && currentProf != 0){ sendSVS(0); }
-    else if(!RMTuse && (count == mswitchSize) && currentProf != 0 && currentProf != -12){ sendSVS(0); }
+    // send S0 or "remote prof12" when all consoles are off
+    if(S0_pwr){ // gameID only mode, ignore S0 
+      if((count == mswitchSize) && currentProf != S0_pwr_profile){ sendSVS(0); } 
+    }
+    else if(S0 && !enableS0 && !RMTuse && (count == mswitchSize)){ // gameID + switches mode
+      if((SVS == 0 || SVS == 2) && currentProf != -12) { sendRBP(12); }
+      else if(SVS == 1 && currentProf != 0) { sendSVS(0); }
+    }
+    // if(S0 && !enableS0 && !S0_pwr && !RMTuse && (SVS == 0 || SVS == 2) && (count == mswitchSize) && currentProf != -12){ sendRBP(12); } // send S0 or "remote prof12" when all consoles are off
+    // else if(S0 && !enableS0 && !S0_pwr && !RMTuse && SVS == 1 && (count == mswitchSize) && currentProf != 0){ sendSVS(0); }
+    // else if(S0_pwr && (count == mswitchSize) && currentProf != S0_pwr_profile){ sendSVS(0); }
 
   } // end of else if prof == 0
 } // end of sendProfile()
@@ -3029,7 +3038,7 @@ void handleRoot(){
 
   )rawliteral";
 
-  if(showS0row)page += "tbody.appendChild(trS0);";
+  if(enableS0)page += "tbody.appendChild(trS0);";
   
   page += R"rawliteral(
 
