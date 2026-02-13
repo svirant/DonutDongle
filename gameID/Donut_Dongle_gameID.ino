@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.4b (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.4c (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -2101,8 +2101,6 @@ void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
 
 void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
 
-  uint8_t count = 0;
-
   // make sure the "No Match Profile" in DonutShop matches it's switch's auto-profile for fallback to work properly
   if(mswitch[GAMEID1].On){
     int gprof = 0;
@@ -2213,20 +2211,17 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
         return;
       }
     } // end of if King == 1
+    uint8_t count = 0;
     for(uint8_t m=0;m < mswitchSize;m++){
       if(mswitch[m].On == 0) count++;
-    }                                       
+    }
+    if(count < mswitchSize){ RMTuse = 0; }
+
     if(S0 && !RMTuse && (SVS == 0 || SVS == 2) && (count == mswitchSize) && currentProf != -12){ sendRBP(12); } // send S0 or "remote prof12" when all consoles are off
     else if(S0 && !RMTuse && SVS == 1 && (count == mswitchSize) && currentProf != 0){ sendSVS(0); }
     else if(!RMTuse && (count == mswitchSize) && currentProf != 0 && currentProf != -12){ sendSVS(0); }
 
   } // end of else if prof == 0
-
-  for(uint8_t m=0;m < mswitchSize;m++){ //This prevents the S0 / remote prof12 profile from constantly overriding any profile loaded with the remote when all consoles are off.
-    if(mswitch[m].On == 0) count++;
-  }
-  if(count < mswitchSize){ RMTuse = 0; }
-
 } // end of sendProfile()
 
 // --------------------- WEB UI FUNCTIONS --------------------- //
