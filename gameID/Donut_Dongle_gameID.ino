@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.4f (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.4g (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -278,6 +278,8 @@ String const auxpower = "LG"; // AUX8 + Power button sends power off/on via IR E
 #define GAMEID1 0
 #define EXTRON1 1
 #define EXTRON2 2
+#define MAX_CONSOLES 10
+#define MAX_GAMEDB 1000
 
 /*
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -314,12 +316,12 @@ uint8_t mswitchSize = 3;
                    //            1 means SVS profile 1
                    //           12 means SVS profile 12
                    //           etc...
-Console consoles[10] = {{"PS1 Digital","http://ps1digital.local/gameid",-9,0,0,0,1}, // you can add more, but stay in this format
+Console consoles[MAX_CONSOLES] = {{"PS1 Digital","http://ps1digital.local/gameid",-9,0,0,0,1}, // you can add more, but stay in this format
                       {"MemCardPro","https://10.0.1.52/api/currentState",-5,0,0,0,1},
                       {"N64 Digital","http://n64digital.local/gameid",-7,0,0,0,1} // the last one in the list has no "," at the end
                       };
 
-int consolesSize = 3; // Can hold 10 entries, but only set for 3 so the UI doesnt show 7 blank entries :)
+int consolesSize = 3; // Can hold MAX_CONSOLES entries, but only set for 3 so the UI doesnt show 7 blank entries :)
 
 
                    // If using a "remote button profile" for the "PROFILE" which are valued 1 - 12, place a "-" before the profile number. 
@@ -331,7 +333,7 @@ int consolesSize = 3; // Can hold 10 entries, but only set for 3 so the UI doesn
                    //           etc...
                    //                      
                                  // {"Description","<GAMEID>","PROFILE #"},
-String gameDB[1000][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 is the "SVS PROFILE", would translate to a S7_<USER_DEFINED>.rt4 named profile under RT4K-SDcard/profile/SVS/
+String gameDB[MAX_GAMEDB][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 is the "SVS PROFILE", would translate to a S7_<USER_DEFINED>.rt4 named profile under RT4K-SDcard/profile/SVS/
                       {"xstation","XSTATION","8"},               // XSTATION is the <GAMEID>
                       {"GameCube","GM4E0100","505"},             // GameCube is the Description
                       {"N64 MarioKart 64","3E5055B6-2E92DA52-N-45","501"},
@@ -343,7 +345,7 @@ String gameDB[1000][3] = {{"N64 EverDrive","00000000-00000000---00","7"}, // 7 i
                       {"MegaDrive","MegaDrive","506"},
                       {"SoR2","Streets of Rage 2 (USA)","507"}};
 
-uint16_t gameDBSize = 11; // array can hold 1000 entries, but only set to current size so the UI doesnt show 989 blank entries :)
+uint16_t gameDBSize = 11; // array can hold MAX_GAMEDB entries, but only set to current size so the UI doesnt show 989 blank entries :)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -457,6 +459,9 @@ class SerialFTDI : public EspUsbHostSerial_FTDI {
       usb_host_transfer_submit(this->usbTransfer_recv);
       if(cprof != "null"){
         tp = cprof.toInt();
+        digitalWrite(LED_BUILTIN,HIGH);
+        analogWrite(LED_RED,255);
+        analogWrite(LED_BLUE,255);
         analogWrite(LED_GREEN,222);
         if(tp >= 0){
           if(offset > 0) cprof = String(tp + offset);
@@ -478,6 +483,9 @@ class SerialFTDI : public EspUsbHostSerial_FTDI {
         }
         submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcprof[0]), tcprof.length()); // usb response
         if(tp < 0) delay(1000); // only added so the green led stays lit for 1 second for "remote prof" commands
+        digitalWrite(LED_BUILTIN,LOW);
+        analogWrite(LED_RED,255);
+        analogWrite(LED_BLUE,255);
         analogWrite(LED_GREEN,255);
         tcprof,cprof = "null";
       }
@@ -1996,13 +2004,12 @@ void recallPreset(uint8_t num, uint8_t sw){
 } // end of recallPreset()
 
 void sendSVS(uint16_t num){
-  #if usbMode 
+  #if usbMode // sends VGA Serial commands as well (green & red leds light up)
   usbHost.cprof = String(num); 
   #endif
-  #if !usbMode
-  analogWrite(LED_RED,255);
-  analogWrite(LED_BLUE,255);
-  analogWrite(LED_GREEN,222);
+
+  #if !usbMode // only VGA Serial commands (red led only)
+  digitalWrite(LED_BUILTIN,HIGH);
 
   Serial.print(F("\rSVS NEW INPUT="));
   if(num != 0)Serial.print(num + offset);
@@ -2014,25 +2021,23 @@ void sendSVS(uint16_t num){
   else Serial.print(num);
   Serial.println(F("\r"));
 
-  analogWrite(LED_GREEN,255);
+  digitalWrite(LED_BUILTIN,LOW);
   #endif
   currentProf = num;
 } // end of sendSVS()
 
 void sendRBP(int prof){ // send Remote Button Profile
-  #if usbMode
+  #if usbMode // sends VGA Serial commands as well
   usbHost.cprof = String(-1*prof);
   #endif
   Serial.print(F("\rremote prof"));
   Serial.print(prof);
   Serial.println(F("\r"));
   currentProf = -1*prof; // always store remote button profiles as negative numbers
-  #if !usbMode
-  analogWrite(LED_RED,255);
-  analogWrite(LED_BLUE,255);
-  analogWrite(LED_GREEN,222);
+  #if !usbMode // add the 1s red led indicator after the VGA Serial command is sent
+  digitalWrite(LED_BUILTIN,HIGH);
   delay(1000);
-  analogWrite(LED_GREEN,255);
+  digitalWrite(LED_BUILTIN,LOW);
   #endif
 } // end of sendRBP()
 
@@ -2519,32 +2524,36 @@ void handleGetPayload(){
 } // end of handleGetPayload()
 
 void handleImportAll() {
-  if (!server.hasArg("plain")) {
+  if(!server.hasArg("plain")){
     server.send(400, "application/json", "{\"error\":\"No data\"}");
     return;
   }
 
   JsonDocument doc;
-  deserializeJson(doc, server.arg("plain"));
+  DeserializationError err = deserializeJson(doc, server.arg("plain"));
+  if(err){
+    server.send(400, "application/json", "{\"error\":\"Invalid JSON\"}");
+    return;
+  }
 
-  // Restore consoles
-  JsonArray consolesArr = doc["consoles"].as<JsonArray>();
+  // ---------------- Restore consoles ----------------
+  JsonArray consolesArr = doc["consoles"];
   consolesSize = 0;
-  for (JsonObject o : consolesArr) {
+  for(JsonObject o : consolesArr){
+    if (consolesSize > MAX_CONSOLES) break;
     consoles[consolesSize].Desc = o["Desc"].as<String>();
     consoles[consolesSize].Address = o["Address"].as<String>();
     consoles[consolesSize].DefaultProf = o["DefaultProf"].as<int>();
     consoles[consolesSize].Enabled = o["Enabled"].as<bool>();
     consolesSize++;
   }
-
   saveConsoles();
-  delay(200);
 
-  // Restore gameDB
-  JsonArray gameArr = doc["gameDB"].as<JsonArray>();
+  // ---------------- Restore gameDB ----------------
+  JsonArray gameArr = doc["gameDB"];
   gameDBSize = 0;
-  for (JsonArray item : gameArr) {
+  for(JsonArray item : gameArr){
+    if (gameDBSize > MAX_GAMEDB) break;
     gameDB[gameDBSize][0] = item[0].as<String>();
     gameDB[gameDBSize][1] = item[1].as<String>();
     gameDB[gameDBSize][2] = item[2].as<String>();
@@ -2552,12 +2561,38 @@ void handleImportAll() {
   }
   saveGameDB();
 
+  // ---------------- Restore Settings ----------------
+  if(doc.containsKey("settings")){
+    JsonObject settings = doc["settings"];
+
+    S0 = settings["S0"] | false;
+    S0_gameID = settings["S0_gameID"] | false;
+    SRS = settings["SRS"] | 0;
+    offset = settings["offset"] | 0;
+    RT5Xir = settings["RT5Xir"] | 0;
+    OSSCir = settings["OSSCir"] | 0;
+    MTVir = settings["MTVir"] | 0;
+    TESmartir = settings["TESmartir"] | 0;
+    ExtronVideoOutputPortSW1 = settings["ExtronVideoOutputPortSW1"] | 0;
+    ExtronVideoOutputPortSW2 = settings["ExtronVideoOutputPortSW2"] | 0;
+
+    if (settings.containsKey("auxprof")) {
+      JsonArray aux = settings["auxprof"];
+      for (int i = 0; i < 12; i++) {
+        auxprof[i] = aux[i] | 0;
+      }
+    }
+
+    saveVars();
+  }
+
   server.send(200, "application/json", "{\"status\":\"ok\"}");
 } // end of handleImportAll()
 
-void handleExportAll() {
+void handleExportAll(){
   JsonDocument doc;
 
+  // ---------------- Consoles ----------------
   JsonArray consolesArr = doc["consoles"].to<JsonArray>();
   for (int i = 0; i < consolesSize; i++) {
     JsonObject o = consolesArr.add<JsonObject>();
@@ -2567,14 +2602,35 @@ void handleExportAll() {
     o["Enabled"] = consoles[i].Enabled;
   }
 
+  // ---------------- gameDB ----------------
   JsonArray gameArr = doc["gameDB"].to<JsonArray>();
-  for (int i = 0; i < gameDBSize; i++) {
+  for(int i=0;i < gameDBSize;i++) {
     JsonArray item = gameArr.add<JsonArray>();
     item.add(gameDB[i][0]);
     item.add(gameDB[i][1]);
     item.add(gameDB[i][2]);
   }
 
+  // ---------------- Settings ----------------
+  JsonObject settings = doc["settings"].to<JsonObject>();
+
+  settings["S0"] = S0;
+  settings["S0_gameID"] = S0_gameID;
+  settings["SRS"] = SRS;
+  settings["offset"] = offset;
+  settings["RT5Xir"] = RT5Xir;
+  settings["OSSCir"] = OSSCir;
+  settings["MTVir"] = MTVir;
+  settings["TESmartir"] = TESmartir;
+  settings["ExtronVideoOutputPortSW1"] = ExtronVideoOutputPortSW1;
+  settings["ExtronVideoOutputPortSW2"] = ExtronVideoOutputPortSW2;
+
+  JsonArray aux = settings["auxprof"].to<JsonArray>();
+  for(int i=0;i < 12;i++) {
+    aux.add(auxprof[i]);
+  }
+
+  // ---------------- Send file ----------------
   String out;
   serializeJsonPretty(doc, out);
   server.sendHeader("Content-Disposition", "attachment; filename=donutshop_config.json");
@@ -2855,6 +2911,80 @@ void handleRoot(){
         padding: 4px;
       }
 
+      .auxprof-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .auxprof-number {
+        width: 36px;
+        height: 22px;
+        background: #e0e0e0;
+        color: #333;
+        font-size: 0.8em;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        margin-bottom: 4px;
+      }
+
+      .consoles-header {
+        position: relative;
+        width: 80%;
+        margin: 20px auto 0 auto;
+        text-align: center;
+      }
+
+      .consoles-header h2 {
+        margin: 0;
+      }
+
+      .add-console-wrapper {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .add-console-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        background-color: #4CAF50;
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 0;
+        line-height: 32px;
+      }
+
+      .add-console-btn:hover {
+        background-color: #43a047;
+      }
+
+      .gamedb-header {
+        position: relative;
+        width: 80%;
+        margin: 20px auto 0 auto;
+        text-align: center;
+      }
+
+      .gamedb-header h2 {
+        margin: 0;
+      }
+
+      .add-profile-wrapper {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
 
     </style>
   </head>
@@ -2885,22 +3015,20 @@ void handleRoot(){
 
   </div>
 
-
   <div id="mainPage">
   <center><h1>Donut Shop</h1></center>
   <div class="controls">
-    <button onclick="addConsole()">Add Console</button>
-    <span class="tooltip">
-      <button onclick="addProfile()">
-        Add Profile
-      </button>
-      <span class="tooltip-bubble">
-      Will populate with last gameID found.
-      </span>
+  </div>
+
+  <div class="consoles-header">
+    <h2>Consoles</h2>
+
+    <span class="tooltip add-console-wrapper">
+      <button class="add-console-btn" onclick="addConsole()">+</button>
+      <span class="tooltip-bubble">Add Console</span>
     </span>
   </div>
 
-  <h2>Consoles</h2>
   <table id="consoleTable">
     <thead>
       <tr>
@@ -2949,7 +3077,16 @@ void handleRoot(){
     <tbody></tbody>
   </table>
 
-  <h2>gameDB</h2>
+  <div class="gamedb-header">
+    <h2>gameDB</h2>
+    <span class="tooltip add-profile-wrapper">
+      <button class="add-console-btn" onclick="addProfile()">+</button>
+      <span class="tooltip-bubble">
+        Add Profile - Will populate with last gameID found.
+      </span>
+    </span>
+  </div>
+
   <table id="profileTable">
     <thead>
       <tr>
@@ -2989,7 +3126,9 @@ void handleRoot(){
               <!-- S0 Toggle -->
               <div class="setting-row">
                 <span class="tooltip">
-                  Load S0 profile when ALL Consoles are powered OFF
+                  <span id="S0_label">
+                    Load S0 profile when ALL Consoles are powered OFF
+                  </span>
                   <span class="tooltip-bubble">Automatically load S0 profile if every console is OFF.</span>
                 </span>
                 <label class="switch">
@@ -3123,13 +3262,13 @@ void handleRoot(){
                   Press AUX8 then a remote # button to load the assigned SVS profile.<br>
                   (IR Receiver must be connected)<br><br>
 
-                  ** Will not work if TESmartir is set to 2 or 3 **<br>
+                  ** IR Receiver options above take priority over AUX8 if used **<br>
                   </span>
                 </span>
               </div>
 
               <!-- 12 Profile Inputs with labels -->
-              <div style="width:33%; margin-left:auto; margin-right:0;">
+              <div style="width:25%; margin-left:auto; margin-right:0;">
                 <div id="auxprofInputs" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-top:2px;"></div>
               </div>
             </div>
@@ -3148,7 +3287,7 @@ void handleRoot(){
                     For certain Extron Matrix models, must specify the video output port that connects to RT4K.
                   </span>
                 </span>
-                <input type="number" id="ExtronVideoOutputPortSW1" min="1" max="32" value="1" style="width:50px;">
+                <input type="number" id="ExtronVideoOutputPortSW1_input" min="1" max="32" value="1" style="width:50px;">
               </div>
 
               <!-- SW2 Video Output Port -->
@@ -3159,7 +3298,7 @@ void handleRoot(){
                     For certain Extron Matrix models, must specify the video output port that connects to RT4K
                   </span>
                 </span>
-                <input type="number" id="ExtronVideoOutputPortSW2" min="1" max="32" value="1" style="width:50px;">
+                <input type="number" id="ExtronVideoOutputPortSW2_input" min="1" max="32" value="1" style="width:50px;">
               </div>
 
             </div>
@@ -3250,12 +3389,11 @@ void handleRoot(){
 
     for (let i = 0; i < 12; i++) {
       const wrapper = document.createElement("div");
+      wrapper.className = "auxprof-wrapper";
 
-      const label = document.createElement("div");
-      label.textContent = "Button " + (i + 1);
-      label.style.fontWeight = "500";
-      label.style.marginBottom = "4px";
-      label.style.textAlign = "center";
+      const numberBox = document.createElement("div");
+      numberBox.className = "auxprof-number";
+      numberBox.textContent = i + 1;
 
       const input = document.createElement("input");
       input.type = "number"; 
@@ -3263,12 +3401,25 @@ void handleRoot(){
       input.max = "999";
       input.id = "auxprof_" + i;
       input.value = Vars.auxprof[i] ?? 0;
-
       input.onchange = updateSettings;
 
-      wrapper.appendChild(label);
+      wrapper.appendChild(numberBox);
       wrapper.appendChild(input);
       container.appendChild(wrapper);
+    }
+  }
+
+  // update S0 text
+  function updateS0Label() {
+    const label = document.getElementById("S0_label");
+    const srs = parseInt(document.getElementById("SRS_select")?.value, 10);
+
+    if (!label) return;
+
+    if (srs === 0) {
+      label.textContent = "Load Remote Button profile 12 when ALL Consoles are powered OFF";
+    } else {
+      label.textContent = "Load S0 profile when ALL Consoles are powered OFF";
     }
   }
 
@@ -3289,16 +3440,15 @@ void handleRoot(){
     const tesInput = document.getElementById("TESmartir_input");
 
     //Extron Matrix
-    const sw1 = document.getElementById("ExtronVideoOutputPortSW1");
-    const sw2 = document.getElementById("ExtronVideoOutputPortSW2");
-    if (sw1) {
-      sw1.value = Vars.ExtronVideoOutputPortSW1 ?? 0;
-      sw1.onchange = updateSettings;
+    const evopsw1 = document.getElementById("ExtronVideoOutputPortSW1_input");
+    const evopsw2 = document.getElementById("ExtronVideoOutputPortSW2_input");
+    if(evopsw1){
+      evopsw1.value = Vars.ExtronVideoOutputPortSW1 ?? 0;
+      evopsw1.onchange = updateSettings;
     }
-
-    if (sw2) {
-      sw2.value = Vars.ExtronVideoOutputPortSW2 ?? 0;
-      sw2.onchange = updateSettings;
+    if(evopsw2){
+      evopsw2.value = Vars.ExtronVideoOutputPortSW2 ?? 0;
+      evopsw2.onchange = updateSettings;
     }
 
     // Load current values
@@ -3324,17 +3474,18 @@ void handleRoot(){
 
     if (!s0Toggle) return;
 
-    
-
-    // ALWAYS coerce to number explicitly
     offsetInput.value = Number(Vars["offset"] ?? 0);
 
     s0Toggle.checked = Boolean(Vars["S0"]);
     srsSelect.value = Vars["SRS"].toString();
+    updateS0Label();
 
     // Event handlers
     s0Toggle.onchange = updateSettings;
-    srsSelect.onchange = updateSettings;
+    srsSelect.onchange = () => {
+      updateSettings();
+      updateS0Label();
+    };
     offsetInput.onchange = updateSettings;
 
     // Ensure blank offset becomes 0
@@ -3699,8 +3850,8 @@ void handleRoot(){
       Vars["OSSCir"] = parseInt(document.getElementById("OSSCir_input").value, 10);
       Vars["MTVir"] = parseInt(document.getElementById("MTVir_input").value, 10);
       Vars["TESmartir"] = parseInt(document.getElementById("TESmartir_input").value, 10);
-      Vars["ExtronVideoOutputPortSW1"] = parseInt(document.getElementById("ExtronVideoOutputPortSW1")?.value, 10) || 0;
-      Vars["ExtronVideoOutputPortSW2"] = parseInt(document.getElementById("ExtronVideoOutputPortSW2")?.value, 10) || 0;
+      Vars["ExtronVideoOutputPortSW1"] = parseInt(document.getElementById("ExtronVideoOutputPortSW1_input")?.value, 10) || 0;
+      Vars["ExtronVideoOutputPortSW2"] = parseInt(document.getElementById("ExtronVideoOutputPortSW2_input")?.value, 10) || 0;
 
       let auxArray = [];
       for (let i = 0; i < 12; i++) {
