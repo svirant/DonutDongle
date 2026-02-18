@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.7i
+* Donut Dongle beta v1.7j
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -518,7 +518,8 @@ void readExtron1(){
         }
       }
     }
-    else if(ecap.substring(0,10) == "00000000\r\n" || ecap.substring(0,18) == "0000000000000000\r\n" 
+    else if(ecap.substring(0,10) == "00000000\r\n" || ecap.substring(0,14) == "000000000000\r\n"
+            || ecap.substring(0,18) == "0000000000000000\r\n" 
             || ecap.substring(0,26) == "000000000000000000000000\r\n" 
             || ecap.substring(0,34) == "00000000000000000000000000000000\r\n"){
       extronSerial.write(VERB,5); // sets extron matrix switch to Verbose level 3
@@ -782,7 +783,8 @@ void readExtron2(){
         }
       }
     }
-    else if(ecap.substring(0,10) == "00000000\r\n" || ecap.substring(0,18) == "0000000000000000\r\n" 
+    else if(ecap.substring(0,10) == "00000000\r\n" || ecap.substring(0,14) == "000000000000\r\n"
+            || ecap.substring(0,18) == "0000000000000000\r\n" 
             || ecap.substring(0,26) == "000000000000000000000000\r\n" 
             || ecap.substring(0,34) == "00000000000000000000000000000000\r\n"){
       extronSerial2.write(VERB,5); // sets extron matrix switch to Verbose level 3
