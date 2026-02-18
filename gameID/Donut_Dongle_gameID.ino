@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.5 (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.5a (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -36,9 +36,9 @@
 #include <WiFiManager.h>
 // <EspUsbHostSerial_FTDI.h> is listed further down with instructions on how to install
 
-uint8_t const debugE1CAP = 0; // line ~783
-uint8_t const debugE2CAP = 0; // line ~1046
-uint8_t const debugState = 0; // line ~596
+uint8_t const debugE1CAP = 0; // line ~784
+uint8_t const debugE2CAP = 0; // line ~1047
+uint8_t const debugState = 0; // line ~597
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -515,7 +515,7 @@ void setup(){
   pinMode(LED_RED, OUTPUT);
 
   // Wifi Captive Portal Setup
-  // Turn LED solid orange during captive portal
+  // Turn LED orange when disconnected
   analogWrite(LED_RED,220);   // Red high
   analogWrite(LED_GREEN,245);  // Green medium
   analogWrite(LED_BLUE,255);    // Blue off
@@ -525,7 +525,8 @@ void setup(){
   wm.setMenu(menu);
   wm.setCustomHeadElement(R"rawliteral(
     <style>
-    .wrap { text-align:center !important; }
+    .wrap { text-align: center !important; }
+    button { background-color: #4CAF50 !important; }
     </style>
     )rawliteral");
   wm.autoConnect("DonutShop_Setup");
