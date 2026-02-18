@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.4i (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.5 (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -33,19 +33,16 @@
 #include <ArduinoJson.h>
 #include <ESPmDNS.h>
 #include <ArduinoOTA.h>
+#include <WiFiManager.h>
 // <EspUsbHostSerial_FTDI.h> is listed further down with instructions on how to install
 
-uint8_t const debugE1CAP = 0; // line ~762
-uint8_t const debugE2CAP = 0; // line ~1025
-uint8_t const debugState = 0; // line ~574
+uint8_t const debugE1CAP = 0; // line ~783
+uint8_t const debugE2CAP = 0; // line ~1046
+uint8_t const debugState = 0; // line ~596
 
-//////////////////////////////////////////  WIFI & Setup //  WIFI & Setup //  WIFI & Setup // WIFI & Setup //////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
-/**--- WIFI & Setup ---**/
 const char* donuthostname = "donutshop";      // hostname, by default: http://donutshop.local include quotes ""
-const char* ssid = "SSID";                    // Wifi Network goes here in quotes ""  Note: MUST be a 2.4GHz WiFi AP. 5GHz is NOT supported by the Nano ESP32.
-const char* password = "password";            // replace "password" with your Wifi password including quotes ""
-const char* updatepassword = "update123";     // password for updating firmware over Wifi via Arduino IDE 2.x. include quotes ""
 
 #define usbMode true              // USB Serial Command mode. set true to enable. requires OTG adapter. normal Serial mode will be active regardless of setting.
                                    // https://github.com/wakwak-koba/EspUsbHost will also need to be installed in order to have FTDI support for the RT4K usb serial port.
@@ -281,6 +278,7 @@ String const auxpower = "LG"; // AUX8 + Power button sends power off/on via IR E
 #define MAX_CONSOLES 10
 #define MAX_GAMEDB 1000
 
+
 /*
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //    GAMEID CONFIG     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -507,16 +505,40 @@ class SerialFTDI : public EspUsbHostSerial_FTDI {
 SerialFTDI usbHost;
 #endif
 
+
 void setup(){
 
+  // Enable LEDs
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_GREEN, OUTPUT);
+  pinMode(LED_BLUE, OUTPUT);
+  pinMode(LED_RED, OUTPUT);
+
+  // Wifi Captive Portal Setup
+  // Turn LED solid orange during captive portal
+  analogWrite(LED_RED,220);   // Red high
+  analogWrite(LED_GREEN,245);  // Green medium
+  analogWrite(LED_BLUE,255);    // Blue off
+
+  WiFiManager wm;
+  std::vector<const char *> menu = {"wifi"};
+  wm.setMenu(menu);
+  wm.setCustomHeadElement(R"rawliteral(
+    <style>
+    .wrap { text-align:center !important; }
+    </style>
+    )rawliteral");
+  wm.autoConnect("DonutShop_Setup");
+
+  // Turn off orange LED when connected
+  analogWrite(LED_RED,255);
+  analogWrite(LED_GREEN,255);
+  analogWrite(LED_BLUE,255);
+
   initPCIInterruptForTinyReceiver(); // for IR Receiver
-  WiFi.begin(ssid,password); // WiFi creds are defined around line 40 at the top
   #if usbMode
   usbHost.begin(115200); // leave at 115200 for RT4K usb connection
   #endif
-  pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(LED_GREEN, OUTPUT); // GREEN led lights up for 1 second when a SVS profile is sent
-  pinMode(LED_BLUE, OUTPUT); // BLUE led is a WiFi activity. Long periods of blue means one of the gameID servers is not connecting.
   analogWrite(LED_GREEN,255);
   analogWrite(LED_BLUE,255);
 
@@ -594,7 +616,6 @@ void GIDloop(void *pvParameters){
 
 void OTAsetup(){
   ArduinoOTA.setHostname(donuthostname);
-  ArduinoOTA.setPassword(updatepassword);
 
   ArduinoOTA
     .onError([](ota_error_t error) {
