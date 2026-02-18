@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.5a (Arduino Nano ESP32 only)
+* Donut Dongle gameID (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -16,6 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
+#define FIRMWARE_VERSION "0.5b"
 #define SEND_LEDC_CHANNEL 0
 #define IR_SEND_PIN 11    // Optional IR LED Emitter for RT5X compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2  // Optional IR Receiver on pin D2
@@ -34,11 +35,12 @@
 #include <ESPmDNS.h>
 #include <ArduinoOTA.h>
 #include <WiFiManager.h>
+#include <Update.h>
 // <EspUsbHostSerial_FTDI.h> is listed further down with instructions on how to install
 
-uint8_t const debugE1CAP = 0; // line ~784
-uint8_t const debugE2CAP = 0; // line ~1047
-uint8_t const debugState = 0; // line ~597
+uint8_t const debugE1CAP = 0; // line ~787
+uint8_t const debugE2CAP = 0; // line ~1051
+uint8_t const debugState = 0; // line ~600
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -569,6 +571,7 @@ void setup(){
   server.on("/getPayload", HTTP_GET, handleGetPayload);
   server.on("/exportAll", HTTP_GET, handleExportAll);
   server.on("/importAll", HTTP_POST, handleImportAll);
+  server.on("/update", HTTP_POST, handleUpdate, handleUpdateUpload);
 
 
   server.begin();
@@ -850,7 +853,8 @@ void readExtron1(){
         }
       }
     }
-    else if(automatrixSW1 && (ecap.substring(0,10) == "00000000\r\n" || ecap.substring(0,18) == "0000000000000000\r\n" 
+    else if(automatrixSW1 && (ecap.substring(0,10) == "00000000\r\n" || ecap.substring(0,14) == "000000000000\r\n"
+            || ecap.substring(0,18) == "0000000000000000\r\n" 
             || ecap.substring(0,26) == "000000000000000000000000\r\n" 
             || ecap.substring(0,34) == "00000000000000000000000000000000\r\n")){
       extronSerial.write(VERB,5); // sets extron matrix switch to Verbose level 3
@@ -1112,7 +1116,8 @@ void readExtron2(){
         }
       }
     }
-    else if(automatrixSW2 && (ecap.substring(0,10) == "00000000\r\n" || ecap.substring(0,18) == "0000000000000000\r\n" 
+    else if(automatrixSW2 && (ecap.substring(0,10) == "00000000\r\n" || ecap.substring(0,14) == "000000000000\r\n"
+            || ecap.substring(0,18) == "0000000000000000\r\n" 
             || ecap.substring(0,26) == "000000000000000000000000\r\n" 
             || ecap.substring(0,34) == "00000000000000000000000000000000\r\n")){
       extronSerial2.write(VERB,5); // sets extron matrix switch to Verbose level 3
@@ -2731,7 +2736,7 @@ void handleExportAll(){
   JsonArray vin = settings["vinMatrix"].to<JsonArray>();
   for(int j=0;j < 65;j++) {
     vin.add(vinMatrix[j]);
-  }
+  } // end of handleExportAll
 
   // ---------------- Send file ----------------
   String out;
@@ -2740,7 +2745,48 @@ void handleExportAll(){
   server.send(200, "application/json", out);
 } // end of handleExportAll()
 
+void handleUpdate() {
+  server.sendHeader("Connection", "close");
+
+  if (Update.hasError()) {
+    server.send(500, "text/plain", "Update Failed!");
+  } else {
+    server.send(200, "text/plain", "Update Success! Rebooting...");
+  }
+
+  delay(100);
+  ESP.restart();
+} // end of handleUpdate()
+
+void handleUpdateUpload() {
+  HTTPUpload& upload = server.upload();
+
+  if (upload.status == UPLOAD_FILE_START) {
+    Serial.printf("Update Start: %s\n", upload.filename.c_str());
+
+    if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {
+      Update.printError(Serial);
+    }
+
+  } else if (upload.status == UPLOAD_FILE_WRITE) {
+
+    if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+      Update.printError(Serial);
+    }
+
+  } else if (upload.status == UPLOAD_FILE_END) {
+
+    if (Update.end(true)) {
+      Serial.printf("Update Success: %u bytes\n", upload.totalSize);
+    } else {
+      Update.printError(Serial);
+    }
+  }
+} // end of handleUpdateUpload()
+
+
 void handleRoot(){
+  String fwVer = String(FIRMWARE_VERSION);
   String page = R"rawliteral(
   <!DOCTYPE html>
   <html>
@@ -3087,6 +3133,56 @@ void handleRoot(){
         top: 50%;
         transform: translateY(-50%);
       }
+
+      .settings-section.firmware-section {
+        margin-top: 48px;
+      }
+
+      .settings-section.firmware-section input[type="file"] {
+        margin-top: 8px;
+        margin-bottom: 12px;
+        width: auto;
+      }
+
+      .settings-section.firmware-section button,
+      .settings-section.firmware-section input[type="submit"] {
+        width: auto;
+        display: inline-block;
+        padding: 8px 16px;
+        font-size: 1rem;
+      }
+
+      .fw-upload-row {
+        display: flex;
+        align-items: center;
+        margin-top: 6px;
+        gap: 12px;
+      }
+
+      #fwUploadBtn {
+        display: none;
+        height: 36px;
+        padding: 0 14px;
+        font-size: 1rem;
+        line-height: 36px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        margin: 0;
+      }
+
+      #fwUploadBtn:hover {
+        background-color: #45a049;
+      }
+
+      #fwStatus {
+        font-size: 0.95rem;
+        white-space: nowrap;
+      }
+
 
 
     </style>
@@ -3482,6 +3578,19 @@ void handleRoot(){
                     <!-- Inputs go here -->
                 </div>
             </div>
+
+            <div class="settings-section firmware-section">
+              <h2 class="settings-title">Firmware Update</h2>
+              Current Version: )rawliteral" + fwVer + R"rawliteral(
+              <form id="fwForm" class="fw-form">
+                <input type="file" id="fwFile" name="update" accept=".bin">
+                <div class="fw-upload-row">
+                  <button type="submit" id="fwUploadBtn" class="fw-button">Upload Firmware</button>
+                  <span id="fwStatus"></span>
+                </div>
+              </form>
+            </div>
+
 
 
 
@@ -4372,6 +4481,71 @@ void handleRoot(){
       updateAutoMatrixVisibility();
   });
 
+  document.addEventListener("DOMContentLoaded", function() {
+    const fileInput = document.getElementById("fwFile");
+    const uploadBtn = document.getElementById("fwUploadBtn");
+    const status = document.getElementById("fwStatus");
+
+    fileInput.addEventListener("change", function() {
+      uploadBtn.style.display = "none";
+      status.innerText = "";
+
+      if (!fileInput.files.length) return;
+
+      const file = fileInput.files[0];
+      if (!file.name.toLowerCase().endsWith(".bin")) {
+        status.innerText = "Invalid file type. Please select a .bin firmware file.";
+        status.style.color = "red";
+        fileInput.value = "";
+        return;
+      }
+
+      uploadBtn.style.display = "inline-block";
+      status.style.color = "";
+
+      // Scroll button into view
+      uploadBtn.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+
+    document.getElementById("fwForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      if (!fileInput.files.length) return;
+
+      const formData = new FormData();
+      formData.append("update", fileInput.files[0]);
+
+      status.innerText = "Uploading... 0%";
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/update", true);
+
+      xhr.upload.onprogress = function(event) {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          status.innerText = "Uploading... " + percent + "%";
+        }
+      };
+
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          status.innerText = "Update complete. Rebooting...";
+          setTimeout(function checkESP() {
+            fetch("/")
+              .then(resp => { if (resp.ok) location.reload(); else setTimeout(checkESP, 1000); })
+              .catch(() => setTimeout(checkESP, 1000));
+          }, 3000);
+        } else {
+          status.innerText = "Update failed.";
+        }
+      };
+
+      xhr.onerror = function() {
+        status.innerText = "Upload error occurred.";
+      };
+
+      xhr.send(formData);
+    });
+  });
 
   </script>
 
