@@ -1,5 +1,5 @@
 /*
-* Donut Dongle gameID v0.4h (Arduino Nano ESP32 only)
+* Donut Dongle gameID v0.4i (Arduino Nano ESP32 only)
 * Copyright(C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -35,9 +35,9 @@
 #include <ArduinoOTA.h>
 // <EspUsbHostSerial_FTDI.h> is listed further down with instructions on how to install
 
-uint8_t const debugE1CAP = 0; // line ~769
-uint8_t const debugE2CAP = 0; // line ~1032
-uint8_t const debugState = 0; // line ~576
+uint8_t const debugE1CAP = 0; // line ~762
+uint8_t const debugE2CAP = 0; // line ~1025
+uint8_t const debugState = 0; // line ~574
 
 //////////////////////////////////////////  WIFI & Setup //  WIFI & Setup //  WIFI & Setup // WIFI & Setup //////////////////////////////////////////
 
@@ -47,7 +47,7 @@ const char* ssid = "SSID";                    // Wifi Network goes here in quote
 const char* password = "password";            // replace "password" with your Wifi password including quotes ""
 const char* updatepassword = "update123";     // password for updating firmware over Wifi via Arduino IDE 2.x. include quotes ""
 
-#define usbMode false              // USB Serial Command mode. set true to enable. requires OTG adapter. normal Serial mode will be active regardless of setting.
+#define usbMode true              // USB Serial Command mode. set true to enable. requires OTG adapter. normal Serial mode will be active regardless of setting.
                                    // https://github.com/wakwak-koba/EspUsbHost will also need to be installed in order to have FTDI support for the RT4K usb serial port.
                                    // This is the easiest method...
                                    // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
@@ -355,8 +355,6 @@ uint32_t prevAMstate = 0;
 int  AMstateTop = -1;
 uint8_t amSizeSW1 = 8; // 8 by default, but updates if a different size is discovered
 uint8_t amSizeSW2 = 8; // ...
-bool verbcheckSW1 = true;
-bool verbcheckSW2 = true;
 
 // GAMEID variables
 bool S0_gameID = true;    // When a gameID match is not found for a powered on console, DefaultProf for that console will load
@@ -748,11 +746,6 @@ uint8_t readAMstate(String& sinput, uint8_t size){
 
 void readExtron1(){
 
-    if(automatrixSW1 && verbcheckSW1){
-      extronSerial.write(VERB,5); // sets extron matrix switch to Verbose level 3
-      verbcheckSW1 = false;
-    }
-    else if(!automatrixSW1) verbcheckSW1 = true; // reset to true when automatrixSW1 is toggled off
 
     if(automatrixSW1){ // if automatrixSW1 is set "true" in options, then "0LS" is sent every 500ms to see if an input has changed
       LS0time1(500);
@@ -834,7 +827,12 @@ void readExtron1(){
           sendProfile(currentInputSW1,EXTRON1,1);
         }
       }
-    } // end of automatrix
+    }
+    else if(automatrixSW1 && (ecap.substring(0,10) == "00000000\r\n" || ecap.substring(0,18) == "0000000000000000\r\n" 
+            || ecap.substring(0,26) == "000000000000000000000000\r\n" 
+            || ecap.substring(0,34) == "00000000000000000000000000000000\r\n")){
+      extronSerial.write(VERB,5); // sets extron matrix switch to Verbose level 3
+    } // end of Verbose check
     else{                             // less complex switches only report input status, no output status
       einput = ecap.substring(0,4);
       eoutput[0] = 1;
@@ -1012,11 +1010,6 @@ void readExtron1(){
 
 void readExtron2(){
 
-    if(automatrixSW2 && verbcheckSW2){
-      extronSerial2.write(VERB,5); // sets extron matrix switch to Verbose level 3
-      verbcheckSW2 = false;
-    }
-    else if(!automatrixSW2) verbcheckSW2 = true; // reset to true when automatrixSW1 is toggled off
 
     if(automatrixSW2){ // if automatrixSW2 is set "true" in options, then "0LS" is sent every 500ms to see if an input has changed
       LS0time2(500);
@@ -1096,7 +1089,12 @@ void readExtron2(){
           sendProfile(currentInputSW2 + 100,EXTRON2,1);
         }
       }
-    } // end of automatrix
+    }
+    else if(automatrixSW2 && (ecap.substring(0,10) == "00000000\r\n" || ecap.substring(0,18) == "0000000000000000\r\n" 
+            || ecap.substring(0,26) == "000000000000000000000000\r\n" 
+            || ecap.substring(0,34) == "00000000000000000000000000000000\r\n")){
+      extronSerial2.write(VERB,5); // sets extron matrix switch to Verbose level 3
+    } // end of Verbose check
     else{                              // less complex switches only report input status, no output status
       einput = ecap.substring(0,4);
       eoutput[1] = 1;
@@ -3389,9 +3387,8 @@ void handleRoot(){
                 <span class="tooltip">
                   <label for="automatrixSW1_toggle">Auto Matrix SW1</label>
                   <span class="tooltip-bubble">
-                    Enable for Auto Matrix switching on "SW1" port.<br>
-                    Extron Matrix switch MUST support DSVP.<br><br>
-                    **Must toggle setting off/on if Extron Matrix reboots.**<br>
+                    Enable for Auto Matrix switching on "SW1" port.<br><br>
+                    **Extron Matrix switch MUST support DSVP.**<br>
                   </span>
                 </span>
                 <label class="switch">
@@ -3405,9 +3402,8 @@ void handleRoot(){
                 <span class="tooltip">
                   <label for="automatrixSW2_toggle">Auto Matrix SW2</label>
                   <span class="tooltip-bubble">
-                    Enable for Auto Matrix switching on "SW2" port.<br>
-                    Extron Matrix switch MUST support DSVP.<br><br>
-                    **Must toggle setting off/on if Extron Matrix reboots.**<br>
+                    Enable for Auto Matrix switching on "SW2" port.<br><br>
+                    **Extron Matrix switch MUST support DSVP.**<br>
                   </span>
                 </span>
                 <label class="switch">
@@ -3422,7 +3418,7 @@ void handleRoot(){
                   <label for="vinMatrixMode_select">Auto Matrix Mode</label>
                   <span class="tooltip-bubble">
                    Auto switches inputs based on signal detection.<br>
-                   Choose how you would like it to switch.<br><br>
+                   Choose what you want to do with the Input.<br><br>
                    **Extron Matrix switch MUST support DSVP.**<br>
                   </span>
                 </span>
