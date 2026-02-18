@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.7h
+* Donut Dongle beta v1.7i
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -398,10 +398,8 @@ void setup(){
     Serial.print(F("\r")); // clear RT4K Serial buffer
     extronSerial.begin(9600); // set the baud rate for the Extron sw1 Connection
     extronSerial.setTimeout(150); // sets the timeout for reading / saving into a string
-    if(automatrixSW1)extronSerial.write(VERB,5); // sets extron matrix switch to Verbose level 3
     extronSerial2.begin(9600); // set the baud rate for Extron sw2 Connection
     extronSerial2.setTimeout(150); // sets the timeout for reading / saving into a string for the Extron sw2 Connection
-    if(automatrixSW2)extronSerial2.write(VERB,5); // sets extron matrix switch to Verbose level 3
     pinMode(LED_BUILTIN, OUTPUT); // initialize builtin led for RTwake
 
 } // end of setup
@@ -519,6 +517,11 @@ void readExtron1(){
           sendProfile(currentInputSW1,EXTRON1,1);
         }
       }
+    }
+    else if(ecap.substring(0,10) == "00000000\r\n" || ecap.substring(0,18) == "0000000000000000\r\n" 
+            || ecap.substring(0,26) == "000000000000000000000000\r\n" 
+            || ecap.substring(0,34) == "00000000000000000000000000000000\r\n"){
+      extronSerial.write(VERB,5); // sets extron matrix switch to Verbose level 3
     } // end of automatrix
 #endif
     else{                             // less complex switches only report input status, no output status
@@ -778,6 +781,11 @@ void readExtron2(){
           sendProfile(currentInputSW2 + 100,EXTRON2,1);
         }
       }
+    }
+    else if(ecap.substring(0,10) == "00000000\r\n" || ecap.substring(0,18) == "0000000000000000\r\n" 
+            || ecap.substring(0,26) == "000000000000000000000000\r\n" 
+            || ecap.substring(0,34) == "00000000000000000000000000000000\r\n"){
+      extronSerial2.write(VERB,5); // sets extron matrix switch to Verbose level 3
     } // end of automatrix
 #endif
     else{                              // less complex switches only report input status, no output status
@@ -1194,6 +1202,12 @@ void readIR(){
         svsbutton += 0;
         nument++;
         ir_recv_command = 0;
+      }
+      else if(ir_recv_command == 26){ // if you accidentally hit the aux8 button 2x + power, still power toggle tv
+        sendIR(auxpower,0,1); 
+        ir_recv_command = 0;
+        svsbutton = "";
+        nument = 0;
       }
       else{
         extrabuttonprof = 0;
