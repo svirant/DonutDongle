@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5b"
+#define FIRMWARE_VERSION "0.5c"
 #define SEND_LEDC_CHANNEL 0
 #define IR_SEND_PIN 11    // Optional IR LED Emitter for RT5X compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2  // Optional IR Receiver on pin D2
@@ -40,7 +40,7 @@
 
 uint8_t const debugE1CAP = 0; // line ~787
 uint8_t const debugE2CAP = 0; // line ~1051
-uint8_t const debugState = 0; // line ~600
+uint8_t const debugState = 0; // line ~597
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -51,7 +51,6 @@ const char* donuthostname = "donutshop";      // hostname, by default: http://do
                                    // This is the easiest method...
                                    // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
                                    // Step 2 - In Arudino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
-
 
 /*
 ////////////////////
@@ -531,6 +530,7 @@ void setup(){
     button { background-color: #4CAF50 !important; }
     </style>
     )rawliteral");
+  WiFi.setHostname(donuthostname);
   wm.autoConnect("DonutShop_Setup");
 
   // Turn off orange LED when connected
@@ -542,9 +542,6 @@ void setup(){
   #if usbMode
   usbHost.begin(115200); // leave at 115200 for RT4K usb connection
   #endif
-  analogWrite(LED_GREEN,255);
-  analogWrite(LED_BLUE,255);
-
   Serial.begin(9600);                           // set the baud rate for the RT4K VGA serial connection
   extronSerial.begin(9600,SERIAL_8N1,3,4);   // set the baud rate for the Extron sw1 Connection
   extronSerial.setTimeout(150);                 // sets the timeout for reading / saving into a string
@@ -642,8 +639,11 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
     for(int i = 0; i < consolesSize; i++){
       if(WiFi.status() == WL_CONNECTED && consoles[i].Enabled){ // wait for WiFi connection
         HTTPClient http;
+        WiFiClientSecure https;
+        https.setInsecure(); // needed for MemCardPro 2.0+ firmware support
         http.setConnectTimeout(2000); // give only 2 seconds per console to check gameID, is only honored for IP-based addresses
-        http.begin(consoles[i].Address);
+        if(consoles[i].Address.substring(0,5) == "https") http.begin(https,consoles[i].Address);
+        else http.begin(consoles[i].Address);
         analogWrite(LED_BLUE,222);
         int httpCode = http.GET();             // start connection and send HTTP header
         if(httpCode > 0 || httpCode == -11){   // httpCode will be negative on error, let the read error slide...
@@ -3431,7 +3431,7 @@ void handleRoot(){
               <!-- TESmart -->
               <div class="setting-row">
                 <span class="tooltip">
-                  TESmart (AUX7 or AUX8 + Profile Button to change Input over Serial)
+                  TESmart (AUX7 or AUX8 + Profile Button changes Input over Serial)
                   <span class="tooltip-bubble">
                   AUX7 / AUX8 + Profile button for SVS Profiles 1-12<br>
                   AUX7 / AUX8 + AUX1 - AUX4 for SVS Profiles 13-16<br>
