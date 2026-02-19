@@ -16,7 +16,8 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5c"
+#define FIRMWARE_VERSION "0.5d"
+#define FW_TYPE "D"
 #define SEND_LEDC_CHANNEL 0
 #define IR_SEND_PIN 11    // Optional IR LED Emitter for RT5X compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2  // Optional IR Receiver on pin D2
@@ -38,9 +39,9 @@
 #include <Update.h>
 // <EspUsbHostSerial_FTDI.h> is listed further down with instructions on how to install
 
-uint8_t const debugE1CAP = 0; // line ~787
-uint8_t const debugE2CAP = 0; // line ~1051
-uint8_t const debugState = 0; // line ~597
+uint8_t const debugE1CAP = 0; // line ~780
+uint8_t const debugE2CAP = 0; // line ~1044
+uint8_t const debugState = 0; // line ~590
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -460,16 +461,8 @@ class SerialFTDI : public EspUsbHostSerial_FTDI {
           if(offset > 0) cprof = String(tp + offset);
           tcprof = "\rSVS NEW INPUT=" + cprof + "\r\n";
           submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcprof[0]), tcprof.length()); // usb response
-          Serial.print(F("\rSVS NEW INPUT=")); // serial response
-          if(tp != 0)Serial.print(tp + offset);
-          else Serial.print(tp);;
-          Serial.println(F("\r"));
           delay(1000);
-          tcprof = "\rSVS CURRENT INPUT=" + cprof + "\r\n"; // serial response
-          Serial.print(F("\rSVS CURRENT INPUT="));
-          if(tp != 0)Serial.print(tp + offset);
-          else Serial.print(tp);
-          Serial.println(F("\r"));      
+          tcprof = "\rSVS CURRENT INPUT=" + cprof + "\r\n"; // serial response     
         }
         if(tp < 0){
           tcprof = "\rremote prof" + String((-1)*tp) + "\r\n";
@@ -2076,9 +2069,7 @@ void sendSVS(uint16_t num){
   usbHost.cprof = String(num); 
   #endif
 
-  #if !usbMode // only VGA Serial commands (red led only)
   digitalWrite(LED_BUILTIN,HIGH);
-
   Serial.print(F("\rSVS NEW INPUT="));
   if(num != 0)Serial.print(num + offset);
   else Serial.print(num);;
@@ -2088,9 +2079,7 @@ void sendSVS(uint16_t num){
   if(num != 0)Serial.print(num + offset);
   else Serial.print(num);
   Serial.println(F("\r"));
-
   digitalWrite(LED_BUILTIN,LOW);
-  #endif
   currentProf = num;
 } // end of sendSVS()
 
@@ -2787,6 +2776,11 @@ void handleUpdateUpload() {
 
 void handleRoot(){
   String fwVer = String(FIRMWARE_VERSION);
+  #ifdef FW_TYPE
+  String fwType = String(FW_TYPE);
+  #else
+  String fwType = "";
+  #endif
   String page = R"rawliteral(
   <!DOCTYPE html>
   <html>
@@ -3318,12 +3312,12 @@ void handleRoot(){
 
         <div id="settingsPage" style="display:none; padding-top:60px;">
         <div style="width:80%; margin:20px auto;">
-          <div class="settings-section">
+          <div class="settings-section" id="profileRulesSection">
             <h2 class="settings-title">Profile Rules</h2>
             <div class="settings-content">
 
               <!-- S0 Toggle -->
-              <div class="setting-row">
+              <div class="setting-row" id="S0_row">
                 <span class="tooltip">
                   <span id="S0_label">
                     Load S0 profile when ALL Consoles are powered OFF
@@ -3578,24 +3572,26 @@ void handleRoot(){
                     <!-- Inputs go here -->
                 </div>
             </div>
-
-            <div class="settings-section firmware-section">
-              <h2 class="settings-title">Firmware Update</h2>
-              Current Version: )rawliteral" + fwVer + R"rawliteral(
-              <form id="fwForm" class="fw-form">
-                <input type="file" id="fwFile" name="update" accept=".bin">
-                <div class="fw-upload-row">
-                  <button type="submit" id="fwUploadBtn" class="fw-button">Upload Firmware</button>
-                  <span id="fwStatus"></span>
-                </div>
-              </form>
-            </div>
-
-
-
-
-            </div>
           </div>
+        </div>
+
+        <div class="settings-section firmware-section" id="firmwareSection">
+          <h2 class="settings-title">Firmware Update</h2>
+          Current Version: )rawliteral" + fwVer + R"rawliteral(
+          <form id="fwForm" class="fw-form">
+            <input type="file" id="fwFile" name="update" accept=".bin">
+            <div class="fw-upload-row">
+              <button type="submit" id="fwUploadBtn" class="fw-button">Upload Firmware</button>
+              <span id="fwStatus"></span>
+            </div>
+          </form>
+        </div>
+
+
+
+
+      </div>
+    </div>
 
 
   <script>
@@ -3608,38 +3604,78 @@ void handleRoot(){
   let currentSortDir = 'asc';
   let currentPage = "main";
 
+  const fwType = ")rawliteral" + fwType + R"rawliteral(";
+  const urlParams = new URLSearchParams(window.location.search);
 
   function togglePage() {
-      const main = document.getElementById("mainPage");
-      const settings = document.getElementById("settingsPage");
-      const iconSpan = document.getElementById("navTooltip");
-      const tooltipText = document.getElementById("navTooltipText");
-      const mainButtons = document.getElementById("mainTopbarButtons");
+    const main = document.getElementById("mainPage");
+    const settings = document.getElementById("settingsPage");
+    const iconSpan = document.getElementById("navTooltip");
+    const tooltipText = document.getElementById("navTooltipText");
+    const mainButtons = document.getElementById("mainTopbarButtons");
 
-      if (currentPage === "main") {
-          main.style.display = "none";
-          settings.style.display = "block";
-          mainButtons.style.display = "none";
+    if (currentPage === "main") {
+      // Hide main page
+      main.style.display = "none";
+      mainButtons.style.display = "none";
+      settings.style.display = "block";
+      iconSpan.firstChild.nodeValue = "⬅ ";
+      tooltipText.textContent = "Back";
+      currentPage = "settings";
 
-          iconSpan.firstChild.nodeValue = "⬅ ";
-          tooltipText.textContent = "Back";
-
-          currentPage = "settings";
-      } else {
-          // Save settings before leaving page
-          updateSettings();
-
-          settings.style.display = "none";
-          main.style.display = "block";
-          mainButtons.style.display = "flex";
-
-          iconSpan.firstChild.nodeValue = "⚙️ ";
-          tooltipText.textContent = "Settings";
-
-          currentPage = "main";
+      // If FW_TYPE == "C", load Quick Settings
+      if (typeof fwType !== "undefined" && fwType === "C") {
+        showQuickSettings();
       }
+    } else {
+      updateSettings();
+      main.style.display = "block";
+      mainButtons.style.display = "flex";
+      settings.style.display = "none";
+      iconSpan.firstChild.nodeValue = "⚙️ ";
+      tooltipText.textContent = "Settings";
+
+      currentPage = "main";
+    }
   }
 
+
+  function showQuickSettings() {
+    document.getElementById("mainPage").style.display = "none";
+    document.getElementById("settingsPage").style.display = "block";
+    currentPage = "settings";
+
+    // Hide all settings sections
+    document.querySelectorAll(".settings-section").forEach(sec => sec.style.display = "none");
+
+    // Show Firmware section
+    const fw = document.getElementById("firmwareSection");
+    if (fw) fw.style.display = "block";
+
+    // Show Profile Rules container
+    const profile = document.getElementById("profileRulesSection");
+    if (profile) {
+      profile.style.display = "block";
+
+      // Hide all rows first
+      profile.querySelectorAll(".setting-row").forEach(row => row.style.display = "none");
+
+      // Force SRS variable to 1
+      Vars["SRS"] = 1;
+      saveVars();
+
+      // Show S0 row
+      const s0 = document.getElementById("S0_row");
+      if (s0) s0.style.display = "flex";
+
+      // Update S0 label text immediately
+      const s0Label = document.getElementById("S0_label");
+      if (s0Label) {
+        s0Label.textContent = "Load S0 profile when ALL Consoles are powered OFF";
+      }
+
+    }
+  }
 
   // inject current Settings values
   )rawliteral";
@@ -3672,6 +3708,7 @@ void handleRoot(){
     if (s0cb && Vars['S0_gameID'] !== undefined) {
       s0cb.checked = Vars['S0_gameID'];
     }
+
   }
 
   function renderAuxProfInputs() {
@@ -4546,6 +4583,7 @@ void handleRoot(){
       xhr.send(formData);
     });
   });
+
 
   </script>
 
