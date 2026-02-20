@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5d"
+#define FIRMWARE_VERSION "0.5e"
 #define FW_TYPE "D"
 #define SEND_LEDC_CHANNEL 0
 #define IR_SEND_PIN 11    // Optional IR LED Emitter for RT5X compatibility. Sends IR data out Arduino pin D11
@@ -39,8 +39,8 @@
 #include <Update.h>
 // <EspUsbHostSerial_FTDI.h> is listed further down with instructions on how to install
 
-uint8_t const debugE1CAP = 0; // line ~780
-uint8_t const debugE2CAP = 0; // line ~1044
+uint8_t const debugE1CAP = 0; // line ~782
+uint8_t const debugE2CAP = 0; // line ~1046
 uint8_t const debugState = 0; // line ~590
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -633,8 +633,10 @@ void readGameID(){ // queries addresses in "consoles" array for gameIDs
       if(WiFi.status() == WL_CONNECTED && consoles[i].Enabled){ // wait for WiFi connection
         HTTPClient http;
         WiFiClientSecure https;
+        http.setConnectTimeout(2000); // give only 2 seconds per http console to check gameID, is only honored for IP-based addresses
         https.setInsecure(); // needed for MemCardPro 2.0+ firmware support
-        http.setConnectTimeout(2000); // give only 2 seconds per console to check gameID, is only honored for IP-based addresses
+        https.setTimeout(5); // give 5 seconds for https 
+        https.setHandshakeTimeout(5); // ^^^
         if(consoles[i].Address.substring(0,5) == "https") http.begin(https,consoles[i].Address);
         else http.begin(consoles[i].Address);
         analogWrite(LED_BLUE,222);
@@ -3935,8 +3937,7 @@ void handleRoot(){
         consoles[idx].DefaultProf = parseInt(profInput.value, 10) || 0; 
         if (consoles[idx].King === 1) {
           activeProfileNumber = consoles[idx].DefaultProf;
-          highlightProfileRow();
-          highlightConsoleProfiles();
+          highlightProfiles();
         }
         await saveConsoles(); 
       };
@@ -4042,8 +4043,7 @@ void handleRoot(){
       valInput.name = `profile_val_${idx}`;
       valInput.onchange = async () => {
         await saveProfiles();
-        highlightProfileRow();
-        highlightConsoleProfiles();
+        highlightProfiles();
       };
       tdVal.appendChild(valInput);
       tr.appendChild(tdVal);
@@ -4107,9 +4107,7 @@ void handleRoot(){
     consoles.forEach((c, i) => updateStatusIcon(i));
 
     renderProfiles();
-
-    highlightProfileRow();
-    highlightConsoleProfiles();
+    highlightProfiles();
 
   }
 
@@ -4198,8 +4196,7 @@ void handleRoot(){
 
     if (c.King === 1 && c.Prof !== undefined) {
       activeProfileNumber = parseInt(c.Prof, 10);
-      highlightProfileRow();
-      highlightConsoleProfiles();
+      highlightProfiles();
     }
   }
 
@@ -4301,19 +4298,18 @@ void handleRoot(){
       const king = consoles.find(c => c.King === 1);
       activeProfileNumber = king ? parseInt(king.Prof || 0, 10) : null;
 
-      highlightProfileRow();
-      highlightConsoleProfiles();
+      highlightProfiles();
 
     } catch (err) {
       console.error("Error refreshing consoles:", err);
     }
   }, 2500);
 
-  // ---------------- HIGHLIGHT FUNCTIONS ----------------
-  function highlightProfileRow() {
-    const rows = document.querySelectorAll('#profileTable tbody tr');
+  function highlightProfiles() {
+    let gameMatchFound = false;
 
-    rows.forEach(row => {
+    const profileRows = document.querySelectorAll('#profileTable tbody tr');
+    profileRows.forEach(row => {
       row.classList.remove('profile-match');
 
       const valInput = row._val;
@@ -4321,18 +4317,14 @@ void handleRoot(){
 
       const profNum = parseInt(valInput.value, 10);
 
-      // Only highlight gameDB if activeProfileNumber does NOT match any console DefaultProf
-      const consoleMatch = consoles.some(c => parseInt(c.DefaultProf, 10) === activeProfileNumber);
-      if (!consoleMatch && profNum === activeProfileNumber) {
+      if (profNum === activeProfileNumber) {
         row.classList.add('profile-match');
+        gameMatchFound = true;  // mark that a gameDB match exists
       }
     });
-  }
 
-  function highlightConsoleProfiles() {
-    const rows = document.querySelectorAll('#consoleTable tbody tr');
-
-    rows.forEach((row, i) => {
+    const consoleRows = document.querySelectorAll('#consoleTable tbody tr');
+    consoleRows.forEach((row, i) => {
       const cell = row.children[3]; // DefaultProf column
       if (!cell) return;
 
@@ -4345,12 +4337,13 @@ void handleRoot(){
       const c = consoles[i];
       if (!c) return;
 
-      // Highlight if DefaultProf matches activeProfileNumber
-      if (parseInt(c.DefaultProf, 10) === activeProfileNumber) {
+      // Only highlight DefaultProf if no gameDB match
+      if (!gameMatchFound && parseInt(c.DefaultProf, 10) === activeProfileNumber) {
         cell.style.backgroundColor = '#4CAF50';
       }
     });
   }
+
 
   // ---------------- EXPORT / IMPORT FUNCTIONS ----------------
   function exportData() {
