@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.7j
+* Donut Dongle beta v1.7k
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -46,9 +46,9 @@ uint8_t mswitchSize = 4;
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~454
-uint8_t const debugE2CAP = 0; // line ~714
-uint8_t const debugState = 0; // line ~425
+uint8_t const debugE1CAP = 0; // line ~453
+uint8_t const debugE2CAP = 0; // line ~718
+uint8_t const debugState = 0; // line ~424
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -397,9 +397,9 @@ void setup(){
     while(!Serial){;}   // allow connection to establish before continuing
     Serial.print(F("\r")); // clear RT4K Serial buffer
     extronSerial.begin(9600); // set the baud rate for the Extron sw1 Connection
-    extronSerial.setTimeout(150); // sets the timeout for reading / saving into a string
+    extronSerial.setTimeout(50); // sets the timeout for reading / saving into a string
     extronSerial2.begin(9600); // set the baud rate for Extron sw2 Connection
-    extronSerial2.setTimeout(150); // sets the timeout for reading / saving into a string for the Extron sw2 Connection
+    extronSerial2.setTimeout(50); // sets the timeout for reading / saving into a string for the Extron sw2 Connection
     pinMode(LED_BUILTIN, OUTPUT); // initialize builtin led for RTwake
 
 } // end of setup
@@ -441,7 +441,7 @@ void readExtron1(){
 
   #if !automatrixSW1
     if(MTVddSW1){            // if a MT-VIKI switch has been detected on SW1, then the currently active MT-VIKI hdmi port is checked for disconnection
-      MTVtime1(1500);
+      MTVtime1(2000);
     }
   #endif
 
@@ -693,7 +693,7 @@ void readExtron1(){
     }
 #endif
 
-  memset(ecapbytes,0,sizeof(ecapbytes)); // reset capture to all 0s
+  memset(ecapbytes,0,44); // reset capture to all 0s
   ecap = "00000000000000000000000000000000000000000000";
   einput = "000000000000000000000000000000000000";
 
@@ -707,7 +707,7 @@ void readExtron2(){
 
 #if !automatrixSW2
     if(MTVddSW2){            // if a MT-VIKI switch has been detected on SW2, then the currently active MT-VIKI hdmi port is checked for disconnection
-      MTVtime2(1500);
+      MTVtime2(2000);
     }
 #endif
 
@@ -951,7 +951,7 @@ void readExtron2(){
     }
   #endif
 
-  memset(ecapbytes,0,sizeof(ecapbytes)); // reset capture to 0s
+  memset(ecapbytes,0,44); // reset capture to 0s
   ecap = "00000000000000000000000000000000000000000000";
   einput = "000000000000000000000000000000000000";
 
@@ -2058,7 +2058,6 @@ void MTVtime1(unsigned long eTime){
     MTVcurrentTime = 0;
     MTVprevTime = 0;
     extronSerialEwrite("viki",currentMTVinput[0],1);
-    delay(50);
  }
 }  // end of MTVtime1()
 #endif
@@ -2072,7 +2071,6 @@ void MTVtime2(unsigned long eTime){
     MTVcurrentTime2 = 0;
     MTVprevTime2 = 0;
     extronSerialEwrite("viki",currentMTVinput[1] - 100,2);
-    delay(50);
  }
 } // end of MTVtime2()
 #endif
@@ -2110,7 +2108,6 @@ void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
     else if(sw == 2)
       extronSerial2.write(tesmart,6);
   }
-  delay(50);
 } // end of extronSerialEwrite()
 
 void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
