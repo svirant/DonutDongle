@@ -16,8 +16,8 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5e"
-#define FW_TYPE "D"
+#define FIRMWARE_VERSION "0.5f"
+#define FW_TYPE 'D'
 #define SEND_LEDC_CHANNEL 0
 #define IR_SEND_PIN 11    // Optional IR LED Emitter for RT5X compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2  // Optional IR Receiver on pin D2
@@ -453,7 +453,6 @@ class SerialFTDI : public EspUsbHostSerial_FTDI {
       usb_host_transfer_submit(this->usbTransfer_recv);
       if(cprof != "null"){
         tp = cprof.toInt();
-        digitalWrite(LED_BUILTIN,HIGH);
         analogWrite(LED_RED,255);
         analogWrite(LED_BLUE,255);
         analogWrite(LED_GREEN,222);
@@ -469,7 +468,6 @@ class SerialFTDI : public EspUsbHostSerial_FTDI {
         }
         submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcprof[0]), tcprof.length()); // usb response
         if(tp < 0) delay(1000); // only added so the green led stays lit for 1 second for "remote prof" commands
-        digitalWrite(LED_BUILTIN,LOW);
         analogWrite(LED_RED,255);
         analogWrite(LED_BLUE,255);
         analogWrite(LED_GREEN,255);
@@ -537,9 +535,9 @@ void setup(){
   #endif
   Serial.begin(9600);                           // set the baud rate for the RT4K VGA serial connection
   extronSerial.begin(9600,SERIAL_8N1,3,4);   // set the baud rate for the Extron sw1 Connection
-  extronSerial.setTimeout(150);                 // sets the timeout for reading / saving into a string
+  extronSerial.setTimeout(50);                 // sets the timeout for reading / saving into a string
   extronSerial2.begin(9600,SERIAL_8N1,8,9);  // set the baud rate for Extron sw2 Connection
-  extronSerial2.setTimeout(150);                // sets the timeout for reading / saving into a string for the Extron sw2 Connection3
+  extronSerial2.setTimeout(50);                // sets the timeout for reading / saving into a string for the Extron sw2 Connection3
   MDNS.begin(donuthostname); // defined around line 40 at the top
   if(!LittleFS.begin(true)){ // format if mount fails
     Serial.println(F("LittleFS mount failed!"));
@@ -581,10 +579,12 @@ void DDloop(void *pvParameters){
   (void)pvParameters;
 
   for(;;){
+    #if FW_TYPE == 'D'
     readIR();
     readExtron1();
     readExtron2();
     if(RTwake)sendRTwake(8000); // 8000 is 8 seconds. After waking the RT4K, wait this amount of time before re-sending the latest profile change.
+    #endif
     if(delaySend)DStime(500);
     server.handleClient();
     if(debugState){
@@ -772,7 +772,7 @@ void readExtron1(){
     }
 
     if(MTVddSW1 && !automatrixSW1){  // if a MT-VIKI switch has been detected on SW1, then the currently active MT-VIKI hdmi port is checked for disconnection
-      MTVtime1(1500);
+      MTVtime1(2000);
     }
 
     // listens to the Extron sw1 Port for changes
@@ -1037,7 +1037,7 @@ void readExtron2(){
     }
 
     if(MTVddSW2 && !automatrixSW2){ // if a MT-VIKI switch has been detected on SW2, then the currently active MT-VIKI hdmi port is checked for disconnection
-      MTVtime2(1500);
+      MTVtime2(2000);
     }
 
     // listens to the Extron sw2 Port for changes
@@ -1593,75 +1593,75 @@ void readIR(){
       if(ir_recv_command == 63){
         if(aux8button < 3)aux8button++;
         else{ 
-          dualSerialPrintln("remote aux8");
+          dualSerialPrint("remote aux8");
         }
       }
       else if(ir_recv_command == 62){
         if(aux7button < 1)aux7button++;
-        else dualSerialPrintln("remote aux7");
+        else dualSerialPrint("remote aux7");
       }
       else if(ir_recv_command == 61){
-        dualSerialPrintln("remote aux6");
+        dualSerialPrint("remote aux6");
       }
       else if(ir_recv_command == 60){
-        dualSerialPrintln("remote aud"); // remote aux5
+        dualSerialPrint("remote aud"); // remote aux5
       }
       else if(ir_recv_command == 59){
-        dualSerialPrintln("remote col"); // remote aux4
+        dualSerialPrint("remote col"); // remote aux4
       }
       else if(ir_recv_command == 58){
-        dualSerialPrintln("remote aux3");
+        dualSerialPrint("remote aux3");
       }
       else if(ir_recv_command == 57){
-        dualSerialPrintln("remote aux2");
+        dualSerialPrint("remote aux2");
       }
       else if(ir_recv_command == 56){
-        dualSerialPrintln("remote aux1");
+        dualSerialPrint("remote aux1");
       }
       else if(ir_recv_command == 52){
-        dualSerialPrintln("remote res1");
+        dualSerialPrint("remote res1");
       }
       else if(ir_recv_command == 53){
-        dualSerialPrintln("remote res2");
+        dualSerialPrint("remote res2");
       }
       else if(ir_recv_command == 54){
-        dualSerialPrintln("remote res3");
+        dualSerialPrint("remote res3");
       }
       else if(ir_recv_command == 55){
-        dualSerialPrintln("remote res4");
+        dualSerialPrint("remote res4");
       }
       else if(ir_recv_command == 51){
-        dualSerialPrintln("remote res480p");
+        dualSerialPrint("remote res480p");
       }
       else if(ir_recv_command == 50){
-        dualSerialPrintln("remote res1440p");
+        dualSerialPrint("remote res1440p");
       }
       else if(ir_recv_command == 49){
-        dualSerialPrintln("remote res1080p");
+        dualSerialPrint("remote res1080p");
       }
       else if(ir_recv_command == 48){
-        dualSerialPrintln("remote res4k");
+        dualSerialPrint("remote res4k");
       }
       else if(ir_recv_command == 47){
-        dualSerialPrintln("remote buffer");
+        dualSerialPrint("remote buffer");
       }
       else if(ir_recv_command == 44){
-        dualSerialPrintln("remote genlock");
+        dualSerialPrint("remote genlock");
       }
       else if(ir_recv_command == 46){
-        dualSerialPrintln("remote safe");
+        dualSerialPrint("remote safe");
       }
       else if(ir_recv_command == 86){
-        dualSerialPrintln("remote pause");
+        dualSerialPrint("remote pause");
       }
       else if(ir_recv_command == 45){
-        dualSerialPrintln("remote phase");
+        dualSerialPrint("remote phase");
       }
       else if(ir_recv_command == 43){
-        dualSerialPrintln("remote gain");
+        dualSerialPrint("remote gain");
       }
       else if(ir_recv_command == 36){
-        dualSerialPrintln("remote prof");
+        dualSerialPrint("remote prof");
       }
       else if(ir_recv_command == 11){
         sendRBP(1);
@@ -1732,46 +1732,46 @@ void readIR(){
         if(OSSCir == 1){sendIR("ossc",12,3);} // OSSC profile 12
       }
       else if(ir_recv_command == 35){
-        dualSerialPrintln("remote adc");
+        dualSerialPrint("remote adc");
       }
       else if(ir_recv_command == 34){
-        dualSerialPrintln("remote sfx");
+        dualSerialPrint("remote sfx");
       }
       else if(ir_recv_command == 33){
-        dualSerialPrintln("remote scaler");
+        dualSerialPrint("remote scaler");
       }
       else if(ir_recv_command == 32){
-        dualSerialPrintln("remote output");
+        dualSerialPrint("remote output");
       }
       else if(ir_recv_command == 17){
-        dualSerialPrintln("remote input");
+        dualSerialPrint("remote input");
       }
       else if(ir_recv_command == 41){
-        dualSerialPrintln("remote stat");
+        dualSerialPrint("remote stat");
       }
       else if(ir_recv_command == 40){
-        dualSerialPrintln("remote diag");
+        dualSerialPrint("remote diag");
       }
       else if(ir_recv_command == 66){
-        dualSerialPrintln("remote back");
+        dualSerialPrint("remote back");
       }
       else if(ir_recv_command == 83){
-        dualSerialPrintln("remote ok");
+        dualSerialPrint("remote ok");
       }
       else if(ir_recv_command == 79){
-        dualSerialPrintln("remote right");
+        dualSerialPrint("remote right");
       }
       else if(ir_recv_command == 16){
-        dualSerialPrintln("remote down");
+        dualSerialPrint("remote down");
       }
       else if(ir_recv_command == 87){
-        dualSerialPrintln("remote left");
+        dualSerialPrint("remote left");
       }
       else if(ir_recv_command == 24){
-        dualSerialPrintln("remote up");
+        dualSerialPrint("remote up");
       }
       else if(ir_recv_command == 92){
-        dualSerialPrintln("remote menu");
+        dualSerialPrint("remote menu");
       }
       else if(ir_recv_command == 26){ // power button
         Serial.println(F("\rpwr on\r")); // wake
@@ -1784,28 +1784,28 @@ void readIR(){
     }
     else if(ir_recv_address == 73 && repeatcount > 4){ // directional buttons have to be held down for just a bit before repeating
       if(ir_recv_command == 24){
-        dualSerialPrintln("remote up");
+        dualSerialPrint("remote up");
       }
       else if(ir_recv_command == 16){
-        dualSerialPrintln("remote down");
+        dualSerialPrint("remote down");
       }
       else if(ir_recv_command == 87){
-        dualSerialPrintln("remote left");
+        dualSerialPrint("remote left");
       }
       else if(ir_recv_command == 79){
-        dualSerialPrintln("remote right");
+        dualSerialPrint("remote right");
       }
     } // end of if(ir_recv_address
     
     if(ir_recv_address == 73 && repeatcount > 15){ // when directional buttons are held down for even longer... turbo directional mode
       if(ir_recv_command == 87){
         for(uint8_t i=0;i<4;i++){
-          dualSerialPrintln("remote left");
+          dualSerialPrint("remote left");
         }
       }
       else if(ir_recv_command == 79){
         for(uint8_t i=0;i<4;i++){
-          dualSerialPrintln("remote right");
+          dualSerialPrint("remote right");
         }
       }
     } // end of turbo directional mode
@@ -2100,13 +2100,13 @@ void sendRBP(int prof){ // send Remote Button Profile
   #endif
 } // end of sendRBP()
 
-void dualSerialPrintln(String str){
+void dualSerialPrint(String str){
   str = "\r" + str + "\r\n";
-  Serial.println(str);
+  Serial.print(str);
   #if usbMode
   usbHost.tcmd = str;
   #endif
-} // end of dualSerialPrintln()
+} // end of dualSerialPrint()
 
 void MTVtime1(unsigned long eTime){
   MTVcurrentTime = millis();  // Init timer
@@ -2116,7 +2116,6 @@ void MTVtime1(unsigned long eTime){
     MTVcurrentTime = 0;
     MTVprevTime = 0;
     extronSerialEwrite("viki",currentMTVinput[0],1);
-    delay(50);
  }
 }  // end of MTVtime1()
 
@@ -2128,7 +2127,6 @@ void MTVtime2(unsigned long eTime){
     MTVcurrentTime2 = 0;
     MTVprevTime2 = 0;
     extronSerialEwrite("viki",currentMTVinput[1] - 100,2);
-    delay(50);
  }
 } // end of MTVtime2()
 
@@ -2165,7 +2163,6 @@ void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
     else if(sw == 2)
       extronSerial2.write(tesmart,6);
   }
-  delay(50);
 }  // end of extronSerialEwrite()
 
 
@@ -3625,7 +3622,7 @@ void handleRoot(){
       tooltipText.textContent = "Back";
       currentPage = "settings";
 
-      // If FW_TYPE == "C", load Quick Settings
+      // If FW_TYPE == 'C', load Quick Settings
       if (typeof fwType !== "undefined" && fwType === "C") {
         showQuickSettings();
       }
