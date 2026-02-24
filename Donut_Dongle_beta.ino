@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.7k
+* Donut Dongle beta v1.7l
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -46,9 +46,9 @@ uint8_t mswitchSize = 4;
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~453
-uint8_t const debugE2CAP = 0; // line ~718
-uint8_t const debugState = 0; // line ~424
+uint8_t const debugE1CAP = 0; // line ~452
+uint8_t const debugE2CAP = 0; // line ~717
+uint8_t const debugState = 0; // line ~423
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -1993,7 +1993,6 @@ void LS0time1(unsigned long eTime){
     LScurrentTime = 0;
     LSprevTime = 0;
     extronSerial.print(F("0LS"));
-    delay(20);
  }
 }  // end of LS0time1()
 
@@ -2005,7 +2004,6 @@ void LS0time2(unsigned long eTime){
     LScurrentTime2 = 0;
     LSprevTime2 = 0;
     extronSerial2.print(F("0LS"));
-    delay(20);
  }
 }  // end of LS0time2()
 
@@ -2089,8 +2087,6 @@ void ExtronOutputQuery(uint8_t outputNum, uint8_t sw){
     extronSerial.write((uint8_t *)cmd,len);
   else if(sw == 2)
     extronSerial2.write((uint8_t *)cmd,len);
-
-  delay(50);
 } // end of ExtronOutputQuery()
 
 void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
