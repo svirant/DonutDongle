@@ -16,8 +16,10 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5g"
+#define FIRMWARE_VERSION "0.5h"
 #define FW_TYPE 'D'
+#define MAX_BYTES 44
+#define MAX_EINPUT 36
 #define SEND_LEDC_CHANNEL 0
 #define IR_SEND_PIN 11    // Optional IR LED Emitter for RT5X compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2  // Optional IR Receiver on pin D2
@@ -39,9 +41,9 @@
 #include <Update.h>
 // <EspUsbHostSerial_FTDI.h> is listed further down with instructions on how to install
 
-uint8_t const debugE1CAP = 0; // line ~797
-uint8_t const debugE2CAP = 0; // line ~1061
-uint8_t const debugState = 0; // line ~592
+uint8_t const debugE1CAP = 0; // line ~801
+uint8_t const debugE2CAP = 0; // line ~1065
+uint8_t const debugState = 0; // line ~596
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -370,7 +372,7 @@ int currentInputSW1 = -1;
 int currentInputSW2 = -1;
 String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
 String einput = "000000000000000000000000000000000000"; // used to store Extron input
-byte ecapbytes[44] = {0}; // used to store first 44 bytes / messages for Extron capture
+byte ecapbytes[MAX_BYTES] = {0}; // used to store first MAX_BYTES bytes / messages for Extron capture
 
 // Serial commands
 byte viki[4] = {0xA5,0x5A,0x00,0xCC};
@@ -540,6 +542,8 @@ void setup(){
   extronSerial.setTimeout(50);                 // sets the timeout for reading / saving into a string
   extronSerial2.begin(9600,SERIAL_8N1,8,9);  // set the baud rate for Extron sw2 Connection
   extronSerial2.setTimeout(50);                // sets the timeout for reading / saving into a string for the Extron sw2 Connection3
+  ecap.reserve(MAX_BYTES); // reserve MAX_BYTES bytes in memory to prevent fragmentation
+  einput.reserve(MAX_EINPUT); // reserve MAX_EINPUT ^^^
   MDNS.begin(donuthostname); // defined around line 40 at the top
   if(!LittleFS.begin(true)){ // format if mount fails
     Serial.println(F("LittleFS mount failed!"));
@@ -793,10 +797,10 @@ void readExtron1(){
     // listens to the Extron sw1 Port for changes
     // SIS Command Responses reference - Page 77 https://media.extron.com/public/download/files/userman/XP300_Matrix_B.pdf
     if(extronSerial.available() > 0){ // if there is data available for reading, read
-      extronSerial.readBytes(ecapbytes,44); // read in and store only the first 44 bytes for every status message received from 1st Extron SW port
+      extronSerial.readBytes(ecapbytes,MAX_BYTES); // read in and store only the first MAX_BYTES bytes for every status message received from 1st Extron SW port
       if(debugE1CAP){
         Serial.print(F("ecap HEX: "));
-        for(uint8_t i=0;i<44;i++){
+        for(uint8_t i=0;i<MAX_BYTES;i++){
           Serial.print(ecapbytes[i],HEX);Serial.print(F(" "));
         }
         Serial.println(F("\r"));
@@ -1038,7 +1042,7 @@ void readExtron1(){
       }
     } // end of if(!automatrixSW1)
 
-  memset(ecapbytes,0,sizeof(ecapbytes)); // reset capture to all 0s
+  memset(ecapbytes,0,MAX_BYTES); // reset capture to all 0s
   ecap = "00000000000000000000000000000000000000000000";
   einput = "000000000000000000000000000000000000";
 
@@ -1057,10 +1061,10 @@ void readExtron2(){
 
     // listens to the Extron sw2 Port for changes
     if(extronSerial2.available() > 0){ // if there is data available for reading, read
-    extronSerial2.readBytes(ecapbytes,44); // read in and store only the first 44 bytes for every status message received from 2nd Extron port
+    extronSerial2.readBytes(ecapbytes,MAX_BYTES); // read in and store only the first MAX_BYTES bytes for every status message received from 2nd Extron port
       if(debugE2CAP){
         Serial.print(F("ecap2 HEX: "));
-        for(uint8_t i=0;i<44;i++){
+        for(uint8_t i=0;i<MAX_BYTES;i++){
           Serial.print(ecapbytes[i],HEX);Serial.print(F(" "));
         }
         Serial.println(F("\r"));
@@ -1294,7 +1298,7 @@ void readExtron2(){
       }
     } // end of !automatrixSW2
 
-  memset(ecapbytes,0,sizeof(ecapbytes)); // reset capture to 0s
+  memset(ecapbytes,0,MAX_BYTES); // reset capture to 0s
   ecap = "00000000000000000000000000000000000000000000";
   einput = "000000000000000000000000000000000000";
 

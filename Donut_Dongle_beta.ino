@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.7l
+* Donut Dongle beta v1.7m
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,8 @@
 
 #define IR_SEND_PIN 11  // Optional IR LED Emitter for RT5X / OSSC compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2 // Optional IR Receiver on pin D2
+#define MAX_BYTES 44
+#define MAX_EINPUT 36
 
 #define EXTRON1 0
 #define EXTRON2 1
@@ -46,9 +48,9 @@ uint8_t mswitchSize = 4;
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~452
-uint8_t const debugE2CAP = 0; // line ~717
-uint8_t const debugState = 0; // line ~423
+uint8_t const debugE1CAP = 0; // line ~457
+uint8_t const debugE2CAP = 0; // line ~722
+uint8_t const debugState = 0; // line ~427
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -337,7 +339,7 @@ int currentInputSW2 = -1;
 int currentProf = 0; // negative numbers for Remote Button profiles, positive for SVS profiles
 String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
 String einput = "000000000000000000000000000000000000"; // used to store Extron input
-byte ecapbytes[44] = {0}; // used to store first 44 bytes / messages for Extron capture
+byte ecapbytes[MAX_BYTES] = {0}; // used to store first MAX_BYTES bytes / messages for Extron capture
 
 // Serial commands
 byte viki[4] = {0xA5,0x5A,0x07,0xCC};
@@ -401,6 +403,8 @@ void setup(){
     extronSerial2.begin(9600); // set the baud rate for Extron sw2 Connection
     extronSerial2.setTimeout(50); // sets the timeout for reading / saving into a string for the Extron sw2 Connection
     pinMode(LED_BUILTIN, OUTPUT); // initialize builtin led for RTwake
+    ecap.reserve(MAX_BYTES); // reserve MAX_BYTES bytes in memory to prevent fragmentation
+    einput.reserve(MAX_EINPUT); // reserve MAX_EINPUT ^^^
 
 } // end of setup
 
@@ -433,6 +437,7 @@ void loop(){
 
 } // end of loop()
 
+
 void readExtron1(){
 
   #if automatrixSW1 // if automatrixSW1 is set "true" in options, then "0LS" is sent every 500ms to see if an input has changed
@@ -448,10 +453,10 @@ void readExtron1(){
     // listens to the Extron sw1 Port for changes
     // SIS Command Responses reference - Page 77 https://media.extron.com/public/download/files/userman/XP300_Matrix_B.pdf
     if(extronSerial.available() > 0){ // if there is data available for reading, read
-      extronSerial.readBytes(ecapbytes,44); // read in and store only the first 44 bytes for every status message received from 1st Extron SW port
+      extronSerial.readBytes(ecapbytes,MAX_BYTES); // read in and store only the first MAX_BYTES bytes for every status message received from 1st Extron SW port
       if(debugE1CAP){
         Serial.print(F("ecap HEX: "));
-        for(uint8_t i=0;i<44;i++){
+        for(uint8_t i=0;i<MAX_BYTES;i++){
           Serial.print(ecapbytes[i],HEX);Serial.print(F(" "));
         }
         Serial.println(F("\r"));
@@ -693,7 +698,7 @@ void readExtron1(){
     }
 #endif
 
-  memset(ecapbytes,0,44); // reset capture to all 0s
+  memset(ecapbytes,0,MAX_BYTES); // reset capture to all 0s
   ecap = "00000000000000000000000000000000000000000000";
   einput = "000000000000000000000000000000000000";
 
@@ -713,10 +718,10 @@ void readExtron2(){
 
     // listens to the Extron sw2 Port for changes
     if(extronSerial2.available() > 0){ // if there is data available for reading, read
-    extronSerial2.readBytes(ecapbytes,44); // read in and store only the first 44 bytes for every status message received from 2nd Extron port
+    extronSerial2.readBytes(ecapbytes,MAX_BYTES); // read in and store only the first MAX_BYTES bytes for every status message received from 2nd Extron port
       if(debugE2CAP){
         Serial.print(F("ecap2 HEX: "));
-        for(uint8_t i=0;i<44;i++){
+        for(uint8_t i=0;i<MAX_BYTES;i++){
           Serial.print(ecapbytes[i],HEX);Serial.print(F(" "));
         }
         Serial.println(F("\r"));
@@ -951,7 +956,7 @@ void readExtron2(){
     }
   #endif
 
-  memset(ecapbytes,0,44); // reset capture to 0s
+  memset(ecapbytes,0,MAX_BYTES); // reset capture to 0s
   ecap = "00000000000000000000000000000000000000000000";
   einput = "000000000000000000000000000000000000";
 
