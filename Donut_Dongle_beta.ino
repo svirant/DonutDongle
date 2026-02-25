@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.7n
+* Donut Dongle beta v1.7o
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 
 #define IR_SEND_PIN 11  // Optional IR LED Emitter for RT5X / OSSC compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2 // Optional IR Receiver on pin D2
+#define RAW_BUFFER_LENGTH 60 // IR Receive buffer length
 #define MAX_BYTES 44
 #define MAX_EINPUT 36
 
@@ -532,11 +533,11 @@ void readExtron1(){
     }
     else if(substringEquals(ecap,0,3,"In0") && !substringEquals(ecap,4,7,"All") && !substringEquals(ecap,5,8,"All")){ // start of automatrix
       if(substringEquals(ecap,0,4,"In00")){
-        amSizeSW1 = lengthUpToLineEnding(ecap,MAX_BYTES) - 7; // amSizeSW1 = ecap.length() - 7;
+        amSizeSW1 = lengthUpToLineEnding(ecap,MAX_BYTES) - 5;
         copySnippet(ecap,5,amSizeSW1 + 5,einput); // einput = ecap.substring(5,amSizeSW1 + 5);
       }
       else{
-        amSizeSW1 = lengthUpToLineEnding(ecap,MAX_BYTES) - 6;// amSizeSW1 = ecap.length() - 6;
+        amSizeSW1 = lengthUpToLineEnding(ecap,MAX_BYTES) - 4;
         copySnippet(ecap,4,amSizeSW1 + 4,einput); // einput = ecap.substring(4,amSizeSW1 + 4);
       }
       uint8_t check = readAMstate(einput,amSizeSW1);
@@ -797,11 +798,11 @@ void readExtron2(){
     }
     else if(substringEquals(ecap,0,3,"In0") && !substringEquals(ecap,4,7,"All") && !substringEquals(ecap,5,8,"All")){ // start of automatrix
       if(substringEquals(ecap,0,4,"In00")){
-        amSizeSW2 = lengthUpToLineEnding(ecap,MAX_BYTES) - 7; // amSizeSW2 = ecap.length() - 7;
+        amSizeSW2 = lengthUpToLineEnding(ecap,MAX_BYTES) - 5;
         copySnippet(ecap,5,amSizeSW2 + 5,einput); // einput = ecap.substring(5,amSizeSW2 + 5);
       }
       else{
-        amSizeSW2 = lengthUpToLineEnding(ecap,MAX_BYTES) - 6; // amSizeSW2 = ecap.length() - 6;
+        amSizeSW2 = lengthUpToLineEnding(ecap,MAX_BYTES) - 4;
         copySnippet(ecap,4,amSizeSW2 + 4,einput); // einput = ecap.substring(4,amSizeSW2 + 4);
       }
       uint8_t check2 = readAMstate(einput,amSizeSW2);
