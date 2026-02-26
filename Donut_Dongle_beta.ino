@@ -1,5 +1,5 @@
 /*
-* Donut Dongle beta v1.7o
+* Donut Dongle beta v1.7p
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 #define IR_SEND_PIN 11  // Optional IR LED Emitter for RT5X / OSSC compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2 // Optional IR Receiver on pin D2
-#define RAW_BUFFER_LENGTH 60 // IR Receive buffer length
+#define RAW_BUFFER_LENGTH 50 // IR Receive buffer length for NEC commands
 #define MAX_BYTES 44
 #define MAX_EINPUT 36
 
@@ -27,8 +27,8 @@
 #define GSCART1 2
 #define GSCART2 3
 
-#include <TinyIRReceiver.hpp>
-#include <IRremote.hpp>       // found in the built-in Library Manager
+#include <TinyIRReceiver.hpp> // these next 3 can be found in the built-in Library Manager
+#include <IRremote.hpp>
 #include <SoftwareSerial.h>
 #include <AltSoftSerial.h>  // https://github.com/PaulStoffregen/AltSoftSerial in order to have a 3rd Serial port for 2nd Extron Switch / alt sw2
                             // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
@@ -49,9 +49,10 @@ uint8_t mswitchSize = 4;
 //////////////////
 */
 
-uint8_t const debugE1CAP = 0; // line ~489
-uint8_t const debugE2CAP = 0; // line ~756
-uint8_t const debugState = 0; // line ~427
+uint8_t const debugE1CAP = 0; // line ~505
+uint8_t const debugE2CAP = 0; // line ~771
+uint8_t const debugState = 0; // line ~432
+
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -304,6 +305,9 @@ uint8_t const fpdccountmax = 3; // number of periods required when in the 50% du
 
 ////////////////////////////////////////////////////////////////////////
 
+// Misc
+int minFreeRam = 2048; // used by recordMem(), on RT4K Diag screen, press AUX8 + Enter button to show Max used mem% and Uptime. Best if below 73%
+
 // automatrix variables
 #if automatrixSW1 || automatrixSW2
 uint8_t AMstate[32];
@@ -328,7 +332,7 @@ uint8_t auxTESmart = 0; // used to keep track if aux7 was pressed to change inpu
 uint8_t extrabuttonprof = 0;  // Used to keep track of AUX8 button presses for addtional button profiles
 
 // Extron sw1 / alt sw1 software serial port -> MAX3232 TTL IC (when jumpers set to "H")
-SoftwareSerial extronSerial = SoftwareSerial(3,4); // setup a software serial port for listening to Extron sw1 / alt sw1. rxPin =3 / txPin = 4
+SoftwareSerial extronSerial(3,4); // setup a software serial port for listening to Extron sw1 / alt sw1. rxPin = 3 / txPin = 4
 
 // Extron sw2 / alt sw2 software serial port -> MAX3232 TTL IC (when jumpers set to "H")
 AltSoftSerial extronSerial2; // setup yet another serial port for listening to Extron sw2 / alt sw2. hardcoded to pins D8 / D9
@@ -436,6 +440,7 @@ void loop(){
     Serial.print(mswitch[EXTRON2].King);Serial.print(F(" Prof: "));Serial.println(mswitch[EXTRON2].Prof);
   }
 
+  recordMem();
 } // end of loop()
 
 bool substringEquals(const char* buffer, int start, int end, const char* compareTo){
@@ -462,13 +467,23 @@ int sliceToInt(const char* buffer, int start, int end){
 } // end of sliceToInt()
 
 uint8_t lengthUpToLineEnding(const char* buffer, uint8_t bufLen){
-  for(uint8_t i = 0; i < bufLen; i++){
+  for(uint8_t i = 0;i < bufLen;i++){
     if(buffer[i] == '\r' || buffer[i] == '\n'){
       return i;  // stop at first line ending
     }
   }
   return bufLen;  // no line ending found, full length
 } // end of lengthUpToLineEnding()
+
+void recordMem(){
+  extern char __heap_start;
+  extern char* __brkval;
+  char top;
+  int current = &top - (__brkval ? __brkval : &__heap_start); // calc free mem
+  if(current < minFreeRam){
+    minFreeRam = current;
+  }
+} // end of recordMem();
 
 
 void readExtron1(){
@@ -731,6 +746,7 @@ void readExtron1(){
     }
 #endif
 
+  recordMem();
   memset(ecapbytes,0,sizeof(ecapbytes)); // reset capture to all 0s
   memset(ecap,0,sizeof(ecap));
   memset(einput,0,sizeof(einput));
@@ -993,6 +1009,7 @@ void readExtron2(){
     }
   #endif
 
+  recordMem();
   memset(ecapbytes,0,sizeof(ecapbytes)); // reset capture to 0s
   memset(ecap,0,sizeof(ecap));
   memset(einput,0,sizeof(einput));
@@ -1090,6 +1107,7 @@ void readGscart1(){
     memset(highcount[0],0,sizeof(highcount[0]));
   }
 
+  recordMem();
 } // end readGscart1()
 
 void readGscart2(){
@@ -1183,6 +1201,7 @@ void readGscart2(){
     memset(highcount[1],0,sizeof(highcount[1]));
   }
 
+  recordMem();
 } // end readGscart2()
 
 void readIR(){
@@ -1373,6 +1392,24 @@ void readIR(){
       }
       else if(ir_recv_command == 26){ // Power button
         sendIR(auxpower,0,0);
+        ir_recv_command = 0;
+        extrabuttonprof = 0;
+      }
+      else if(ir_recv_command == 83){ // ok button
+        Serial.print(F("Max mem used: "));
+        Serial.print((long)100 * (2048 - minFreeRam) / 2048);
+        Serial.println(F("%"));
+        unsigned long totalMinutes = millis() / 60000UL;
+        unsigned int days = totalMinutes / 1440UL;
+        unsigned int hours = (totalMinutes / 60UL) % 24;
+        byte minutes = totalMinutes % 60;
+        Serial.print(F("Uptime: "));
+        Serial.print(days);
+        Serial.print(F("d "));
+        Serial.print(hours);
+        Serial.print(F("h "));
+        Serial.print(minutes);
+        Serial.println(F("m"));
         ir_recv_command = 0;
         extrabuttonprof = 0;
       }
@@ -1824,7 +1861,8 @@ void readIR(){
       
     // } // end of OSSC remote
     
-  } // end of TinyReceiverDecode()   
+  } // end of TinyReceiverDecode()
+  recordMem();
 } // end of readIR()
 
 void overrideGscart(uint8_t port){ // disable auto switching and allows gscart port select
@@ -1916,6 +1954,7 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
       lastginput = port;
     }
   }
+  recordMem();
 } // end of overrideGscart()
 
 void sendSVS(uint16_t num){
@@ -1929,13 +1968,15 @@ void sendSVS(uint16_t num){
   else Serial.print(num);
   Serial.println(F("\r"));
   currentProf = num;
+  recordMem();
 }
 
 void sendRBP(int prof){ // send Remote Button Profile
-    Serial.print(F("\rremote prof"));
-    Serial.print(prof);
-    Serial.println(F("\r"));
-    currentProf = -1*prof; // always store remote button profiles as negative numbers
+  Serial.print(F("\rremote prof"));
+  Serial.print(prof);
+  Serial.println(F("\r"));
+  currentProf = -1*prof; // always store remote button profiles as negative numbers
+  recordMem();
 }
 
 void sendIR(const char* type, uint8_t prof, uint8_t repeat){
@@ -2000,30 +2041,32 @@ void sendIR(const char* type, uint8_t prof, uint8_t repeat){
     irsend.sendNEC(0x00,0x00,0);
     irsend.sendNEC(0x00,0x00,0);
   }
+  recordMem();
 } // end of sendIR()
 
 void sendRTwake(uint16_t mil){
-    currentTime = millis();
-    if(prevTime == 0)
-      prevTime = millis();
-    if((currentTime - prevTime) >= mil){
-      prevTime = 0;
-      prevBlinkTime = 0;
-      currentTime = 0;
-      RTwake = false;
-      digitalWrite(LED_BUILTIN,LOW);
-      if((SVS == 1 && currentProf != 0) || ((SVS == 0 || SVS == 2) && currentProf != -12)){
-        if(currentProf > 0)
-          sendSVS(currentProf);
-        else
-          sendRBP(-1*currentProf);
-      }
+  currentTime = millis();
+  if(prevTime == 0)
+    prevTime = millis();
+  if((currentTime - prevTime) >= mil){
+    prevTime = 0;
+    prevBlinkTime = 0;
+    currentTime = 0;
+    RTwake = false;
+    digitalWrite(LED_BUILTIN,LOW);
+    if((SVS == 1 && currentProf != 0) || ((SVS == 0 || SVS == 2) && currentProf != -12)){
+      if(currentProf > 0)
+        sendSVS(currentProf);
+      else
+        sendRBP(-1*currentProf);
     }
-    if(currentTime - prevBlinkTime >= 300){
-      prevBlinkTime = currentTime;
-      if(digitalRead(LED_BUILTIN) == LOW)digitalWrite(LED_BUILTIN,HIGH);
-      else digitalWrite(LED_BUILTIN,LOW);
-    }
+  }
+  if(currentTime - prevBlinkTime >= 300){
+    prevBlinkTime = currentTime;
+    if(digitalRead(LED_BUILTIN) == LOW)digitalWrite(LED_BUILTIN,HIGH);
+    else digitalWrite(LED_BUILTIN,LOW);
+  }
+  recordMem();
 } // end of sendRTwake()
 
 void LS0time1(unsigned long eTime){
@@ -2034,7 +2077,8 @@ void LS0time1(unsigned long eTime){
     LScurrentTime = 0;
     LSprevTime = 0;
     extronSerial.print(F("0LS"));
- }
+  }
+  recordMem();
 }  // end of LS0time1()
 
 void LS0time2(unsigned long eTime){
@@ -2045,7 +2089,8 @@ void LS0time2(unsigned long eTime){
     LScurrentTime2 = 0;
     LSprevTime2 = 0;
     extronSerial2.print(F("0LS"));
- }
+  }
+  recordMem();
 }  // end of LS0time2()
 
 void setTie(uint8_t num, uint8_t sw){
@@ -2075,6 +2120,7 @@ void setTie(uint8_t num, uint8_t sw){
       extronSerial2.print(F("!"));
     }
   }
+  recordMem();
 } // end of setTie()
 
 void recallPreset(uint8_t num, uint8_t sw){
@@ -2086,6 +2132,7 @@ void recallPreset(uint8_t num, uint8_t sw){
     extronSerial2.print(num);
     extronSerial2.print(F("."));
   }
+  recordMem();
 } // end of recallPreset()
 
 #if !automatrixSW1
@@ -2097,7 +2144,8 @@ void MTVtime1(unsigned long eTime){
     MTVcurrentTime = 0;
     MTVprevTime = 0;
     extronSerialEwrite("viki",currentMTVinput[0],1);
- }
+  }
+  recordMem();
 }  // end of MTVtime1()
 #endif
 
@@ -2110,7 +2158,8 @@ void MTVtime2(unsigned long eTime){
     MTVcurrentTime2 = 0;
     MTVprevTime2 = 0;
     extronSerialEwrite("viki",currentMTVinput[1] - 100,2);
- }
+  }
+  recordMem();
 } // end of MTVtime2()
 #endif
 
@@ -2128,6 +2177,7 @@ void ExtronOutputQuery(uint8_t outputNum, uint8_t sw){
     extronSerial.write((uint8_t *)cmd,len);
   else if(sw == 2)
     extronSerial2.write((uint8_t *)cmd,len);
+  recordMem();
 } // end of ExtronOutputQuery()
 
 void extronSerialEwrite(const char* type, uint8_t value, uint8_t sw){
@@ -2145,6 +2195,7 @@ void extronSerialEwrite(const char* type, uint8_t value, uint8_t sw){
     else if(sw == 2)
       extronSerial2.write(tesmart,6);
   }
+  recordMem();
 } // end of extronSerialEwrite()
 
 void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
@@ -2235,6 +2286,7 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
     else if(S0 && SVS == 1 && (count == mswitchSize) && currentProf != 0){ sendSVS(0); } 
   
   } // end of else if prof == 0
+  recordMem();
 } // end of sendProfile()
 
 #if automatrixSW1 || automatrixSW2
@@ -2280,6 +2332,7 @@ uint8_t readAMstate(const char* cinput, uint8_t size){
   } // end of for
 
   prevAMstate = newAMstate;
+  recordMem();
   return AMstate[AMstateTop];
 } // end of readAMstate()
 #endif
