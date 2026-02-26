@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5h"
+#define FIRMWARE_VERSION "0.5i"
 #define FW_TYPE 'D'
 #define MAX_BYTES 44
 #define MAX_EINPUT 36
@@ -566,7 +566,6 @@ void setup(){
   server.on("/exportAll", HTTP_GET, handleExportAll);
   server.on("/importAll", HTTP_POST, handleImportAll);
   server.on("/update", HTTP_POST, handleUpdate, handleUpdateUpload);
-
 
   server.begin();
 
@@ -2795,10 +2794,19 @@ void handleUpdateUpload() {
   }
 } // end of handleUpdateUpload()
 
+String formatUptime(unsigned long ms){
+  unsigned long days = ms / 86400000UL;
+  unsigned long hours = (ms / 3600000UL) % 24;
+  unsigned long minutes = (ms / 60000UL) % 60;
+
+  return "Uptime: " + String(days) + "d " + String(hours) + "h " + String(minutes) + "m";
+} // end of formatUptime()
+
 
 void handleRoot(){
   String fwVer = String(FIRMWARE_VERSION);
   String fwType = String(FW_TYPE);
+  String Uptime = formatUptime(millis());
   String page = R"rawliteral(
   <!DOCTYPE html>
   <html>
@@ -3595,6 +3603,7 @@ void handleRoot(){
 
         <div class="settings-section firmware-section" id="firmwareSection">
           <h2 class="settings-title">Firmware Update</h2>
+          )rawliteral" + Uptime + R"rawliteral( <br>
           Current Version: )rawliteral" + fwVer + R"rawliteral(
           <form id="fwForm" class="fw-form">
             <input type="file" id="fwFile" name="update" accept=".bin">
