@@ -16,10 +16,12 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5i"
+#define FIRMWARE_VERSION "0.5j"
 #define FW_TYPE 'D'
-#define MAX_BYTES 44
+#define MAX_BYTES 50
 #define MAX_EINPUT 36
+#define MTV_TIME_CHECK 1500 // time between mt-viki disconnetion detection checks
+#define AM_TIME_CHECK 500 // time between auto-matrix input change detection
 #define SEND_LEDC_CHANNEL 0
 #define IR_SEND_PIN 11    // Optional IR LED Emitter for RT5X compatibility. Sends IR data out Arduino pin D11
 #define IR_RECEIVE_PIN 2  // Optional IR Receiver on pin D2
@@ -41,9 +43,9 @@
 #include <Update.h>
 // <EspUsbHostSerial_FTDI.h> is listed further down with instructions on how to install
 
-uint8_t const debugE1CAP = 0; // line ~801
-uint8_t const debugE2CAP = 0; // line ~1065
-uint8_t const debugState = 0; // line ~596
+uint8_t const debugE1CAP = 0; // line ~802
+uint8_t const debugE2CAP = 0; // line ~1072
+uint8_t const debugState = 0; // line ~597
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -786,11 +788,11 @@ void readExtron1(){
 
 
     if(automatrixSW1){ // if automatrixSW1 is set "true" in options, then "0LS" is sent every 500ms to see if an input has changed
-      LS0time1(500);
+      LS0time1(AM_TIME_CHECK);
     }
 
     if(MTVddSW1 && !automatrixSW1){  // if a MT-VIKI switch has been detected on SW1, then the currently active MT-VIKI hdmi port is checked for disconnection
-      MTVtime1(2000);
+      MTVtime1(MTV_TIME_CHECK);
     }
 
     // listens to the Extron sw1 Port for changes
@@ -912,11 +914,17 @@ void readExtron1(){
 
 
       if((ecap.substring(0,3) == "==>" || ecap.substring(15,18) == "==>") && listenITE[0]){   // checks if the serial command from the VIKI starts with "=" This indicates that the command is an ITE mux status message
-        if(ecap.substring(10,11) == "P"){        // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
+        if(ecap.substring(0,11) == "==>IT6635_P"){        // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
           ITEstatus[0] = ecap.substring(11,12).toInt();
         }
-        if(ecap.substring(25,26) == "P"){        // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
+        if(ecap.substring(15,26) == "==>IT6635_P"){        // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
           ITEstatus[0] = ecap.substring(26,27).toInt();
+        }
+        if(ecap.substring(21,32) == "==>IT6635_P"){        // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
+          ITEstatus[0] = ecap.substring(32,33).toInt();
+        }
+        if(ecap.substring(36,47) == "==>IT6635_P"){        // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
+          ITEstatus[0] = ecap.substring(47,48).toInt();
         }
         if(ecap.substring(18,20) == ">0"){       // checks the value of the IT66535 IC that points to Dev->0. P2 is input 1 / P1 is input 2 / P0 is input 3
           ITEstatus[1] = ecap.substring(12,13).toInt();
@@ -1051,11 +1059,11 @@ void readExtron2(){
 
 
     if(automatrixSW2){ // if automatrixSW2 is set "true" in options, then "0LS" is sent every 500ms to see if an input has changed
-      LS0time2(500);
+      LS0time2(AM_TIME_CHECK);
     }
 
     if(MTVddSW2 && !automatrixSW2){ // if a MT-VIKI switch has been detected on SW2, then the currently active MT-VIKI hdmi port is checked for disconnection
-      MTVtime2(2000);
+      MTVtime2(MTV_TIME_CHECK);
     }
 
     // listens to the Extron sw2 Port for changes
@@ -1171,11 +1179,17 @@ void readExtron2(){
 
 
       if((ecap.substring(0,3) == "==>" || ecap.substring(15,18) == "==>") && listenITE[1]){   // checks if the serial command from the VIKI starts with "=" This indicates that the command is an ITE mux status message
-        if(ecap.substring(10,11) == "P"){       // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
+        if(ecap.substring(0,11) == "==>IT6635_P"){       // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
           ITEstatus2[0] = ecap.substring(11,12).toInt();
         }
-        if(ecap.substring(25,26) == "P"){       // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
+        if(ecap.substring(15,26) == "==>IT6635_P"){       // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
           ITEstatus2[0] = ecap.substring(26,27).toInt();
+        }
+        if(ecap.substring(21,32) == "==>IT6635_P"){       // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
+          ITEstatus2[0] = ecap.substring(32,33).toInt();
+        }
+        if(ecap.substring(36,47) == "==>IT6635_P"){       // checks the last value of the IT6635 mux. P3 points to inputs 1,2,3 / P2 points to inputs 4,5,6 / P1 input 7 / P0 input 8
+          ITEstatus2[0] = ecap.substring(47,48).toInt();
         }
         if(ecap.substring(18,20) == ">0"){       // checks the value of the IT66535 IC that points to Dev->0. P2 is input 1 / P1 is input 2 / P0 is input 3
           ITEstatus2[1] = ecap.substring(12,13).toInt();
