@@ -11,7 +11,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 </br>
 
 > [!NOTE]
-> *NEW* beta allows:
+> *NEW* version allows:
 >   - **Fallback** - feature that allows a switch that reports having no active inputs to change profiles over to one that does.
 >   - **MT-VIKI Disconnection Detection** - when an input is powered off and on, the profile is resent.
 >   - **front case buttons/remote NOW change profiles on the MT-VIKI HDMI switch.** Thanks to [Arthrimus](https://scalablevideoswitch.com/)! 
