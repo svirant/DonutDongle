@@ -13,21 +13,16 @@
 | **Color**    | Blinking | On | Notes |
 | ------------- | ------------- |------------- |------------- |
 | 🟠| | Wifi not connected | After 2 minutes of unsuccessfully connecting, "DonutShop_Setup" Wifi AP will reappear to help with reconnection. |
-| 🔵| WiFi active, querying gameID addresses| Longer blinks represent an unsuccessful query of gameID address. Usually a powered off console in the list.| After initial power, no blue light means WiFi not found. |
+| 🔵| WiFi active, querying gameID addresses| Longer blinks represent an unsuccessful query of gameID address. Usually a powered off console in the list.| After initial power, no BLUE light means WiFi not found. |
 | 🟢| 1 second blink is gameID match found and SVS profile being sent to RT4K | |  | 
 | 🔴| | Power| No way to control as it's hardwired in. May just need to cover with tape. |
-
-You can disable the <code style="color : blue">BLUE</code> / <code style="color : green">GREEN</code> LEDs by commenting out the following lines in the .ino:
-```
- //pinMode(LED_GREEN, OUTPUT);
- //pinMode(LED_BLUE, OUTPUT);
-```
 
 ## Flashing 
 1. Download the latest ```.bin``` files listed above
 2. Open [ESP Tool](https://espressif.github.io/esptool-js/) in Chrome, Brave, or Edge
 3. Connect your Arduino Nano ESP32 via USB and double click the RST button immediately following to enter **recovery mode** (a GREEN led will strobe when successful)
 4. Click **Connect** and select your device (typically starts with USB JTAG)
+   - You may first need to connect to "Nano ESP32" and refresh the page for "USB JTAG" to appear in the Connect menu. 
 5. Click **Erase Flash** to format your device (required for LittleFS)
 6. Set Flash Address to **0x0** and Choose the downloaded file ```Donut_Shop.bin```
 7. Click **Add File**, set the next Flash Address to **0xF70000**, Choose ```nora_recovery.bin```
@@ -37,8 +32,8 @@ You can disable the <code style="color : blue">BLUE</code> / <code style="color 
 ## Setup
 1. Upon reconnecting the USB cable, your board should **Successfully boot DonutShop** and leave you with an ORANGE led.
 2. With your computer or smartphone, join the broadcasted ```DonutShop_Setup``` WiFi to connect it to your home network.
-3. Follow the instructions listed and once complete, you should see a BLUE led indicating it's connected to WiFi and looking for addresses to connect to. If the blue led does not show, press the RST button one time.
-4. You should now be able to visit http://donutshop.local to finish setup.
+3. Follow the instructions listed and once complete, you should see a BLUE led indicating it's connected to WiFi and looking for addresses to connect to. If the BLUE led does not show, press the RST button one time.
+4. You should now be able to visit http://donutshop.local to add Consoles and gameIDs.
 5. For all future changes/uploads you can use the "Firmware Update" section in Settings to apply the latest listed .bin file.
    
 ## General Setup
@@ -65,3 +60,14 @@ I recommend the [Official Arduino IDE and guide](https://docs.arduino.cc/softwar
     - Goto https://github.com/wakwak-koba/EspUsbHost
     - Click the <code style="color : green">GREEN</code> "<> Code" box and "Download ZIP"
     - In Arudino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
+1. First, you must have completed the steps shown in the "Flashing" section above at least once before continuing.
+2. "Double click" the RST button right after connecting to your PC/Mac to put into "recovery mode". You'll see a GREEN led strobe if successful.
+3. Open up Donut_Shop.ino in the Arduino IDE to make your custom changes.
+4. Under the "Tools" menu, make sure...
+- Board - "Arduino Nano ESP32" is selected
+- Port - The listed "Serial" port is chosen, not dfu one.
+    - If Donut_Shop is currently running, you should also see a "DonutShop" Network Port that connects via WiFi.
+- Partition Scheme - "With SPIFFS partition (advanced)" is chosen
+- Pin Numbering - "By Arduino pin (default)"
+- USB Mode - "Normal mode (TinyUSB)"
+5. To flash the changes, select "Sketch" -> "Upload"
