@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5j"
+#define FIRMWARE_VERSION "0.5k"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -43,9 +43,9 @@
 #include <Update.h>
 // <EspUsbHostSerial_FTDI.h> is listed further down with instructions on how to install
 
-uint8_t const debugE1CAP = 0; // line ~802
-uint8_t const debugE2CAP = 0; // line ~1072
-uint8_t const debugState = 0; // line ~597
+uint8_t const debugE1CAP = 0; // line ~803
+uint8_t const debugE2CAP = 0; // line ~1075
+uint8_t const debugState = 0; // line ~598
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -375,6 +375,7 @@ int currentInputSW2 = -1;
 String ecap = "00000000000000000000000000000000000000000000"; // used to store Extron status messages for Extron in String format
 String einput = "000000000000000000000000000000000000"; // used to store Extron input
 byte ecapbytes[MAX_BYTES] = {0}; // used to store first MAX_BYTES bytes / messages for Extron capture
+bool ReconfigSet[2] = {false,false};
 
 // Serial commands
 byte viki[4] = {0xA5,0x5A,0x00,0xCC};
@@ -833,6 +834,7 @@ void readExtron1(){
       eoutput[0] = 1;
     }
     else if(ecap.substring(0,8) == "RECONFIG"){     // This is received everytime a change is made on older Extron Crosspoints
+      ReconfigSet[0] = true;
       ExtronOutputQuery(ExtronVideoOutputPortSW1,1); // Finds current input for "ExtronVideoOutputPortSW1" that is connected to port 1 of the DD
     }
     else if(ecap.substring(amSizeSW1 + 6,amSizeSW1 + 9) == "Rpr" && automatrixSW1){ // detect if a Preset has been used 
@@ -882,7 +884,8 @@ void readExtron1(){
 
     // For older Extron Crosspoints, where "RECONFIG" is sent when changes are made, the profile is only changed when a different input is selected for the defined output. (ExtronVideoOutputPortSW1)
     // Without this, the profile would be resent when changes to other outputs are selected.
-    if(einput.substring(0,2) == "IN"){
+    if(einput.substring(0,2) == "IN" && einput.substring(2,4).toInt() == currentProf && ReconfigSet[0]){
+      ReconfigSet[0] = false;
       int temp = einput.substring(2,4).toInt();
       if(SRS == 0 && !S0 && temp > 0 && temp < 13 && temp == -1*currentProf) einput = "XX00";
       else if(SRS == 0 && S0 && temp > 0 && temp < 12 && temp == -1*currentProf) einput = "XX00";
@@ -1102,6 +1105,7 @@ void readExtron2(){
       eoutput[1] = 1;
     }
     else if(ecap.substring(0,8) == "RECONFIG"){     // This is received everytime a change is made on older Extron Crosspoints.
+      ReconfigSet[1] = true;
       ExtronOutputQuery(ExtronVideoOutputPortSW2,2); // Finds current input for "ExtronVideoOutputPortSW2" that is connected to port 2 of the DD
     }
     else if(ecap.substring(amSizeSW2 + 6,amSizeSW2 + 9) == "Rpr" && automatrixSW2){ // detect if a Preset has been used 
@@ -1150,7 +1154,10 @@ void readExtron2(){
 
     // For older Extron Crosspoints, where "RECONFIG" is sent when changes are made, the profile is only changed when a different input is selected for the defined output. (ExtronVideoOutputPortSW2)
     // Without this, the profile would be resent when changes to other outputs are selected.
-    if(einput.substring(0,2) == "IN" && einput.substring(2,4).toInt()+100 == currentProf) einput = "XX00";
+    if(einput.substring(0,2) == "IN" && einput.substring(2,4).toInt()+100 == currentProf && ReconfigSet[1]){
+      ReconfigSet[1] = false;
+      einput = "XX00";
+    }
 
     // For Extron devices, use remaining results to see which input is now active and change profile accordingly, cross-references eoutput[1]
     if(((einput.substring(0,2) == "IN" || einput.substring(0,2) == "In") && eoutput[1] && !automatrixSW2) || (einput.substring(0,3) == "Rpr")){
@@ -3593,7 +3600,6 @@ void handleRoot(){
                 </span>
               </span>
               <div id="SW1PresetsGrid" style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px;">
-                <!-- Inputs go here -->
               </div>
             </div>
 
@@ -3609,16 +3615,21 @@ void handleRoot(){
                     </span>
                 </span>
                 <div id="SW2PresetsGrid" style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px;">
-                    <!-- Inputs go here -->
                 </div>
             </div>
           </div>
         </div>
 
+        <!-- Firmware Update -->
         <div class="settings-section firmware-section" id="firmwareSection">
           <h2 class="settings-title">Firmware Update</h2>
-          )rawliteral" + Uptime + R"rawliteral( <br>
-          Current Version: )rawliteral" + fwVer + R"rawliteral(
+          <span class="tooltip">
+            Current Version:
+            <span class="tooltip-bubble">
+            )rawliteral" + Uptime + R"rawliteral(
+            </span>
+          </span>
+           )rawliteral" + fwVer + R"rawliteral(
           <form id="fwForm" class="fw-form">
             <input type="file" id="fwFile" name="update" accept=".bin">
             <div class="fw-upload-row">
@@ -3627,8 +3638,6 @@ void handleRoot(){
             </div>
           </form>
         </div>
-
-
 
 
       </div>
@@ -3802,6 +3811,7 @@ void handleRoot(){
     const s0Toggle = document.getElementById("S0_toggle");
     const srsSelect = document.getElementById("SRS_select");
     const offsetInput = document.getElementById("offset_input");
+    
     // IR Emitter
     const rt5xInput = document.getElementById("RT5Xir_input");
     const osscInput = document.getElementById("OSSCir_input");
