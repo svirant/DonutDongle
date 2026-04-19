@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.7s
+* Donut Dongle v1.7.1
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -28,9 +28,11 @@
 #define EXTRON2 1
 #define GSCART1 2
 #define GSCART2 3
+#define HDMI1 4
+#define OTAKU3 5
 
-#include <TinyIRReceiver.hpp> // these next 3 can be found in the built-in Library Manager
-#include <IRremote.hpp>
+#include <IRremote.hpp> // these next 3 can be found in the built-in Library Manager
+#include <TinyIRReceiver.hpp>
 #include <SoftwareSerial.h>
 #include <AltSoftSerial.h>  // https://github.com/PaulStoffregen/AltSoftSerial in order to have a 3rd Serial port for 2nd Extron Switch / alt sw2
                             // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
@@ -42,8 +44,8 @@ struct profileorder {
   uint8_t Order;
 };
 
-profileorder mswitch[4] = {{0,0,0,0},{0,0,0,1},{0,0,0,2},{0,0,0,3}};
-uint8_t mswitchSize = 4;
+profileorder mswitch[6] = {{0,0,0,0},{0,0,0,1},{0,0,0,2},{0,0,0,3},{0,0,0,4},{0,0,0,5}};
+uint8_t mswitchSize = 6;
 
 /*
 ////////////////////
@@ -328,7 +330,6 @@ uint8_t lastginput = 1; // used to keep track of overrideGscart last input
 
 // TESmart remote control
 uint8_t auxTESmart = 0; // used to keep track if aux7 was pressed to change inputs on TESmart 16x1 HDMI switch via RT4K remote.
-uint8_t extrabuttonprof = 0;  // Used to keep track of AUX8 button presses for addtional button profiles
 
 // Extron sw1 / alt sw1 software serial port -> MAX3232 TTL IC (when jumpers set to "H")
 SoftwareSerial extronSerial(3,4); // setup a software serial port for listening to Extron sw1 / alt sw1. rxPin = 3 / txPin = 4
@@ -337,6 +338,9 @@ SoftwareSerial extronSerial(3,4); // setup a software serial port for listening 
 AltSoftSerial extronSerial2; // setup yet another serial port for listening to Extron sw2 / alt sw2. hardcoded to pins D8 / D9
 
 // Extron Global variables
+uint8_t extrabuttonprof = 0;  // Used to keep track of AUX8 button presses for addtional button profiles
+uint8_t altprof = 0; // Used to keep track of SAFE button pressed for alt profiles
+uint16_t altprofoffset = 0; // Used for alt profiles
 uint8_t eoutput[2]; // used to store Extron output
 int currentInputSW1 = -1;
 int currentInputSW2 = -1;
@@ -385,8 +389,8 @@ unsigned long ITEtimer2 = 0;
 #endif
 
 // MT-VIKI Manual Switch variables
-uint8_t ITEstatus[] = {3,0,0};
-uint8_t ITEstatus2[] = {3,0,0};
+uint8_t ITEstatus[] = {3,2,0};
+uint8_t ITEstatus2[] = {3,2,0};
 bool ITErecv[2] = {0,0};
 bool listenITE[2] = {1,1};
 uint8_t ITEinputnum[2] = {0,0};
@@ -438,6 +442,10 @@ void loop(){
     Serial.print(mswitch[EXTRON1].King);Serial.print(F(" Prof: "));Serial.print(mswitch[EXTRON1].Prof);
     Serial.print(F(" -- EXTRON2 "));Serial.print(F(" On: "));Serial.print(mswitch[EXTRON2].On);Serial.print(F(" King: "));
     Serial.print(mswitch[EXTRON2].King);Serial.print(F(" Prof: "));Serial.println(mswitch[EXTRON2].Prof);
+    // Serial.print(F(" -- OTAKU3 "));Serial.print(F(" On: "));Serial.print(mswitch[OTAKU3].On);Serial.print(F(" King: "));
+    // Serial.print(mswitch[OTAKU3].King);Serial.print(F(" Prof: "));Serial.print(mswitch[OTAKU3].Prof);
+    // Serial.print(F(" -- HDMI1 "));Serial.print(F(" On: "));Serial.print(mswitch[HDMI1].On);Serial.print(F(" King: "));
+    // Serial.print(mswitch[HDMI1].King);Serial.print(F(" Prof: "));Serial.println(mswitch[HDMI1].Prof);
   }
 
 } // end of loop()
@@ -735,6 +743,48 @@ void readExtron1(){
       else if(substringEquals(ecap,0,13,"remote prof12")){
         sendProfile(0,EXTRON1,1);
       }
+      else if(substringEquals(ecap,0,13,"remote prof13")){
+        //sendProfile(0,EXTRON1,1);
+      }
+      else if(substringEquals(ecap,0,13,"remote prof23")){ // custom code for experimental project -->
+        sendProfile(23,HDMI1,1);
+      }
+      else if(substringEquals(ecap,0,13,"remote prof24")){
+        sendProfile(24,HDMI1,1);
+      }
+      else if(substringEquals(ecap,0,13,"remote prof25")){
+        sendProfile(25,HDMI1,1);
+      }
+      else if(substringEquals(ecap,0,13,"remote prof26")){
+        sendProfile(26,HDMI1,1);
+      }
+      else if(substringEquals(ecap,0,13,"remote prof27")){
+        sendProfile(27,HDMI1,1);
+      }
+      else if(substringEquals(ecap,0,13,"remote prof29")){
+        sendProfile(0,HDMI1,1);
+      }
+      else if(substringEquals(ecap,0,13,"remote prof30")){
+        sendProfile(0,OTAKU3,1);
+      } 
+      else if(substringEquals(ecap,0,13,"remote prof31")){
+        sendProfile(31,OTAKU3,1);
+      }
+      else if(substringEquals(ecap,0,13,"remote prof32")){
+        sendProfile(32,OTAKU3,1);
+      }
+      else if(substringEquals(ecap,0,13,"remote prof33")){
+        sendProfile(33,OTAKU3,1);
+      }
+      else if(substringEquals(ecap,0,13,"remote prof34")){
+        sendProfile(34,OTAKU3,1);
+      }
+      else if(substringEquals(ecap,0,13,"remote prof35")){
+        sendProfile(35,OTAKU3,1);
+      }
+      else if(substringEquals(ecap,0,13,"remote prof36")){
+        sendProfile(36,OTAKU3,1);
+      } // <-- end of custom code
       else if(substringEquals(ecap,12,13,"\r")){
         sendProfile(sliceToInt(ecap,11,12),EXTRON1,1);
       }
@@ -936,6 +986,7 @@ void readExtron2(){
     // for TESmart 4K60 / TESmart 4K30 / MT-VIKI HDMI switch on SW2
     if(ecapbytes[4] == 17 || ecapbytes[3] == 17 || substringEquals(ecap,0,5,"Auto_") || substringEquals(ecap,15,20,"Auto_") || ITEinputnum[1] > 0){
       if(ecapbytes[6] == 22 || ecapbytes[5] == 22 || ecapbytes[11] == 48 || ecapbytes[26] == 48 || ITEinputnum[1] == 1){
+        //sendProfile(0,EXTRON2,1);
         sendProfile(101,EXTRON2,1);
         currentMTVinput[1] = 101;
         MTVdiscon[1] = false;
@@ -1427,6 +1478,164 @@ void readIR(){
     } // end extrabuttonprof == 1
 
 
+        if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && altprof == 2){ // if SAFE was pressed twice and a profile button is pressed next,
+      if(ir_recv_command == 11){ // profile button 1                                                     // always load alt profiles based on profile number until
+        altprofoffset = 1000;                                                                            // SAFE + button profile 10,11,12 disables the feature 
+        sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 7){ // profile button 2
+        altprofoffset = 2000;
+        sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 3){ // profile button 3
+        altprofoffset = 3000;
+        sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 10){ // profile button 4
+        altprofoffset = 4000;
+        sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 6){ // profile button 5
+        altprofoffset = 5000;
+        sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 2){ // profile button 6
+        altprofoffset = 6000;
+        sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 9){ // profile button 7
+        altprofoffset = 7000;
+        sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 5){ // profile button 8
+        altprofoffset = 8000;
+        sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 1){ // profile button 9
+        altprofoffset = 9000;
+        sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 37){ // profile button 10
+        altprofoffset = 0;
+        sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 38){ // profile button 11
+       altprofoffset = 0;
+       sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 39){ // profile button 12
+        altprofoffset = 0;
+        sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 46){
+        Serial.println(F("\rremote safe\r"));
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else{
+        altprof = 0;
+      }
+    } // end of altprof == 2
+
+
+    if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && altprof == 1){ // if SAFE was pressed and a profile button is pressed next,
+      if(ir_recv_command == 11){ // profile button 1                                                 // load alt based profile
+        sendSVS(currentProf + 1000);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 7){ // profile button 2
+        sendSVS(currentProf + 2000);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 3){ // profile button 3
+        sendSVS(currentProf + 3000);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 10){ // profile button 4
+        sendSVS(currentProf + 4000);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 6){ // profile button 5
+        sendSVS(currentProf + 5000);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 2){ // profile button 6
+        sendSVS(currentProf + 6000);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 9){ // profile button 7
+        sendSVS(currentProf + 7000);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 5){ // profile button 8
+        sendSVS(currentProf + 8000);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 1){ // profile button 9
+        sendSVS(currentProf + 9000);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 37){ // profile button 10
+        altprofoffset = 0;
+        sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 38){ // profile button 11
+        altprofoffset = 0;
+        sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 39){ // profile button 12
+        altprofoffset = 0;
+        sendSVS(currentProf);
+        ir_recv_command = 0;
+        altprof = 0;
+      }
+      else if(ir_recv_command == 46){ // safe button
+        altprof = 2;
+        ir_recv_command = 0;
+      }
+      else{
+        altprof = 0;
+      }
+    } // end of altprof == 1
+
+
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT && auxTESmart == 1){ // if AUX7 was pressed and a profile button is pressed next
       if(ir_recv_command == 11){ // profile button 1
         extronSerialEwrite("tesmart",1,1);sendSVS(1);                                                                    
@@ -1651,7 +1860,8 @@ void readIR(){
         Serial.println(F("\rremote genlock\r"));
       }
       else if(ir_recv_command == 46){
-        Serial.println(F("\rremote safe\r"));
+        //Serial.println(F("\rremote safe\r"));
+        altprof = 1;
       }
       else if(ir_recv_command == 86){
         Serial.println(F("\rremote pause\r"));
@@ -1958,15 +2168,15 @@ void overrideGscart(uint8_t port){ // disable auto switching and allows gscart p
 
 void sendSVS(uint16_t num){
   Serial.print(F("\rSVS NEW INPUT="));
-  if(num != 0)Serial.print(num + offset);
+  if(num != 0)Serial.print(num + offset + altprofoffset);
   else Serial.print(num);
   Serial.println(F("\r"));
   delay(1000);
   Serial.print(F("\rSVS CURRENT INPUT="));
-  if(num != 0)Serial.print(num + offset);
+  if(num != 0)Serial.print(num + offset + altprofoffset);
   else Serial.print(num);
   Serial.println(F("\r"));
-  currentProf = num;
+  if(num < 1000)currentProf = num;
 }
 
 void sendRBP(int prof){ // send Remote Button Profile

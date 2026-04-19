@@ -12,6 +12,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 
 > [!NOTE]
 > *NEW* version allows:
+>   - **Alternate SVS Profile System** - allows a different set of profiles to load. Explained in the ["New IR Remote Control functionality"](https://github.com/svirant/DonutDongle#new-ir-remote-control-functionality) section below.
 >   - **Fallback** - feature that allows a switch that reports having no active inputs to change profiles over to one that does.
 >   - **MT-VIKI Disconnection Detection** - when an input is powered off and on, the profile is resent.
 >   - **front case buttons/remote NOW change profiles on the MT-VIKI HDMI switch.** Thanks to [Arthrimus](https://scalablevideoswitch.com/)! 
@@ -130,6 +131,25 @@ The spring pins allow it to stay "sandwiched" in place by the lid<br />
 ----------------
 # New IR Remote Control functionality
 When using the optional IR Receiver, the IR reception of the RT4K can be been greatly enhanced. You can think of it as an IR repeater, but instead talks to the RT4K via Serial for solid communication. Since the Donut Dongle is in the middle, other remote features can be added such as:
+ - **Alternate SVS Profiles**: Have you ever wanted to add CRT effects to all of your existing SVS profiles? Or wanted all your profiles to output at 1080p instead of 4K? With this feature you can create a set of SVS profiles that have these changes and activate the system with the remote. Pressing the "SAFE" button twice + 1 - 9 buttons will allow you to configure 9 different sets of these profiles per regular profile to load instead of the regular one you created. For example: Instead of SVS profile S1_SNES.rt4 loading, S1001_SNES.rt4 will load instead after activating with the "SAFE"x2 + 1 button. Here are some more examples so you can see the pattern used for creating these: </br>
+
+    "SAFE"x2 + x button = Sx001_SNES-CRT.rt4, where x is the number button selected and 001 is the S1_ profile represented in 3 digits. </br>
+    "SAFE"x2 + 2 button = S2001_SNES-1080p.rt4 </br>
+    "SAFE"x2 + 3 button = S3001_SNES-Zoomed.rt4 </br>
+    "SAFE"x2 + 4 button = S4001_SNES.rt4 </br>
+    "SAFE"x2 + 5 button = S5001_SNES.rt4 </br>
+    "SAFE"x2 + 6 button = S6001_SNES.rt4 </br>
+    "SAFE"x2 + 7 button = S7001_SNES.rt4 </br>
+    "SAFE"x2 + 8 button = S8001_SNES.rt4 </br>
+    "SAFE"x2 + 9 button = S9001_SNES.rt4 </br> 
+
+   - The name following the "\_" can be changed as well. So a name like S1001_SNES-CRT.rt4 can be used to better describe. Only the naming pattern before the "\_" is important. </br>
+
+   - When SVS profile S2 normally would load, Sx002 would load instead where x = the number button chosen prior and 002 represents the S2 profile. S2100_NES.rt4 for example would be the 2nd Alternate profile for S100_NES.rt4. It's up to you to create these alternate sets of profiles on your SD card of course. To disable this feature and return to your normally configured profiles, press "SAFE" button + 10,11, or 12 buttons on the remote.
+
+   - Pressing the "SAFE" button once + 1 - 9 buttons will load the alt profile once and not lock in the feature. The next profile change will be as usual.
+
+
  - Normally, if you power on your console before waking the RT4K, the RT4K will have not seen the profile change. Using the remote's POWER button, in this configuration, will wake the RT4K "and" resend the profile after it's finished waking.
 
  - AUX8 button + Power button power cycles your TV via IR Emitter. (only LG OLED CX atm, more can be added upon request)
