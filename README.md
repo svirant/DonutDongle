@@ -158,7 +158,7 @@ When using the optional IR Receiver, the IR reception of the RT4K can be been gr
 
  - AUX8 pressed twice, manually enter a SVS profile to load with the profile buttons using 1 - 9 and 10,11,12 buttons for 0. Must use 3 digits. Ex: 001 = 1, 010 = 10, etc
  
- - MT-ViKI 8 Port HDMI switch's inputs can be changed with AUX8 button + profile buttons 1 - 8. Must configure "MTVIKIir" in the options section of the .ino
+ - MT-ViKI 8 Port HDMI switch's inputs can be changed with AUX8 button + profile buttons 1 - 8. Must configure "MTVir" in the options section of the .ino
 
  - TESmart 16x1 HDMI switch's inputs can changed. Must set "TESmartir" in the options section.
     - AUX7 + button 1 - 12, aux1, aux2, aux3, aux4 for inputs 1 - 16 on "alt sw1" port (SVS profiles 1 - 16)
@@ -402,6 +402,10 @@ The following is from the .ino file itself. Refer to it directly for all **Advan
 //////////////////
 */
 
+uint8_t const debugE1CAP = 0; // line ~495
+uint8_t const debugE2CAP = 0; // line ~768
+uint8_t const debugState = 0; // line ~432
+
 
 uint16_t const offset = 0; // Only needed for multiple Donut Dongles (DD). Set offset so 2nd,3rd,etc boards don't overlap SVS profiles. (e.g. offset = 300;) 
                       // MUST use SVS=1 on additional DDs. If using the IR receiver, recommended to have it only connected to the DD with lowest offset.
@@ -445,28 +449,22 @@ uint8_t const SVS = 1; //     "Remote" profiles are profiles that are assigned t
                       //     - SVS   1 -  99 for 1st Extron or TESmart
                       //     - SVS 101 - 199 for 2nd Extron or TESmart
                       //
-                      //
-                      //
 
 
-
-bool const S0  = false;        // (Profile 0) 
+bool const S0 = false;  // (Profile 0) default is false
                          //
-                         //  ** Recommended to remove any /profile/SVS/S0_<user defined>.rt4 profiles and leave this option "false" if using in tandem with the Scalable Video Switch. **
+                         //  ** Recommended to remove any /profile/SVS/S0_<user defined>.rt4 profiles and leave this option set false if using in tandem with the Scalable Video Switch. **
+                         //  ** Does not work with TESmart HDMI switches **
                          //
-                         // set "true" to load "Remote Profile 12" instead of "S0_<user definted>.rt4" (if SVS=0) when all ports are in-active on 1st Extron switch (and 2nd if connected). 
+                         // For SVS=0; set true to load "Remote Profile 12" when all ports are in-active on SW1 (and SW2 if connected). 
                          // You can assign it to a generic HDMI profile for example.
                          // If your device has a 12th input, SVS will be used instead. "If" you also have an active 2nd Extron Switch, Remote Profile 12
                          // will only load if "BOTH" switches have all in-active ports.
                          // 
-                         // 
-                         // If SVS=1, /profile/SVS/ "S0_<user defined>.rt4" will be used instead of Remote Profile 12
+                         // For SVS=1, /profile/SVS/ "S0_<user defined>.rt4" will load instead of Remote Profile 12
                          //
-                         // If SVS=2, Remote Profile 12 will be used instead of "S0_<user defined>.rt4"
+                         // For SVS=2, Remote Profile 12 will be used instead of "S0_<user defined>.rt4"
                          //
-                         //
-                         // default is false // also recommended to set false to filter out unstable Extron inputs that can result in spamming the RT4K with profile changes 
-                       
 
 
 ////////////////////////// 
@@ -481,82 +479,96 @@ bool const S0  = false;        // (Profile 0)
                         //
 //////////////////////////
 
+// For Extron Matrix switches that support DSVP. RGBS and HDMI/DVI video types.
 
+#define automatrixSW1 false // set true for auto matrix switching on "SW1" port
+#define automatrixSW2 false // set true for auto matrix switching on "SW2" port
 
-uint8_t const voutMatrix[65] = {1,  // MATRIX switchers // by default ALL input changes to any/all outputs result in a profile change
-                                                   // disable specific outputs from triggering profile changes
-                                                   //
-                           1,  // output 1 (1 = enabled, 0 = disabled)
-                           1,  // output 2
-                           1,  // output 3
-                           1,  // output 4
-                           1,  // output 5
-                           1,  // output 6
-                           1,  // output 7
-                           1,  // output 8
-                           1,  // output 9
-                           1,  // output 10
-                           1,  // output 11
-                           1,  // output 12
-                           1,  // output 13
-                           1,  // output 14
-                           1,  // output 15
-                           1,  // output 16
-                           1,  // output 17
-                           1,  // output 18
-                           1,  // output 19
-                           1,  // output 20
-                           1,  // output 21
-                           1,  // output 22
-                           1,  // output 23
-                           1,  // output 24
-                           1,  // output 25
-                           1,  // output 26
-                           1,  // output 27
-                           1,  // output 28
-                           1,  // output 29
-                           1,  // output 30
-                           1,  // output 31
-                           1,  // output 32 (1 = enabled, 0 = disabled)
+///////////////////////////////
+
+uint8_t const ExtronVideoOutputPortSW1 = 1; // For certain Extron Matrix models, must specify the video output port that connects to RT4K
+uint8_t const ExtronVideoOutputPortSW2 = 1; // can also be used for auto matrix mode as shown in next option
+
+///////////////////////////////
+
+uint8_t const vinMatrix[65] = {0,  // MATRIX switchers  // When auto matrix mode is enabled: (automatrixSW1 / SW2 defined above)
+                                                        // set to 0 for the auto switched input to tie to all outputs
+                                                        // set to 1 for the auto switched input to trigger a Preset
+                                                        // set to 2 for the auto switched input to tie to "ExtronVideoOutputPortSW1" / "ExtronVideoOutputPortSW2"
+                                                        //
+                                                        // For option 1, set the following inputs to the desired Preset #
+                                                        // (by default each input # is set to the same corresponding Preset #)
+                           1,  // input 1 SW1
+                           2,  // input 2
+                           3,  // input 3
+                           4,  // input 4
+                           5,  // input 5
+                           6,  // input 6
+                           7,  // input 7
+                           8,  // input 8
+                           9,  // input 9
+                           10,  // input 10
+                           11,  // input 11
+                           12,  // input 12
+                           13,  // input 13
+                           14,  // input 14
+                           15,  // input 15
+                           16,  // input 16
+                           17,  // input 17
+                           18,  // input 18
+                           19,  // input 19
+                           20,  // input 20
+                           21,  // input 21
+                           22,  // input 22
+                           23,  // input 23
+                           24,  // input 24
+                           25,  // input 25
+                           26,  // input 26
+                           27,  // input 27
+                           28,  // input 28
+                           29,  // input 29
+                           30,  // input 30
+                           30,  // input 31
+                           30,  // input 32
                                //
-                               // ONLY USE FOR 2ND MATRIX SWITCH
-                           1,  // 2ND MATRIX SWITCH output 1 (1 = enabled, 0 = disabled)
-                           1,  // 2ND MATRIX SWITCH output 2
-                           1,  // 2ND MATRIX SWITCH output 3
-                           1,  // 2ND MATRIX SWITCH output 4
-                           1,  // 2ND MATRIX SWITCH output 5
-                           1,  // 2ND MATRIX SWITCH output 6
-                           1,  // 2ND MATRIX SWITCH output 7
-                           1,  // 2ND MATRIX SWITCH output 8
-                           1,  // 2ND MATRIX SWITCH output 9
-                           1,  // 2ND MATRIX SWITCH output 10
-                           1,  // 2ND MATRIX SWITCH output 11
-                           1,  // 2ND MATRIX SWITCH output 12
-                           1,  // 2ND MATRIX SWITCH output 13
-                           1,  // 2ND MATRIX SWITCH output 14
-                           1,  // 2ND MATRIX SWITCH output 15
-                           1,  // 2ND MATRIX SWITCH output 16
-                           1,  // 2ND MATRIX SWITCH output 17
-                           1,  // 2ND MATRIX SWITCH output 18
-                           1,  // 2ND MATRIX SWITCH output 19
-                           1,  // 2ND MATRIX SWITCH output 20
-                           1,  // 2ND MATRIX SWITCH output 21
-                           1,  // 2ND MATRIX SWITCH output 22
-                           1,  // 2ND MATRIX SWITCH output 23
-                           1,  // 2ND MATRIX SWITCH output 24
-                           1,  // 2ND MATRIX SWITCH output 25
-                           1,  // 2ND MATRIX SWITCH output 26
-                           1,  // 2ND MATRIX SWITCH output 27
-                           1,  // 2ND MATRIX SWITCH output 28
-                           1,  // 2ND MATRIX SWITCH output 29
-                           1,  // 2ND MATRIX SWITCH output 30
-                           1,  // 2ND MATRIX SWITCH output 31
-                           1,  // 2ND MATRIX SWITCH output 32 (1 = enabled, 0 = disabled)
+                               // ONLY USE FOR 2ND MATRIX SWITCH on SW2
+                           1,  // 2ND MATRIX SWITCH input 1 SW2
+                           2,  // 2ND MATRIX SWITCH input 2
+                           3,  // 2ND MATRIX SWITCH input 3
+                           4,  // 2ND MATRIX SWITCH input 4
+                           5,  // 2ND MATRIX SWITCH input 5
+                           6,  // 2ND MATRIX SWITCH input 6
+                           7,  // 2ND MATRIX SWITCH input 7
+                           8,  // 2ND MATRIX SWITCH input 8
+                           9,  // 2ND MATRIX SWITCH input 9
+                           10,  // 2ND MATRIX SWITCH input 10
+                           11,  // 2ND MATRIX SWITCH input 11
+                           12,  // 2ND MATRIX SWITCH input 12
+                           13,  // 2ND MATRIX SWITCH input 13
+                           14,  // 2ND MATRIX SWITCH input 14
+                           15,  // 2ND MATRIX SWITCH input 15
+                           16,  // 2ND MATRIX SWITCH input 16
+                           17,  // 2ND MATRIX SWITCH input 17
+                           18,  // 2ND MATRIX SWITCH input 18
+                           19,  // 2ND MATRIX SWITCH input 19
+                           20,  // 2ND MATRIX SWITCH input 20
+                           21,  // 2ND MATRIX SWITCH input 21
+                           22,  // 2ND MATRIX SWITCH input 22
+                           23,  // 2ND MATRIX SWITCH input 23
+                           24,  // 2ND MATRIX SWITCH input 24
+                           25,  // 2ND MATRIX SWITCH input 25
+                           26,  // 2ND MATRIX SWITCH input 26
+                           27,  // 2ND MATRIX SWITCH input 27
+                           28,  // 2ND MATRIX SWITCH input 28
+                           29,  // 2ND MATRIX SWITCH input 29
+                           30,  // 2ND MATRIX SWITCH input 30
+                           30,  // 2ND MATRIX SWITCH input 31
+                           30,  // 2ND MATRIX SWITCH input 32
                            };
-                           
+
 
                            // ** Must be on firmware version 3.7 or higher **
-uint8_t const RT5Xir = 2;     // 0 = disables IR Emitter for RetroTink 5x
+uint8_t const RT5Xir = 0;     // 0 = disables IR Emitter for RetroTink 5x
                               // 1 = enabled for Extron sw1 / alt sw1, TESmart HDMI, MT-ViKi, or Otaku Games Scart Switch if connected
                               //     sends Profile 1 - 10 commands to RetroTink 5x. Must have IR LED emitter connected.
                               //
@@ -571,7 +583,7 @@ uint8_t const OSSCir = 0;     // 0 = disables IR Emitter for OSSC
                               //     
                               // 2 = enabled for gscart switch only (remote profiles 1-8 for first gscart, 9-14 for first 6 inputs on second gscart)
 
-uint8_t const MTVIKIir = 0;   // Must have IR "Receiver" connected to the Donut Dongle for option 1 & 2.
+uint8_t const MTVir = 0;   // Must have IR "Receiver" connected to the Donut Dongle for option 1 & 2.
                               // 0 = disables IR Receiver -> Serial Control for MT-VIKI 8 Port HDMI switch
                               //
                               // 1 = MT-VIKI 8 Port HDMI switch connected to "Extron sw1"
@@ -582,9 +594,28 @@ uint8_t const MTVIKIir = 0;   // Must have IR "Receiver" connected to the Donut 
                               //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the MT-VIKI Input over Serial.
                               //     Sends auxprof SVS profiles listed below. You can change them below to 101 - 108 to prevent SVS profile conflicts if needed.
 
+
+uint8_t const TESmartir = 0;  // Must have IR "Receiver" connected to the Donut Dongle for option 1 and above.
+                              // 0 = disables IR Receiver -> Serial Control for TESmart 16x1 Port HDMI switch
+                              //
+                              // 1 = TESmart 16x1 HDMI switch connected to "alt sw1"
+                              //     Using the RT4K Remote w/ the IR Receiver, AUX7 + profile button changes the Input over Serial. AUX7 + AUX1 - AUX4 for Input 13 - 16.
+                              //     Sends SVS profile 1 - 16 as well.
+                              //
+                              // 2 = TESmart 16x1 HDMI switch connected to "alt sw2"
+                              //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the Input over Serial. AUX8 + AUX1 - AUX4 for Input 13 - 16.
+                              //     Sends SVS profile 101 - 116 as well.
+                              //  ** this option overrides auxprof shown below  **
+                              //
+                              // 3 = TESmart 16x1 HDMI switch connected to BOTH "alt sw1" and "alt sw2"
+                              //     Use AUX7 and AUX8 buttons as described above.
+                              //  ** this option overrides auxprof shown below  **
+
 uint8_t const auxprof[12] =   // Assign SVS profiles to IR remote profile buttons. 
                               // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
                               // Press AUX8 then profile button to load. Must have IR Receiver connected and Serial connection to RT4K.
+                              //
+                              // ** Will not work if TESmartir above is set to 2 or 3 **
                               // 
                               {1,  // AUX8 + profile 1 button
                                 2,  // AUX8 + profile 2 button
@@ -600,8 +631,9 @@ uint8_t const auxprof[12] =   // Assign SVS profiles to IR remote profile button
                                 12, // AUX8 + profile 12 button
                                 };
 
-uint8_t const gctl = 1; // 1 = Enables gscart/gcomp manual input selection.
-                        // 0 = Disabled (default)
+uint8_t const gctl = 0; // 1 = Enables gscart/gcomp manual input selection
+                        // 0 = Disable (Default)
+                        //
                         // ** Only supported on vers 5.x gscart/gcomp switches **
                         //
                         // AUX5 button + 1-8 button for gscart sw1, button 1 = input 1, etc
@@ -612,12 +644,5 @@ uint8_t const gctl = 1; // 1 = Enables gscart/gcomp manual input selection.
                         // 
                         // (RT5x and OSSC may require a repeat of the button combo for the IR signal to send.)
 
-String const auxpower = "LG"; // AUX8 + Power button sends power off/on via IR Emitter. "LG" OLEX CX is the only one implemented atm. 
-
-uint8_t const legacyOR[] = {1,2,3}; // For Legacy RT5x remote, when gctl = 1, you can use the bottom-most 3 buttons for manual input selection of gscart/gcomp inputs.
-                                    //                         set to input 1, 2, and 3 as default. Values can be: 1 - 8, for gscart/gcomp sw1 only at the moment.
-                                    //
-                                    // Use the "Back/Exit" button to re-enable auto switching.
-                                    //
-                                    // ** Only supported on vers 5.x gscart/gcomp switches **
+char const auxpower[] = "LG"; // AUX8 + Power button sends power off/on via IR Emitter. "LG" OLEX CX is the only one implemented atm.
 ```
