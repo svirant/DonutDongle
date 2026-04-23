@@ -16,22 +16,22 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5.1"
+#define FIRMWARE_VERSION "0.5.2"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
 #define MTV_TIME_CHECK 1500 // time between mt-viki disconnetion detection checks
 #define AM_TIME_CHECK 500 // time between auto-matrix input change detection
 #define SEND_LEDC_CHANNEL 0
-#define IR_SEND_PIN 11    // Optional IR LED Emitter for RT5X compatibility. Sends IR data out Arduino pin D11
+#define LED_BUILTIN 13
 #define IR_RECEIVE_PIN 2  // Optional IR Receiver on pin D2
 #define extronSerial Serial1
 #define extronSerial2 Serial2
 #define Serial Serial0 // ** COMMENT OUT THIS LINE ** to see output in Serial Monitor. Disables Serial output to RT4K. usbMode must also be set to "false"
 
 
-#include <TinyIRReceiver.hpp> // all can be found in the built-in Library Manager
 #include <IRremote.hpp>
+#include <TinyIRReceiver.hpp> // all can be found in the built-in Library Manager
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <WebServer.h>
@@ -51,7 +51,7 @@ uint8_t const debugState = 0; // line ~598
 
 const char* donuthostname = "donutshop";      // hostname, by default: http://donutshop.local include quotes ""
 
-#define usbMode true              // USB Serial Command mode. set true to enable. requires OTG adapter. normal Serial mode will be active regardless of setting.
+#define usbMode false              // USB Serial Command mode. set true to enable. requires OTG adapter. normal Serial mode will be active regardless of setting.
                                    // https://github.com/wakwak-koba/EspUsbHost will also need to be installed in order to have FTDI support for the RT4K usb serial port.
                                    // This is the easiest method...
                                    // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
@@ -1561,6 +1561,21 @@ void readIR(){
       }
       else if(ir_recv_command == 26){ // (aux8 +) Power button
         sendIR(auxpower,0,1);
+        ir_recv_command = 0;
+        aux8button = 0;
+      }
+      else if(ir_recv_command == 83){ // ok button
+        unsigned long totalMinutes = millis() / 60000UL;
+        unsigned int days = totalMinutes / 1440UL;
+        unsigned int hours = (totalMinutes / 60UL) % 24;
+        byte minutes = totalMinutes % 60;
+        Serial.print(F("Uptime: "));
+        Serial.print(days);
+        Serial.print(F("d "));
+        Serial.print(hours);
+        Serial.print(F("h "));
+        Serial.print(minutes);
+        Serial.println(F("m"));
         ir_recv_command = 0;
         aux8button = 0;
       }
