@@ -16,13 +16,14 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5.2"
+#define FIRMWARE_VERSION "0.5.2a"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
 #define MTV_TIME_CHECK 1500 // time between mt-viki disconnetion detection checks
 #define AM_TIME_CHECK 500 // time between auto-matrix input change detection
 #define SEND_LEDC_CHANNEL 0
+#define IR_SEND_PIN 11  // Optional IR LED Emitter for RT5X/OSSC/TV compatibility. Sends IR data out Arduino pin D11
 #define LED_BUILTIN 13
 #define IR_RECEIVE_PIN 2  // Optional IR Receiver on pin D2
 #define extronSerial Serial1
