@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5.2a"
+#define FIRMWARE_VERSION "0.5.2b"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -326,7 +326,7 @@ uint8_t mswitchSize = 5;
                    //           etc...
 Console consoles[MAX_CONSOLES] = {{"PS1 Digital","http://ps1digital.local/gameid",-9,0,0,0,1}, // you can add more, but stay in this format
                       {"MemCardPro","http://10.0.1.50/api/currentState",-5,0,0,0,1},
-                      {"MemCardPro 2.0+ Firmware","https://10.0.1.52/api/currentState",-5,0,0,0,1},
+                      {"MemCardPro 20 Firmware","https://10.0.1.52/api/currentState",-5,0,0,0,1},
                       {"N64 Digital","http://n64digital.local/gameid",-7,0,0,0,1} // the last one in the list has no "," at the end
                       };
 
@@ -445,8 +445,14 @@ WebServer server(80);
 
 void DDloop(void *pvParameters);
 void GIDloop(void *pvParameters);
+void Wloop(void *pvParameters);
+void OTAloop(void *pvParameters);
 uint16_t gTime = 2000;
 uint8_t RMTuse = 0;
+unsigned long xtaskCurrentTime = 0;
+unsigned long xtaskPrevTime = 0;
+unsigned long xtaskCurrentTime2 = 0;
+unsigned long xtaskPrevTime2 = 0;
 
 #if usbMode
 #include <EspUsbHostSerial_FTDI.h> // https://github.com/wakwak-koba/EspUsbHost in order to have FTDI support for the RT4K usb serial port, this is the easiest method.
@@ -577,8 +583,10 @@ void setup(){
 
   server.begin();
 
-  xTaskCreate(DDloop,"DDloop",4096,NULL,1,NULL);
-  xTaskCreate(GIDloop,"GIDloop",4096,NULL,1,NULL);
+  xTaskCreate(DDloop,"DDloop",16384,NULL,1,NULL);
+  xTaskCreate(GIDloop,"GIDloop",16384,NULL,1,NULL);
+  // xTaskCreate(Wloop,"Wloop",16384,NULL,1,NULL);
+  // xTaskCreate(OTAloop,"OTAloop",16384,NULL,1,NULL);
   
 }  // end of setup
 
@@ -587,6 +595,38 @@ void loop(){
    // leave empty
    //
 }  // end of loop()
+
+void xtaskfreemem(unsigned long eTime){
+  xtaskCurrentTime = millis();  // Init timer
+  if(xtaskPrevTime == 0)       // If previous timer not initialized, do so now.
+    xtaskPrevTime = millis();
+  if((xtaskCurrentTime - xtaskPrevTime) >= eTime){ // If it's been longer than eTime, run task
+    xtaskCurrentTime = 0;
+    xtaskPrevTime = 0;
+    // Check the "High Water Mark" for the current task
+    UBaseType_t remainingStack = uxTaskGetStackHighWaterMark(NULL);
+    
+    Serial.print(F("DD Free: "));
+    Serial.print(remainingStack);
+    Serial.println(F(" bytes"));
+ }
+}  // end of xtaskfreemem()
+
+void xtaskfreemem2(unsigned long eTime){
+  xtaskCurrentTime2 = millis();  // Init timer
+  if(xtaskPrevTime2 == 0)       // If previous timer not initialized, do so now.
+    xtaskPrevTime2 = millis();
+  if((xtaskCurrentTime2 - xtaskPrevTime2) >= eTime){ // If it's been longer than eTime, run rask
+    xtaskCurrentTime2 = 0;
+    xtaskPrevTime2 = 0;
+    // Check the "High Water Mark" for the current task
+    UBaseType_t remainingStack = uxTaskGetStackHighWaterMark(NULL);
+    
+    Serial.print(F("GID Free: "));
+    Serial.print(remainingStack);
+    Serial.println(F(" bytes"));
+ }
+}  // end of xtaskfreemem2()
 
 void DDloop(void *pvParameters){
   (void)pvParameters;
@@ -610,6 +650,7 @@ void DDloop(void *pvParameters){
     #if usbMode
     usbHost.task();  // used for RT4K usb serial communications
     #endif
+    //xtaskfreemem(2000);
   }
 } // end of DDloop
 
@@ -618,8 +659,25 @@ void GIDloop(void *pvParameters){
 
   for(;;){
     readGameID();
+    //xtaskfreemem2(2000);
   }
 } // end of GIDloop
+
+void Wloop(void *pvParameters){
+  (void)pvParameters;
+
+  for(;;){
+    server.handleClient();
+  }
+} // end of Wloop
+
+void OTAloop(void *pvParameters){
+  (void)pvParameters;
+
+  for(;;){
+    ArduinoOTA.handle();
+  }
+} // end of OTAloop
 
 void OTAsetup(){
   ArduinoOTA.setHostname(donuthostname);
@@ -1566,17 +1624,7 @@ void readIR(){
         aux8button = 0;
       }
       else if(ir_recv_command == 83){ // ok button
-        unsigned long totalMinutes = millis() / 60000UL;
-        unsigned int days = totalMinutes / 1440UL;
-        unsigned int hours = (totalMinutes / 60UL) % 24;
-        byte minutes = totalMinutes % 60;
-        Serial.print(F("Uptime: "));
-        Serial.print(days);
-        Serial.print(F("d "));
-        Serial.print(hours);
-        Serial.print(F("h "));
-        Serial.print(minutes);
-        Serial.println(F("m"));
+        dualSerialPrint(formatUptime(millis()));
         ir_recv_command = 0;
         aux8button = 0;
       }
@@ -3892,6 +3940,7 @@ void handleRoot(){
   let currentSortCol = null;
   let currentSortDir = 'asc';
   let currentPage = "main";
+  let isFetching = false;
 
   const fwType = ")rawliteral" + fwType + R"rawliteral(";
   const urlParams = new URLSearchParams(window.location.search);
@@ -4557,10 +4606,20 @@ void handleRoot(){
   loadData();
 
   refreshInterval = setInterval(async () => {
-    if (updatingConsoles) return; // skip refresh if user is editing
+    if (updatingConsoles || isFetching) return; // skip refresh if user is editing
+
+    isFetching = true;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 seconds
 
     try {
-      const res = await fetch('/getConsoles');
+      const res = await fetch('/getConsoles', {
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
       const updated = await res.json();
 
       // Sync the local consoles array with backend
@@ -4581,7 +4640,7 @@ void handleRoot(){
       }
 
       // Update icons and highlights
-      consoles.forEach((c, i) => updateStatusIcon(i)); // Update icons
+      consoles.forEach((c, i) => updateStatusIcon(i));
 
       // Track King console
       const king = consoles.find(c => c.King === 1);
@@ -4590,9 +4649,16 @@ void handleRoot(){
       highlightProfiles();
 
     } catch (err) {
-      console.error("Error refreshing consoles:", err);
+      if (err.name === 'AbortError') {
+        console.warn('Fetch timed out after 4 seconds');
+      } else {
+        console.error("Error refreshing consoles:", err);
+      }
+    } finally {
+      isFetching = false;
     }
   }, 2500);
+
 
   function highlightProfiles() {
     let gameMatchFound = false;
