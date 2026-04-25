@@ -145,20 +145,19 @@ When using the optional IR Receiver, the IR reception of the RT4K can be been gr
 
    - The name following the "\_" can be changed as well. So a name like S1001_SNES-CRT.rt4 can be used to better describe. Only the naming pattern before the "\_" is important. </br>
 
-   - When SVS profile S2 normally would load, Sx002 would load instead where x = the number button chosen prior and 002 represents the S2 profile. S2100_NES.rt4 for example would be the 2nd Alternate profile for S100_NES.rt4. It's up to you to create these alternate sets of profiles on your SD card of course. To disable this feature and return to your normally configured profiles, press "SAFE" button + 10,11, or 12 buttons on the remote.
+   - When SVS profile S2 normally would load, Sx002 would load instead where x = the number button chosen prior and 002 represents the S2 profile. S2100_NES.rt4 for example would be the 2nd Alternate profile for S100_NES.rt4. It's up to you to create these alternate sets of profiles on your SD card of course. To disable this feature and return to your normally configured profiles, press "SAFE"x2  + 10, 11, or 12 buttons on the remote.
 
-   - Pressing the "SAFE" button once + 1 - 9 buttons will load the alt profile once and not lock in the feature. The next profile change will be as usual.
-
-
+ - SAFE button once + profile button 1 - 12 loads SVS profiles of your choosing. By default is SVS 1 - 12. Configured with auxprof[] in the Settings section of the .ino
+  
  - Normally, if you power on your console before waking the RT4K, the RT4K will have not seen the profile change. Using the remote's POWER button, in this configuration, will wake the RT4K "and" resend the profile after it's finished waking.
 
  - AUX8 button + Power button power cycles your TV via IR Emitter. (only LG OLED CX atm, more can be added upon request)
 
- - AUX8 button + profile button 1 - 12 loads SVS profiles of your choosing. By default is SVS 1 - 12
-
  - AUX8 pressed twice, manually enter a SVS profile to load with the profile buttons using 1 - 9 and 10,11,12 buttons for 0. Must use 3 digits. Ex: 001 = 1, 010 = 10, etc
  
- - MT-ViKI 8 Port HDMI switch's inputs can be changed with AUX8 button + profile buttons 1 - 8. Must configure "MTVir" in the options section of the .ino
+ - MT-ViKI 8 Port HDMI switch's inputs can be changed. Must configure "MTVir" in the options section of the .ino
+    - AUX7 + button 1 - 8 for inputs 1 - 8 on "alt sw1" port (SVS profiles 1 - 8)
+    - AUX8 + button 1 - 8 for inputs 1 - 8 on "alt sw2" port (SVS profiles 101 - 108)
 
  - TESmart 16x1 HDMI switch's inputs can changed. Must set "TESmartir" in the options section.
     - AUX7 + button 1 - 12, aux1, aux2, aux3, aux4 for inputs 1 - 16 on "alt sw1" port (SVS profiles 1 - 16)
@@ -593,6 +592,9 @@ uint8_t const MTVir = 0;   // Must have IR "Receiver" connected to the Donut Don
                               // 2 = MT-VIKI 8 Port HDMI switch connected to "Extron sw2"
                               //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the MT-VIKI Input over Serial.
                               //     Sends auxprof SVS profiles listed below. You can change them below to 101 - 108 to prevent SVS profile conflicts if needed.
+                              // 3 = MT-VIKI 8 Port HDMI switch connected to BOTH "alt sw1" and "alt sw2"
+                              //     Use AUX7 and AUX8 buttons as described above.
+                              //
 
 
 uint8_t const TESmartir = 0;  // Must have IR "Receiver" connected to the Donut Dongle for option 1 and above.
@@ -605,30 +607,28 @@ uint8_t const TESmartir = 0;  // Must have IR "Receiver" connected to the Donut 
                               // 2 = TESmart 16x1 HDMI switch connected to "alt sw2"
                               //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the Input over Serial. AUX8 + AUX1 - AUX4 for Input 13 - 16.
                               //     Sends SVS profile 101 - 116 as well.
-                              //  ** this option overrides auxprof shown below  **
                               //
                               // 3 = TESmart 16x1 HDMI switch connected to BOTH "alt sw1" and "alt sw2"
                               //     Use AUX7 and AUX8 buttons as described above.
-                              //  ** this option overrides auxprof shown below  **
+                              //
 
 uint8_t const auxprof[12] =   // Assign SVS profiles to IR remote profile buttons. 
                               // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
-                              // Press AUX8 then profile button to load. Must have IR Receiver connected and Serial connection to RT4K.
+                              // Press SAFE button then profile button to load. Must have IR Receiver connected and Serial connection to RT4K.
                               //
-                              // ** Will not work if TESmartir above is set to 2 or 3 **
                               // 
-                              {1,  // AUX8 + profile 1 button
-                                2,  // AUX8 + profile 2 button
-                                3,  // AUX8 + profile 3 button
-                                4,  // AUX8 + profile 4 button
-                                5,  // AUX8 + profile 5 button
-                                6,  // AUX8 + profile 6 button
-                                7,  // AUX8 + profile 7 button
-                                8,  // AUX8 + profile 8 button
-                                9,  // AUX8 + profile 9 button
-                                10, // AUX8 + profile 10 button
-                                11, // AUX8 + profile 11 button
-                                12, // AUX8 + profile 12 button
+                              {1,  // SAFE + profile 1 button
+                                2,  // SAFE + profile 2 button
+                                3,  // SAFE + profile 3 button
+                                4,  // SAFE + profile 4 button
+                                5,  // SAFE + profile 5 button
+                                6,  // SAFE + profile 6 button
+                                7,  // SAFE + profile 7 button
+                                8,  // SAFE + profile 8 button
+                                9,  // SAFE + profile 9 button
+                                10, // SAFE + profile 10 button
+                                11, // SAFE + profile 11 button
+                                12, // SAFE + profile 12 button
                                 };
 
 uint8_t const gctl = 0; // 1 = Enables gscart/gcomp manual input selection
