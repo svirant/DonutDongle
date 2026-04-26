@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5.2c"
+#define FIRMWARE_VERSION "0.5.2d"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -44,9 +44,9 @@
 #include <Update.h>
 // <EspUsbHostSerial_FTDI.h> is listed further down with instructions on how to install
 
-uint8_t const debugE1CAP = 0; // line ~803
-uint8_t const debugE2CAP = 0; // line ~1075
-uint8_t const debugState = 0; // line ~598
+uint8_t const debugE1CAP = 0; // line ~811
+uint8_t const debugE2CAP = 0; // line ~1125
+uint8_t const debugState = 0; // line ~606
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -239,6 +239,10 @@ uint8_t MTVir = 0;   // Must have IR "Receiver" connected to the Donut Dongle fo
                               // 2 = MT-VIKI 8 Port HDMI switch connected to "Extron sw2"
                               //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the MT-VIKI Input over Serial.
                               //     Sends auxprof SVS profiles listed below. You can change them below to 101 - 108 to prevent SVS profile conflicts if needed.
+                              //
+                              // 3 = MT-VIKI 8 Port HDMI switch connected to BOTH "alt sw1" and "alt sw2"
+                              //     Use AUX7 and AUX8 buttons as described above.
+                              //
 
 uint8_t TESmartir = 0;  // Must have IR "Receiver" connected to the Donut Dongle for option 1 and above.
                               // 0 = disables IR Receiver -> Serial Control for TESmart 16x1 Port HDMI switch
@@ -250,30 +254,28 @@ uint8_t TESmartir = 0;  // Must have IR "Receiver" connected to the Donut Dongle
                               // 2 = TESmart 16x1 HDMI switch connected to "alt sw2"
                               //     Using the RT4K Remote w/ the IR Receiver, AUX8 + profile button changes the Input over Serial. AUX8 + AUX1 - AUX4 for Input 13 - 16.
                               //     Sends SVS profile 101 - 116 as well.
-                              //  ** this option overrides auxprof shown below  **
                               //
                               // 3 = TESmart 16x1 HDMI switch connected to BOTH "alt sw1" and "alt sw2"
                               //     Use AUX7 and AUX8 buttons as described above.
-                              //  ** this option overrides auxprof shown below  **
-
-uint8_t auxprof[12] =   // Assign SVS profiles to IR remote profile buttons. 
-                              // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
-                              // Press AUX8 then profile button to load. Must have IR Receiver connected and Serial connection to RT4K.
                               //
-                              // ** Will not work if TESmartir above is set to 2 or 3 **
+
+uint8_t auxprof[12] =         // Assign SVS profiles to IR remote profile buttons. 
+                              // Replace 1, 2, 3, etc below with "ANY" SVS profile number.
+                              // Press SAFE then profile button to load. Must have IR Receiver connected and Serial connection to RT4K.
+                              //
                               // 
-                              {1,  // AUX8 + profile 1 button
-                                2,  // AUX8 + profile 2 button
-                                3,  // AUX8 + profile 3 button
-                                4,  // AUX8 + profile 4 button
-                                5,  // AUX8 + profile 5 button
-                                6,  // AUX8 + profile 6 button
-                                7,  // AUX8 + profile 7 button
-                                8,  // AUX8 + profile 8 button
-                                9,  // AUX8 + profile 9 button
-                                10, // AUX8 + profile 10 button
-                                11, // AUX8 + profile 11 button
-                                12, // AUX8 + profile 12 button
+                              {1,  // SAFE + profile 1 button
+                                2,  // SAFE + profile 2 button
+                                3,  // SAFE + profile 3 button
+                                4,  // SAFE + profile 4 button
+                                5,  // SAFE + profile 5 button
+                                6,  // SAFE + profile 6 button
+                                7,  // SAFE + profile 7 button
+                                8,  // SAFE + profile 8 button
+                                9,  // SAFE + profile 9 button
+                                10, // SAFE + profile 10 button
+                                11, // SAFE + profile 11 button
+                                12, // SAFE + profile 12 button
                                 };
 
 
@@ -326,7 +328,7 @@ uint8_t mswitchSize = 5;
                    //           etc...
 Console consoles[MAX_CONSOLES] = {{"PS1 Digital","http://ps1digital.local/gameid",-9,0,0,0,1}, // you can add more, but stay in this format
                       {"MemCardPro","http://10.0.1.50/api/currentState",-5,0,0,0,1},
-                      {"MemCardPro 20 Firmware","https://10.0.1.52/api/currentState",-5,0,0,0,1},
+                      {"MemCardPro2fw","https://10.0.1.52/api/currentState",-5,0,0,0,1},
                       {"N64 Digital","http://n64digital.local/gameid",-7,0,0,0,1} // the last one in the list has no "," at the end
                       };
 
