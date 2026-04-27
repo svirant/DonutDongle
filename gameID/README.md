@@ -1,3 +1,5 @@
+<img src="../images/dsdemo.JPG"><br />
+
 ## gameID devices currently supported
 | **Device**    | Supported | Notes |
 | ------------- | ------------- |------------- |
