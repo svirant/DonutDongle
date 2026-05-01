@@ -15,6 +15,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 >   - **Alternate SVS Profile System** - allows a different set of profiles to load. Explained in the ["New IR Remote Control functionality"](https://github.com/svirant/DonutDongle#new-ir-remote-control-functionality) section below.
 >   - **Fallback** - feature that allows a switch that reports having no active inputs to change profiles over to one that does.
 >   - **MT-VIKI Disconnection Detection** - when an input is powered off and on, the profile is resent.
+>     - **Disable MT-VIKI beeping by pressing the "#" button on its remote.**
 >   - **front case buttons/remote NOW change profiles on the MT-VIKI HDMI switch.** Thanks to [Arthrimus](https://scalablevideoswitch.com/)! 
 >   - **auto-switching on Extron Matrix switchers** that support DSVP. Works with RGBS/HV and HDMI/DVI signal types.
 >   - **Support for older Extron Crosspoint (non plus) matrix switchers**
@@ -61,7 +62,7 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 (current list, but not limited to)
 | **Switch**    | Supported | Notes |
 | ------------- | ------------- |------------- |
-| MT-VIKI 8 port HDMI | yes, confirmed first hand. RT4K remote can also change inputs and profiles.  | Front case buttons and included IR remote **NOW** also change profiles! All Thanks to [Arthrimus](https://scalablevideoswitch.com/)!  Only supported in _beta firmware atm. |
+| MT-VIKI 8 port HDMI | yes, confirmed first hand. RT4K remote can also change inputs and profiles.  | Front case buttons and included IR remote also change profiles! **Disable MT-VIKI beeping by pressing the "#" button on its remote.** |
 | TESmart 16x1 HDMI  | yes, confirmed first hand  | RT4K remote can also change inputs and profiles. |
 | TESmart 8x1 HDMI  | unconfirmed, but should work, let me know! ||
 | gSCARTsw / gCOMPsw | **version 5.x** confirmed by [@niquallis](https://x.com/niquallis) and [@UstSte](https://x.com/UstSte), thanks so much for your help! | Manual input selection works too! |
