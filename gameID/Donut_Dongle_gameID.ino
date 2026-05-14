@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5.2d"
+#define FIRMWARE_VERSION "0.5.3"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -52,7 +52,7 @@ uint8_t const debugState = 0; // line ~606
 
 const char* donuthostname = "donutshop";      // hostname, by default: http://donutshop.local include quotes ""
 
-#define usbMode false              // USB Serial Command mode. set true to enable. requires OTG adapter. normal Serial mode will be active regardless of setting.
+#define usbMode true              // USB Serial Command mode. set true to enable. requires OTG adapter. normal Serial mode will be active regardless of setting.
                                    // https://github.com/wakwak-koba/EspUsbHost will also need to be installed in order to have FTDI support for the RT4K usb serial port.
                                    // This is the easiest method...
                                    // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
@@ -363,7 +363,7 @@ uint16_t gameDBSize = 11; // array can hold MAX_GAMEDB entries, but only set to 
 // automatrix variables
 uint8_t AMstate[32];
 uint32_t prevAMstate = 0;
-int  AMstateTop = -1;
+int AMstateTop = -1;
 uint8_t amSizeSW1 = 8; // 8 by default, but updates if a different size is discovered
 uint8_t amSizeSW2 = 8; // ...
 
@@ -535,6 +535,7 @@ void setup(){
     button { background-color: #4CAF50 !important; }
     </style>
     )rawliteral");
+  esp_wifi_set_ps(WIFI_PS_NONE); // disable power saving mode
   WiFi.setHostname(donuthostname);
   wm.autoConnect("DonutShop_Setup");
 
@@ -843,7 +844,10 @@ void readExtron1(){
     }
     else if(ecap.substring(0,8) == "RECONFIG"){     // This is received everytime a change is made on older Extron Crosspoints
       ReconfigSet[0] = true;
-      ExtronOutputQuery(ExtronVideoOutputPortSW1,1); // Finds current input for "ExtronVideoOutputPortSW1" that is connected to port 1 of the DD
+      char cmd[10];
+      snprintf(cmd, sizeof(cmd), "v%d%%", ExtronVideoOutputPortSW1);
+      extronSerial.write(cmd);
+      delay(20);
     }
     else if(ecap.substring(amSizeSW1 + 6,amSizeSW1 + 9) == "Rpr" && automatrixSW1){ // detect if a Preset has been used 
       einput = ecap.substring(amSizeSW1 + 6,amSizeSW1 + 11);
@@ -1156,7 +1160,10 @@ void readExtron2(){
     }
     else if(ecap.substring(0,8) == "RECONFIG"){     // This is received everytime a change is made on older Extron Crosspoints.
       ReconfigSet[1] = true;
-      ExtronOutputQuery(ExtronVideoOutputPortSW2,2); // Finds current input for "ExtronVideoOutputPortSW2" that is connected to port 2 of the DD
+      char cmd[10];
+      snprintf(cmd, sizeof(cmd), "v%d%%", ExtronVideoOutputPortSW2);
+      extronSerial2.write(cmd);
+      delay(20);
     }
     else if(ecap.substring(amSizeSW2 + 6,amSizeSW2 + 9) == "Rpr" && automatrixSW2){ // detect if a Preset has been used 
       einput = ecap.substring(amSizeSW2 + 6,amSizeSW2 + 11);
@@ -2365,22 +2372,6 @@ void MTVtime2(unsigned long eTime){
  }
 } // end of MTVtime2()
 
-void ExtronOutputQuery(uint8_t outputNum, uint8_t sw){
-  char cmd[6]; 
-  uint8_t len = 0;
-  cmd[len++] = 'v';
-  char buff[4];
-  itoa(outputNum,buff,10);
-  for(char* p = buff; *p; p++){
-    cmd[len++] = *p;
-  }
-  cmd[len++] = '%';
-  if(sw == 1)
-    extronSerial.write((uint8_t *)cmd,len);
-  else if(sw == 2)
-    extronSerial2.write((uint8_t *)cmd,len);
-} // end of ExtronOutputQuery()
-
 void extronSerialEwrite(String type, uint8_t value, uint8_t sw){
   if(type == "viki"){
     viki[2] = byte(value - 1);
@@ -2991,40 +2982,36 @@ void handleExportAll(){
   server.send(200, "application/json", out);
 } // end of handleExportAll()
 
-void handleUpdate() {
+void handleUpdate(){
   server.sendHeader("Connection", "close");
-
-  if (Update.hasError()) {
+  if(Update.hasError()){
     server.send(500, "text/plain", "Update Failed!");
-  } else {
+  }
+  else{
     server.send(200, "text/plain", "Update Success! Rebooting...");
   }
-
   delay(100);
   ESP.restart();
 } // end of handleUpdate()
 
-void handleUpdateUpload() {
+void handleUpdateUpload(){
   HTTPUpload& upload = server.upload();
-
-  if (upload.status == UPLOAD_FILE_START) {
+  if(upload.status == UPLOAD_FILE_START){
     Serial.printf("Update Start: %s\n", upload.filename.c_str());
-
-    if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {
+    if(!Update.begin(UPDATE_SIZE_UNKNOWN)){
       Update.printError(Serial);
     }
-
-  } else if (upload.status == UPLOAD_FILE_WRITE) {
-
-    if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+  }
+  else if(upload.status == UPLOAD_FILE_WRITE){
+    if(Update.write(upload.buf, upload.currentSize) != upload.currentSize){
       Update.printError(Serial);
     }
-
-  } else if (upload.status == UPLOAD_FILE_END) {
-
-    if (Update.end(true)) {
+  }
+  else if(upload.status == UPLOAD_FILE_END){
+    if(Update.end(true)){
       Serial.printf("Update Success: %u bytes\n", upload.totalSize);
-    } else {
+    }
+    else{
       Update.printError(Serial);
     }
   }
