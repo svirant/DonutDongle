@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5.3"
+#define FIRMWARE_VERSION "0.5.4"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -44,9 +44,9 @@
 #include <Update.h>
 // <EspUsbHostSerial_FTDI.h> is listed further down with instructions on how to install
 
-uint8_t const debugE1CAP = 0; // line ~811
-uint8_t const debugE2CAP = 0; // line ~1125
-uint8_t const debugState = 0; // line ~606
+uint8_t const debugE1CAP = 0; // line ~869
+uint8_t const debugE2CAP = 0; // line ~1186
+uint8_t const debugState = 0; // line ~615
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -445,8 +445,13 @@ bool MTVddSW2 = false;
 
 WebServer server(80);
 
+// telnet server variables
+WiFiServer shellServer(23);
+WiFiClient shellClient;
+
 void DDloop(void *pvParameters);
 void GIDloop(void *pvParameters);
+void SHloop(void *pvParameters);
 uint16_t gTime = 2000;
 uint8_t RMTuse = 0;
 
@@ -474,14 +479,14 @@ class SerialFTDI : public EspUsbHostSerial_FTDI {
           if(offset > 0) cprof = String(tp + offset);
           tcprof = "\rSVS NEW INPUT=" + cprof + "\r\n";
           submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcprof[0]), tcprof.length()); // usb response
-          delay(1000);
+          vTaskDelay(pdMS_TO_TICKS(1000));
           tcprof = "\rSVS CURRENT INPUT=" + cprof + "\r\n"; // serial response     
         }
         if(tp < 0){
           tcprof = "\rremote prof" + String((-1)*tp) + "\r\n";
         }
         submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcprof[0]), tcprof.length()); // usb response
-        if(tp < 0) delay(1000); // only added so the green led stays lit for 1 second for "remote prof" commands
+        if(tp < 0) vTaskDelay(pdMS_TO_TICKS(1000)); // only added so the green led stays lit for 1 second for "remote prof" commands
         analogWrite(LED_RED,255);
         analogWrite(LED_BLUE,255);
         analogWrite(LED_GREEN,255);
@@ -577,11 +582,14 @@ void setup(){
   server.on("/exportAll", HTTP_GET, handleExportAll);
   server.on("/importAll", HTTP_POST, handleImportAll);
   server.on("/update", HTTP_POST, handleUpdate, handleUpdateUpload);
+  server.on("/cmd", HTTP_POST, handleSendCMD);
 
   server.begin();
+  shellServer.begin();
 
   xTaskCreate(DDloop,"DDloop",16384,NULL,1,NULL);
   xTaskCreate(GIDloop,"GIDloop",16384,NULL,1,NULL);
+  xTaskCreate(SHloop,"SHloop",16384,NULL,1,NULL);
   
 }  // end of setup
 
@@ -605,10 +613,13 @@ void DDloop(void *pvParameters){
     #endif
     server.handleClient();
     if(debugState){
-      delay(100);
+      vTaskDelay(pdMS_TO_TICKS(100));
       Serial.print(F("GAMEID1 "));Serial.print(F(" On: "));Serial.print(mswitch[GAMEID1].On);Serial.print(F(" King: "));Serial.print(mswitch[GAMEID1].King);Serial.print(F(" Prof: "));Serial.println(mswitch[GAMEID1].Prof);
       Serial.print(F("EXTRON1 "));Serial.print(F(" On: "));Serial.print(mswitch[EXTRON1].On);Serial.print(F(" King: "));Serial.print(mswitch[EXTRON1].King);Serial.print(F(" Prof: "));Serial.println(mswitch[EXTRON1].Prof);
       Serial.print(F("EXTRON2 "));Serial.print(F(" On: "));Serial.print(mswitch[EXTRON2].On);Serial.print(F(" King: "));Serial.print(mswitch[EXTRON2].King);Serial.print(F(" Prof: "));Serial.println(mswitch[EXTRON2].Prof);
+    }
+    else{
+      vTaskDelay(pdMS_TO_TICKS(2));
     }
     ArduinoOTA.handle();
     #if usbMode
@@ -622,21 +633,67 @@ void GIDloop(void *pvParameters){
 
   for(;;){
     readGameID();
+    vTaskDelay(pdMS_TO_TICKS(5));
   }
 } // end of GIDloop
 
+
+void SHloop(void *pvParameters){
+  (void)pvParameters;
+
+  char commandBuffer[128];
+  size_t idx = 0;
+
+  for(;;){
+
+    // Accept new client if needed
+    if(!shellClient || !shellClient.connected()){
+      shellClient = shellServer.available();
+
+      if(shellClient){
+        shellClient.println("Ready for RT4K commands");
+        shellClient.print("> ");
+        idx = 0; // reset buffer
+      }
+    }
+
+    // Read input if connected
+    if(shellClient && shellClient.connected()){
+      while(shellClient.available()){
+        char c = shellClient.read();
+
+        if(c == '\r') continue;
+        if(c == '\n'){
+          commandBuffer[idx] = '\0';
+          TelnetSendCMD(String(commandBuffer));
+          idx = 0;
+          shellClient.print("> ");
+        }
+        else{
+          if(idx < sizeof(commandBuffer) - 1) commandBuffer[idx++] = c;
+          else{
+            // overflow protection
+            idx = 0;
+            shellClient.println("ERR: line too long");
+            shellClient.print("> ");
+          }
+        }
+      } // end of while loop
+    }
+    vTaskDelay(pdMS_TO_TICKS(5));
+  } // end of for loop
+} // end of SHloop()
+
 void OTAsetup(){
   ArduinoOTA.setHostname(donuthostname);
-
-  ArduinoOTA
-    .onError([](ota_error_t error) {
+  ArduinoOTA.onError([](ota_error_t error){
       Serial.printf("Error[%u]: ", error);
       if (error == OTA_AUTH_ERROR) Serial.println("OTA Auth Failed");
       else if (error == OTA_BEGIN_ERROR) Serial.println("OTA Begin Failed");
       else if (error == OTA_CONNECT_ERROR) Serial.println("OTA Connect Failed");
       else if (error == OTA_RECEIVE_ERROR) Serial.println("OTA Receive Failed");
       else if (error == OTA_END_ERROR) Serial.println("OTA End Failed");
-    });
+  });
   ArduinoOTA.begin();
 } // end of OTAsetup()
 
@@ -847,7 +904,7 @@ void readExtron1(){
       char cmd[10];
       snprintf(cmd, sizeof(cmd), "v%d%%", ExtronVideoOutputPortSW1);
       extronSerial.write(cmd);
-      delay(20);
+      vTaskDelay(pdMS_TO_TICKS(20));
     }
     else if(ecap.substring(amSizeSW1 + 6,amSizeSW1 + 9) == "Rpr" && automatrixSW1){ // detect if a Preset has been used 
       einput = ecap.substring(amSizeSW1 + 6,amSizeSW1 + 11);
@@ -1163,7 +1220,7 @@ void readExtron2(){
       char cmd[10];
       snprintf(cmd, sizeof(cmd), "v%d%%", ExtronVideoOutputPortSW2);
       extronSerial2.write(cmd);
-      delay(20);
+      vTaskDelay(pdMS_TO_TICKS(20));
     }
     else if(ecap.substring(amSizeSW2 + 6,amSizeSW2 + 9) == "Rpr" && automatrixSW2){ // detect if a Preset has been used 
       einput = ecap.substring(amSizeSW2 + 6,amSizeSW2 + 11);
@@ -1298,8 +1355,8 @@ void readExtron2(){
       // for TESmart 4K60 / TESmart 4K30 / MT-VIKI HDMI switch on SW2
       if(ecapbytes[4] == 17 || ecapbytes[3] == 17 || ecap.substring(0,5) == "Auto_" || ecap.substring(15,20) == "Auto_" || ITEinputnum[1] > 0){
         if(ecapbytes[6] == 22 || ecapbytes[5] == 22 || ecapbytes[11] == 48 || ecapbytes[26] == 48 || ITEinputnum[1] == 1){
-          //sendProfile(-1,HDMI1,1);
-          sendProfile(101,EXTRON2,1);
+          if(RT5Xir == 4) sendProfile(-1,HDMI1,1); // part of my "Experimental" setup
+          else sendProfile(101,EXTRON2,1);
           currentMTVinput[1] = 101;
           MTVdiscon[1] = false;
         }
@@ -1909,62 +1966,62 @@ void readIR(){
       }
       else if(ir_recv_command == 11){
         sendRBP(1);
-        if(RT5Xir >= 1){sendIR("5x",1,1);delay(30);sendIR("5x",1,1);} // RT5X profile 1
-        if(RT5Xir && OSSCir)delay(500);
+        if(RT5Xir >= 1){sendIR("5x",1,1);vTaskDelay(pdMS_TO_TICKS(30));sendIR("5x",1,1);} // RT5X profile 1
+        if(RT5Xir && OSSCir)vTaskDelay(pdMS_TO_TICKS(500));
         if(OSSCir == 1){sendIR("ossc",1,3);} // OSSC profile 1
       }
       else if(ir_recv_command == 7){
         sendRBP(2);
-        if(RT5Xir >= 1){sendIR("5x",2,1);delay(30);sendIR("5x",2,1);} // RT5X profile 2
-        if(RT5Xir && OSSCir)delay(500);
+        if(RT5Xir >= 1){sendIR("5x",2,1);vTaskDelay(pdMS_TO_TICKS(30));sendIR("5x",2,1);} // RT5X profile 2
+        if(RT5Xir && OSSCir)vTaskDelay(pdMS_TO_TICKS(500));
         if(OSSCir == 1){sendIR("ossc",2,3);} // OSSC profile 2
       }
       else if(ir_recv_command == 3){
         sendRBP(3);
-        if(RT5Xir >= 1){sendIR("5x",3,1);delay(30);sendIR("5x",3,1);} // RT5X profile 3
-        if(RT5Xir && OSSCir)delay(500);
+        if(RT5Xir >= 1){sendIR("5x",3,1);vTaskDelay(pdMS_TO_TICKS(30));sendIR("5x",3,1);} // RT5X profile 3
+        if(RT5Xir && OSSCir)vTaskDelay(pdMS_TO_TICKS(500));
         if(OSSCir == 1){sendIR("ossc",3,3);} // OSSC profile 3
       }
       else if(ir_recv_command == 10){
         sendRBP(4);
-        if(RT5Xir >= 1){sendIR("5x",4,1);delay(30);sendIR("5x",4,1);} // RT5X profile 4
-        if(RT5Xir && OSSCir)delay(500);
+        if(RT5Xir >= 1){sendIR("5x",4,1);vTaskDelay(pdMS_TO_TICKS(30));sendIR("5x",4,1);} // RT5X profile 4
+        if(RT5Xir && OSSCir)vTaskDelay(pdMS_TO_TICKS(500));
         if(OSSCir == 1){sendIR("ossc",4,3);} // OSSC profile 4
       }
       else if(ir_recv_command == 6){
         sendRBP(5);
-        if(RT5Xir >= 1){sendIR("5x",5,1);delay(30);sendIR("5x",5,1);} // RT5X profile 5
-        if(RT5Xir && OSSCir)delay(500);
+        if(RT5Xir >= 1){sendIR("5x",5,1);vTaskDelay(pdMS_TO_TICKS(30));sendIR("5x",5,1);} // RT5X profile 5
+        if(RT5Xir && OSSCir)vTaskDelay(pdMS_TO_TICKS(500));
         if(OSSCir == 1){sendIR("ossc",5,3);} // OSSC profile 5
       }
       else if(ir_recv_command == 2){
         sendRBP(6);
-        if(RT5Xir >= 1){sendIR("5x",6,1);delay(30);sendIR("5x",6,1);} // RT5X profile 6
-        if(RT5Xir && OSSCir)delay(500);
+        if(RT5Xir >= 1){sendIR("5x",6,1);vTaskDelay(pdMS_TO_TICKS(30));sendIR("5x",6,1);} // RT5X profile 6
+        if(RT5Xir && OSSCir)vTaskDelay(pdMS_TO_TICKS(500));
         if(OSSCir == 1){sendIR("ossc",6,3);} // OSSC profile 6
       }
       else if(ir_recv_command == 9){
         sendRBP(7);
-        if(RT5Xir >= 1){sendIR("5x",7,1);delay(30);sendIR("5x",7,1);} // RT5X profile 7
-        if(RT5Xir && OSSCir)delay(500);
+        if(RT5Xir >= 1){sendIR("5x",7,1);vTaskDelay(pdMS_TO_TICKS(30));sendIR("5x",7,1);} // RT5X profile 7
+        if(RT5Xir && OSSCir)vTaskDelay(pdMS_TO_TICKS(500));
         if(OSSCir == 1){sendIR("ossc",7,3);} // OSSC profile 7
       }
       else if(ir_recv_command == 5){
         sendRBP(8);
-        if(RT5Xir >= 1){sendIR("5x",8,1);delay(30);sendIR("5x",8,1);} // RT5X profile 8
-        if(RT5Xir && OSSCir)delay(500);
+        if(RT5Xir >= 1){sendIR("5x",8,1);vTaskDelay(pdMS_TO_TICKS(30));sendIR("5x",8,1);} // RT5X profile 8
+        if(RT5Xir && OSSCir)vTaskDelay(pdMS_TO_TICKS(500));
         if(OSSCir == 1){sendIR("ossc",8,3);} // OSSC profile 8
       }
       else if(ir_recv_command == 1){
         sendRBP(9);
-        if(RT5Xir >= 1){sendIR("5x",9,1);delay(30);sendIR("5x",9,1);} // RT5X profile 9
-        if(RT5Xir && OSSCir)delay(500);
+        if(RT5Xir >= 1){sendIR("5x",9,1);vTaskDelay(pdMS_TO_TICKS(30));sendIR("5x",9,1);} // RT5X profile 9
+        if(RT5Xir && OSSCir)vTaskDelay(pdMS_TO_TICKS(500));
         if(OSSCir == 1){sendIR("ossc",9,3);} // OSSC profile 9
       }
       else if(ir_recv_command == 37){
         sendRBP(10);
-        if(RT5Xir >= 1){sendIR("5x",10,1);delay(30);sendIR("5x",10,1);} // RT5X profile 10
-        if(RT5Xir && OSSCir)delay(500);
+        if(RT5Xir >= 1){sendIR("5x",10,1);vTaskDelay(pdMS_TO_TICKS(30));sendIR("5x",10,1);} // RT5X profile 10
+        if(RT5Xir && OSSCir)vTaskDelay(pdMS_TO_TICKS(500));
         if(OSSCir == 1){sendIR("ossc",10,3);} // OSSC profile 10
       }
       else if(ir_recv_command == 38){
@@ -2140,11 +2197,11 @@ void sendIR(String type, uint8_t prof, uint8_t repeat){
   }
   else if(type == "OSSC" || type == "ossc"){
     irsend.sendNEC(0x7C,0xB7,repeat); // exit
-    delay(100);
+    vTaskDelay(pdMS_TO_TICKS(100));
     irsend.sendNEC(0x7C,0xB7,repeat); // exit 
-    delay(100);
+    vTaskDelay(pdMS_TO_TICKS(100));
     irsend.sendNEC(0x7C,0x9D,repeat); // 10+ button
-    delay(400);
+    vTaskDelay(pdMS_TO_TICKS(400));
     //if(prof == 0){irsend.sendNEC(0x7C,0x93,repeat);} // OSSC profile 0 not used atm
     if(prof == 1){irsend.sendNEC(0x7C,0x94,repeat);} // OSSC profile 1 
     else if(prof == 2){irsend.sendNEC(0x7C,0x95,repeat);} // OSSC profile 2
@@ -2155,16 +2212,16 @@ void sendIR(String type, uint8_t prof, uint8_t repeat){
     else if(prof == 7){irsend.sendNEC(0x7C,0x9A,repeat);} // OSSC profile 7
     else if(prof == 8){irsend.sendNEC(0x7C,0x9B,repeat);} // OSSC profile 8
     else if(prof == 9){irsend.sendNEC(0x7C,0x9C,repeat);} // OSSC profile 9
-    else if(prof == 10){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x93,repeat);} // OSSC profile 10
-    else if(prof == 11){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x94,repeat);} // OSSC profile 11
-    else if(prof == 12){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x95,repeat);} // OSSC profile 12
-    else if(prof == 13){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x7C,0x96,repeat);} // OSSC profile 13
-    else if(prof == 14){irsend.sendNEC(0x7C,0x9D,repeat);delay(400);irsend.sendNEC(0x47C,0x97,repeat);} // OSSC profile 14
+    else if(prof == 10){irsend.sendNEC(0x7C,0x9D,repeat);vTaskDelay(pdMS_TO_TICKS(400));irsend.sendNEC(0x7C,0x93,repeat);} // OSSC profile 10
+    else if(prof == 11){irsend.sendNEC(0x7C,0x9D,repeat);vTaskDelay(pdMS_TO_TICKS(400));irsend.sendNEC(0x7C,0x94,repeat);} // OSSC profile 11
+    else if(prof == 12){irsend.sendNEC(0x7C,0x9D,repeat);vTaskDelay(pdMS_TO_TICKS(400));irsend.sendNEC(0x7C,0x95,repeat);} // OSSC profile 12
+    else if(prof == 13){irsend.sendNEC(0x7C,0x9D,repeat);vTaskDelay(pdMS_TO_TICKS(400));irsend.sendNEC(0x7C,0x96,repeat);} // OSSC profile 13
+    else if(prof == 14){irsend.sendNEC(0x7C,0x9D,repeat);vTaskDelay(pdMS_TO_TICKS(400));irsend.sendNEC(0x47C,0x97,repeat);} // OSSC profile 14
   }
   else if(type == "LG"){ // LG TV
       irsend.sendNEC(0x04,0x08,repeat); // Power button
       irsend.sendNEC(0x00,0x00,3);
-      delay(50);
+      vTaskDelay(pdMS_TO_TICKS(50));
       irsend.sendNEC(0x04,0x08,repeat); // send once more
       irsend.sendNEC(0x00,0x00,3);
   }
@@ -2318,7 +2375,7 @@ void sendSVS(uint16_t num){
   if(num != 0)Serial.print(num + offset + altprofoffset);
   else Serial.print(num);;
   Serial.println(F("\r"));
-  delay(1000);
+  vTaskDelay(pdMS_TO_TICKS(1000));
   Serial.print(F("\rSVS CURRENT INPUT="));
   if(num != 0)Serial.print(num + offset + altprofoffset);
   else Serial.print(num);
@@ -2337,7 +2394,7 @@ void sendRBP(int prof){ // send Remote Button Profile
   currentProf = -1*prof; // always store remote button profiles as negative numbers
   #if !usbMode // add the 1s red led indicator after the VGA Serial command is sent
   digitalWrite(LED_BUILTIN,HIGH);
-  delay(1000);
+  vTaskDelay(pdMS_TO_TICKS(1000));
   digitalWrite(LED_BUILTIN,LOW);
   #endif
 } // end of sendRBP()
@@ -2472,7 +2529,7 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
     if(sname == EXTRON1){ // sendIR to RT5X / OSSC
       if(sprof < 11){
         if(RT5Xir == 1)sendIR("5x",sprof,2); // RT5X profile
-        if(RT5Xir && OSSCir)delay(500);
+        if(RT5Xir && OSSCir)vTaskDelay(pdMS_TO_TICKS(500));
         if(OSSCir == 1)sendIR("ossc",sprof,3); // OSSC profile
       }
       else if(OSSCir == 1 && sprof > 11 && sprof < 15){
@@ -2990,7 +3047,7 @@ void handleUpdate(){
   else{
     server.send(200, "text/plain", "Update Success! Rebooting...");
   }
-  delay(100);
+  vTaskDelay(pdMS_TO_TICKS(100));
   ESP.restart();
 } // end of handleUpdate()
 
@@ -3016,6 +3073,26 @@ void handleUpdateUpload(){
     }
   }
 } // end of handleUpdateUpload()
+
+void handleSendCMD(){
+  String cmd = server.arg("plain");
+  if(cmd.substring(0,6) == "tv pwr"){
+    sendIR(auxpower,0,1);
+  }
+  else{
+    dualSerialPrint(cmd);
+  }
+  server.send(204);
+} //end of handleSendCMD()
+
+void TelnetSendCMD(String cmd){
+  if(cmd.substring(0,6) == "tv pwr"){
+    sendIR(auxpower,0,1);
+  }
+  else{
+    dualSerialPrint(cmd);
+  }
+} // end TelnetSendCMD()
 
 String formatUptime(unsigned long ms){
   unsigned long days = ms / 86400000UL;
@@ -3426,7 +3503,67 @@ void handleRoot(){
         white-space: nowrap;
       }
 
+      #termWidget {
+          font-family: monospace;
+          display: flex;
+          flex-direction: column;
 
+          height: 450px;
+          width: 100%;
+
+          margin: 0;
+          padding: 0;
+
+          border: 1px solid #0f0;
+          background: black;
+          color: #00ff00;
+      }
+
+      /* scrollable output area */
+      #terminal {
+          flex: 1;
+          overflow-y: auto;
+          padding: 10px;
+          white-space: pre-wrap;
+          overscroll-behavior: contain;
+          margin: 0;
+          padding-bottom: 5px;
+      }
+
+      /* input stays at bottom */
+      #inputRow {
+          display: flex;
+          padding: 5px;
+          border-top: none;
+          align-items: center;
+      }
+
+      #inputRow span {
+          margin-right: 5px;
+      }
+
+      #cmd {
+          flex: 1;
+          background: black;
+          color: #00ff00;
+          border: none;
+          outline: none;
+          font-family: monospace;
+          caret-color: #00ff00;
+      }
+
+      #term_label {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+      }
+
+      .kbdContainer {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+      }
 
     </style>
   </head>
@@ -3561,6 +3698,39 @@ void handleRoot(){
 
         <div id="settingsPage" style="display:none; padding-top:60px;">
         <div style="width:80%; margin:20px auto;">
+        
+        <div class="settings-section terminal-section" id="terminalSection">
+          <h2 class="settings-title">RT4K Terminal</h2>
+            <span id="term_label">
+              Output shown on RT4K or RT4K "DIAG" screen.
+
+              <div class="kbdContainer">
+                <span class="tooltip">
+                  <span class="kbdLabel">Keyboard Nav Mode</span>
+                    <span class="tooltip-bubble">
+                    ←↑↓→ = remote left/up/down/right<br>
+                    M/m = remote menu<br>
+                    Enter = remote ok<br>
+                    Backspace = remote back<br>
+                    ESC = exit keyboard nav mode<br>
+                    </span>
+                </span>    
+                  <label class="switch">
+                    <input type="checkbox" id="keyboardToggle">
+                    <span class="slider"></span>
+                  </label>
+              </div>
+            </span>
+
+            <div id="termWidget">
+                <div id="terminal"></div>
+                <div id="inputRow">
+                    <span id="prompt">&gt;</span>
+                    <input id="cmd" autocomplete="off" />
+                </div>
+            </div>
+        </div>
+
           <div class="settings-section" id="profileRulesSection">
             <h2 class="settings-title">Profile Rules</h2>
             <div class="settings-content">
@@ -3820,6 +3990,7 @@ void handleRoot(){
           </div>
         </div>
 
+
         <!-- Firmware Update -->
         <div class="settings-section firmware-section" id="firmwareSection">
           <h2 class="settings-title">Firmware Update</h2>
@@ -3839,7 +4010,7 @@ void handleRoot(){
           </form>
         </div>
 
-
+        
       </div>
     </div>
 
@@ -3890,8 +4061,180 @@ void handleRoot(){
     }
   }
 
+  const terminal = document.getElementById("terminal");
+  const cmdInput = document.getElementById("cmd");
 
-  function showQuickSettings() {
+  terminal.addEventListener("mouseenter", () =>{
+      cmd.focus();
+  });
+
+  terminal.addEventListener("click", () =>{
+      cmd.focus();
+  });
+
+  terminal.scrollTop = terminal.scrollHeight;
+
+  let history = JSON.parse(localStorage.getItem("cmd_history") || "[]");
+  let histIndex = history.length;
+
+  function saveHistory(){
+      localStorage.setItem("cmd_history", JSON.stringify(history));
+  }
+
+  function print(line){
+      terminal.textContent += line + "\n";
+      terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  function printLink(text, url)
+  {
+      const line = document.createElement("div");
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.textContent = text;
+
+      a.target = "_blank";   // open new tab
+      a.style.color = "#00ff00";
+      a.style.textDecoration = "underline";
+
+      line.appendChild(a);
+      terminal.appendChild(line);
+
+      terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  let keyboardMode = false;
+
+  document.getElementById("keyboardToggle")
+      .addEventListener("change", function ()
+  {
+      if (this.checked)
+          enterKeyboardMode();
+      else
+          exitKeyboardMode();
+  });
+
+  function enterKeyboardMode()
+  {
+      keyboardMode = true;
+      document.getElementById("prompt").textContent = "<KEYBOARD NAV MODE>";
+      document.getElementById("keyboardToggle").checked = true;
+      document.getElementById("termWidget")
+          .classList.add("keyboard-mode");
+  }
+
+  function exitKeyboardMode()
+  {
+      keyboardMode = false;
+      document.getElementById("prompt").textContent = ">";
+      document.getElementById("keyboardToggle").checked = false;
+      document.getElementById("termWidget")
+          .classList.remove("keyboard-mode");
+      print("Use Remote Control Commands to control RT4K");
+      print("consolemods.org/wiki/AV:RetroTINK-4K#Remote_Control_Commands");
+      print(" ");
+  }
+
+  function sendCommand(cmd)
+  {
+    if (!cmd.trim()) return;
+    print(cmd);
+    if(cmd === "keyboard"){
+      enterKeyboardMode();
+    }
+    else{
+      fetch("/cmd", {
+        method: "POST",
+        body: cmd
+      });
+    }
+
+    history.push(cmd);
+    saveHistory();
+    histIndex = history.length;
+  }
+
+  cmdInput.addEventListener("keydown", e =>{
+
+    if(keyboardMode){ // Keyboard mode arrow handling
+      if(e.key === "Escape"){
+        exitKeyboardMode();
+        e.preventDefault();
+        return;
+      }
+      let command = null;
+
+      switch (e.key){
+            case "ArrowUp":
+                command = "remote up";
+                break;
+
+            case "ArrowDown":
+                command = "remote down";
+                break;
+
+            case "ArrowLeft":
+                command = "remote left";
+                break;
+
+            case "ArrowRight":
+                command = "remote right";
+                break;
+
+            case "Enter":
+                command = "remote ok";
+            break;
+
+            case "Backspace":
+                command = "remote back";
+            break;
+
+            case "m":
+            case "M":
+                command = "remote menu";
+                break;
+
+            
+        }
+
+        if(command){
+          e.preventDefault();
+          if(!keyboardMode) print(command);
+
+          fetch("/cmd", {
+            method: "POST",
+            body: command
+          });
+
+          return;
+        }
+    }
+
+      if(e.key === "Enter"){
+        sendCommand(cmdInput.value);
+        cmdInput.value = "";
+      }
+      else if(!keyboardMode && e.key === "ArrowUp"){
+        if(history.length === 0) return;
+        histIndex = Math.max(0, histIndex - 1);
+        cmdInput.value = history[histIndex] || "";
+        e.preventDefault();
+      }
+      else if(!keyboardMode && e.key === "ArrowDown"){
+        histIndex = Math.min(history.length, histIndex + 1);
+        cmdInput.value = history[histIndex] || "";
+        e.preventDefault();
+      }
+  });
+
+  document.getElementById("termWidget")
+    .addEventListener("click", () =>{
+    cmdInput.focus();
+  });
+
+
+  function showQuickSettings(){
     document.getElementById("mainPage").style.display = "none";
     document.getElementById("settingsPage").style.display = "block";
     currentPage = "settings";
@@ -3926,6 +4269,11 @@ void handleRoot(){
       }
 
     }
+
+    // Show Terminal section
+    const termSec = document.getElementById("terminalSection");
+    if (termSec) termSec.style.display = "block";
+
   }
 
   // inject current Settings values
