@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5.4"
+#define FIRMWARE_VERSION "0.5.5"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -2528,9 +2528,9 @@ void sendProfile(int sprof, uint8_t sname, uint8_t soverride){
 
     if(sname == EXTRON1){ // sendIR to RT5X / OSSC
       if(sprof < 11){
-        if(RT5Xir == 1)sendIR("5x",sprof,2); // RT5X profile
+        if(RT5Xir == 1) sendIR("5x",sprof,2); // RT5X profile
         if(RT5Xir && OSSCir)vTaskDelay(pdMS_TO_TICKS(500));
-        if(OSSCir == 1)sendIR("ossc",sprof,3); // OSSC profile
+        if(OSSCir == 1) sendIR("ossc",sprof,3); // OSSC profile
       }
       else if(OSSCir == 1 && sprof > 11 && sprof < 15){
         sendIR("ossc",sprof,3); // OSSC profile
@@ -3079,6 +3079,18 @@ void handleSendCMD(){
   if(cmd.substring(0,6) == "tv pwr"){
     sendIR(auxpower,0,1);
   }
+  else if(cmd.substring(0,3) == "5x "){
+    if(cmd.substring(3,9) == "prof10") sendIR("5x",10,2);
+    else if(cmd.substring(3,8) == "prof1") sendIR("5x",1,2);
+    else if(cmd.substring(3,8) == "prof2") sendIR("5x",2,2);
+    else if(cmd.substring(3,8) == "prof3") sendIR("5x",3,2);
+    else if(cmd.substring(3,8) == "prof4") sendIR("5x",4,2);
+    else if(cmd.substring(3,8) == "prof5") sendIR("5x",5,2);
+    else if(cmd.substring(3,8) == "prof6") sendIR("5x",6,2);
+    else if(cmd.substring(3,8) == "prof7") sendIR("5x",7,2);
+    else if(cmd.substring(3,8) == "prof8") sendIR("5x",8,2);
+    else if(cmd.substring(3,8) == "prof9") sendIR("5x",9,2);
+  }
   else{
     dualSerialPrint(cmd);
   }
@@ -3088,6 +3100,18 @@ void handleSendCMD(){
 void TelnetSendCMD(String cmd){
   if(cmd.substring(0,6) == "tv pwr"){
     sendIR(auxpower,0,1);
+  }
+  else if(cmd.substring(0,3) == "5x "){
+    if(cmd.substring(3,9) == "prof10") sendIR("5x",10,2);
+    else if(cmd.substring(3,8) == "prof1") sendIR("5x",1,2);
+    else if(cmd.substring(3,8) == "prof2") sendIR("5x",2,2);
+    else if(cmd.substring(3,8) == "prof3") sendIR("5x",3,2);
+    else if(cmd.substring(3,8) == "prof4") sendIR("5x",4,2);
+    else if(cmd.substring(3,8) == "prof5") sendIR("5x",5,2);
+    else if(cmd.substring(3,8) == "prof6") sendIR("5x",6,2);
+    else if(cmd.substring(3,8) == "prof7") sendIR("5x",7,2);
+    else if(cmd.substring(3,8) == "prof8") sendIR("5x",8,2);
+    else if(cmd.substring(3,8) == "prof9") sendIR("5x",9,2);
   }
   else{
     dualSerialPrint(cmd);
@@ -4025,6 +4049,7 @@ void handleRoot(){
   let currentSortDir = 'asc';
   let currentPage = "main";
   let isFetching = false;
+  const MAX_CMD_HISTORY = 999;
 
   const fwType = ")rawliteral" + fwType + R"rawliteral(";
   const urlParams = new URLSearchParams(window.location.search);
@@ -4086,24 +4111,6 @@ void handleRoot(){
       terminal.scrollTop = terminal.scrollHeight;
   }
 
-  function printLink(text, url)
-  {
-      const line = document.createElement("div");
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.textContent = text;
-
-      a.target = "_blank";   // open new tab
-      a.style.color = "#00ff00";
-      a.style.textDecoration = "underline";
-
-      line.appendChild(a);
-      terminal.appendChild(line);
-
-      terminal.scrollTop = terminal.scrollHeight;
-  }
-
   let keyboardMode = false;
 
   document.getElementById("keyboardToggle")
@@ -4131,17 +4138,78 @@ void handleRoot(){
       document.getElementById("keyboardToggle").checked = false;
       document.getElementById("termWidget")
           .classList.remove("keyboard-mode");
-      print("Use Remote Control Commands to control RT4K");
-      print("consolemods.org/wiki/AV:RetroTINK-4K#Remote_Control_Commands");
       print(" ");
+      print(">> Exited Keyboard Navigation Mode");
+      print(" ");
+  }
+
+  function showHistory(){
+    if (history.length === 0) {
+        print("No command history.");
+        return;
+    }
+
+    print("--- Command History ---");
+
+    history.forEach((cmd, index) => {
+        print(`${index + 1}: ${cmd}`);
+    });
+
+    print("----------------------");
+    print(" ");
   }
 
   function sendCommand(cmd)
   {
-    if (!cmd.trim()) return;
+    if(!cmd.trim()) return;
+
+    if(cmd.startsWith("!")){
+      const index = parseInt(cmd.slice(1), 10) - 1;
+
+      if(isNaN(index) || index < 0 || index >= history.length){
+        print(`No such history entry: ${cmd}`);
+        return;
+      }
+
+      cmd = history[index];
+    }
+
     print(cmd);
+
     if(cmd === "keyboard"){
       enterKeyboardMode();
+    }
+    else if(cmd === "help" || cmd === "?"){
+      print(" ");
+      print("--- Local Commands ---");
+      print("keyboard - enter keyboard navigation mode");
+      print("history  - show command history");
+      print("clear    - clear screen");
+      print("!5       - execute this history entry. ex: !5 executes the 5th history entry");
+      print("erase history - remove all command history");
+      print(" ");
+      print("--- Remote Commands ---");
+      print("Use Remote Control Commands to control RT4K");
+      print("consolemods.org/wiki/AV:RetroTINK-4K#Remote_Control_Commands");
+      print(" ");
+      print("--- Donut Dongle gameID Only! (IR Blaster required) ---");
+      print("5x prof#  - change RT5X profiles. # is profile number");
+      print("tv pwr    - TV power toggle");
+      print("-------------------------------------------------------");
+      print(" ");
+    }
+    else if(cmd === "history"){
+      showHistory();
+    }
+    else if(cmd === "clear"){
+      terminal.textContent = "";
+    }
+    else if(cmd === "erase history"){
+      history = [];
+      saveHistory();
+      histIndex = history.length;
+      terminal.textContent = "";
+      return;
     }
     else{
       fetch("/cmd", {
@@ -4151,6 +4219,9 @@ void handleRoot(){
     }
 
     history.push(cmd);
+    if(history.length > MAX_CMD_HISTORY){
+      history = history.slice(-MAX_CMD_HISTORY);
+    }
     saveHistory();
     histIndex = history.length;
   }
