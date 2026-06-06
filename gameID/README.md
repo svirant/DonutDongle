@@ -1,4 +1,5 @@
 <img src="../images/dsdemo.JPG"><br />
+<img src="../images/3ds.JPG"><br />
 
 ## gameID devices currently supported
 | **Device**    | Supported | Notes |

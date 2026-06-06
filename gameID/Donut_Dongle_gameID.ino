@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5.5"
+#define FIRMWARE_VERSION "0.5.6"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -445,13 +445,8 @@ bool MTVddSW2 = false;
 
 WebServer server(80);
 
-// telnet server variables
-WiFiServer shellServer(23);
-WiFiClient shellClient;
-
 void DDloop(void *pvParameters);
 void GIDloop(void *pvParameters);
-void SHloop(void *pvParameters);
 uint16_t gTime = 2000;
 uint8_t RMTuse = 0;
 
@@ -585,11 +580,9 @@ void setup(){
   server.on("/cmd", HTTP_POST, handleSendCMD);
 
   server.begin();
-  shellServer.begin();
 
   xTaskCreate(DDloop,"DDloop",16384,NULL,1,NULL);
   xTaskCreate(GIDloop,"GIDloop",16384,NULL,1,NULL);
-  xTaskCreate(SHloop,"SHloop",16384,NULL,1,NULL);
   
 }  // end of setup
 
@@ -636,53 +629,6 @@ void GIDloop(void *pvParameters){
     vTaskDelay(pdMS_TO_TICKS(5));
   }
 } // end of GIDloop
-
-
-void SHloop(void *pvParameters){
-  (void)pvParameters;
-
-  char commandBuffer[128];
-  size_t idx = 0;
-
-  for(;;){
-
-    // Accept new client if needed
-    if(!shellClient || !shellClient.connected()){
-      shellClient = shellServer.available();
-
-      if(shellClient){
-        shellClient.println("Ready for RT4K commands");
-        shellClient.print("> ");
-        idx = 0; // reset buffer
-      }
-    }
-
-    // Read input if connected
-    if(shellClient && shellClient.connected()){
-      while(shellClient.available()){
-        char c = shellClient.read();
-
-        if(c == '\r') continue;
-        if(c == '\n'){
-          commandBuffer[idx] = '\0';
-          TelnetSendCMD(String(commandBuffer));
-          idx = 0;
-          shellClient.print("> ");
-        }
-        else{
-          if(idx < sizeof(commandBuffer) - 1) commandBuffer[idx++] = c;
-          else{
-            // overflow protection
-            idx = 0;
-            shellClient.println("ERR: line too long");
-            shellClient.print("> ");
-          }
-        }
-      } // end of while loop
-    }
-    vTaskDelay(pdMS_TO_TICKS(5));
-  } // end of for loop
-} // end of SHloop()
 
 void OTAsetup(){
   ArduinoOTA.setHostname(donuthostname);
@@ -3097,27 +3043,6 @@ void handleSendCMD(){
   server.send(204);
 } //end of handleSendCMD()
 
-void TelnetSendCMD(String cmd){
-  if(cmd.substring(0,6) == "tv pwr"){
-    sendIR(auxpower,0,1);
-  }
-  else if(cmd.substring(0,3) == "5x "){
-    if(cmd.substring(3,9) == "prof10") sendIR("5x",10,2);
-    else if(cmd.substring(3,8) == "prof1") sendIR("5x",1,2);
-    else if(cmd.substring(3,8) == "prof2") sendIR("5x",2,2);
-    else if(cmd.substring(3,8) == "prof3") sendIR("5x",3,2);
-    else if(cmd.substring(3,8) == "prof4") sendIR("5x",4,2);
-    else if(cmd.substring(3,8) == "prof5") sendIR("5x",5,2);
-    else if(cmd.substring(3,8) == "prof6") sendIR("5x",6,2);
-    else if(cmd.substring(3,8) == "prof7") sendIR("5x",7,2);
-    else if(cmd.substring(3,8) == "prof8") sendIR("5x",8,2);
-    else if(cmd.substring(3,8) == "prof9") sendIR("5x",9,2);
-  }
-  else{
-    dualSerialPrint(cmd);
-  }
-} // end TelnetSendCMD()
-
 String formatUptime(unsigned long ms){
   unsigned long days = ms / 86400000UL;
   unsigned long hours = (ms / 3600000UL) % 24;
@@ -4178,6 +4103,15 @@ void handleRoot(){
 
     if(cmd === "keyboard"){
       enterKeyboardMode();
+      print(" ");
+      print("--- KEYBOARD NAVIGATION ---");
+      print("←↑↓→      = remote left/up/down/right");
+      print("M/m       = remote menu");
+      print("Enter     = remote ok");
+      print("Backspace = remote back");
+      print("ESC       = exit keyboard nav mode");
+      print("---------------------------");
+      print(" ");
     }
     else if(cmd === "help" || cmd === "?"){
       print(" ");
@@ -4195,6 +4129,10 @@ void handleRoot(){
       print("--- Donut Dongle gameID Only! (IR Blaster required) ---");
       print("5x prof#  - change RT5X profiles. # is profile number");
       print("tv pwr    - TV power toggle");
+      print(" ");
+      print("For scripting, all commands can be sent remotely using \"curl\" ");
+      print("Ex: curl http://donutshop.local/cmd -d \"plain=remote pwr\"");
+      print("    curl http://donutshop.local/cmd -d \"plain=SVS NEW INPUT=1\"");
       print("-------------------------------------------------------");
       print(" ");
     }
