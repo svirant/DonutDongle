@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5.6"
+#define FIRMWARE_VERSION "0.5.7"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -567,6 +567,7 @@ void setup(){
   loadVars();
 
   server.on("/",HTTP_GET,handleRoot);
+  server.on("/term", HTTP_GET, handleRoot);
   server.on("/getConsoles",HTTP_GET,handleGetConsoles);
   server.on("/updateConsoles",HTTP_POST,handleUpdateConsoles);
   server.on("/getGameDB",HTTP_GET,handleGetGameDB);
@@ -1559,7 +1560,7 @@ void readIR(){
         aux8button = 0;
       }
       else if(ir_recv_command == 83){ // ok button
-        dualSerialPrint(formatUptime(millis()));
+        dualSerialPrint("Uptime: " + formatUptime(millis()));
         ir_recv_command = 0;
         aux8button = 0;
       }
@@ -3037,6 +3038,11 @@ void handleSendCMD(){
     else if(cmd.substring(3,8) == "prof8") sendIR("5x",8,2);
     else if(cmd.substring(3,8) == "prof9") sendIR("5x",9,2);
   }
+  else if(cmd.substring(0,6) == "uptime"){
+    String result = "DonutShop Uptime: " + formatUptime(millis()) + "\r\n";
+    server.send(200, "text/plain", result);
+    return;
+  }
   else{
     dualSerialPrint(cmd);
   }
@@ -3048,14 +3054,14 @@ String formatUptime(unsigned long ms){
   unsigned long hours = (ms / 3600000UL) % 24;
   unsigned long minutes = (ms / 60000UL) % 60;
 
-  return "Uptime: " + String(days) + "d " + String(hours) + "h " + String(minutes) + "m";
+  return String(days) + "d " + String(hours) + "h " + String(minutes) + "m";
 } // end of formatUptime()
 
 
 void handleRoot(){
   String fwVer = String(FIRMWARE_VERSION);
   String fwType = String(FW_TYPE);
-  String Uptime = formatUptime(millis());
+  String Uptime = "Uptime: " + formatUptime(millis());
   String page = R"rawliteral(
   <!DOCTYPE html>
   <html>
@@ -3534,7 +3540,7 @@ void handleRoot(){
     </div>
 
     <!-- SETTINGS / BACK BUTTON -->
-    <button id="navBtn" onclick="togglePage()">
+    <button id="navBtn" onclick="settingsPage()">
       <span class="tooltip" id="navTooltip">
         ⚙️
         <span class="tooltip-bubble" id="navTooltipText">Settings</span>
@@ -3648,10 +3654,11 @@ void handleRoot(){
         <div id="settingsPage" style="display:none; padding-top:60px;">
         <div style="width:80%; margin:20px auto;">
         
+        <!-- RT4K Terminal -->
         <div class="settings-section terminal-section" id="terminalSection">
-          <h2 class="settings-title">RT4K Terminal</h2>
+          <h2 class="settings-title"><a href="/term" style="color:inherit;text-decoration:none;">RT4K Terminal</a></h2>
             <span id="term_label">
-              Output shown on RT4K or RT4K "DIAG" screen.
+              Type ? for help.
 
               <div class="kbdContainer">
                 <span class="tooltip">
@@ -3979,27 +3986,29 @@ void handleRoot(){
   const fwType = ")rawliteral" + fwType + R"rawliteral(";
   const urlParams = new URLSearchParams(window.location.search);
 
-  function togglePage() {
+  function settingsPage() {
     const main = document.getElementById("mainPage");
     const settings = document.getElementById("settingsPage");
     const iconSpan = document.getElementById("navTooltip");
     const tooltipText = document.getElementById("navTooltipText");
     const mainButtons = document.getElementById("mainTopbarButtons");
 
-    if (currentPage === "main") {
+    if(currentPage === "main"){
       // Hide main page
       main.style.display = "none";
       mainButtons.style.display = "none";
       settings.style.display = "block";
       iconSpan.firstChild.nodeValue = "⬅ ";
       tooltipText.textContent = "Back";
+
       currentPage = "settings";
 
-      // If FW_TYPE == 'C', load Quick Settings
-      if (typeof fwType !== "undefined" && fwType === "C") {
-        showQuickSettings();
+      // If FW_TYPE == 'C', show minimal settings
+      if(typeof fwType !== "undefined" && fwType === "C"){
+        showMinSettings();
       }
-    } else {
+    } 
+    else if(currentPage === "settings"){
       updateSettings();
       main.style.display = "block";
       mainButtons.style.display = "flex";
@@ -4052,8 +4061,16 @@ void handleRoot(){
       keyboardMode = true;
       document.getElementById("prompt").textContent = "<KEYBOARD NAV MODE>";
       document.getElementById("keyboardToggle").checked = true;
-      document.getElementById("termWidget")
-          .classList.add("keyboard-mode");
+      document.getElementById("termWidget").classList.add("keyboard-mode");
+      print(" ");
+      print("--- KEYBOARD NAVIGATION ---");
+      print("←↑↓→      = remote left/up/down/right");
+      print("M/m       = remote menu");
+      print("Enter     = remote ok");
+      print("Backspace = remote back");
+      print("ESC       = exit keyboard nav mode");
+      print("---------------------------");
+      print(" ");
   }
 
   function exitKeyboardMode()
@@ -4061,11 +4078,7 @@ void handleRoot(){
       keyboardMode = false;
       document.getElementById("prompt").textContent = ">";
       document.getElementById("keyboardToggle").checked = false;
-      document.getElementById("termWidget")
-          .classList.remove("keyboard-mode");
-      print(" ");
-      print(">> Exited Keyboard Navigation Mode");
-      print(" ");
+      document.getElementById("termWidget").classList.remove("keyboard-mode");
   }
 
   function showHistory(){
@@ -4084,7 +4097,7 @@ void handleRoot(){
     print(" ");
   }
 
-  function sendCommand(cmd)
+  async function sendCommand(cmd)
   {
     if(!cmd.trim()) return;
 
@@ -4099,19 +4112,10 @@ void handleRoot(){
       cmd = history[index];
     }
 
-    print(cmd);
+    print("> " + cmd);
 
     if(cmd === "keyboard"){
       enterKeyboardMode();
-      print(" ");
-      print("--- KEYBOARD NAVIGATION ---");
-      print("←↑↓→      = remote left/up/down/right");
-      print("M/m       = remote menu");
-      print("Enter     = remote ok");
-      print("Backspace = remote back");
-      print("ESC       = exit keyboard nav mode");
-      print("---------------------------");
-      print(" ");
     }
     else if(cmd === "help" || cmd === "?"){
       print(" ");
@@ -4120,11 +4124,13 @@ void handleRoot(){
       print("history  - show command history");
       print("clear    - clear screen");
       print("!5       - execute this history entry. ex: !5 executes the 5th history entry");
+      print("uptime   - DonutShop uptime");
       print("erase history - remove all command history");
       print(" ");
-      print("--- Remote Commands ---");
-      print("Use Remote Control Commands to control RT4K");
+      print("--- Remote Commands --- ");
+      print("use Remote Control Commands to control RT4K:");
       print("consolemods.org/wiki/AV:RetroTINK-4K#Remote_Control_Commands");
+      print('response shown on RT4K or RT4K "DIAG" screen');
       print(" ");
       print("--- Donut Dongle gameID Only! (IR Blaster required) ---");
       print("5x prof#  - change RT5X profiles. # is profile number");
@@ -4141,6 +4147,19 @@ void handleRoot(){
     }
     else if(cmd === "clear"){
       terminal.textContent = "";
+    }
+    else if(cmd === "uptime"){
+      try{
+        const response = await fetch("/cmd", {
+          method: "POST",
+          body: cmd
+        });
+        const text = await response.text();
+        print(text);
+      }
+      catch(err){
+        console.error("Request failed:", err);
+      }
     }
     else if(cmd === "erase history"){
       history = [];
@@ -4243,7 +4262,7 @@ void handleRoot(){
   });
 
 
-  function showQuickSettings(){
+  function showMinSettings(){
     document.getElementById("mainPage").style.display = "none";
     document.getElementById("settingsPage").style.display = "block";
     currentPage = "settings";
@@ -5200,6 +5219,18 @@ void handleRoot(){
 
       xhr.send(formData);
     });
+  });
+
+  window.addEventListener('load', () => {
+    if(window.location.pathname === '/term'){
+      document.getElementById('mainPage').style.display = 'none';
+      document.getElementById('mainTopbarButtons').style.display = 'none';
+      document.getElementById('navBtn').style.display = 'none';
+      document.getElementById('settingsPage').style.display = 'block';
+      document.querySelectorAll(".settings-section").forEach(sec => sec.style.display = "none");
+      document.getElementById('terminalSection').style.display = 'block';
+
+    }
   });
 
 
