@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5.7"
+#define FIRMWARE_VERSION "0.5.8"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -3664,11 +3664,7 @@ void handleRoot(){
                 <span class="tooltip">
                   <span class="kbdLabel">Keyboard Nav Mode</span>
                     <span class="tooltip-bubble">
-                    ←↑↓→ = remote left/up/down/right<br>
-                    M/m = remote menu<br>
-                    Enter = remote ok<br>
-                    Backspace = remote back<br>
-                    ESC = exit keyboard nav mode<br>
+                    Use the keyboard to control the RT4K.
                     </span>
                 </span>    
                   <label class="switch">
@@ -4050,10 +4046,12 @@ void handleRoot(){
   document.getElementById("keyboardToggle")
       .addEventListener("change", function ()
   {
-      if (this.checked)
-          enterKeyboardMode();
+      if(this.checked)
+        enterKeyboardMode();
       else
-          exitKeyboardMode();
+        exitKeyboardMode();
+
+      cmd.focus();
   });
 
   function enterKeyboardMode()
@@ -4066,6 +4064,15 @@ void handleRoot(){
       print("--- KEYBOARD NAVIGATION ---");
       print("←↑↓→      = remote left/up/down/right");
       print("M/m       = remote menu");
+      print("S/s       = remote stat");
+      print("D/d       = remote diag");
+      print("G/g       = remote gain");
+      print("P/p       = remote phase");
+      print("I/i       = remote input");
+      print("O/o       = remote output");
+      print("A/a       = remote aud");
+      print("C/c       = remote col");
+      print("1-8       = remote aux1 - aux8");
       print("Enter     = remote ok");
       print("Backspace = remote back");
       print("ESC       = exit keyboard nav mode");
@@ -4212,18 +4219,89 @@ void handleRoot(){
 
             case "Enter":
                 command = "remote ok";
-            break;
+                break;
 
             case "Backspace":
                 command = "remote back";
-            break;
+                break;
 
             case "m":
             case "M":
                 command = "remote menu";
                 break;
-
             
+            case "d":
+            case "D":
+                command = "remote diag";
+                break;
+
+            case "s":
+            case "S":
+                command = "remote stat";
+                break;
+            
+            case "p":
+            case "P":
+                command = "remote phase";
+                break;
+
+            case "g":
+            case "G":
+                command = "remote gain";
+                break;
+            
+            case "i":
+            case "I":
+                command = "remote input";
+                break;
+            
+            case "O":
+            case "o":
+                command = "remote output";
+                break;
+
+            case "A":
+            case "a":
+                command = "remote aud";
+                break;
+
+            case "C":
+            case "c":
+                command = "remote col";
+                break;
+
+            case "1":
+                command = "remote aux1";
+                break;
+            
+            case "2":
+                command = "remote aux2";
+                break;
+
+            case "3":
+                command = "remote aux3";
+                break;
+
+            case "4":
+                command = "remote aux4";
+                break;
+
+            case "5":
+                command = "remote aux5";
+                break;
+
+            case "6":
+                command = "remote aux6";
+                break;
+
+            case "7":
+                command = "remote aux7";
+                break;
+
+            case "8":
+                command = "remote aux8";
+                break;
+   
         }
 
         if(command){
@@ -4895,7 +4973,7 @@ void handleRoot(){
   loadData();
 
   refreshInterval = setInterval(async () => {
-    if (updatingConsoles || isFetching) return; // skip refresh if user is editing
+    if (updatingConsoles || isFetching || window.location.pathname === '/term' || currentPage === "settings") return; // skip refresh if user is editing or not on main page
 
     isFetching = true;
 
@@ -5229,6 +5307,7 @@ void handleRoot(){
       document.getElementById('settingsPage').style.display = 'block';
       document.querySelectorAll(".settings-section").forEach(sec => sec.style.display = "none");
       document.getElementById('terminalSection').style.display = 'block';
+      cmd.focus();
 
     }
   });
