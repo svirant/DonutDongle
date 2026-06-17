@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5.8"
+#define FIRMWARE_VERSION "0.5.9"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -1456,6 +1456,13 @@ void readIR(){
         svsbutton = "";
         nument = 0;
       }
+      else if(ir_recv_command == 63){ // aux8 button 3x
+        dualSerialPrint("remote aux8");
+        ir_recv_command = 0;
+        aux8button = 0;
+        svsbutton = "";
+        nument = 0;
+      }
       else{
         aux8button = 0;
         svsbutton = "";
@@ -1651,7 +1658,7 @@ void readIR(){
         altprof = 0;
       }
       else if(ir_recv_command == 46){
-        Serial.println(F("\rremote safe\r"));
+        dualSerialPrint("remote safe");
         ir_recv_command = 0;
         altprof = 0;
       }
@@ -1837,11 +1844,8 @@ void readIR(){
 
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT){ // block most buttons from being repeated when held
       repeatcount = 0;
-      if(ir_recv_command == 63){
-        if(aux8button < 3)aux8button++;
-        else{ 
-          dualSerialPrint("remote aux8");
-        }
+      if(ir_recv_command == 63 && aux8button < 3){
+        aux8button++;
       }
       else if(ir_recv_command == 62){
         if(TESmartir == 1 || TESmartir == 3 || MTVir == 1 || MTVir == 3)aux7button = 1;

@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.7.3
+* Donut Dongle v1.7.4
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -1329,6 +1329,13 @@ void readIR(){
         memset(svsbutton,0,sizeof(svsbutton));
         nument = 0;
       }
+      else if(ir_recv_command == 63){ // aux8 button 3x
+        Serial.println(F("\rremote aux8\r"));
+        ir_recv_command = 0;
+        aux8button = 0;
+        svsbutton = "";
+        nument = 0;
+      }
       else{
         aux8button = 0;
         memset(svsbutton,0,sizeof(svsbutton));
@@ -1787,10 +1794,8 @@ void readIR(){
 
     if(ir_recv_address == 73 && TinyIRReceiverData.Flags != IRDATA_FLAGS_IS_REPEAT){ // block most buttons from being repeated when held
       repeatcount = 0;
-      if(ir_recv_command == 63){
-        //Serial.println(F("\rremote aux8\r")); aux8
-        if(aux8button < 3)aux8button++;
-        else Serial.println(F("\rremote aux8\r"));
+      if(ir_recv_command == 63 && aux8button < 3){ // aux8 button
+        aux8button++;
       }
       else if(ir_recv_command == 62){
         if(TESmartir == 1 || TESmartir == 3 || MTVir == 1 || MTVir == 3)aux7button = 1;
