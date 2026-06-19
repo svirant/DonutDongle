@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5.9"
+#define FIRMWARE_VERSION "0.5.10"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -4304,6 +4304,10 @@ void handleRoot(){
 
             case "8":
                 command = "remote aux8";
+                break;
+            
+            default:
+                e.preventDefault();
                 break;
    
         }
