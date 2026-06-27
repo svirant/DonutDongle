@@ -1,5 +1,5 @@
 /*
-* Donut Dongle v1.7.4
+* Donut Dongle v1.7.5
 * Copyright (C) 2026 @Donutswdad
 *
 * This program is free software: you can redistribute it and/or modify
@@ -1333,7 +1333,7 @@ void readIR(){
         Serial.println(F("\rremote aux8\r"));
         ir_recv_command = 0;
         aux8button = 0;
-        svsbutton = "";
+        memset(svsbutton,0,sizeof(svsbutton));
         nument = 0;
       }
       else{
