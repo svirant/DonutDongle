@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5.10"
+#define FIRMWARE_VERSION "0.5.11"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -44,9 +44,9 @@
 #include <Update.h>
 // <EspUsbHostSerial_FTDI.h> is listed further down with instructions on how to install
 
-uint8_t const debugE1CAP = 0; // line ~869
-uint8_t const debugE2CAP = 0; // line ~1186
-uint8_t const debugState = 0; // line ~615
+uint8_t const debugE1CAP = 0; // line ~817
+uint8_t const debugE2CAP = 0; // line ~1134
+uint8_t const debugState = 0; // line ~610
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -454,6 +454,7 @@ uint8_t RMTuse = 0;
 #include <EspUsbHostSerial_FTDI.h> // https://github.com/wakwak-koba/EspUsbHost in order to have FTDI support for the RT4K usb serial port, this is the easiest method.
                                    // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
                                    // Step 2 - In Arudino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
+                                   // Step 3 - Make sure version 1.0.1 of the "EspUsbHost" Library is installed. Code is not "yet" compatible with 2.x
 
 class SerialFTDI : public EspUsbHostSerial_FTDI {
   public:
@@ -2318,7 +2319,7 @@ void recallPreset(uint8_t num, uint8_t sw){
 
 void sendSVS(uint16_t num){
   #if usbMode // sends VGA Serial commands as well (green & red leds light up)
-  usbHost.cprof = String(num); 
+  usbHost.cprof = String(num + offset + altprofoffset); 
   #endif
 
   digitalWrite(LED_BUILTIN,HIGH);
