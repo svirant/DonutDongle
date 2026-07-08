@@ -57,6 +57,7 @@ The Web UI allows you to live update the Consoles and gameID table. You no longe
 I recommend the [Official Arduino IDE and guide](https://docs.arduino.cc/software/ide-v2/tutorials/getting-started-ide-v2/) if you're unfamiliar with Arduinos. All .ino files used for programming are listed above. The following Libraries will also need to be added in order to Compile successfully.<br />
 - **Libraries:**
   - If a Library is missing, it should be available through the built-in Library Manager under "Tools" -> "Manage Libraries..."
+  - <EspUsbHost> Make sure version 1.0.1 of the "EspUsbHost" Library is installed. Code is not "yet" compatible with 2.x  
   - <EspUsbHostSerial_FTDI.h>  Follow these steps to add EspUsbHostSerial_FTDI.h
     - Goto https://github.com/wakwak-koba/EspUsbHost
     - Click the <code style="color : green">GREEN</code> "<> Code" box and "Download ZIP"
