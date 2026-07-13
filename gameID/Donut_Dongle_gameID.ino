@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.5.11"
+#define FIRMWARE_VERSION "0.6.0"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -34,6 +34,7 @@
 #include <IRremote.hpp>
 #include <TinyIRReceiver.hpp> // all can be found in the built-in Library Manager
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include <WebServer.h>
 #include <LittleFS.h>
@@ -42,21 +43,22 @@
 #include <ArduinoOTA.h>
 #include <WiFiManager.h>
 #include <Update.h>
-// <EspUsbHostSerial_FTDI.h> is listed further down with instructions on how to install
 
-uint8_t const debugE1CAP = 0; // line ~817
-uint8_t const debugE2CAP = 0; // line ~1134
-uint8_t const debugState = 0; // line ~610
+uint8_t const debugE1CAP = 0; // line ~756
+uint8_t const debugE2CAP = 0; // line ~1073
+uint8_t const debugState = 0; // line ~552
 
 ////////////////////////////////////////////////////////////////////////////////////
 
 const char* donuthostname = "donutshop";      // hostname, by default: http://donutshop.local include quotes ""
 
 #define usbMode true              // USB Serial Command mode. set true to enable. requires OTG adapter. normal Serial mode will be active regardless of setting.
-                                   // https://github.com/wakwak-koba/EspUsbHost will also need to be installed in order to have FTDI support for the RT4K usb serial port.
-                                   // This is the easiest method...
-                                   // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
-                                   // Step 2 - In Arudino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
+
+#if usbMode
+#include <EspUsbHost.h> // found in the built-in Library Manager
+EspUsbHost usbHost;
+EspUsbHostCdcSerial CdcSerial(usbHost);
+#endif
 
 /*
 ////////////////////
@@ -450,68 +452,6 @@ void GIDloop(void *pvParameters);
 uint16_t gTime = 2000;
 uint8_t RMTuse = 0;
 
-#if usbMode
-#include <EspUsbHostSerial_FTDI.h> // https://github.com/wakwak-koba/EspUsbHost in order to have FTDI support for the RT4K usb serial port, this is the easiest method.
-                                   // Step 1 - Goto the github link above. Click the GREEN "<> Code" box and "Download ZIP"
-                                   // Step 2 - In Arudino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
-                                   // Step 3 - Make sure version 1.0.1 of the "EspUsbHost" Library is installed. Code is not "yet" compatible with 2.x
-
-class SerialFTDI : public EspUsbHostSerial_FTDI {
-  public:
-  String cprof = "null";
-  String tcprof = "null";
-  String tcmd = "null";
-  int tp = 0;
-  virtual void task(void) override {
-    EspUsbHost::task();
-    if(this->isReady()){
-      usb_host_transfer_submit(this->usbTransfer_recv);
-      if(cprof != "null"){
-        tp = cprof.toInt();
-        analogWrite(LED_RED,255);
-        analogWrite(LED_BLUE,255);
-        analogWrite(LED_GREEN,222);
-        if(tp >= 0){
-          if(offset > 0) cprof = String(tp + offset);
-          tcprof = "\rSVS NEW INPUT=" + cprof + "\r\n";
-          submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcprof[0]), tcprof.length()); // usb response
-          vTaskDelay(pdMS_TO_TICKS(1000));
-          tcprof = "\rSVS CURRENT INPUT=" + cprof + "\r\n"; // serial response     
-        }
-        if(tp < 0){
-          tcprof = "\rremote prof" + String((-1)*tp) + "\r\n";
-        }
-        submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcprof[0]), tcprof.length()); // usb response
-        if(tp < 0) vTaskDelay(pdMS_TO_TICKS(1000)); // only added so the green led stays lit for 1 second for "remote prof" commands
-        analogWrite(LED_RED,255);
-        analogWrite(LED_BLUE,255);
-        analogWrite(LED_GREEN,255);
-        tcprof = "null";
-        cprof = "null";
-      }
-      else if(tcmd == "wakesleep"){ // this sets up the "pwr on", "remote pwr" command combo so a single button can sleep/wake
-        tcmd = "\rpwr on\r\n";
-        submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcmd[0]), tcmd.length());
-        tcmd = "null";
-        wakesleepcmd = true; // set true so the following will execute next cycle
-      }
-      else if(wakesleepcmd){
-        tcmd = "\rremote pwr\r\n";
-        submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcmd[0]), tcmd.length());
-        tcmd = "null";
-        wakesleepcmd = false;
-      }
-      else if(tcmd != "null"){
-        submit((uint8_t *)reinterpret_cast<const uint8_t*>(&tcmd[0]), tcmd.length());
-        tcmd = "null";
-      }
-    }
-  }
-};
-
-SerialFTDI usbHost;
-#endif
-
 
 void setup(){
 
@@ -546,9 +486,6 @@ void setup(){
   analogWrite(LED_BLUE,255);
 
   initPCIInterruptForTinyReceiver(); // for IR Receiver
-  #if usbMode
-  usbHost.begin(115200); // leave at 115200 for RT4K usb connection
-  #endif
   Serial.begin(9600);                           // set the baud rate for the RT4K VGA serial connection
   extronSerial.begin(9600,SERIAL_8N1,3,4);   // set the baud rate for the Extron sw1 Connection
   extronSerial.setTimeout(50);                 // sets the timeout for reading / saving into a string
@@ -585,6 +522,11 @@ void setup(){
 
   xTaskCreate(DDloop,"DDloop",16384,NULL,1,NULL);
   xTaskCreate(GIDloop,"GIDloop",16384,NULL,1,NULL);
+
+  #if usbMode
+  CdcSerial.begin(115200);
+  if(!usbHost.begin()) Serial.printf("usbHost.begin failed: %s\n", usbHost.lastErrorName());
+  #endif
   
 }  // end of setup
 
@@ -617,9 +559,6 @@ void DDloop(void *pvParameters){
       vTaskDelay(pdMS_TO_TICKS(2));
     }
     ArduinoOTA.handle();
-    #if usbMode
-    usbHost.task();  // used for RT4K usb serial communications
-    #endif
   }
 } // end of DDloop
 
@@ -2030,7 +1969,9 @@ void readIR(){
         Serial.println(F("\rpwr on\r")); // wake
         Serial.println(F("\rremote pwr\r")); // sleep
         #if usbMode
-        usbHost.tcmd = "wakesleep";
+        CdcSerial.println(F("\rpwr on\r")); // wake
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        CdcSerial.println(F("\rremote pwr\r")); // sleep
         #endif
         RTwake = true;
       }
@@ -2319,7 +2260,15 @@ void recallPreset(uint8_t num, uint8_t sw){
 
 void sendSVS(uint16_t num){
   #if usbMode // sends VGA Serial commands as well (green & red leds light up)
-  usbHost.cprof = String(num + offset + altprofoffset); 
+  CdcSerial.print(F("\rSVS NEW INPUT="));
+  if(num != 0)CdcSerial.print(num + offset + altprofoffset);
+  else CdcSerial.print(num);;
+  CdcSerial.println(F("\r"));
+  vTaskDelay(pdMS_TO_TICKS(1000));
+  CdcSerial.print(F("\rSVS CURRENT INPUT="));
+  if(num != 0)CdcSerial.print(num + offset + altprofoffset);
+  else CdcSerial.print(num);
+  CdcSerial.println(F("\r"));
   #endif
 
   digitalWrite(LED_BUILTIN,HIGH);
@@ -2338,7 +2287,10 @@ void sendSVS(uint16_t num){
 
 void sendRBP(int prof){ // send Remote Button Profile
   #if usbMode // sends VGA Serial commands as well
-  usbHost.cprof = String(-1*prof);
+  //usbHost.cprof = String(-1*prof);
+  CdcSerial.print(F("\rremote prof"));
+  CdcSerial.print(prof);
+  CdcSerial.println(F("\r"));
   #endif
   Serial.print(F("\rremote prof"));
   Serial.print(prof);
@@ -2355,7 +2307,7 @@ void dualSerialPrint(String str){
   str = "\r" + str + "\r\n";
   Serial.print(str);
   #if usbMode
-  usbHost.tcmd = str;
+  CdcSerial.print(str);
   #endif
 } // end of dualSerialPrint()
 

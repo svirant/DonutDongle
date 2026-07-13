@@ -55,21 +55,18 @@ The Web UI allows you to live update the Consoles and gameID table. You no longe
 
 ## [Advanced] Programming the Arduino Nano ESP32 with custom .ino changes
 I recommend the [Official Arduino IDE and guide](https://docs.arduino.cc/software/ide-v2/tutorials/getting-started-ide-v2/) if you're unfamiliar with Arduinos. All .ino files used for programming are listed above. The following Libraries will also need to be added in order to Compile successfully.<br />
-- **Libraries:**
-  - If a Library is missing, it should be available through the built-in Library Manager under "Tools" -> "Manage Libraries..."
-  - <EspUsbHost> Make sure version 1.0.1 of the "EspUsbHost" Library is installed. Code is not "yet" compatible with 2.x  
-  - <EspUsbHostSerial_FTDI.h>  Follow these steps to add EspUsbHostSerial_FTDI.h
-    - Goto https://github.com/wakwak-koba/EspUsbHost
-    - Click the <code style="color : green">GREEN</code> "<> Code" box and "Download ZIP"
-    - In Arudino IDE; goto "Sketch" -> "Include Library" -> "Add .ZIP Library"
+- **Add Additional Boards**
+  - In the Arduino IDE open up "Settings", find the section "Additional boards manager URLs:"
+  - Add in: https://espressif.github.io/arduino-esp32/package_esp32_index.json and select "OK"
 1. First, you must have completed the steps shown in the "Flashing" section above at least once before continuing.
 2. "Double click" the RST button right after connecting to your PC/Mac to put into "recovery mode". You'll see a GREEN led strobe if successful.
 3. Open up Donut_Dongle_gameID.ino in the Arduino IDE to make your custom changes.
 4. Under the "Tools" menu, make sure...
-- Board - "Arduino Nano ESP32" is selected
+- Board - "esp32" -> "Arduino Nano ESP32" is selected. DO NOT select "Arduino ESP32 Boards" -> "Arduino Nano ESP32"
 - Port - The listed "Serial" port is chosen, not dfu one.
     - If Donut_Shop is currently running, you should also see a "DonutShop" Network Port that connects via WiFi.
+- Core Debug Level - "None"
 - Partition Scheme - "With SPIFFS partition (advanced)" is chosen
 - Pin Numbering - "By Arduino pin (default)"
-- USB Mode - "Normal mode (TinyUSB)"
+- USB Mode - "Debug mode (Hardware CDC)" / **Important that this is selected!**
 5. To flash the changes, select "Sketch" -> "Upload"
