@@ -53,6 +53,45 @@ The Web UI allows you to live update the Consoles and gameID table. You no longe
 ## WiFi setup
 **ONLY** compatible with **2.4GHz** WiFi APs. Configured during initial setup process. If you need to change SSID or password, the "DonutShop_Setup" AP will reappear after 2 minutes of not being able to connect.
 
+## New IR Remote Control functionality
+When using the optional IR Receiver, the IR reception of the RT4K can be been greatly enhanced. You can think of it as an IR repeater, but instead talks to the RT4K via Serial for solid communication. Since the Donut Dongle is in the middle, other remote features can be added such as:
+ - **Alternate SVS Profiles**: Have you ever wanted to add CRT effects to all of your existing SVS profiles? Or wanted all your profiles to output at 1080p instead of 4K? With this feature you can create a set of SVS profiles that have these changes and activate the system with the remote. Pressing the "SAFE" button twice + 1 - 9 buttons will allow you to configure 9 different sets of these profiles per regular profile to load instead of the regular one you created. For example: Instead of SVS profile S1_SNES.rt4 loading, S1001_SNES.rt4 will load instead after activating with the "SAFE"x2 + 1 button. Here are some more examples so you can see the pattern used for creating these: </br>
+
+    "SAFE"x2 + x button = Sx001_SNES-CRT.rt4, where x is the number button selected and 001 is the S1_ profile represented in 3 digits. </br>
+    "SAFE"x2 + 2 button = S2001_SNES-1080p.rt4 </br>
+    "SAFE"x2 + 3 button = S3001_SNES-Zoomed.rt4 </br>
+    "SAFE"x2 + 4 button = S4001_SNES.rt4 </br>
+    "SAFE"x2 + 5 button = S5001_SNES.rt4 </br>
+    "SAFE"x2 + 6 button = S6001_SNES.rt4 </br>
+    "SAFE"x2 + 7 button = S7001_SNES.rt4 </br>
+    "SAFE"x2 + 8 button = S8001_SNES.rt4 </br>
+    "SAFE"x2 + 9 button = S9001_SNES.rt4 </br> 
+
+   - The name following the "\_" can be changed as well. So a name like S1001_SNES-CRT.rt4 can be used to better describe. Only the naming pattern before the "\_" is important. </br>
+
+   - When SVS profile S2 normally would load, Sx002 would load instead where x = the number button chosen prior and 002 represents the S2 profile. S2100_NES.rt4 for example would be the 2nd Alternate profile for S100_NES.rt4. It's up to you to create these alternate sets of profiles on your SD card of course. To disable this feature and return to your normally configured profiles, press "SAFE"x2  + 10, 11, or 12 buttons on the remote.
+
+ - SAFE button once + profile button 1 - 12 loads SVS profiles of your choosing. By default is SVS 1 - 12. Configured with auxprof[] in the Settings section of the .ino
+  
+ - Normally, if you power on your console before waking the RT4K, the RT4K will have not seen the profile change. Using the remote's POWER button, in this configuration, will wake the RT4K "and" resend the profile after it's finished waking.
+
+ - AUX8 button + Power button power cycles your TV via IR Emitter. (only LG OLED CX atm, more can be added upon request)
+
+ - AUX8 pressed twice, manually enter a SVS profile to load with the profile buttons using 1 - 9 and 10,11,12 buttons for 0. Must use 3 digits. Ex: 001 = 1, 010 = 10, etc
+
+ - AUX8 pressed 3x will perform the standard AUX8 action
+
+ - AUX5 will load the previous profile. Repeated presses will switch back/forth the last 2 profiles. Great for A/B comparisons.
+ 
+ - MT-ViKI 8 Port HDMI switch's inputs can be changed. Must configure "MTVir" in the options section of the .ino
+    - AUX7 + button 1 - 8 for inputs 1 - 8 on "alt sw1" port (SVS profiles 1 - 8)
+    - AUX8 + button 1 - 8 for inputs 1 - 8 on "alt sw2" port (SVS profiles 101 - 108)
+
+ - TESmart 16x1 HDMI switch's inputs can changed. Must set "TESmartir" in the options section.
+    - AUX7 + button 1 - 12, aux1, aux2, aux3, aux4 for inputs 1 - 16 on "alt sw1" port (SVS profiles 1 - 16)
+    - AUX8 + button 1 - 12, aux1,aux2,aux3,aux4 for inputs 1 - 16 on "alt sw2" port (SVS profiles 101 - 116)
+
+
 ## [Advanced] Programming the Arduino Nano ESP32 with custom .ino changes
 I recommend the [Official Arduino IDE and guide](https://docs.arduino.cc/software/ide-v2/tutorials/getting-started-ide-v2/) if you're unfamiliar with Arduinos. All .ino files used for programming are listed above. The following Libraries will also need to be added in order to Compile successfully.<br />
 - **Add Additional Boards**

@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.6.0"
+#define FIRMWARE_VERSION "0.6.1"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -412,6 +412,7 @@ uint8_t nument = 0; // used to keep track of how many digits have been entered f
 
 // sendRTwake global variables
 int currentProf = 0; // negative numbers for Remote Button profiles, positive for SVS profiles
+int prevProf = 0;
 bool RTwake = false;
 unsigned long currentTime = 0;
 unsigned long prevTime = 0;
@@ -1794,11 +1795,11 @@ void readIR(){
       else if(ir_recv_command == 61){
         dualSerialPrint("remote aux6");
       }
-      else if(ir_recv_command == 60){
-        dualSerialPrint("remote aud"); // remote aux5
+      else if(ir_recv_command == 60){ // remote aux5
+        prevProfile();
       }
-      else if(ir_recv_command == 59){
-        dualSerialPrint("remote col"); // remote aux4
+      else if(ir_recv_command == 59){ // remote aux4
+        dualSerialPrint("remote col");
       }
       else if(ir_recv_command == 58){
         dualSerialPrint("remote aux3");
@@ -2258,17 +2259,24 @@ void recallPreset(uint8_t num, uint8_t sw){
   }
 } // end of recallPreset()
 
+void prevProfile(){
+  if(prevProf > 0)
+    sendSVS(prevProf);
+  else
+    sendRBP(-1*prevProf);
+} // end of prevProfile()
+
 void sendSVS(uint16_t num){
   #if usbMode // sends VGA Serial commands as well (green & red leds light up)
   CdcSerial.print(F("\rSVS NEW INPUT="));
   if(num != 0)CdcSerial.print(num + offset + altprofoffset);
   else CdcSerial.print(num);;
   CdcSerial.println(F("\r"));
-  vTaskDelay(pdMS_TO_TICKS(1000));
-  CdcSerial.print(F("\rSVS CURRENT INPUT="));
-  if(num != 0)CdcSerial.print(num + offset + altprofoffset);
-  else CdcSerial.print(num);
-  CdcSerial.println(F("\r"));
+  // vTaskDelay(pdMS_TO_TICKS(1000));
+  // CdcSerial.print(F("\rSVS CURRENT INPUT="));
+  // if(num != 0)CdcSerial.print(num + offset + altprofoffset);
+  // else CdcSerial.print(num);
+  // CdcSerial.println(F("\r"));
   #endif
 
   digitalWrite(LED_BUILTIN,HIGH);
@@ -2276,13 +2284,16 @@ void sendSVS(uint16_t num){
   if(num != 0)Serial.print(num + offset + altprofoffset);
   else Serial.print(num);;
   Serial.println(F("\r"));
-  vTaskDelay(pdMS_TO_TICKS(1000));
-  Serial.print(F("\rSVS CURRENT INPUT="));
-  if(num != 0)Serial.print(num + offset + altprofoffset);
-  else Serial.print(num);
-  Serial.println(F("\r"));
+  // vTaskDelay(pdMS_TO_TICKS(1000));
+  // Serial.print(F("\rSVS CURRENT INPUT="));
+  // if(num != 0)Serial.print(num + offset + altprofoffset);
+  // else Serial.print(num);
+  // Serial.println(F("\r"));
   digitalWrite(LED_BUILTIN,LOW);
-  if(num < 1000)currentProf = num;
+  if(num < 1000){
+    prevProf = currentProf;
+    currentProf = num;
+  }
 } // end of sendSVS()
 
 void sendRBP(int prof){ // send Remote Button Profile
@@ -2295,6 +2306,7 @@ void sendRBP(int prof){ // send Remote Button Profile
   Serial.print(F("\rremote prof"));
   Serial.print(prof);
   Serial.println(F("\r"));
+  prevProf = currentProf;
   currentProf = -1*prof; // always store remote button profiles as negative numbers
   #if !usbMode // add the 1s red led indicator after the VGA Serial command is sent
   digitalWrite(LED_BUILTIN,HIGH);
@@ -2982,6 +2994,9 @@ void handleSendCMD(){
   String cmd = server.arg("plain");
   if(cmd.substring(0,6) == "tv pwr"){
     sendIR(auxpower,0,1);
+  }
+  else if(cmd.substring(0,8) == "prevprof"){
+    prevProfile();
   }
   else if(cmd.substring(0,3) == "5x "){
     if(cmd.substring(3,9) == "prof10") sendIR("5x",10,2);
@@ -4032,6 +4047,7 @@ void handleRoot(){
       print("1-8       = remote aux1 - aux8");
       print("Enter     = remote ok");
       print("Backspace = remote back");
+      print("B/b       = previous profile");
       print("ESC       = exit keyboard nav mode");
       print("---------------------------");
       print(" ");
@@ -4089,6 +4105,7 @@ void handleRoot(){
       print("clear    - clear screen");
       print("!5       - execute this history entry. ex: !5 executes the 5th history entry");
       print("uptime   - DonutShop uptime");
+      print("prevprof - previous profile");
       print("erase history - remove all command history");
       print(" ");
       print("--- Remote Commands --- ");
@@ -4225,6 +4242,11 @@ void handleRoot(){
             case "C":
             case "c":
                 command = "remote col";
+                break;
+
+            case "B":
+            case "b":
+                command = "prevprof";
                 break;
 
             case "1":
