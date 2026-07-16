@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.6.1"
+#define FIRMWARE_VERSION "0.6.2"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -546,7 +546,8 @@ void DDloop(void *pvParameters){
     readIR();
     readExtron1();
     readExtron2();
-    if(RTwake)sendRTwake(8000); // 8000 is 8 seconds. After waking the RT4K, wait this amount of time before re-sending the latest profile change.
+    if(RTwake && CdcSerial.connected()) sendRTwakeUSB(); // new method for usb serial. can detect when Tink is fully off/on
+    else if(RTwake) sendRTwake(8000); // 8000 is 8 seconds. After waking the RT4K, wait this amount of time before re-sending the latest profile change.
     if(delaySend)DStime(500);
     #endif
     server.handleClient();
@@ -738,6 +739,16 @@ uint8_t readAMstate(String& sinput, uint8_t size){
   return AMstate[AMstateTop];
 } // end of readAMstate()
 
+
+String readTink(){
+  if(CdcSerial.available() > 0){
+    return CdcSerial.readString();
+  }
+  else if(Serial.available() > 0){
+    return Serial.readString();
+  }
+  else return "";
+} // end of readTink()
 
 void readExtron1(){
 
@@ -2184,6 +2195,28 @@ void sendRTwake(uint16_t mil){
     }
 } // end of sendRTwake()
 
+void sendRTwakeUSB(){
+  currentTime = millis();
+  String result = readTink();
+  if(result.indexOf("Console") != -1 || result.indexOf("Off") != -1){
+    prevBlinkTime = 0;
+    currentTime = 0;
+    RTwake = false;
+    digitalWrite(LED_BUILTIN,LOW);
+    if(((SRS == 1 || !S0) && currentProf != 0) || (SRS != 1 && S0 && (currentProf != -12 && currentProf != 0))){
+      if(currentProf > 0)
+        sendSVS(currentProf);
+      else
+        sendRBP(-1*currentProf);
+    }
+  }
+  if(currentTime - prevBlinkTime >= 300){
+    prevBlinkTime = currentTime;
+    if(digitalRead(LED_BUILTIN) == LOW)digitalWrite(LED_BUILTIN,HIGH);
+    else digitalWrite(LED_BUILTIN,LOW);
+  }
+} // end of sendRTwakeUSB()
+
 void LS0time1(unsigned long eTime){
   LScurrentTime = millis();  // Init timer
   if(LSprevTime == 0)       // If previous timer not initialized, do so now.
@@ -3015,8 +3048,42 @@ void handleSendCMD(){
     server.send(200, "text/plain", result);
     return;
   }
+  else if(cmd.substring(0,8) == "readTink"){
+    server.send(200, "text/plain", readTink());
+    return;
+  }
+  else if(cmd.substring(0,6) == "pwr on"){
+    dualSerialPrint(cmd);
+    if(CdcSerial.connected()){
+      String result = readTink();
+      while(result.indexOf("Console") == -1){
+        result = result + readTink();
+      }
+      server.send(200, "text/plain", result + readTink() + "\r\n" + "...Booting Complete...");
+      if(((SRS == 1 || !S0) && currentProf != 0) || (SRS != 1 && S0 && (currentProf != -12 && currentProf != 0))){
+        if(currentProf > 0)
+          sendSVS(currentProf);
+        else
+          sendRBP(-1*currentProf);
+      }
+      return;
+    }
+  }
+  else if(cmd.substring(0,10) == "remote pwr"){
+    dualSerialPrint(cmd);
+    if(CdcSerial.connected()){
+      String result = readTink();
+      while(result.indexOf("Off") == -1){
+        result = result + readTink();
+      }
+      server.send(200, "text/plain", result + readTink() + "\r\n\r\n" + "...Sleeping zZzZzZz...");
+      return;
+    }
+  }
   else{
     dualSerialPrint(cmd);
+    server.send(200, "text/plain", readTink());
+    return;
   }
   server.send(204);
 } //end of handleSendCMD()
@@ -4016,8 +4083,8 @@ void handleRoot(){
   let keyboardMode = false;
 
   document.getElementById("keyboardToggle")
-      .addEventListener("change", function ()
-  {
+      .addEventListener("change", function (){
+
       if(this.checked)
         enterKeyboardMode();
       else
@@ -4026,8 +4093,7 @@ void handleRoot(){
       cmd.focus();
   });
 
-  function enterKeyboardMode()
-  {
+  function enterKeyboardMode(){
       keyboardMode = true;
       document.getElementById("prompt").textContent = "<KEYBOARD NAV MODE>";
       document.getElementById("keyboardToggle").checked = true;
@@ -4053,8 +4119,7 @@ void handleRoot(){
       print(" ");
   }
 
-  function exitKeyboardMode()
-  {
+  function exitKeyboardMode(){
       keyboardMode = false;
       document.getElementById("prompt").textContent = ">";
       document.getElementById("keyboardToggle").checked = false;
@@ -4062,7 +4127,7 @@ void handleRoot(){
   }
 
   function showHistory(){
-    if (history.length === 0) {
+    if(history.length === 0){
         print("No command history.");
         return;
     }
@@ -4077,8 +4142,8 @@ void handleRoot(){
     print(" ");
   }
 
-  async function sendCommand(cmd)
-  {
+  async function sendCommand(cmd){
+
     if(!cmd.trim()) return;
 
     if(cmd.startsWith("!")){
@@ -4129,19 +4194,6 @@ void handleRoot(){
     else if(cmd === "clear"){
       terminal.textContent = "";
     }
-    else if(cmd === "uptime"){
-      try{
-        const response = await fetch("/cmd", {
-          method: "POST",
-          body: cmd
-        });
-        const text = await response.text();
-        print(text);
-      }
-      catch(err){
-        console.error("Request failed:", err);
-      }
-    }
     else if(cmd === "erase history"){
       history = [];
       saveHistory();
@@ -4150,10 +4202,17 @@ void handleRoot(){
       return;
     }
     else{
-      fetch("/cmd", {
-        method: "POST",
-        body: cmd
-      });
+      try{
+        const response = await fetch("/cmd", {
+          method: "POST",
+          body: cmd
+        });
+        const text = await response.text();
+        if(text.length > 0) print(text);
+      }
+      catch(err){
+        console.error("Request failed:", err);
+      }
     }
 
     history.push(cmd);
