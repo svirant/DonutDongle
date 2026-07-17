@@ -16,7 +16,7 @@
 * along with this program.  If not,see <http://www.gnu.org/licenses/>.
 */
 
-#define FIRMWARE_VERSION "0.6.2"
+#define FIRMWARE_VERSION "0.6.2a"
 #define FW_TYPE 'D'
 #define MAX_BYTES 50
 #define MAX_EINPUT 36
@@ -3055,11 +3055,14 @@ void handleSendCMD(){
   else if(cmd.substring(0,6) == "pwr on"){
     dualSerialPrint(cmd);
     if(CdcSerial.connected()){
+      currentTime = millis();
       String result = readTink();
-      while(result.indexOf("Console") == -1){
+      while(result.indexOf("Console") == -1 && millis() - currentTime < 10000){
         result = result + readTink();
       }
-      server.send(200, "text/plain", result + readTink() + "\r\n" + "...Booting Complete...");
+      currentTime = 0;
+      if(result.isEmpty()) server.send(200, "text/plain", "Already On.\r\n");
+      else server.send(200, "text/plain", result + readTink() + "\r\n" + "...Booting Complete...\r\n");
       if(((SRS == 1 || !S0) && currentProf != 0) || (SRS != 1 && S0 && (currentProf != -12 && currentProf != 0))){
         if(currentProf > 0)
           sendSVS(currentProf);
@@ -3072,11 +3075,14 @@ void handleSendCMD(){
   else if(cmd.substring(0,10) == "remote pwr"){
     dualSerialPrint(cmd);
     if(CdcSerial.connected()){
+      currentTime = millis();
       String result = readTink();
-      while(result.indexOf("Off") == -1){
+      while(result.indexOf("Off") == -1 && millis() - currentTime < 4000){
         result = result + readTink();
       }
-      server.send(200, "text/plain", result + readTink() + "\r\n\r\n" + "...Sleeping zZzZzZz...");
+      currentTime = 0;
+      if(result.isEmpty()) server.send(200, "text/plain", "Already Asleep.\r\n");
+      else server.send(200, "text/plain", result + readTink() + "\r\n\r\n" + "...Sleeping zZzZzZz...\r\n");
       return;
     }
   }
