@@ -27,17 +27,19 @@
 4. Click **Connect** and select your device (typically starts with USB JTAG)
    - You may first need to connect to "Nano ESP32" and refresh the page for "USB JTAG" to appear in the Connect menu. 
 5. Click **Erase Flash** to format your device (required for LittleFS)
-6. Set Flash Address to **0x0** and Choose the downloaded file ```Donut_Dongle_gameID_Full_vXXX.bin``` (not _Update.bin)
-7. Click **Add File**, set the next Flash Address to **0xF70000**, Choose ```nora_recovery.bin```
-8. Click **Program**
-9. Once complete, reconnect the USB cable of the device and continue **Setup** below...
+6. Download the latest Donut_Dongle_gameID_vX.X.X_full.bin file from the Github Releases section.
+7. Set Flash Address to **0x0** and Choose the file ```Donut_Dongle_gameID_vXXX_full.bin``` (not _update.bin)
+8. Click **Add File**, set the next Flash Address to **0xF70000**, Choose ```nora_recovery.bin```
+9. Click **Program**
+10. Once complete, reconnect the USB cable of the device and continue **Setup** below...
 
 ## Setup
 1. Upon reconnecting the USB cable, your board should **Successfully boot DonutShop** and leave you with an ORANGE led.
 2. With your computer or smartphone, join the broadcasted ```DonutShop_Setup``` WiFi to connect it to your home network.
 3. Follow the instructions listed and once complete, you should see a BLUE led indicating it's connected to WiFi and looking for addresses to connect to. If the BLUE led does not show, press the RST button one time.
 4. You should now be able to visit http://donutshop.local to add Consoles and gameIDs.
-5. For all future changes/uploads you can use the "Firmware Update" section in Settings to apply the latest listed _Update.bin file. Using the _Full.bin file for updates will not work.
+5. For all future changes/uploads you can use the "Firmware Update" section in Settings to apply the latest listed _update.bin file. Using the _full.bin file for updates will not work.
+6. A "Check for Updates" feature is planned and will auto update to the latest.
    
 ## General Setup
 
