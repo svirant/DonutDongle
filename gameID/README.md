@@ -23,7 +23,7 @@
 ## Flashing 
 1. Download the latest ```.bin``` files listed above
 2. Open [ESP Tool](https://espressif.github.io/esptool-js/) in Chrome, Brave, or Edge
-3. Connect your Arduino Nano ESP32 via USB and double click the RST button immediately following to enter **recovery mode** (a GREEN led will strobe when successful)
+3. Connect your Arduino Nano ESP32 via USB directly to your PC or Mac (not through a usb-hub) and double click the RST button immediately following to enter recovery mode (a GREEN led will strobe when successful)
 4. Click **Connect** and select your device (typically starts with USB JTAG)
    - You may first need to connect to "Nano ESP32" and refresh the page for "USB JTAG" to appear in the Connect menu. 
 5. Click **Erase Flash** to format your device (required for LittleFS)
