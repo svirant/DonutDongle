@@ -21,17 +21,19 @@
 | 🔴| | Power| No way to control as it's hardwired in. May just need to cover with tape. |
 
 ## Flashing 
-1. Download the latest ```.bin``` files listed above
+1. Download the latest ```.bin``` files from Releases
 2. Open [ESP Tool](https://espressif.github.io/esptool-js/) in Chrome, Brave, or Edge
-3. Connect your Arduino Nano ESP32 via USB directly to your PC or Mac (not through a usb-hub) and double click the RST button immediately following to enter recovery mode (a GREEN led will strobe when successful)
-4. Click **Connect** and select your device (typically starts with USB JTAG)
-   - You may first need to connect to "Nano ESP32" and refresh the page for "USB JTAG" to appear in the Connect menu. 
-5. Click **Erase Flash** to format your device (required for LittleFS)
-6. Download the latest Donut_Dongle_gameID_vX.X.X_full.bin file from the Github Releases section.
-7. Set Flash Address to **0x0** and Choose the file ```Donut_Dongle_gameID_vXXX_full.bin``` (not _update.bin)
-8. Click **Add File**, set the next Flash Address to **0xF70000**, Choose ```nora_recovery.bin```
-9. Click **Program**
-10. Once complete, reconnect the USB cable of the device and continue **Setup** below...
+3. Connect your Arduino Nano ESP32 via USB directly to your PC or Mac (not through a usb-hub) and double click the Nano's RST button immediately following to enter **recovery mode** (a GREEN led will strobe when successful)
+4. Clicking **Connect** opens up a selection menu and you should see something like (depending on OS and Nano brand) Nano ESP32 or TinyUSB
+5. With the **Connect menu** still open, single click the Nano button once more and you should catch the device changing it's name to USB JTAG or Nora.
+6. Quickly select this device and click **Connect**
+     - If you get errors going forward, try changing to a lower Baudrate.
+7. Click **Erase Flash** to format your device (required for LittleFS)
+8. Download the latest ```DonutShop_vX.X.X_full.bin``` file from the Github Releases section.
+9. Set Flash Address to **0x0** and Choose the file ```DonutShop_vX.X.X_full.bin```
+10. Click **Add File**, set the next Flash Address to **0xF70000**, Choose ```nora_recovery.bin```
+11. Click **Program**
+12. Once complete, reconnect the USB cable of the device and continue **Setup** below...
 
 ## Setup
 1. Upon reconnecting the USB cable, your board should **Successfully boot DonutShop** and leave you with an ORANGE led.
