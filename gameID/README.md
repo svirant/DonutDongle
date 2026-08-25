@@ -29,8 +29,8 @@
     - If it disappears, click the Nano button again for it to return. Be faster this time! ;)
     - If you get errors going forward, try changing to a lower Baudrate
 6. Click **Erase Flash** to format your device (required for LittleFS)
-7. Download the latest ```DonutShop_vX.X.X_full.bin``` file from the Github Releases section.
-8. Set Flash Address to **0x0** and Choose the file ```DonutShop_vX.X.X_full.bin```
+7. Download the latest ```Donut_Dongle_gameID_vX.X.X_full.bin``` file from the Github Releases section.
+8. Set Flash Address to **0x0** and Choose the file ```Donut_Dongle_gameID_vX.X.X_full.bin```
 9. Click **Add File**, set the next Flash Address to **0xF70000**, Choose ```nora_recovery.bin```
 10. Click **Program**
 11. Once complete, reconnect the USB cable of the device and continue **Setup** below...
