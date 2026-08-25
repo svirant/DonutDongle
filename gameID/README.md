@@ -25,15 +25,15 @@
 2. Open [ESP Tool](https://espressif.github.io/esptool-js/) in Chrome, Brave, or Edge
 3. Connect your Arduino Nano ESP32 via USB directly to your PC or Mac (not through a usb-hub) and double click the Nano's RST button immediately following to enter **recovery mode** (a GREEN led will strobe when successful)
 4. Clicking **Connect** opens up a selection menu and you should see something like (depending on OS and Nano brand) Nano ESP32 or TinyUSB
-5. With the **Connect menu** still open, single click the Nano button once more and you should catch the device changing it's name to USB JTAG or Nora.
-6. Quickly select this device and click **Connect**
-     - If you get errors going forward, try changing to a lower Baudrate.
-7. Click **Erase Flash** to format your device (required for LittleFS)
-8. Download the latest ```DonutShop_vX.X.X_full.bin``` file from the Github Releases section.
-9. Set Flash Address to **0x0** and Choose the file ```DonutShop_vX.X.X_full.bin```
-10. Click **Add File**, set the next Flash Address to **0xF70000**, Choose ```nora_recovery.bin```
-11. Click **Program**
-12. Once complete, reconnect the USB cable of the device and continue **Setup** below...
+5. With the **Connect menu** still open, single click the Nano button once more and quickly select the new device named USB JTAG or Nora; click **Connect**
+    - If it disappears, click the Nano button again for it to return. Be faster this time! ;)
+    - If you get errors going forward, try changing to a lower Baudrate
+6. Click **Erase Flash** to format your device (required for LittleFS)
+7. Download the latest ```DonutShop_vX.X.X_full.bin``` file from the Github Releases section.
+8. Set Flash Address to **0x0** and Choose the file ```DonutShop_vX.X.X_full.bin```
+9. Click **Add File**, set the next Flash Address to **0xF70000**, Choose ```nora_recovery.bin```
+10. Click **Program**
+11. Once complete, reconnect the USB cable of the device and continue **Setup** below...
 
 ## Setup
 1. Upon reconnecting the USB cable, your board should **Successfully boot DonutShop** and leave you with an ORANGE led.
