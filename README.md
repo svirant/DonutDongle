@@ -67,8 +67,8 @@ For details, refer to the ["How to Use"](https://github.com/svirant/DonutDongle/
 | TESmart 8x1 HDMI  | unconfirmed, but should work, let me know! ||
 | gSCARTsw / gCOMPsw | **version 5.x** confirmed by [@niquallis](https://x.com/niquallis) and [@UstSte](https://x.com/UstSte), thanks so much for your help! | Manual input selection works too! |
 | Extron RGBHV sw6  | yes, confirmed first hand  | |
-| Extron DXP 88 | yes, confirmed first hand | at the moment, works with Presets only. Preset 1 is Profile/SVS 1. On Extron sw2 port Preset 1 is SVS 101, etc|
-| Extron CrossPoint, MVX, etc | same as DXP 88 above. at the moment, Presets only |
+| Extron DXP 88 | yes, confirmed first hand | Auto-switching can be enabled in "Options" section of .ino.  Works with Presets. On SW1, Preset 1 is S1_ profile. On SW2, Preset 1 is S101_ profile, etc. <br><br>Power up the switch before connecting the DonutHole. |
+| Extron CrossPoint, MVX, etc | yes, confirmed by other users | Auto-switching can be enabled for switches that supports DSVP and are RGBS/HDMI/DVI signal types. By default, works with Presets as shown in the Note above. |
 | Extron CrossPoint E-series  | yes, works with Presets and Input changes | Must set ExtronVideoOutputPortSW1 / SW2 variable to output connected to RT4K |
 | Extron SW4 VGA Ars | yes, confirmed by "Nobody" on the RT4K Discord |
 | Otaku Games Scart 10 | Jumper moved to "L" and with required [mod](https://github.com/svirant/RT4k_HD15_serial_control/tree/main/Otaku%20Games%20Scart%20Switch) , **SVS=0; must also be set in the Otaku .ino for the DD to respond** | modded switch works on its own, but connecting through the DD is mostly useful if your Otaku mod doesn't include the buffer IC |
