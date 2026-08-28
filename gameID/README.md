@@ -21,26 +21,38 @@
 | 🔴| | Power| No way to control as it's hardwired in. May just need to cover with tape. |
 
 ## Flashing 
-1. Open [ESP Tool](https://espressif.github.io/esptool-js/) in Chrome, Brave, or Edge
-2. Connect your Arduino Nano ESP32 via USB directly to your PC or Mac (not through a usb-hub) and double click the Nano's RST button immediately following to enter **recovery mode** (a GREEN led will strobe when successful)
-3. Clicking **Connect** opens up a selection menu and you should see something like (depending on OS and Nano brand) Nano ESP32 or TinyUSB
-4. With the **Connect menu** still open, single click the Nano button once more and quickly select the new device named USB JTAG or Nora; click **Connect**
+1. For flashing the Arduino Nano ESP32 on Windows 10, a different method is required. See section below.
+2. Open [ESP Tool](https://espressif.github.io/esptool-js/) in Chrome, Brave, or Edge
+3. Connect your Arduino Nano ESP32 via USB directly to your PC or Mac (not through a usb-hub) and double click the Nano's RST button immediately following to enter **recovery mode** (a GREEN led will strobe when successful)
+4. Clicking **Connect** opens up a selection menu and you should see something like (depending on OS and Nano brand) Nano ESP32 or TinyUSB
+5. With the **Connect menu** still open, single click the Nano button once more and quickly select the new device named USB JTAG; click **Connect**
     - If it disappears, click the Nano button again for it to return. Be faster this time! ;)
     - If you get errors going forward, try changing to a lower Baudrate
-5. Click **Erase Flash** to format your device (required for LittleFS)
-6. Download the latest files from the Github Releases section.
-7. Set Flash Address to **0x0** and Choose the file ```Donut_Dongle_gameID_vX.X.X_full.bin```
-8. Click **Add File**, set the next Flash Address to **0xF70000**, Choose ```nora_recovery.bin```
-9. Click **Program**
-10. Once complete, reconnect the USB cable of the device and continue **Setup** below...
+6. Click **Erase Flash** to format your device (required for LittleFS)
+7. Download the latest files from the Github Releases section.
+8. Set Flash Address to **0x0** and Choose the file ```Donut_Dongle_gameID_vX.X.X_full.bin```
+9. Click **Add File**, set the next Flash Address to **0xF70000**, Choose ```nora_recovery.bin```
+10. Click **Program**
+11. Once complete, reconnect the USB cable of the device and continue **Setup** below...
+
+## Flashing (For Arduino brand on Windows 10 only)
+1. Unfortunately the only way I've discovered that Windows 10 recognizes USB JTAG mode for the Arduino brand is to bridge pin B1 and Gnd pin beside it when connecting via USB. (White mask surrounds the Gnd pin)
+  - I've had success using some metal tweezers and the bridge can be released after connecting via USB if you wish.
+  - Connecting the Nano in this way automatically forces it to stay in USB JTAG mode for Windows 10.
+  - MacOS with both the Arduino and Waveshare brand can use the Flashing section above.
+2. Open [ESP Tool](https://espressif.github.io/esptool-js/) in Chrome, Brave, or Edge.
+3. Click on **Connect** and select USB JTAG
+4. Continue with step 6 above.
 
 ## Setup
 1. Upon reconnecting the USB cable, your board should **Successfully boot DonutShop** and leave you with an ORANGE led.
 2. With your computer or smartphone, join the broadcasted ```DonutShop_Setup``` WiFi to connect it to your home network.
 3. Follow the instructions listed and once complete, you should see a BLUE led indicating it's connected to WiFi and looking for addresses to connect to. If the BLUE led does not show, press the RST button one time.
-4. You should now be able to visit http://donutshop.local to add Consoles and gameIDs.
-5. For all future changes/uploads you can use the "Firmware Update" section in Settings to apply the latest listed _update.bin file. Using the _full.bin file for updates will not work.
-6. A "Check for Updates" feature is planned and will auto update to the latest.
+4. You should now be able to visit http://donutshop.local to confirm WiFi connectivity.
+5. Disconnect the Arduino Nano ESP32 and connect it to the OTG adapter. Connect the OTG assembly to the RT4K and everything should power on.
+6. Reconfirm connectivity to http://donutshop.local and refresh the page after the RT4K has fully booted.
+7. For all updates you can visit the "Firmware Update" section in Settings to "Check for Updates" and auto update to the latest.
+8. There is also a manual update section where you can apply any version's _update .bin file. Updating manually with the _full version will not work.
    
 ## General Setup
 
