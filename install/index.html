@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#ffffff">
   <title>DonutShop Firmware Installer</title>
   <meta name="description" content="Install DonutShop firmware on an Arduino or Waveshare Nano ESP32.">
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./style.css?v=dfu-rst-v1">
 </head>
 <body>
   <main class="page-shell">
@@ -15,7 +15,7 @@
     </header>
 
     <section id="browserWarning" class="notice hidden" role="alert">
-      Web Serial is unavailable. Use Chrome or Edge on desktop.
+      WebUSB and Web Serial are required. Use Chrome or Edge on desktop.
     </section>
 
     <section class="firmware-card" aria-labelledby="firmwareTitle">
@@ -26,13 +26,12 @@
       <a id="releaseLink" class="release-link hidden" href="#" target="_blank" rel="noopener noreferrer">Release Notes</a>
 
       <ol class="install-steps">
-        <li>Connect your Nano ESP32 via USB directly to your PC or Mac (not through a USB hub) and double click the Nano's RST button immediately following to enter <strong>recovery mode</strong> (a <strong>GREEN</strong> LED will strobe when successful).</li>
-        <li>Click <strong>“Connect and Flash”</strong>.</li>
-        <li>Continue with the <strong>“Setup”</strong> steps listed on GitHub.</li>
+        <li>Connect your Nano ESP32 via USB directly to your PC or Mac (not through a USB hub) and double click the Nano's RST button to enter <strong>recovery mode</strong> (a <strong>GREEN</strong> LED will strobe when successful).</li>
+        <li>Click <strong>“Connect and Flash”</strong>, select <strong>“Nano ESP32 (bootloader)”</strong>, then press the Nano's <strong>RST button once</strong> when prompted.</li>
+        <li>After installation, continue with the <strong>“Setup”</strong> steps listed on GitHub.</li>
       </ol>
 
       <button id="startButton" class="flash-button" disabled>Connect and Flash</button>
-      <button id="bootloaderButton" class="hidden" disabled tabindex="-1" aria-hidden="true">Select USB JTAG and Flash</button>
     </section>
 
     <section class="terminal-card" aria-label="Installer terminal">
@@ -48,30 +47,19 @@
     </div>
     <div id="errorBox" class="result error-box hidden" role="alert"></div>
 
-    <!-- Internal installer state. These remain in the DOM for installer.js but are intentionally not displayed. -->
     <div class="hidden" aria-hidden="true">
-      <span id="configWarning"></span>
       <span id="releaseBadge"></span>
-      <span id="releaseNotes"></span>
       <span id="fullName"></span>
       <span id="recoveryName"></span>
-      <span id="fullSize"></span>
-      <span id="recoverySize"></span>
-
-      <div id="stepRelease"><span id="stepReleaseText"></span></div>
-      <div id="stepTrigger"><span id="stepTriggerText"></span></div>
-      <div id="stepConnect"><span id="stepConnectText"></span></div>
-      <div id="stepFlash"><span id="stepFlashText"></span></div>
-
-      <span id="fullProgressLabel"></span>
+      <span id="helperName"></span>
       <progress id="fullProgress" value="0" max="100"></progress>
-      <span id="fullPercent">0%</span>
       <progress id="recoveryProgress" value="0" max="100"></progress>
+      <span id="fullPercent">0%</span>
       <span id="recoveryPercent">0%</span>
     </div>
   </main>
 
-  <script src="./config.js"></script>
-  <script type="module" src="./installer.js"></script>
+  <script src="./config.js?v=dfu-rst-v1"></script>
+  <script type="module" src="./installer.js?v=dfu-rst-v1"></script>
 </body>
 </html>

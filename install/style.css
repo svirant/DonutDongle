@@ -47,7 +47,8 @@ button,a{font:inherit}
 
 .flash-button{
   display:block;
-  width:150px;
+  width:auto;
+  min-width:190px;
   min-height:40px;
   margin:14px auto 0;
   padding:9px 18px;
@@ -116,4 +117,14 @@ button,a{font:inherit}
   .hero h1{font-size:1.45rem}
   .firmware-card{padding:22px 18px 24px}
   .console-output{height:250px;font-size:11.5px}
+}
+
+
+/* Mid-install reset cue */
+.flash-button.reset-cue{
+  background:#fff;
+  color:#202020;
+  border-color:#202020;
+  opacity:1;
+  cursor:default;
 }

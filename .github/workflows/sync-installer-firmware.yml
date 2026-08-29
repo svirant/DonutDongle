@@ -20,7 +20,23 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
 
-      - name: Mirror latest Release into GitHub Pages
+      - name: Install Arduino CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/arduino-cli-bin"
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh \
+            | BINDIR="$RUNNER_TEMP/arduino-cli-bin" sh -s 1.5.1
+          echo "$RUNNER_TEMP/arduino-cli-bin" >> "$GITHUB_PATH"
+
+      - name: Install Arduino Nano ESP32 core
+        shell: bash
+        run: |
+          set -euo pipefail
+          arduino-cli core update-index
+          arduino-cli core install arduino:esp32
+
+      - name: Mirror Release and build DFU helper
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -39,8 +55,10 @@ jobs:
 
           FIRMWARE_DIR="install/firmware"
           mkdir -p "$FIRMWARE_DIR"
+
           rm -f "$FIRMWARE_DIR"/*_full.bin \
                 "$FIRMWARE_DIR"/nora_recovery.bin \
+                "$FIRMWARE_DIR"/dfu_to_usb_jtag.bin \
                 "$FIRMWARE_DIR"/manifest.json
 
           gh release download "$TAG" \
@@ -51,6 +69,7 @@ jobs:
             --clobber
 
           mapfile -t FULL_FILES < <(find "$FIRMWARE_DIR" -maxdepth 1 -type f -name '*_full.bin' -printf '%f\n' | sort)
+
           if [[ ${#FULL_FILES[@]} -ne 1 ]]; then
             echo "Expected exactly one *_full.bin asset, found ${#FULL_FILES[@]}."
             printf '%s\n' "${FULL_FILES[@]}"
@@ -59,16 +78,37 @@ jobs:
 
           FULL_NAME="${FULL_FILES[0]}"
           RECOVERY_NAME="nora_recovery.bin"
+          HELPER_NAME="dfu_to_usb_jtag.bin"
 
           if [[ ! -f "$FIRMWARE_DIR/$RECOVERY_NAME" ]]; then
             echo "Missing $RECOVERY_NAME in Release $TAG."
             exit 1
           fi
 
+          mkdir -p "$RUNNER_TEMP/helper-build"
+
+          arduino-cli compile \
+            --fqbn arduino:esp32:nano_nora \
+            --output-dir "$RUNNER_TEMP/helper-build" \
+            install/helper/DFU_to_USB_JTAG
+
+          HELPER_BUILD="$(find "$RUNNER_TEMP/helper-build" -maxdepth 1 -type f -name '*.ino.bin' | head -n 1)"
+
+          if [[ -z "$HELPER_BUILD" || ! -f "$HELPER_BUILD" ]]; then
+            echo "Compiled DFU helper .ino.bin was not found."
+            find "$RUNNER_TEMP/helper-build" -maxdepth 1 -type f -print
+            exit 1
+          fi
+
+          cp "$HELPER_BUILD" "$FIRMWARE_DIR/$HELPER_NAME"
+
           FULL_SIZE="$(stat -c%s "$FIRMWARE_DIR/$FULL_NAME")"
           RECOVERY_SIZE="$(stat -c%s "$FIRMWARE_DIR/$RECOVERY_NAME")"
+          HELPER_SIZE="$(stat -c%s "$FIRMWARE_DIR/$HELPER_NAME")"
+
           FULL_SHA="$(sha256sum "$FIRMWARE_DIR/$FULL_NAME" | awk '{print $1}')"
           RECOVERY_SHA="$(sha256sum "$FIRMWARE_DIR/$RECOVERY_NAME" | awk '{print $1}')"
+          HELPER_SHA="$(sha256sum "$FIRMWARE_DIR/$HELPER_NAME" | awk '{print $1}')"
 
           gh api "repos/$REPO/releases/tags/$TAG" > "$RUNNER_TEMP/release.json"
 
@@ -90,6 +130,9 @@ jobs:
             --arg recovery_name "$RECOVERY_NAME" \
             --argjson recovery_size "$RECOVERY_SIZE" \
             --arg recovery_sha "$RECOVERY_SHA" \
+            --arg helper_name "$HELPER_NAME" \
+            --argjson helper_size "$HELPER_SIZE" \
+            --arg helper_sha "$HELPER_SHA" \
             --argjson prerelease "$PRERELEASE" \
             '{
               tag: $tag,
@@ -107,19 +150,24 @@ jobs:
                 name: $recovery_name,
                 size: $recovery_size,
                 sha256: $recovery_sha
+              },
+              helper: {
+                name: $helper_name,
+                size: $helper_size,
+                sha256: $helper_sha
               }
             }' > "$FIRMWARE_DIR/manifest.json"
 
           echo "Mirrored $FULL_NAME ($FULL_SIZE bytes)"
           echo "Mirrored $RECOVERY_NAME ($RECOVERY_SIZE bytes)"
+          echo "Built $HELPER_NAME ($HELPER_SIZE bytes)"
 
-      - name: Commit mirrored firmware
+      - name: Commit installer firmware mirror
         id: commit
-        env:
-          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add install/firmware
@@ -142,5 +190,6 @@ jobs:
           REPO: ${{ github.repository }}
         shell: bash
         run: |
+          set -euo pipefail
           gh api --method POST "repos/$REPO/pages/builds" >/dev/null
           echo "GitHub Pages rebuild requested."
