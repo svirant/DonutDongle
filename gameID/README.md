@@ -21,28 +21,8 @@
 | 🔴| | Power| No way to control as it's hardwired in. May just need to cover with tape. |
 
 ## Flashing 
-1. For flashing the Arduino Nano ESP32 on Windows 10, a different method is required. See section below.
-2. Open [ESP Tool](https://espressif.github.io/esptool-js/) in Chrome, Brave, or Edge
-3. Connect your Arduino Nano ESP32 via USB directly to your PC or Mac (not through a usb-hub) and double click the Nano's RST button immediately following to enter **recovery mode** (a GREEN led will strobe when successful)
-4. Clicking **Connect** opens up a selection menu and you should see something like (depending on OS and Nano brand) Nano ESP32 or TinyUSB
-5. With the **Connect menu** still open, single click the Nano button once more and quickly select the new device named USB JTAG; click **Connect**
-    - If it disappears, click the Nano button again for it to return. Be faster this time! ;)
-    - If you get errors going forward, try changing to a lower Baudrate
-6. Click **Erase Flash** to format your device (required for LittleFS)
-7. Download the latest files from the Github Releases section.
-8. Set Flash Address to **0x0** and Choose the file ```Donut_Dongle_gameID_vX.X.X_full.bin```
-9. Click **Add File**, set the next Flash Address to **0xF70000**, Choose ```nora_recovery.bin```
-10. Click **Program**
-11. Once complete, reconnect the USB cable of the device and continue **Setup** below...
-
-## Flashing (For Arduino brand on Windows 10 only)
-1. Unfortunately the only way I've discovered that Windows 10 recognizes USB JTAG mode for the Arduino brand is to bridge pin B1 and Gnd pin beside it when connecting via USB. (White mask surrounds the Gnd pin)
-  - I've had success using some metal tweezers and the bridge can be released after connecting via USB if you wish.
-  - Connecting the Nano in this way automatically forces it to stay in USB JTAG mode for Windows 10.
-  - MacOS with both the Arduino and Waveshare brand can use the Flashing section above.
-2. Open [ESP Tool](https://espressif.github.io/esptool-js/) in Chrome, Brave, or Edge.
-3. Click on **Connect** and select USB JTAG
-4. Continue with step 6 above.
+1. Open the [Donut Dongle gameID Firmware Installer](https://svirant.github.io/DonutDongle/install/) in Chrome, Brave, or Edge
+2. Once complete, reconnect the USB cable of the device and continue **Setup** below...
 
 ## Setup
 1. Upon reconnecting the USB cable, your board should **Successfully boot DonutShop** and leave you with an ORANGE led.
