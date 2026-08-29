@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nano ESP32 DFU → USB JTAG Test</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <section class="card">
+      <h1>DFU → USB JTAG Test</h1>
+      <p class="lead">Uploads the tiny helper app through Nano ESP32 recovery DFU, then checks for <b>303A:1001</b>.</p>
+
+      <div class="file-row">
+        <input id="helperFile" type="file" accept=".bin,application/octet-stream">
+        <div id="fileInfo" class="file-info">Select the compiled helper <b>.ino.bin</b>.</div>
+      </div>
+
+      <div class="buttons">
+        <button id="runBtn" type="button">Upload Helper</button>
+        <button id="checkBtn" class="secondary" type="button">Check USB JTAG</button>
+      </div>
+
+      <div class="terminal-wrap">
+        <div class="terminal-title">Terminal</div>
+        <pre id="terminal" class="terminal"></pre>
+      </div>
+
+      <div id="summary" class="summary" hidden></div>
+    </section>
+  </main>
+  <script src="test.js"></script>
+</body>
+</html>
