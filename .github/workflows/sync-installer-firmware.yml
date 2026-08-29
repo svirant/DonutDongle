@@ -1,0 +1,146 @@
+name: Sync Installer Firmware
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - name: Mirror latest Release into GitHub Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${EVENT_TAG:-}" ]]; then
+            TAG="$EVENT_TAG"
+          else
+            TAG="$(gh release view --repo "$REPO" --json tagName --jq '.tagName')"
+          fi
+
+          echo "Syncing Release: $TAG"
+
+          FIRMWARE_DIR="install/firmware"
+          mkdir -p "$FIRMWARE_DIR"
+          rm -f "$FIRMWARE_DIR"/*_full.bin \
+                "$FIRMWARE_DIR"/nora_recovery.bin \
+                "$FIRMWARE_DIR"/manifest.json
+
+          gh release download "$TAG" \
+            --repo "$REPO" \
+            --pattern '*_full.bin' \
+            --pattern 'nora_recovery.bin' \
+            --dir "$FIRMWARE_DIR" \
+            --clobber
+
+          mapfile -t FULL_FILES < <(find "$FIRMWARE_DIR" -maxdepth 1 -type f -name '*_full.bin' -printf '%f\n' | sort)
+          if [[ ${#FULL_FILES[@]} -ne 1 ]]; then
+            echo "Expected exactly one *_full.bin asset, found ${#FULL_FILES[@]}."
+            printf '%s\n' "${FULL_FILES[@]}"
+            exit 1
+          fi
+
+          FULL_NAME="${FULL_FILES[0]}"
+          RECOVERY_NAME="nora_recovery.bin"
+
+          if [[ ! -f "$FIRMWARE_DIR/$RECOVERY_NAME" ]]; then
+            echo "Missing $RECOVERY_NAME in Release $TAG."
+            exit 1
+          fi
+
+          FULL_SIZE="$(stat -c%s "$FIRMWARE_DIR/$FULL_NAME")"
+          RECOVERY_SIZE="$(stat -c%s "$FIRMWARE_DIR/$RECOVERY_NAME")"
+          FULL_SHA="$(sha256sum "$FIRMWARE_DIR/$FULL_NAME" | awk '{print $1}')"
+          RECOVERY_SHA="$(sha256sum "$FIRMWARE_DIR/$RECOVERY_NAME" | awk '{print $1}')"
+
+          gh api "repos/$REPO/releases/tags/$TAG" > "$RUNNER_TEMP/release.json"
+
+          RELEASE_NAME="$(jq -r '.name // .tag_name' "$RUNNER_TEMP/release.json")"
+          PUBLISHED_AT="$(jq -r '.published_at // .created_at // ""' "$RUNNER_TEMP/release.json")"
+          HTML_URL="$(jq -r '.html_url // ""' "$RUNNER_TEMP/release.json")"
+          BODY="$(jq -r '.body // ""' "$RUNNER_TEMP/release.json")"
+          PRERELEASE="$(jq -r '.prerelease // false' "$RUNNER_TEMP/release.json")"
+
+          jq -n \
+            --arg tag "$TAG" \
+            --arg name "$RELEASE_NAME" \
+            --arg published_at "$PUBLISHED_AT" \
+            --arg html_url "$HTML_URL" \
+            --arg body "$BODY" \
+            --arg full_name "$FULL_NAME" \
+            --argjson full_size "$FULL_SIZE" \
+            --arg full_sha "$FULL_SHA" \
+            --arg recovery_name "$RECOVERY_NAME" \
+            --argjson recovery_size "$RECOVERY_SIZE" \
+            --arg recovery_sha "$RECOVERY_SHA" \
+            --argjson prerelease "$PRERELEASE" \
+            '{
+              tag: $tag,
+              name: $name,
+              published_at: $published_at,
+              html_url: $html_url,
+              body: $body,
+              prerelease: $prerelease,
+              full: {
+                name: $full_name,
+                size: $full_size,
+                sha256: $full_sha
+              },
+              recovery: {
+                name: $recovery_name,
+                size: $recovery_size,
+                sha256: $recovery_sha
+              }
+            }' > "$FIRMWARE_DIR/manifest.json"
+
+          echo "Mirrored $FULL_NAME ($FULL_SIZE bytes)"
+          echo "Mirrored $RECOVERY_NAME ($RECOVERY_SIZE bytes)"
+
+      - name: Commit mirrored firmware
+        id: commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add install/firmware
+
+          if git diff --cached --quiet; then
+            echo "Installer firmware mirror is already current."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          TAG="$(jq -r '.tag' install/firmware/manifest.json)"
+          git commit -m "Sync installer firmware for $TAG"
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Request GitHub Pages rebuild
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          gh api --method POST "repos/$REPO/pages/builds" >/dev/null
+          echo "GitHub Pages rebuild requested."
