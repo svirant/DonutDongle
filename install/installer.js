@@ -264,13 +264,13 @@ async function triggerFactoryBootloader(){
     setStep(ui.stepConnect, "active");
     ui.stepConnectText.textContent = "Select the Espressif USB device on the next click.";
     primaryStage = "flash";
-    ui.startButton.textContent = "Connect & Flash";
+    ui.startButton.textContent = "Flash";
     setStatus("good");
-    log("Bootloader requested. Click Connect & Flash and select the Espressif USB JTAG/serial debug unit.");
+    log("Bootloader requested. Click Flash and select the Espressif USB JTAG/serial debug unit.");
   }
   catch(error){
     const message = error?.name === "NotFoundError"
-      ? "No Nano ESP32 was selected. Click Install DonutShop to try again."
+      ? "No Nano ESP32 was selected. Click Connect to try again."
       : `Could not trigger installation mode: ${error?.message || error}`;
     showError(message, ui.stepTrigger);
   }
@@ -387,7 +387,7 @@ async function flashBootloaderDevice(){
   }
   catch(error){
     const message = error?.name === "NotFoundError"
-      ? "No bootloader device was selected. Click Connect Bootloader & Flash to try again."
+      ? "No bootloader device was selected. Click Flash to try again."
       : `Installation failed: ${error?.message || error}`;
     showError(message, ui.stepFlash.classList.contains("active") ? ui.stepFlash : ui.stepConnect);
     if(transport){
