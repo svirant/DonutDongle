@@ -219,7 +219,8 @@
         const rawCfg = await readConfigDescriptor(device);
         const fd = parseDfuFunctionalDescriptor(rawCfg);
         if(fd){
-          log(`DFU descriptor: transferSize=${fd.transferSize}, detachTimeout=${fd.detachTimeout}ms, bcdDFU=0x${hex(fd.version)}.`);
+          log(`DFU descriptor: attributes=0x${hex(fd.attributes,2)}, transferSize=${fd.transferSize}, detachTimeout=${fd.detachTimeout}ms, bcdDFU=0x${hex(fd.version)}.`);
+          log(`DFU flags: download=${!!(fd.attributes & 0x01)}, upload=${!!(fd.attributes & 0x02)}, manifestationTolerant=${!!(fd.attributes & 0x04)}, willDetach=${!!(fd.attributes & 0x08)}.`);
           if(fd.transferSize > 0) transferSize = Math.min(fd.transferSize, 4096);
         }
         else{
@@ -257,14 +258,32 @@
       log("Helper upload complete; requesting manifestation/final detach…");
       await manifest(device, iface.interfaceNumber, block);
 
+      // Try to replace the physical RST press with a host-issued USB reset.
+      // On Chrome this maps to WebUSB USBDevice.reset(). If the Nano recovery
+      // firmware treats the USB bus reset as sufficient to boot the selected
+      // application, the helper should immediately run and force 303A:1001.
+      if(device.opened){
+        try{
+          log("Attempting WebUSB device.reset() to leave DFU without pressing RST…");
+          await device.reset();
+          log("WebUSB device.reset() completed.");
+          await sleep(500);
+        }
+        catch(e){
+          // A reset can make the old USB handle disappear; NetworkError is
+          // therefore compatible with the device having reset successfully.
+          log(`WebUSB reset result: ${e.name || "Error"}: ${e.message || e}`);
+        }
+      }
+
       try{
         if(device.opened && claimed){ await device.releaseInterface(iface.interfaceNumber); claimed=false; }
       }
       catch(e){}
       try{ if(device.opened) await device.close(); }catch(e){}
 
-      log("DFU transfer finished. Waiting for helper to boot and enter ROM USB Serial/JTAG…");
-      await waitForAuthorizedJtag(10000);
+      log("DFU transfer/reset finished. Waiting for helper to boot and enter ROM USB Serial/JTAG…");
+      await waitForAuthorizedJtag(12000);
     }
     catch(e){
       log(`ERROR: ${e.name || "Error"}: ${e.message || e}`);
