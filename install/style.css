@@ -1,136 +1,314 @@
 :root{
   color-scheme:light;
-  --green:#4CAF50;
-  --green-hover:#43a047;
-  --border:#d8d8d8;
-  --text:#202020;
-  --muted:#777;
-  --red:#c62828;
+  --page:#f7f8f9;
+  --surface:#ffffff;
+  --border:#dfe3e6;
+  --border-strong:#cfd5d9;
+  --text:#202428;
+  --muted:#6f7780;
+  --primary:#1769aa;
+  --primary-hover:#125b94;
+  --green:#4caf50;
+  --green-hover:#449d48;
+  --danger:#c62828;
 }
 
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:#fff;color:var(--text)}
-body{font-family:sans-serif;padding:36px 18px 48px}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  background:var(--page);
+  color:var(--text);
+}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  padding:42px 18px 56px;
+  -webkit-font-smoothing:antialiased;
+}
+
 button,a{font:inherit}
 .hidden{display:none!important}
 
-.page-shell{width:min(100%,760px);margin:0 auto}
-.hero{text-align:center;margin:8px 0 28px}
-.hero h1{font-size:1.75rem;margin:0;font-weight:700}
+.page-shell{
+  width:min(100%,680px);
+  margin:0 auto;
+}
+
+
+
 
 .firmware-card{
-  width:min(100%,660px);
-  margin:0 auto 24px;
-  padding:25px 26px 27px;
-  background:#fff;
+  width:100%;
+  margin:0 auto 20px;
+  padding:28px 30px 30px;
+  background:var(--surface);
   border:1px solid var(--border);
-  border-radius:12px;
+  border-radius:8px;
+  box-shadow:0 1px 3px rgba(0,0,0,.045);
   text-align:center;
 }
-.firmware-card h2{margin:0 0 11px;font-size:1.45rem;font-weight:600}
-.version{font-size:1.12rem;font-weight:600;margin-bottom:5px}
-.date{color:var(--muted);font-size:.92rem;margin-bottom:13px}
-.device{font-size:.92rem;color:#444;margin-bottom:7px}
-.release-link{display:inline-block;color:#1565c0;font-size:.88rem;margin:0 0 18px;text-underline-offset:2px}
+
+.firmware-card h2{
+  margin:0 0 11px;
+  font-size:1.48rem;
+  line-height:1.25;
+  font-weight:650;
+  letter-spacing:-.01em;
+}
+
+.version-date-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+  min-height:24px;
+  margin:0 0 5px;
+}
+
+.version-date-row .version{
+  display:inline;
+  margin:0;
+  font-size:.98rem;
+  font-weight:600;
+}
+
+.version-date-row .date{
+  display:inline;
+  margin:0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.version-date-separator{
+  color:#9aa0a6;
+  font-size:.8rem;
+}
+
+.device{
+  margin:3px 0 5px;
+  color:#4d555c;
+  font-size:.88rem;
+}
+
+.release-notes-wrap{
+  position:relative;
+  display:inline-block;
+  margin-top:1px;
+}
+
+.release-link{
+  display:inline-block;
+  margin:0;
+  color:var(--primary);
+  font-size:.88rem;
+  font-weight:500;
+  text-decoration:underline;
+  text-decoration-thickness:1px;
+  text-underline-offset:3px;
+}
+
+.release-link:hover{
+  color:var(--primary-hover);
+}
+
+.section-divider{
+  height:1px;
+  margin:23px 0 21px;
+  background:#eceff1;
+}
 
 .install-steps{
   width:100%;
-  margin:30px auto 20px;
-  padding-left:24px;
-  color:#333;
+  margin:0;
+  padding-left:23px;
+  color:#33393e;
   text-align:left;
   font-size:.9rem;
-  line-height:1.45;
+  line-height:1.52;
 }
-.install-steps li{padding-left:3px;margin-bottom:9px}
-.install-steps li:last-child{margin-bottom:0}
+
+.install-steps li{
+  padding-left:4px;
+  margin:0 0 11px;
+}
+
+.install-steps li:last-child{
+  margin-bottom:0;
+}
 
 .flash-button{
   display:block;
   width:auto;
-  min-width:190px;
-  min-height:40px;
-  margin:14px auto 0;
-  padding:9px 18px;
+  min-width:170px;
+  min-height:44px;
+  margin:23px auto 0;
+  padding:10px 20px;
   border:1px solid var(--green);
   border-radius:5px;
   background:var(--green);
   color:#fff;
-  font-weight:600;
+  font-weight:650;
+  line-height:1.2;
   cursor:pointer;
+  transition:background .12s ease,border-color .12s ease,opacity .12s ease;
 }
-.flash-button:hover:not(:disabled){background:var(--green-hover);border-color:var(--green-hover)}
-.flash-button:disabled{opacity:.5;cursor:not-allowed}
+
+.flash-button:hover:not(:disabled){
+  background:var(--green-hover);
+  border-color:var(--green-hover);
+}
+
+.flash-button:disabled{
+  opacity:.48;
+  cursor:not-allowed;
+}
+
+.flash-button.reset-cue{
+  background:#fff;
+  color:#24282c;
+  border-color:#899198;
+  opacity:1;
+  cursor:default;
+}
+
+.flash-button.reset-cue.reset-done{
+  opacity:.34;
+}
 
 .terminal-card{
   width:100%;
   margin:0 auto;
   overflow:hidden;
-  border:1px solid #242424;
-  border-radius:10px;
-  background:#050505;
-  box-shadow:0 2px 7px rgba(0,0,0,.08);
+  border:1px solid #2e3337;
+  border-radius:7px;
+  background:#0b0d0e;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
 }
+
 .terminal-titlebar{
-  height:38px;
+  height:35px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:0 13px;
-  color:#cfcfcf;
-  background:#151515;
-  border-bottom:1px solid #292929;
-  font:12px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  padding:0 12px;
+  color:#c4c8cb;
+  background:#171a1c;
+  border-bottom:1px solid #292d30;
+  font:11.5px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
-.status-dot{width:9px;height:9px;border-radius:50%;background:#666;display:inline-block}
+
+.status-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#666;
+  display:inline-block;
+}
+
 .status-dot.busy{background:#d18b00}
-.status-dot.good{background:#4CAF50}
+.status-dot.good{background:#4caf50}
 .status-dot.bad{background:#e53935}
+
 .console-output{
-  height:285px;
+  height:250px;
   margin:0;
-  padding:14px 16px;
+  padding:13px 15px;
   overflow:auto;
-  background:#050505;
-  color:#d7d7d7;
+  background:#0b0d0e;
+  color:#d3d7da;
   white-space:pre-wrap;
   overflow-wrap:anywhere;
-  font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font:12px/1.52 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
-.console-output::selection{background:#454545}
+
+.console-output::selection{
+  background:#454a4e;
+}
 
 .notice,.result{
-  width:min(100%,620px);
+  width:100%;
   margin:0 auto 18px;
   padding:10px 12px;
-  border-radius:7px;
+  border-radius:6px;
   text-align:center;
-  font-size:.92rem;
+  font-size:.9rem;
 }
-.notice,.error-box{border:1px solid #e0a4a4;background:#fff5f5;color:#7b2020}
-.success-box{border:1px solid #a9d7aa;background:#f2fff2;color:#276629;margin-top:18px}
-.error-box{margin-top:18px}
+
+.notice,.error-box{
+  border:1px solid #dfabab;
+  background:#fff6f6;
+  color:#7b2020;
+}
+
+.success-box{
+  border:1px solid #afd4b0;
+  background:#f4fff4;
+  color:#276629;
+  margin:0 auto 18px;
+}
+
+.error-box{
+  margin:0 auto 18px;
+}
+
+/* Release Notes hover/focus tooltip */
+.release-notes-tooltip{
+  position:absolute;
+  left:50%;
+  top:calc(100% + 9px);
+  bottom:auto;
+  transform:translateX(-50%) translateY(-4px);
+  width:min(430px,calc(100vw - 36px));
+  max-height:260px;
+  overflow:auto;
+  padding:12px 14px;
+  border:1px solid #d5dadd;
+  border-radius:7px;
+  background:#fff;
+  color:#252a2e;
+  box-shadow:0 8px 24px rgba(0,0,0,.14);
+  font-size:13px;
+  line-height:1.45;
+  text-align:left;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  z-index:20;
+  transition:opacity .12s ease,transform .12s ease,visibility .12s ease;
+}
+
+.release-notes-wrap:hover .release-notes-tooltip,
+.release-notes-wrap:focus-within .release-notes-tooltip{
+  opacity:1;
+  visibility:visible;
+  transform:translateX(-50%) translateY(0);
+}
 
 @media (max-width:600px){
-  body{padding:24px 12px 36px}
-  .hero{margin-bottom:20px}
-  .hero h1{font-size:1.45rem}
-  .firmware-card{padding:22px 18px 24px}
-  .console-output{height:250px;font-size:11.5px}
-}
+  body{
+    padding:28px 12px 38px;
+  }
 
+  .firmware-card{
+    padding:23px 19px 24px;
+  }
 
-/* Mid-install reset cue */
-.flash-button.reset-cue{
-  background:#fff;
-  color:#202020;
-  border-color:#202020;
-  opacity:1;
-  cursor:default;
-}
+  .section-divider{
+    margin:20px 0 18px;
+  }
 
+  .install-steps{
+    font-size:.87rem;
+    padding-left:21px;
+  }
 
-/* RST has been detected; keep the same cue visible but fade it while flashing continues. */
-.flash-button.reset-cue.reset-done{
-  opacity:.38;
+  .console-output{
+    height:225px;
+    font-size:11.3px;
+  }
 }

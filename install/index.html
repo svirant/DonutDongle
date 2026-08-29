@@ -6,24 +6,28 @@
   <meta name="theme-color" content="#ffffff">
   <title>Donut Dongle gameID Firmware Installer</title>
   <meta name="description" content="Install DonutShop firmware on an Arduino or Waveshare Nano ESP32.">
-  <link rel="stylesheet" href="./style.css?v=dfu-rst-v1">
+  <link rel="stylesheet" href="./style.css?v=messages-above-terminal-v1">
 </head>
 <body>
   <main class="page-shell">
-    <header class="hero">
-      <h1>Donut Dongle gameID Firmware Installer</h1>
-    </header>
-
-    <section id="browserWarning" class="notice hidden" role="alert">
+<section id="browserWarning" class="notice hidden" role="alert">
       WebUSB and Web Serial are required. Use Chrome or Edge on desktop.
     </section>
 
     <section class="firmware-card" aria-labelledby="firmwareTitle">
-      <h2 id="firmwareTitle">Donut Dongle gameID</h2>
-      <div id="releaseVersion" class="version">—</div>
-      <div id="releaseDate" class="date">—</div>
+      <h2 id="firmwareTitle">Donut Dongle gameID Firmware Installer</h2>
+      <div class="version-date-row">
+        <span id="releaseVersion" class="version">—</span>
+        <span class="version-date-separator">•</span>
+        <span id="releaseDate" class="date">—</span>
+      </div>
       <div class="device">Arduino / Waveshare Nano ESP32 compatible.</div>
-      <a id="releaseLink" class="release-link hidden" href="#" target="_blank" rel="noopener noreferrer">Release Notes</a>
+      <span id="releaseNotesWrap" class="release-notes-wrap hidden">
+        <a id="releaseLink" class="release-link" href="#" target="_blank" rel="noopener noreferrer" aria-describedby="releaseNotesTooltip">Release Notes</a>
+        <span id="releaseNotesTooltip" class="release-notes-tooltip" role="tooltip"></span>
+      </span>
+
+      <div class="section-divider" aria-hidden="true"></div>
 
       <ol class="install-steps">
         <li>Connect your Nano ESP32 via USB directly to your PC or Mac (not through a USB hub) and double click the Nano's RST button to enter <strong>recovery mode</strong> (a <strong>GREEN</strong> LED will strobe when successful).</li>
@@ -34,18 +38,18 @@
       <button id="startButton" class="flash-button" disabled>Connect and Flash</button>
     </section>
 
-    <section class="terminal-card" aria-label="Installer terminal">
-      <div class="terminal-titlebar">
-        <span>Terminal</span>
-        <span id="statusDot" class="status-dot" aria-hidden="true"></span>
-      </div>
-      <pre id="consoleOutput" class="console-output" aria-live="polite"></pre>
-    </section>
-
     <div id="successBox" class="result success-box hidden" role="status">
       DonutShop installed successfully.
     </div>
     <div id="errorBox" class="result error-box hidden" role="alert"></div>
+
+    <section class="terminal-card" aria-label="Installer terminal">
+      <div class="terminal-titlebar">
+        <span>Log</span>
+        <span id="statusDot" class="status-dot" aria-hidden="true"></span>
+      </div>
+      <pre id="consoleOutput" class="console-output" aria-live="polite"></pre>
+    </section>
 
     <div class="hidden" aria-hidden="true">
       <span id="releaseBadge"></span>
@@ -60,6 +64,6 @@
   </main>
 
   <script src="./config.js?v=dfu-rst-v1"></script>
-  <script type="module" src="./installer.js?v=rst-persistent-v1"></script>
+  <script type="module" src="./installer.js?v=release-tooltip-v1"></script>
 </body>
 </html>

@@ -8,7 +8,9 @@ const ui = {
   releaseBadge: $("releaseBadge"),
   releaseVersion: $("releaseVersion"),
   releaseDate: $("releaseDate"),
+  releaseNotesWrap: $("releaseNotesWrap"),
   releaseLink: $("releaseLink"),
+  releaseNotesTooltip: $("releaseNotesTooltip"),
   fullName: $("fullName"),
   recoveryName: $("recoveryName"),
   helperName: $("helperName"),
@@ -78,10 +80,10 @@ function bytesText(bytes){
 function formatDate(iso){
   if(!iso) return "—";
   const date = new Date(iso);
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
-    month: "long",
-    day: "numeric"
+    month: "2-digit",
+    day: "2-digit"
   }).format(date);
 }
 
@@ -196,6 +198,24 @@ function validateLayout(fullAsset, recoveryAsset, helperAsset){
   }
 }
 
+function formatReleaseNotes(body){
+  const text = String(body || "").trim();
+
+  if(!text){
+    return "No release notes were provided for this release.";
+  }
+
+  return text
+    .replace(/\r\n/g, "\n")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/^\s*[-*+]\s+/gm, "• ")
+    .trim();
+}
+
 async function prepareRelease(){
   try{
     setStatus("busy");
@@ -226,9 +246,11 @@ async function prepareRelease(){
     ui.releaseDate.textContent = formatDate(manifest.published_at);
     ui.releaseBadge.textContent = manifest.prerelease ? "Pre-release" : "Latest stable";
 
+    ui.releaseNotesTooltip.textContent = formatReleaseNotes(manifest.body);
+
     if(manifest.html_url){
       ui.releaseLink.href = manifest.html_url;
-      ui.releaseLink.classList.remove("hidden");
+      ui.releaseNotesWrap.classList.remove("hidden");
     }
 
     ui.fullName.textContent = manifest.full.name;
