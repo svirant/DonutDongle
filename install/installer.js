@@ -622,6 +622,12 @@ async function beginFactoryFlow(){
     log("Connecting to Nano ESP32 recovery mode…");
     await uploadHelperDfu();
 
+    // Give the Nano recovery/DFU stack a full two seconds to settle before
+    // telling the user to press RST. Pressing RST earlier can interrupt the
+    // transition immediately after the helper upload.
+    log("Preparing reset step…");
+    await sleep(2000);
+
     stage = "wait-reset";
     setBusy(false);
     updateButtonForStage();
