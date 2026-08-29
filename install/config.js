@@ -38,6 +38,9 @@ window.DONUTSHOP_INSTALLER_CONFIG = {
     // 1200 baud is only the factory-bootloader trigger.
     triggerBaud: 1200,
 
+    // Time to wait for a previously authorized 303A:1001 port after the 1200-baud reboot.
+    autoBootloaderWaitMs: 6000,
+
     // esptool-js connection setting after the board is in ROM download mode.
     flashBaud: 921600
   }

@@ -218,6 +218,80 @@ async function prepareRelease(){
   }
 }
 
+function isBootloaderPort(port){
+  try{
+    const info = port.getInfo();
+    return info.usbVendorId === cfg.device.bootVendorId &&
+           info.usbProductId === cfg.device.bootProductId;
+  }
+  catch(_error){
+    return false;
+  }
+}
+
+async function getAuthorizedBootloaderPorts(){
+  const ports = await navigator.serial.getPorts();
+  return ports.filter(isBootloaderPort);
+}
+
+async function waitForAuthorizedBootloader(timeoutMs){
+  const deadline = Date.now() + timeoutMs;
+
+  while(Date.now() < deadline){
+    const matches = await getAuthorizedBootloaderPorts();
+
+    if(matches.length === 1){
+      return { port: matches[0], multiple: false };
+    }
+
+    if(matches.length > 1){
+      return { port: null, multiple: true };
+    }
+
+    await sleep(250);
+  }
+
+  return { port: null, multiple: false };
+}
+
+async function tryAutomaticBootloaderFlash(){
+  if(busy || !images || primaryStage !== "flash") return;
+
+  const waitMs = cfg.device.autoBootloaderWaitMs || 6000;
+  setBusy(true);
+  ui.stepConnectText.textContent = "Waiting for the ESP32-S3 USB bootloader…";
+  log("Waiting for a previously authorized ESPressif USB JTAG/serial debug unit…");
+
+  let result;
+  try{
+    result = await waitForAuthorizedBootloader(waitMs);
+  }
+  catch(error){
+    log(`Could not check previously authorized serial ports: ${error?.message || error}`);
+    result = { port: null, multiple: false };
+  }
+  finally{
+    setBusy(false);
+  }
+
+  if(result.multiple){
+    setStatus("good");
+    ui.stepConnectText.textContent = "Multiple authorized ESPressif bootloaders were found. Select the correct one.";
+    log("Multiple authorized bootloaders detected. Click Connect and Flash and select the correct device.");
+    return;
+  }
+
+  if(!result.port){
+    setStatus("good");
+    ui.stepConnectText.textContent = "Click Connect and Flash and select the Espressif USB JTAG/serial debug unit.";
+    log("Bootloader permission is not available yet. Click Connect and Flash and select the Espressif USB JTAG/serial debug unit.");
+    return;
+  }
+
+  log("Previously authorized bootloader detected. Flashing automatically.");
+  await flashBootloaderDevice(result.port, true);
+}
+
 async function triggerFactoryBootloader(){
   if(busy || !images) return;
   clearError();
@@ -226,6 +300,7 @@ async function triggerFactoryBootloader(){
   ui.stepTriggerText.textContent = "Select the factory Arduino Nano ESP32 in Chrome's serial chooser.";
 
   let port = null;
+  let tryAutoFlash = false;
   try{
     log("Requesting factory Arduino Nano ESP32…");
     port = await navigator.serial.requestPort({
@@ -262,11 +337,12 @@ async function triggerFactoryBootloader(){
     setStep(ui.stepTrigger, "done");
     ui.stepTriggerText.textContent = "Bootloader requested. The Nano should now appear as an Espressif USB JTAG/serial debug unit.";
     setStep(ui.stepConnect, "active");
-    ui.stepConnectText.textContent = "Select the Espressif USB device on the next click.";
+    ui.stepConnectText.textContent = "Looking for an already-authorized ESP32-S3 bootloader…";
     primaryStage = "flash";
-    ui.startButton.textContent = "Flash";
+    ui.startButton.textContent = "Connect and Flash";
     setStatus("good");
-    log("Bootloader requested. Click Flash and select the Espressif USB JTAG/serial debug unit.");
+    log("Bootloader requested. Checking whether Chrome already has permission to the Espressif USB device…");
+    tryAutoFlash = true;
   }
   catch(error){
     const message = error?.name === "NotFoundError"
@@ -277,9 +353,13 @@ async function triggerFactoryBootloader(){
   finally{
     setBusy(false);
   }
+
+  if(tryAutoFlash){
+    await tryAutomaticBootloaderFlash();
+  }
 }
 
-async function flashBootloaderDevice(){
+async function flashBootloaderDevice(portOverride = null, automatic = false){
   if(busy || !images) return;
   clearError();
   ui.successBox.classList.add("hidden");
@@ -290,14 +370,22 @@ async function flashBootloaderDevice(){
   ui.stepConnectText.textContent = "Select “Espressif USB JTAG/serial debug unit” in Chrome's serial chooser.";
 
   let transport = null;
+  let loaderConnected = false;
   try{
-    log("Requesting ESP32-S3 USB Serial/JTAG bootloader…");
-    const port = await navigator.serial.requestPort({
-      filters: [{
-        usbVendorId: cfg.device.bootVendorId,
-        usbProductId: cfg.device.bootProductId
-      }]
-    });
+    let port = portOverride;
+
+    if(port){
+      log("Using previously authorized ESP32-S3 USB Serial/JTAG bootloader.");
+    }
+    else{
+      log("Requesting ESP32-S3 USB Serial/JTAG bootloader…");
+      port = await navigator.serial.requestPort({
+        filters: [{
+          usbVendorId: cfg.device.bootVendorId,
+          usbProductId: cfg.device.bootProductId
+        }]
+      });
+    }
 
     const info = port.getInfo();
     log(`Selected USB ${hex4(info.usbVendorId)}:${hex4(info.usbProductId)}.`);
@@ -322,6 +410,7 @@ async function flashBootloaderDevice(){
 
     ui.stepConnectText.textContent = "Connecting to the ESP32-S3 ROM downloader…";
     const chipName = await esploader.main();
+    loaderConnected = true;
     log(`Detected chip: ${chipName}`);
 
     if(!String(chipName).toUpperCase().includes(cfg.device.expectedChip.toUpperCase())){
@@ -386,13 +475,26 @@ async function flashBootloaderDevice(){
     }
   }
   catch(error){
-    const message = error?.name === "NotFoundError"
-      ? "No bootloader device was selected. Click Flash to try again."
-      : `Installation failed: ${error?.message || error}`;
-    showError(message, ui.stepFlash.classList.contains("active") ? ui.stepFlash : ui.stepConnect);
     if(transport){
       try{ await transport.disconnect(); }catch(_error){}
     }
+
+    if(automatic && !loaderConnected){
+      clearError();
+      setStatus("good");
+      setStep(ui.stepConnect, "active");
+      ui.stepConnectText.textContent = "Automatic connection was not ready. Click Connect and Flash and select the Espressif USB device.";
+      primaryStage = "flash";
+      ui.startButton.textContent = "Connect and Flash";
+      log(`Automatic bootloader connection was not ready: ${error?.message || error}`);
+      log("Click Connect and Flash and select the Espressif USB JTAG/serial debug unit.");
+      return;
+    }
+
+    const message = error?.name === "NotFoundError"
+      ? "No bootloader device was selected. Click Connect and Flash to try again."
+      : `Installation failed: ${error?.message || error}`;
+    showError(message, ui.stepFlash.classList.contains("active") ? ui.stepFlash : ui.stepConnect);
   }
   finally{
     setBusy(false);
