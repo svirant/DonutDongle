@@ -589,10 +589,7 @@ function startBootloaderWatcher(){
         stopBootloaderWatcher();
         stage = "flashing";
         updateButtonForStage();
-        log("RST detected. USB JTAG is ready.");
-        log("Waiting 2 seconds for the Nano to settle…");
-        await sleep(2000);
-        log("Continuing with flash.");
+        log("RST detected. USB JTAG is ready; flashing automatically.");
         await flashBootloaderDevice(ports[0], true);
       }
     }
