@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.8",
-  "name": "DonutShop v0.7.8",
-  "published_at": "2026-08-28T02:20:15Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.8",
-  "body": "**Sleep/Wake UI experience**\r\n- When DonutShop detects \"remote pwr\" (sleep) has been sent to the RT4K, or the WebCtl remote power button has been pressed, WebCtl will exit out to the connect page. \r\n  - Unfortunately, it cannot detect when the RT4K builtin IR receiver is sent a sleep IR code. In this scenario, WebCtl will not exit and a manual page refresh is required for it to notice.\r\n- When DonutShop detects \"pwr on\" (wake) has been sent to the RT4K, all connected WebCtl pages reload so they reconnect to the awake RT4K. \r\n  - does not apply to when the RT4K builtin IR receiver was used to wake.\r\n- Works great with the IR Receiver of the Donut Dongle.",
+  "tag": "v0.7.9",
+  "name": "Donut Dongle gameID v0.7.9",
+  "published_at": "2026-08-29T07:17:49Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.9",
+  "body": "**Maintenance**\r\n- Websocket message cleanup\r\n- Paused gameID checks while \"stage latest experimental\" and \"Check for Updates\" are performed. DMA memory mgmt.\r\n\r\n**UI Experience**\r\n- WebCtl reconnects automatically after a RT4K firmware update",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.8_full.bin",
-    "size": 1894528,
-    "sha256": "6111820026b5ffaa2a3ff7be771d9bec26eddcdace05aa367694150f1f1d8e26"
+    "name": "Donut_Dongle_gameID_v0.7.9_full.bin",
+    "size": 1897008,
+    "sha256": "54083f6aa886c1d3037831cbc60931c624ac6afbaab100f622b3a76788619486"
   },
   "recovery": {
     "name": "nora_recovery.bin",
