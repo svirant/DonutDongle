@@ -135,7 +135,7 @@ function updateButtonForStage(){
   }
   else if(stage === "flashing"){
     ui.startButton.disabled = true;
-    ui.startButton.textContent = "Press RST Once";
+    ui.startButton.textContent = "Press RST";
     ui.startButton.classList.add("reset-cue", "reset-done");
   }
   else if(stage === "done"){
