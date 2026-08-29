@@ -114,7 +114,7 @@ function setBusy(value){
 }
 
 function updateButtonForStage(){
-  ui.startButton.classList.remove("reset-cue");
+  ui.startButton.classList.remove("reset-cue", "reset-done");
 
   if(!images){
     ui.startButton.disabled = true;
@@ -131,9 +131,10 @@ function updateButtonForStage(){
     ui.startButton.textContent = "Press RST Once";
     ui.startButton.classList.add("reset-cue");
   }
-  else if(stage === "select-jtag"){
-    ui.startButton.disabled = false;
-    ui.startButton.textContent = "Select USB JTAG and Flash";
+  else if(stage === "flashing"){
+    ui.startButton.disabled = true;
+    ui.startButton.textContent = "Press RST Once";
+    ui.startButton.classList.add("reset-cue", "reset-done");
   }
   else if(stage === "done"){
     ui.startButton.disabled = true;
@@ -576,15 +577,8 @@ function stopBootloaderWatcher(){
 function startBootloaderWatcher(){
   stopBootloaderWatcher();
 
-  watchDeadline = Date.now() + (cfg.device.jtagWatchMs || 60000);
-
   watchTimer = setInterval(async () => {
-    if(busy || stage !== "select-jtag"){
-      return;
-    }
-
-    if(Date.now() > watchDeadline){
-      stopBootloaderWatcher();
+    if(busy || stage !== "wait-reset"){
       return;
     }
 
@@ -593,7 +587,9 @@ function startBootloaderWatcher(){
 
       if(ports.length === 1){
         stopBootloaderWatcher();
-        log("Previously authorized USB JTAG device detected after reset. Flashing automatically.");
+        stage = "flashing";
+        updateButtonForStage();
+        log("RST detected. USB JTAG is ready; flashing automatically.");
         await flashBootloaderDevice(ports[0], true);
       }
     }
@@ -636,24 +632,17 @@ async function beginFactoryFlow(){
     log("========================================");
     log("Waiting for USB JTAG…");
 
-    // Give the reset instruction a moment to remain visually explicit, then
-    // expose the manual USB JTAG selector while continuing to auto-detect any
-    // previously authorized 303A:1001 device.
-    await sleep(2200);
-
-    if(stage === "wait-reset"){
-      stage = "select-jtag";
-      updateButtonForStage();
-      startBootloaderWatcher();
-    }
+    // Keep the same button in the Press RST Once state. The page watches for
+    // the already-authorized 303A:1001 device and continues automatically.
+    startBootloaderWatcher();
   }
   catch(error){
     setBusy(false);
 
     if(error?.name === "NotFoundError"){
-      stage = "select-jtag";
+      stage = "connect";
       updateButtonForStage();
-      showError("Nano recovery mode was not selected. If the board is already in USB JTAG mode, click “Select USB JTAG and Flash”. Otherwise double-click RST until the GREEN LED strobes and try again.");
+      showError("Nano recovery mode was not selected. Double-click RST until the GREEN LED strobes, then click “Connect and Flash” again.");
     }
     else{
       stage = "connect";
@@ -788,33 +777,24 @@ async function flashBootloaderDevice(portOverride = null, automatic = false){
     setBusy(false);
 
     if(automatic && !loaderConnected){
-      stage = "select-jtag";
+      stage = "wait-reset";
       updateButtonForStage();
       setStatus("good");
-      log(`Automatic USB JTAG connection was not ready: ${error?.message || error}`);
-      log("Click “Select USB JTAG and Flash” and select the Espressif USB JTAG/serial debug unit.");
+      log(`Automatic USB JTAG connection was not ready yet: ${error?.message || error}`);
+      log("Waiting for USB JTAG to become available…");
+      startBootloaderWatcher();
       return;
     }
 
-    if(error?.name === "NotFoundError"){
-      stage = "select-jtag";
-      updateButtonForStage();
-      showError("No USB JTAG device was selected. Press RST once if you have not already, then try again.");
-    }
-    else{
-      stage = "select-jtag";
-      updateButtonForStage();
-      showError(`Installation failed: ${error?.message || error}`);
-    }
+    stage = "wait-reset";
+    updateButtonForStage();
+    showError(`Installation failed: ${error?.message || error}`);
   }
 }
 
 async function handlePrimaryAction(){
   if(stage === "connect"){
     await beginFactoryFlow();
-  }
-  else if(stage === "select-jtag"){
-    await flashBootloaderDevice();
   }
 }
 

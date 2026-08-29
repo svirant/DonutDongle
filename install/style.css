@@ -128,3 +128,9 @@ button,a{font:inherit}
   opacity:1;
   cursor:default;
 }
+
+
+/* RST has been detected; keep the same cue visible but fade it while flashing continues. */
+.flash-button.reset-cue.reset-done{
+  opacity:.38;
+}
