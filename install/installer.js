@@ -622,11 +622,11 @@ async function beginFactoryFlow(){
     log("Connecting to Nano ESP32 recovery mode…");
     await uploadHelperDfu();
 
-    // Give the Nano recovery/DFU stack a full two seconds to settle before
+    // Give the Nano recovery/DFU stack a full three seconds to settle before
     // telling the user to press RST. Pressing RST earlier can interrupt the
     // transition immediately after the helper upload.
     log("Preparing reset step…");
-    await sleep(2000);
+    await sleep(3000);
 
     stage = "wait-reset";
     setBusy(false);
@@ -726,6 +726,10 @@ async function flashBootloaderDevice(portOverride = null, automatic = false){
     if(!String(chipName).toUpperCase().includes(cfg.device.expectedChip.toUpperCase())){
       throw new Error(`Wrong chip detected (${chipName}). This installer requires ${cfg.device.expectedChip}.`);
     }
+
+    log("Erasing entire flash…");
+    await loader.eraseFlash();
+    log("Flash erase complete.");
 
     log("Writing DonutShop firmware…");
 
