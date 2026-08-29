@@ -27,7 +27,7 @@
 
       <ol class="install-steps">
         <li>Connect your Nano ESP32 via USB directly to your PC or Mac (not through a USB hub) and double click the Nano's RST button to enter <strong>recovery mode</strong> (a <strong>GREEN</strong> LED will strobe when successful).</li>
-        <li>Click <strong>“Connect and Flash”</strong>, select <strong>“Nano ESP32 (bootloader)”</strong>, then press the Nano's <strong>RST button once</strong> when prompted.</li>
+        <li>Click <strong>“Connect and Flash”</strong>, select <strong>“Nano ESP32 (bootloader)”</strong>, then <strong>Press RST Once</strong> when prompted. If the process does not continue, press RST once again until it does.</li>
         <li>After installation, continue with the <strong>“Setup”</strong> steps listed on GitHub.</li>
       </ol>
 
@@ -60,6 +60,6 @@
   </main>
 
   <script src="./config.js?v=dfu-rst-v1"></script>
-  <script type="module" src="./installer.js?v=erase-flash-rst3s-v1"></script>
+  <script type="module" src="./installer.js?v=rst-persistent-v1"></script>
 </body>
 </html>

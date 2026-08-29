@@ -587,9 +587,9 @@ function startBootloaderWatcher(){
 
       if(ports.length === 1){
         stopBootloaderWatcher();
+        log("RST detected. USB JTAG is ready; continuing automatically.");
         stage = "flashing";
         updateButtonForStage();
-        log("RST detected. USB JTAG is ready; flashing automatically.");
         await flashBootloaderDevice(ports[0], true);
       }
     }
