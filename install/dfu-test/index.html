@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nano ESP32 WebUSB DFU Diagnostic</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <section class="card">
+      <h1>Nano ESP32 DFU Test</h1>
+      <p>Put the Nano ESP32 in double-RST recovery mode, then click the button.</p>
+
+      <button id="testBtn" type="button">Test WebUSB DFU</button>
+
+      <div class="terminal-wrap">
+        <div class="terminal-title">Terminal</div>
+        <pre id="terminal" class="terminal"></pre>
+      </div>
+
+      <div id="summary" class="summary" hidden></div>
+    </section>
+  </main>
+
+  <script src="diagnostic.js"></script>
+</body>
+</html>
