@@ -297,21 +297,38 @@ async function triggerFactoryBootloader(){
   clearError();
   setBusy(true);
   setStep(ui.stepTrigger, "active");
-  ui.stepTriggerText.textContent = "Select the factory Arduino Nano ESP32 in Chrome's serial chooser.";
+  ui.stepTriggerText.textContent = "Select the Nano ESP32 / TinyUSB CDC device in Chrome's serial chooser.";
 
   let port = null;
   let tryAutoFlash = false;
   try{
-    log("Requesting factory Arduino Nano ESP32…");
-    port = await navigator.serial.requestPort({
-      filters: [{
-        usbVendorId: cfg.device.nanoVendorId,
-        usbProductId: cfg.device.nanoProductId
-      }]
-    });
+    log("Requesting USB serial device…");
+    // Do not filter the first chooser. Arduino and Waveshare Nano ESP32 boards can
+    // expose different TinyUSB VID/PID values depending on firmware/bootloader state.
+    // We inspect the selected identity after the user chooses the device.
+    port = await navigator.serial.requestPort();
 
     const info = port.getInfo();
-    log(`Selected USB ${hex4(info.usbVendorId)}:${hex4(info.usbProductId)}.`);
+    const selectedVid = info.usbVendorId;
+    const selectedPid = info.usbProductId;
+    log(`Selected USB ${hex4(selectedVid)}:${hex4(selectedPid)}.`);
+
+    // If the user selected the ESP32-S3 hardware USB Serial/JTAG device directly,
+    // there is no reason to perform the TinyUSB 1200-baud transition.
+    if(isBootloaderPort(port)){
+      setStep(ui.stepTrigger, "done");
+      ui.stepTriggerText.textContent = "ESP32-S3 USB bootloader selected.";
+      setStep(ui.stepConnect, "active");
+      ui.stepConnectText.textContent = "Connecting to ESP32-S3…";
+      primaryStage = "flash";
+      ui.startButton.textContent = "Select USB JTAG and Flash";
+      setStatus("good");
+      log("ESP32-S3 USB Serial/JTAG device selected directly. Skipping the 1200-baud trigger.");
+      setBusy(false);
+      await flashBootloaderDevice(port, true);
+      return;
+    }
+
     ui.stepTriggerText.textContent = "Sending the 1200-baud bootloader trigger…";
 
     await port.open({
@@ -345,9 +362,17 @@ async function triggerFactoryBootloader(){
     tryAutoFlash = true;
   }
   catch(error){
-    const message = error?.name === "NotFoundError"
-      ? "No Nano ESP32 was selected. Click Connect and Flash to try again."
-      : `Could not trigger installation mode: ${error?.message || error}`;
+    let message;
+    if(error?.name === "NotFoundError"){
+      message = "No USB serial device was selected. Click Connect and Flash to try again.";
+    }
+    else if(port){
+      message = "Could not open TinyUSB CDC. Make sure the Nano is in normal mode (not pulsing-green recovery mode) and that Arduino IDE, Serial Monitor, or another app is not using the port. Press RST once or unplug/replug the Nano, then try again.";
+    }
+    else{
+      message = `Could not trigger installation mode: ${error?.message || error}`;
+    }
+    log(`USB open error: ${error?.name || "Error"}: ${error?.message || error}`);
     showError(message, ui.stepTrigger);
   }
   finally{
