@@ -5,147 +5,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#ffffff">
   <title>DonutShop Firmware Installer</title>
-  <meta name="description" content="Install DonutShop firmware on an Arduino Nano ESP32 from Chrome or Edge.">
+  <meta name="description" content="Install DonutShop firmware on an Arduino Nano ESP32.">
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <div class="topbar">
-    <a id="releaseLinkTop" href="https://github.com/svirant/DonutDongle/releases" target="_blank" rel="noopener noreferrer" title="DonutShop releases">GitHub</a>
-  </div>
-
   <main class="page-shell">
     <header class="hero">
-      <h1>DonutShop</h1>
-      <h2>Firmware Installer</h2>
-      <p>Connect an Arduino Nano ESP32 via USB and install the latest DonutShop release directly from your browser.</p>
+      <h1>DonutShop Firmware Installer</h1>
     </header>
 
     <section id="browserWarning" class="notice hidden" role="alert">
-      <strong>Web Serial is not available.</strong>
-      <span>Use a current version of Google Chrome or Microsoft Edge on a supported desktop operating system.</span>
+      Web Serial is unavailable. Use Chrome or Edge on desktop.
     </section>
 
-    <section id="configWarning" class="notice hidden" role="alert">
-      <strong>Installer configuration is incomplete.</strong>
-      <span>Edit <code>config.js</code> and set the GitHub owner and repository.</span>
+    <section class="firmware-card" aria-labelledby="firmwareTitle">
+      <h2 id="firmwareTitle">DonutShop</h2>
+      <div id="releaseVersion" class="version">—</div>
+      <div id="releaseDate" class="date">—</div>
+      <div class="device">Arduino Nano ESP32</div>
+      <a id="releaseLink" class="release-link hidden" href="#" target="_blank" rel="noopener noreferrer">What's New</a>
+
+      <button id="startButton" class="flash-button" disabled>Flash</button>
+      <button id="bootloaderButton" class="hidden" disabled tabindex="-1" aria-hidden="true">Connect Bootloader &amp; Flash</button>
     </section>
 
-    <section class="settings-section" aria-labelledby="firmwareTitle">
-      <div class="settings-title" id="firmwareTitle">Firmware</div>
-
-      <div class="release-summary">
-        <strong>DonutShop</strong>
-        <span id="releaseBadge" class="release-badge">Loading…</span>
-      </div>
-
-      <table class="release-table" aria-label="Firmware release information">
-        <thead>
-          <tr>
-            <th>Item</th>
-            <th>File / Value</th>
-            <th>Flash Address</th>
-            <th>Size</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Release</td>
-            <td id="releaseVersion">—</td>
-            <td>—</td>
-            <td id="releaseDate">—</td>
-          </tr>
-          <tr>
-            <td>Main</td>
-            <td id="fullName">*_full.bin</td>
-            <td><code>0x000000</code></td>
-            <td id="fullSize">—</td>
-          </tr>
-          <tr>
-            <td>Recovery</td>
-            <td id="recoveryName">nora_recovery.bin</td>
-            <td><code>0xF70000</code></td>
-            <td id="recoverySize">—</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <p id="releaseNotes" class="release-notes">Checking the configured GitHub repository for firmware…</p>
-      <p><a id="releaseLink" class="text-link hidden" href="#" target="_blank" rel="noopener noreferrer">View release on GitHub</a></p>
-
-      <div class="actions">
-        <button id="startButton" class="button button-primary" disabled>Install DonutShop</button>
-        <button id="bootloaderButton" class="button" disabled>Connect Bootloader &amp; Flash</button>
-      </div>
-
-      <p class="helper-text">
-        For a factory-new Nano ESP32, start with <strong>Install DonutShop</strong>. If the board already appears as an
-        <strong>Espressif USB JTAG/serial debug unit</strong>, use <strong>Connect Bootloader &amp; Flash</strong>.
-      </p>
-    </section>
-
-    <section class="settings-section" aria-labelledby="statusTitle">
-      <div class="settings-title status-heading">
-        <span id="statusTitle">Installer Status</span>
+    <section class="terminal-card" aria-label="Installer terminal">
+      <div class="terminal-titlebar">
+        <span>Terminal</span>
         <span id="statusDot" class="status-dot" aria-hidden="true"></span>
       </div>
-
-      <table class="status-table" aria-label="Installer progress">
-        <thead>
-          <tr>
-            <th>Step</th>
-            <th>Action</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr id="stepRelease" class="step active">
-            <td><span class="step-indicator">1</span></td>
-            <td>Prepare release</td>
-            <td id="stepReleaseText">Loading firmware information…</td>
-          </tr>
-          <tr id="stepTrigger" class="step">
-            <td><span class="step-indicator">2</span></td>
-            <td>Enter installation mode</td>
-            <td id="stepTriggerText">Waiting for Arduino Nano ESP32.</td>
-          </tr>
-          <tr id="stepConnect" class="step">
-            <td><span class="step-indicator">3</span></td>
-            <td>Connect bootloader</td>
-            <td id="stepConnectText">Waiting for Espressif USB Serial/JTAG.</td>
-          </tr>
-          <tr id="stepFlash" class="step">
-            <td><span class="step-indicator">4</span></td>
-            <td>Flash firmware</td>
-            <td id="stepFlashText">Not started.</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="progress-group">
-        <div class="progress-label"><span id="fullProgressLabel">Main firmware</span><span id="fullPercent">0%</span></div>
-        <progress id="fullProgress" value="0" max="100">0%</progress>
-      </div>
-      <div class="progress-group">
-        <div class="progress-label"><span>Recovery image</span><span id="recoveryPercent">0%</span></div>
-        <progress id="recoveryProgress" value="0" max="100">0%</progress>
-      </div>
-
-      <div id="successBox" class="success-box hidden" role="status">
-        <strong>DonutShop installed successfully.</strong>
-        <span>The Nano ESP32 has been reset and should now start the installed firmware.</span>
-      </div>
-
-      <div id="errorBox" class="error-box hidden" role="alert"></div>
-
-      <details class="console-wrap">
-        <summary>Installer log</summary>
-        <pre id="consoleOutput" class="console-output" aria-live="polite"></pre>
-      </details>
+      <pre id="consoleOutput" class="console-output" aria-live="polite"></pre>
     </section>
 
-    <footer>
-      Uses Espressif esptool-js through the Web Serial API. Chrome / Edge recommended.
-    </footer>
+    <div id="successBox" class="result success-box hidden" role="status">
+      DonutShop installed successfully.
+    </div>
+    <div id="errorBox" class="result error-box hidden" role="alert"></div>
+
+    <!-- Internal installer state. These remain in the DOM for installer.js but are intentionally not displayed. -->
+    <div class="hidden" aria-hidden="true">
+      <span id="configWarning"></span>
+      <span id="releaseBadge"></span>
+      <span id="releaseNotes"></span>
+      <span id="fullName"></span>
+      <span id="recoveryName"></span>
+      <span id="fullSize"></span>
+      <span id="recoverySize"></span>
+
+      <div id="stepRelease"><span id="stepReleaseText"></span></div>
+      <div id="stepTrigger"><span id="stepTriggerText"></span></div>
+      <div id="stepConnect"><span id="stepConnectText"></span></div>
+      <div id="stepFlash"><span id="stepFlashText"></span></div>
+
+      <span id="fullProgressLabel"></span>
+      <progress id="fullProgress" value="0" max="100"></progress>
+      <span id="fullPercent">0%</span>
+      <progress id="recoveryProgress" value="0" max="100"></progress>
+      <span id="recoveryPercent">0%</span>
+    </div>
   </main>
 
   <script src="./config.js"></script>

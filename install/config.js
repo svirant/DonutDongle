@@ -2,12 +2,11 @@
 // Edit only the values in this file before publishing.
 window.DONUTSHOP_INSTALLER_CONFIG = {
   github: {
-    // Public GitHub repository that contains your firmware Releases.
+    // Firmware Release source. The GitHub Action mirrors assets from this repository.
     owner: "svirant",
     repo: "DonutDongle",
 
-    // "latest" installs GitHub's latest published non-prerelease Release.
-    // You can also set this to a specific tag such as "v0.7.9".
+    // Informational only in the browser; the workflow always mirrors the latest published Release.
     release: "latest"
   },
 

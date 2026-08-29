@@ -39,6 +39,8 @@ const ui = {
 let releaseInfo = null;
 let images = null;
 let busy = false;
+let primaryStage = "trigger";
+let lastProgressLog = [-10, -10];
 
 function log(message){
   const line = `[${new Date().toLocaleTimeString()}] ${message}`;
@@ -72,7 +74,7 @@ function clearError(){
 
 function setBusy(value){
   busy = value;
-  ui.startButton.disabled = value || !images;
+  ui.startButton.disabled = value || !images || primaryStage === "done";
   ui.bootloaderButton.disabled = value || !images;
   if(value) setStatus("busy");
 }
@@ -108,43 +110,6 @@ function normalizeNotes(text){
   return stripped.length > max ? `${stripped.slice(0, max).trimEnd()}…` : stripped;
 }
 
-function isConfigured(){
-  return cfg &&
-    cfg.github &&
-    cfg.github.owner && cfg.github.owner !== "CHANGE_ME" &&
-    cfg.github.repo && cfg.github.repo !== "CHANGE_ME";
-}
-
-function releaseApiUrl(){
-  const owner = encodeURIComponent(cfg.github.owner);
-  const repo = encodeURIComponent(cfg.github.repo);
-  if(!cfg.github.release || cfg.github.release === "latest"){
-    return `https://api.github.com/repos/${owner}/${repo}/releases/latest`;
-  }
-  return `https://api.github.com/repos/${owner}/${repo}/releases/tags/${encodeURIComponent(cfg.github.release)}`;
-}
-
-function findAssets(release){
-  const assets = release.assets || [];
-  let fullAsset;
-
-  if(cfg.firmware.fullBinName){
-    fullAsset = assets.find((asset) => asset.name === cfg.firmware.fullBinName);
-  }
-  else{
-    const matches = assets.filter((asset) => asset.name.endsWith(cfg.firmware.fullBinSuffix));
-    if(matches.length > 1){
-      throw new Error(`Release contains multiple ${cfg.firmware.fullBinSuffix} files. Set firmware.fullBinName in config.js to the exact asset name.`);
-    }
-    fullAsset = matches[0];
-  }
-
-  const recoveryAsset = assets.find((asset) => asset.name === cfg.firmware.recoveryName);
-  if(!fullAsset) throw new Error(`Could not find the main firmware asset (${cfg.firmware.fullBinName || `*${cfg.firmware.fullBinSuffix}`}).`);
-  if(!recoveryAsset) throw new Error(`Could not find ${cfg.firmware.recoveryName} in this Release.`);
-  return { fullAsset, recoveryAsset };
-}
-
 function validateLayout(fullAsset, recoveryAsset){
   const fullEnd = cfg.firmware.fullAddress + fullAsset.size;
   const recoveryEnd = cfg.firmware.recoveryAddress + recoveryAsset.size;
@@ -162,80 +127,84 @@ async function sha256Hex(bytes){
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-async function fetchAsset(asset){
+function firmwareUrl(name){
+  // Firmware is mirrored into install/firmware by the GitHub Action.  Fetching
+  // from the same GitHub Pages origin avoids GitHub Release CDN CORS blocking.
+  return new URL(`firmware/${encodeURIComponent(name)}`, window.location.href).href;
+}
+
+async function fetchMirroredAsset(asset){
   log(`Downloading ${asset.name} (${bytesText(asset.size)})…`);
-  const response = await fetch(asset.browser_download_url, { cache:"no-store" });
+  const response = await fetch(firmwareUrl(asset.name), { cache:"no-store" });
   if(!response.ok) throw new Error(`Download failed for ${asset.name}: HTTP ${response.status}`);
 
   const data = new Uint8Array(await response.arrayBuffer());
   if(data.byteLength !== asset.size){
-    throw new Error(`${asset.name} size mismatch. GitHub reports ${asset.size} bytes; downloaded ${data.byteLength} bytes.`);
+    throw new Error(`${asset.name} size mismatch. Manifest reports ${asset.size} bytes; downloaded ${data.byteLength} bytes.`);
   }
 
-  if(asset.digest && asset.digest.toLowerCase().startsWith("sha256:")){
-    const expected = asset.digest.slice(7).toLowerCase();
+  if(asset.sha256){
     const actual = await sha256Hex(data);
-    if(actual !== expected){
+    if(actual !== String(asset.sha256).toLowerCase()){
       throw new Error(`SHA-256 verification failed for ${asset.name}.`);
     }
     log(`${asset.name}: SHA-256 verified.`);
   }
   else{
-    log(`${asset.name}: GitHub did not provide a SHA-256 digest; size verified only.`);
+    throw new Error(`${asset.name} has no SHA-256 value in firmware/manifest.json.`);
   }
 
   return data;
 }
 
 async function prepareRelease(){
-  if(!isConfigured()){
-    ui.configWarning.classList.remove("hidden");
-    ui.releaseBadge.textContent = "Configure first";
-    ui.releaseNotes.textContent = "Set github.owner and github.repo in config.js, then reload this page.";
-    setStep(ui.stepRelease, "error");
-    ui.stepReleaseText.textContent = "config.js needs your GitHub repository details.";
-    return;
-  }
-
   try{
     setStatus("busy");
-    log(`Loading GitHub Release from ${cfg.github.owner}/${cfg.github.repo}…`);
-    const response = await fetch(releaseApiUrl(), {
-      headers: { "Accept":"application/vnd.github+json" },
-      cache: "no-store"
-    });
+    log("Loading mirrored firmware manifest…");
+    const manifestUrl = new URL("firmware/manifest.json", window.location.href);
+    manifestUrl.searchParams.set("_", Date.now().toString());
+    const response = await fetch(manifestUrl, { cache:"no-store" });
+
+    if(response.status === 404){
+      throw new Error("Firmware mirror is not initialized yet. Run the “Sync Installer Firmware” GitHub Action once, then reload this page.");
+    }
     if(!response.ok){
-      if(response.status === 403) throw new Error("GitHub API request was rate-limited. Reload later or use a dedicated Pages repository with fewer API requests.");
-      if(response.status === 404) throw new Error("Configured GitHub Release was not found. Check github.owner, github.repo, and github.release in config.js.");
-      throw new Error(`GitHub Release lookup failed: HTTP ${response.status}`);
+      throw new Error(`Firmware manifest lookup failed: HTTP ${response.status}`);
     }
 
-    const release = await response.json();
-    const { fullAsset, recoveryAsset } = findAssets(release);
+    const manifest = await response.json();
+    if(!manifest.tag || !manifest.full || !manifest.recovery){
+      throw new Error("firmware/manifest.json is incomplete.");
+    }
+
+    const fullAsset = manifest.full;
+    const recoveryAsset = manifest.recovery;
     validateLayout(fullAsset, recoveryAsset);
 
-    releaseInfo = { release, fullAsset, recoveryAsset };
-    ui.releaseBadge.textContent = cfg.github.release === "latest" ? (release.prerelease ? "Pre-release" : "Latest stable") : "Pinned release";
-    ui.releaseVersion.textContent = release.tag_name || release.name || "—";
-    ui.releaseDate.textContent = formatDate(release.published_at || release.created_at);
-    ui.releaseNotes.textContent = normalizeNotes(release.body);
-    ui.releaseLink.href = release.html_url;
-    ui.releaseLink.classList.remove("hidden");
+    releaseInfo = { release: manifest, fullAsset, recoveryAsset };
+    ui.releaseBadge.textContent = manifest.prerelease ? "Pre-release" : "Latest stable";
+    ui.releaseVersion.textContent = manifest.tag || manifest.name || "—";
+    ui.releaseDate.textContent = formatDate(manifest.published_at);
+    ui.releaseNotes.textContent = normalizeNotes(manifest.body);
+    if(manifest.html_url){
+      ui.releaseLink.href = manifest.html_url;
+      ui.releaseLink.classList.remove("hidden");
+    }
     ui.fullName.textContent = fullAsset.name;
     ui.recoveryName.textContent = recoveryAsset.name;
     ui.fullSize.textContent = bytesText(fullAsset.size);
     ui.recoverySize.textContent = bytesText(recoveryAsset.size);
     ui.fullProgressLabel.textContent = fullAsset.name;
 
-    ui.stepReleaseText.textContent = "Downloading and verifying Release assets…";
+    ui.stepReleaseText.textContent = "Downloading and verifying mirrored Release assets…";
     const [fullData, recoveryData] = await Promise.all([
-      fetchAsset(fullAsset),
-      fetchAsset(recoveryAsset)
+      fetchMirroredAsset(fullAsset),
+      fetchMirroredAsset(recoveryAsset)
     ]);
 
     images = { fullData, recoveryData };
     setStep(ui.stepRelease, "done");
-    ui.stepReleaseText.textContent = `${release.tag_name}: both firmware files downloaded and verified.`;
+    ui.stepReleaseText.textContent = `${manifest.tag}: both firmware files downloaded and verified.`;
     setStep(ui.stepTrigger, "active");
     setStatus("good");
     ui.startButton.disabled = false;
@@ -245,7 +214,7 @@ async function prepareRelease(){
   catch(error){
     showError(error?.message || String(error), ui.stepRelease);
     ui.releaseBadge.textContent = "Unavailable";
-    ui.releaseNotes.textContent = "The firmware Release could not be prepared.";
+    ui.releaseNotes.textContent = "The firmware mirror could not be prepared.";
   }
 }
 
@@ -293,9 +262,11 @@ async function triggerFactoryBootloader(){
     setStep(ui.stepTrigger, "done");
     ui.stepTriggerText.textContent = "Bootloader requested. The Nano should now appear as an Espressif USB JTAG/serial debug unit.";
     setStep(ui.stepConnect, "active");
-    ui.stepConnectText.textContent = "Click “Connect Bootloader & Flash”, then select the Espressif device.";
+    ui.stepConnectText.textContent = "Select the Espressif USB device on the next click.";
+    primaryStage = "flash";
+    ui.startButton.textContent = "Connect & Flash";
     setStatus("good");
-    log("1200-baud trigger sent. Waiting for the ESP32-S3 ROM USB device.");
+    log("Bootloader requested. Click Connect & Flash and select the Espressif USB JTAG/serial debug unit.");
   }
   catch(error){
     const message = error?.name === "NotFoundError"
@@ -313,6 +284,7 @@ async function flashBootloaderDevice(){
   clearError();
   ui.successBox.classList.add("hidden");
   resetProgress();
+  lastProgressLog = [-10, -10];
   setBusy(true);
   setStep(ui.stepConnect, "active");
   ui.stepConnectText.textContent = "Select “Espressif USB JTAG/serial debug unit” in Chrome's serial chooser.";
@@ -381,6 +353,12 @@ async function flashBootloaderDevice(){
           ui.recoveryProgress.value = percent;
           ui.recoveryPercent.textContent = `${percent}%`;
         }
+
+        const bucket = percent === 100 ? 100 : Math.floor(percent / 10) * 10;
+        if(bucket >= lastProgressLog[fileIndex] + 10 || percent === 100){
+          lastProgressLog[fileIndex] = bucket;
+          log(`${fileIndex === 0 ? "Main firmware" : "Recovery image"}: ${percent}%`);
+        }
       }
     });
 
@@ -395,6 +373,8 @@ async function flashBootloaderDevice(){
     setStep(ui.stepFlash, "done");
     ui.stepFlashText.textContent = "Installation complete.";
     setStatus("good");
+    primaryStage = "done";
+    ui.startButton.textContent = "Installed";
     ui.successBox.classList.remove("hidden");
     log("Installation complete. Hard reset requested.");
 
@@ -435,10 +415,14 @@ function sleep(ms){
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function handlePrimaryAction(){
+  if(primaryStage === "trigger") await triggerFactoryBootloader();
+  else if(primaryStage === "flash") await flashBootloaderDevice();
+}
+
 function init(){
   ui.recoveryName.textContent = cfg?.firmware?.recoveryName || "nora_recovery.bin";
-  ui.startButton.addEventListener("click", triggerFactoryBootloader);
-  ui.bootloaderButton.addEventListener("click", flashBootloaderDevice);
+  ui.startButton.addEventListener("click", handlePrimaryAction);
 
   if(!("serial" in navigator)){
     ui.browserWarning.classList.remove("hidden");
