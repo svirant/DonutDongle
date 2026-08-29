@@ -277,14 +277,14 @@ async function tryAutomaticBootloaderFlash(){
   if(result.multiple){
     setStatus("good");
     ui.stepConnectText.textContent = "Multiple authorized ESPressif bootloaders were found. Select the correct one.";
-    log("Multiple authorized bootloaders detected. Click Connect and Flash and select the correct device.");
+    log("Multiple authorized bootloaders detected. Click Select USB JTAG and Flash and select the correct device.");
     return;
   }
 
   if(!result.port){
     setStatus("good");
-    ui.stepConnectText.textContent = "Click Connect and Flash and select the Espressif USB JTAG/serial debug unit.";
-    log("Bootloader permission is not available yet. Click Connect and Flash and select the Espressif USB JTAG/serial debug unit.");
+    ui.stepConnectText.textContent = "Click Select USB JTAG and Flash and select the Espressif USB JTAG/serial debug unit.";
+    log("Bootloader permission is not available yet. Click Select USB JTAG and Flash and select the Espressif USB JTAG/serial debug unit.");
     return;
   }
 
@@ -339,14 +339,14 @@ async function triggerFactoryBootloader(){
     setStep(ui.stepConnect, "active");
     ui.stepConnectText.textContent = "Looking for an already-authorized ESP32-S3 bootloader…";
     primaryStage = "flash";
-    ui.startButton.textContent = "Connect and Flash";
+    ui.startButton.textContent = "Select USB JTAG and Flash";
     setStatus("good");
     log("Bootloader requested. Checking whether Chrome already has permission to the Espressif USB device…");
     tryAutoFlash = true;
   }
   catch(error){
     const message = error?.name === "NotFoundError"
-      ? "No Nano ESP32 was selected. Click Connect to try again."
+      ? "No Nano ESP32 was selected. Click Connect and Flash to try again."
       : `Could not trigger installation mode: ${error?.message || error}`;
     showError(message, ui.stepTrigger);
   }
@@ -483,16 +483,16 @@ async function flashBootloaderDevice(portOverride = null, automatic = false){
       clearError();
       setStatus("good");
       setStep(ui.stepConnect, "active");
-      ui.stepConnectText.textContent = "Automatic connection was not ready. Click Connect and Flash and select the Espressif USB device.";
+      ui.stepConnectText.textContent = "Automatic connection was not ready. Click Select USB JTAG and Flash and select the Espressif USB device.";
       primaryStage = "flash";
-      ui.startButton.textContent = "Connect and Flash";
+      ui.startButton.textContent = "Select USB JTAG and Flash";
       log(`Automatic bootloader connection was not ready: ${error?.message || error}`);
-      log("Click Connect and Flash and select the Espressif USB JTAG/serial debug unit.");
+      log("Click Select USB JTAG and Flash and select the Espressif USB JTAG/serial debug unit.");
       return;
     }
 
     const message = error?.name === "NotFoundError"
-      ? "No bootloader device was selected. Click Connect and Flash to try again."
+      ? "No bootloader device was selected. Click Select USB JTAG and Flash to try again."
       : `Installation failed: ${error?.message || error}`;
     showError(message, ui.stepFlash.classList.contains("active") ? ui.stepFlash : ui.stepConnect);
   }
