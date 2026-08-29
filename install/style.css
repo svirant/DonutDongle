@@ -19,7 +19,7 @@ button,a{font:inherit}
 .hero h1{font-size:1.75rem;margin:0;font-weight:700}
 
 .firmware-card{
-  width:100%;
+  width:min(100%,660px);
   margin:0 auto 24px;
   padding:25px 26px 27px;
   background:#fff;
@@ -34,7 +34,7 @@ button,a{font:inherit}
 .release-link{display:inline-block;color:#1565c0;font-size:.88rem;margin:0 0 18px;text-underline-offset:2px}
 
 .install-steps{
-  width:min(100%,390px);
+  width:100%;
   margin:30px auto 20px;
   padding-left:24px;
   color:#333;
