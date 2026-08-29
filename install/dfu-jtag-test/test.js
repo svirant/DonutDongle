@@ -258,21 +258,25 @@
       log("Helper upload complete; requesting manifestation/final detach…");
       await manifest(device, iface.interfaceNumber, block);
 
-      // Try to replace the physical RST press with a host-issued USB reset.
-      // On Chrome this maps to WebUSB USBDevice.reset(). If the Nano recovery
-      // firmware treats the USB bus reset as sufficient to boot the selected
-      // application, the helper should immediately run and force 303A:1001.
+      // V2 experiment: send the standard DFU_DETACH class request.
+      // This is different from USBDevice.reset(); it asks the DFU implementation
+      // itself to detach/reboot. The Nano recovery descriptor reports
+      // manifestation-tolerant + willDetach=false, so this is an experiment.
       if(device.opened){
         try{
-          log("Attempting WebUSB device.reset() to leave DFU without pressing RST…");
-          await device.reset();
-          log("WebUSB device.reset() completed.");
-          await sleep(500);
+          log("Sending DFU_DETACH request to the recovery DFU interface…");
+          const detach = await device.controlTransferOut({
+            requestType: "class",
+            recipient: "interface",
+            request: 0x00,  // DFU_DETACH
+            value: 100,     // wDetachTimeOut in ms
+            index: iface.interfaceNumber
+          });
+          log(`DFU_DETACH result: ${detach.status}.`);
+          await sleep(1500);
         }
         catch(e){
-          // A reset can make the old USB handle disappear; NetworkError is
-          // therefore compatible with the device having reset successfully.
-          log(`WebUSB reset result: ${e.name || "Error"}: ${e.message || e}`);
+          log(`DFU_DETACH result: ${e.name || "Error"}: ${e.message || e}`);
         }
       }
 
@@ -282,7 +286,7 @@
       catch(e){}
       try{ if(device.opened) await device.close(); }catch(e){}
 
-      log("DFU transfer/reset finished. Waiting for helper to boot and enter ROM USB Serial/JTAG…");
+      log("DFU transfer/detach finished. Waiting for helper to boot and enter ROM USB Serial/JTAG…");
       await waitForAuthorizedJtag(12000);
     }
     catch(e){
@@ -353,6 +357,7 @@
   runBtn.addEventListener("click", uploadHelper);
   checkBtn.addEventListener("click", checkJtag);
 
+  log("BUILD: DFU-DETACH-V2");
   log("Ready.");
   log("Compile the included helper sketch, select its plain .ino.bin above, then double-RST the Nano and click Upload Helper.");
 })();
