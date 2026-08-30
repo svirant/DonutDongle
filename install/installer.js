@@ -660,7 +660,7 @@ async function beginFactoryFlow(){
     log("========================================");
     log("Waiting for USB JTAG…");
 
-    // Keep the same button in the Press RST Once state. The page watches for
+    // Keep the same button in the Press RST state. The page watches for
     // the already-authorized 303A:1001 device and continues automatically.
     startBootloaderWatcher();
   }
@@ -670,7 +670,7 @@ async function beginFactoryFlow(){
     if(error?.name === "NotFoundError"){
       stage = "connect";
       updateButtonForStage();
-      showError("Nano recovery mode was not selected. Double-click RST until the GREEN LED strobes, then click “Connect and Flash” again.");
+      showError("Device was not selected. Reconnect Nano ESP32 and Double-click RST until the GREEN LED strobes, then click “Connect and Flash” again.");
     }
     else{
       stage = "connect";
@@ -704,7 +704,7 @@ async function flashBootloaderDevice(portOverride = null, automatic = false){
     let port = portOverride;
 
     if(!port){
-      log("Select “Espressif USB JTAG/serial debug unit” in Chrome.");
+      log("Select “Espressif USB JTAG/serial debug unit” in Brave/Chrome/Edge.");
       port = await navigator.serial.requestPort({
         filters: [{
           usbVendorId: cfg.device.bootVendorId,
@@ -796,7 +796,7 @@ async function flashBootloaderDevice(portOverride = null, automatic = false){
     setBusy(false);
     updateButtonForStage();
     ui.successBox.classList.remove("hidden");
-    log("Installation complete.");
+    log("Installation complete. Continue with Setup");
   }
   catch(error){
     if(transport){
