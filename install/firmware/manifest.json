@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.9",
-  "name": "Donut Dongle gameID v0.7.9",
-  "published_at": "2026-08-29T07:17:49Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.9",
-  "body": "**Maintenance**\r\n- Websocket message cleanup\r\n- Paused gameID checks while \"stage latest experimental\" and \"Check for Updates\" are performed. DMA memory mgmt.\r\n\r\n**UI Experience**\r\n- WebCtl reconnects automatically after a RT4K firmware update",
+  "tag": "v0.7.10",
+  "name": "Donut Dongle gameID v0.7.10",
+  "published_at": "2026-08-30T22:10:56Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.10",
+  "body": "**Misc**\r\n- Initial RT6X CE support has been added\r\n- Cleaned up i2c card layout in the Expert section\r\n- WebCtl websocket reconnects automatically after waking / disconnected\r\n- For 0:/profile/ and subfolders, Profiles can be sorted by Type or Name by clicking on \"Name\"\r\n  - Type: .rt4 files are listed A->Z first, then .rt6 files. Mimics the On Screen \"Load From File\" menu\r\n  - Name: files are listed A->Z regardless of type. Default behavior for all other 0:/ folders.\r\n- Profiles in 0:/profile/ and subfolders now have 4k / 6X icons that represent the model that created the profile.",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.9_full.bin",
-    "size": 1897008,
-    "sha256": "54083f6aa886c1d3037831cbc60931c624ac6afbaab100f622b3a76788619486"
+    "name": "Donut_Dongle_gameID_v0.7.10_full.bin",
+    "size": 1901360,
+    "sha256": "bd2079f25eec7c161ab307b24e78b8d0061d7d71891049c58c96dec422000525"
   },
   "recovery": {
     "name": "nora_recovery.bin",
