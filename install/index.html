@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#ffffff">
   <title>Donut Dongle gameID Firmware Installer</title>
   <meta name="description" content="Install DonutShop firmware on an Arduino or Waveshare Nano ESP32.">
-  <link rel="stylesheet" href="./style.css?v=chrome-jtag-permission-test-v1">
+  <link rel="stylesheet" href="./style.css?v=authorize-instructions-v1">
 </head>
 <body>
   <main class="page-shell">
@@ -31,12 +31,13 @@
 
       <ol class="install-steps">
         <li>Connect your Nano ESP32 via USB directly to your PC or Mac (not through a USB hub) and double click the Nano's RST button to enter <strong>recovery mode</strong> (a <strong>GREEN</strong> LED will strobe when successful).</li>
-        <li>Click <strong>“Connect and Flash”</strong> and select <strong>“Nano ESP32 (bootloader)”</strong>. If this browser profile has not authorized USB JTAG before, click <strong>“Authorize USB JTAG”</strong> first, then <strong>Press RST</strong> on the Nano once while the chooser is open and select the USB JTAG device when it appears. If USB JTAG is already authorized, simply press RST when prompted. If the process does not continue, press RST once again until it does.</li>
+        <li>Click <strong>“Connect and Flash”</strong> and select <strong>“Nano ESP32 (bootloader)”</strong>. When <strong>“Authorize USB JTAG”</strong> appears, follow the instruction shown below the button.</li>
         <li>After installation, continue with the <strong>“Setup”</strong> steps listed on GitHub.</li>
       </ol>
 
       <button id="startButton" class="flash-button" disabled>Connect and Flash</button>
       <button id="jtagButton" class="jtag-button hidden" type="button">Authorize USB JTAG</button>
+      <p id="jtagInstructions" class="jtag-instructions hidden">Click <strong>“Authorize USB JTAG”</strong>, leave the chooser open, press RST on the Nano once, then select the USB JTAG device when it appears.</p>
     </section>
 
     <div id="successBox" class="result success-box hidden" role="status">
@@ -65,6 +66,6 @@
   </main>
 
   <script src="./config.js?v=dfu-rst-v1"></script>
-  <script type="module" src="./installer.js?v=authorize-before-rst-test-v1"></script>
+  <script type="module" src="./installer.js?v=authorize-instructions-v1"></script>
 </body>
 </html>

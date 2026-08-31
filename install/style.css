@@ -341,3 +341,13 @@ button,a{font:inherit}
   opacity:.48;
   cursor:not-allowed;
 }
+
+
+.jtag-instructions{
+  max-width:520px;
+  margin:10px auto 0;
+  color:#4d555c;
+  font-size:.86rem;
+  line-height:1.5;
+  text-align:center;
+}
