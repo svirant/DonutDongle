@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.11",
-  "name": "Donut Dongle gameID v0.7.11",
-  "published_at": "2026-08-31T05:19:45Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.11",
-  "body": "**Files viewer/editor**\r\n- Double-click .**txt** and .**html** files to view in-browser. **Txt** files can also be edited and saved. \r\n  - Great for:\r\n    - Instant viewing of guides and documentation found through-out the SD card image. \r\n    - Making immediate changes to various features that use .txt files.",
+  "tag": "v0.7.12",
+  "name": "Donut Dongle gameID v0.7.12",
+  "published_at": "2026-08-31T16:13:41Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.12",
+  "body": "- fixed bug where .html file viewer would sometimes show all white instead of contents until a manual page refresh was performed",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.11_full.bin",
-    "size": 1917680,
-    "sha256": "f132538c8bcb8f959947bbfa637ab10d0a07934a9e7acde2a6022c1214e6f923"
+    "name": "Donut_Dongle_gameID_v0.7.12_full.bin",
+    "size": 1918384,
+    "sha256": "e49207dd3ef132a813f732b0d62150705aa67cae3c418b1e1f64501edb197cfb"
   },
   "recovery": {
     "name": "nora_recovery.bin",
