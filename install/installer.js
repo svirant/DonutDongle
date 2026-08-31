@@ -620,7 +620,8 @@ function startBootloaderWatcher(){
     showJtagFallback = true;
     updateButtonForStage();
     log("USB JTAG was not detected automatically.");
-    log("If this browser has not been granted USB JTAG access yet, click “Connect USB JTAG” after pressing RST.");
+    log("If this browser profile has not been granted USB JTAG access yet, click “Authorize USB JTAG”.");
+    log("If USB JTAG is not listed, connect B1 to GND and press RST once, then select the USB JTAG device. This is normally only required once per browser profile.");
   }, 3000);
 
   watchTimer = setInterval(async () => {
@@ -731,7 +732,7 @@ async function flashBootloaderDevice(portOverride = null, automatic = false){
     let port = portOverride;
 
     if(!port){
-      log("Select “Espressif USB JTAG/serial debug unit” in Chrome.");
+      log("Select “Espressif USB JTAG/serial debug unit” to authorize it for this browser profile.");
       port = await navigator.serial.requestPort({
         filters: [{
           usbVendorId: cfg.device.bootVendorId,
@@ -854,7 +855,8 @@ async function flashBootloaderDevice(portOverride = null, automatic = false){
       stage = "wait-reset";
       updateButtonForStage();
       setStatus("good");
-      log("USB JTAG was not selected. Press RST again if needed, then click “Connect USB JTAG”.");
+      log("USB JTAG was not selected. Click “Authorize USB JTAG” again when ready.");
+      log("If USB JTAG is not listed, connect B1 to GND and press RST once, then select the USB JTAG device. This is normally only required once per browser profile.");
       startBootloaderWatcher();
       showJtagFallback = true;
       updateButtonForStage();
