@@ -17,7 +17,7 @@
   },
   "helper": {
     "name": "dfu_to_usb_jtag.bin",
-    "size": 286400,
-    "sha256": "444e36a49f0e16e261817b59e6877db5268ea3e9b65f7b3028c93ae7191d6b8f"
+    "size": 286384,
+    "sha256": "f66e80d9ca43036754f811dca366a46b85c07c67df800f86c82669d6c0df0dd6"
   }
 }
