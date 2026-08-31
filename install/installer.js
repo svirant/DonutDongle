@@ -47,7 +47,6 @@ let images = null;
 let busy = false;
 let stage = "connect";
 let watchTimer = null;
-let jtagFallbackTimer = null;
 let showJtagFallback = false;
 let watchDeadline = 0;
 let lastProgressLog = [-10, -10];
@@ -603,26 +602,19 @@ function stopBootloaderWatcher(){
     watchTimer = null;
   }
 
-  if(jtagFallbackTimer){
-    clearTimeout(jtagFallbackTimer);
-    jtagFallbackTimer = null;
-  }
 }
 
 function startBootloaderWatcher(){
   stopBootloaderWatcher();
 
-  jtagFallbackTimer = setTimeout(() => {
-    if(busy || stage !== "wait-reset"){
-      return;
-    }
-
-    showJtagFallback = true;
-    updateButtonForStage();
-    log("USB JTAG was not detected automatically.");
-    log("If this browser profile has not been granted USB JTAG access yet, click “Authorize USB JTAG”.");
-    log("If USB JTAG is not listed, connect B1 to GND and press RST once, then select the USB JTAG device. This is normally only required once per browser profile.");
-  }, 3000);
+  // We cannot reliably know whether a disconnected 303A:1001 was previously
+  // authorized, because getPorts() only returns connected ports the origin can
+  // access. Show the authorization control immediately during the reset step.
+  showJtagFallback = true;
+  updateButtonForStage();
+  log("If this browser profile has not authorized USB JTAG before, click “Authorize USB JTAG” first.");
+  log("Leave the chooser open, press RST on the Nano once, then select the USB JTAG device when it appears.");
+  log("If USB JTAG is already authorized, simply press RST and the installer will continue automatically.");
 
   watchTimer = setInterval(async () => {
     if(busy || stage !== "wait-reset"){
@@ -740,7 +732,7 @@ async function flashBootloaderDevice(portOverride = null, automatic = false){
         }]
       });
       manualPermissionGranted = true;
-      showJtagFallback = false;
+      showJtagFallback = true;
       updateButtonForStage();
     }
     else{
@@ -855,8 +847,7 @@ async function flashBootloaderDevice(portOverride = null, automatic = false){
       stage = "wait-reset";
       updateButtonForStage();
       setStatus("good");
-      log("USB JTAG was not selected. Click “Authorize USB JTAG” again when ready.");
-      log("If USB JTAG is not listed, connect B1 to GND and press RST once, then select the USB JTAG device. This is normally only required once per browser profile.");
+      log("USB JTAG was not selected. Click “Authorize USB JTAG” again, leave the chooser open, then press RST on the Nano once.");
       startBootloaderWatcher();
       showJtagFallback = true;
       updateButtonForStage();
