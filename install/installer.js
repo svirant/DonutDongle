@@ -722,7 +722,10 @@ async function flashBootloaderDevice(portOverride = null, automatic = false){
         }]
       });
       manualPermissionGranted = true;
-      showJtagFallback = true;
+
+      // The user successfully selected/authorized the device. The
+      // authorization instructions are no longer needed.
+      showJtagFallback = false;
       updateButtonForStage();
     }
     else{
@@ -873,7 +876,9 @@ async function handleJtagAction(){
     return;
   }
 
-  showJtagFallback = false;
+  // Keep the authorization instructions visible while the native chooser
+  // is open so the user can still reference them.
+  showJtagFallback = true;
   updateButtonForStage();
   await flashBootloaderDevice(null, false);
 }
