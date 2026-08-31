@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.10",
-  "name": "Donut Dongle gameID v0.7.10",
-  "published_at": "2026-08-30T22:10:56Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.10",
-  "body": "**Misc**\r\n- Initial RT6X CE support has been added\r\n- Cleaned up i2c card layout in the Expert section\r\n- WebCtl websocket reconnects automatically after waking / disconnected\r\n- For 0:/profile/ and subfolders, Profiles can be sorted by Type or Name by clicking on \"Name\"\r\n  - Type: .rt4 files are listed A->Z first, then .rt6 files. Mimics the On Screen \"Load From File\" menu\r\n  - Name: files are listed A->Z regardless of type. Default behavior for all other 0:/ folders.\r\n- Profiles in 0:/profile/ and subfolders now have 4k / 6X icons that represent the model that created the profile.",
+  "tag": "v0.7.11",
+  "name": "Donut Dongle gameID v0.7.11",
+  "published_at": "2026-08-31T05:19:45Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.11",
+  "body": "**Files viewer/editor**\r\n- Double-click .**txt** and .**html** files to view in-browser. **Txt** files can also be edited and saved. \r\n  - Great for:\r\n    - Instant viewing of guides and documentation found through-out the SD card image. \r\n    - Making immediate changes to various features that use .txt files.",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.10_full.bin",
-    "size": 1901360,
-    "sha256": "bd2079f25eec7c161ab307b24e78b8d0061d7d71891049c58c96dec422000525"
+    "name": "Donut_Dongle_gameID_v0.7.11_full.bin",
+    "size": 1917680,
+    "sha256": "f132538c8bcb8f959947bbfa637ab10d0a07934a9e7acde2a6022c1214e6f923"
   },
   "recovery": {
     "name": "nora_recovery.bin",
