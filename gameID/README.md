@@ -28,6 +28,8 @@
 ## Setup
 1. Upon reconnecting the USB cable, your board should **Successfully boot DonutShop** and leave you with an ORANGE led.
 2. With your computer or smartphone, join the broadcasted ```DonutShop_Setup``` WiFi to connect it to your home network.
+    - You can now also change the default "donutshop" Hostname. Must follow the rules listed and will have .local appended automatically.
+    - ONLY "a-z", "0-9", and "-" (hyphen) characters are allowed. (edge hyphens not allowed)
 3. Follow the instructions listed and once complete, you should see a BLUE led indicating it's connected to WiFi and looking for addresses to connect to. If the BLUE led does not show, press the RST button one time.
 4. You should now be able to visit http://donutshop.local to confirm WiFi connectivity.
 5. Disconnect the Arduino Nano ESP32 and connect it to the OTG adapter. Connect the OTG assembly to the RT4K and everything should power on.
