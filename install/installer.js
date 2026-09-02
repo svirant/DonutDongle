@@ -63,6 +63,25 @@ function sleep(ms){
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+const DFU_STEP_TIMEOUT_MS = 10000;
+
+function withTimeout(promise, ms, message){
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), ms);
+
+    Promise.resolve(promise).then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
+}
+
 function hex4(value){
   if(value === undefined) return "????";
   return Number(value).toString(16).toUpperCase().padStart(4, "0");
@@ -488,13 +507,33 @@ async function uploadHelperDfu(){
       throw new Error("The selected device does not expose the Nano ESP32 DFU recovery interface.");
     }
 
-    await device.open();
+    log("Opening DFU device…");
+    await withTimeout(
+      device.open(),
+      DFU_STEP_TIMEOUT_MS,
+      "Timed out while opening the Nano DFU device. Close Arduino IDE and other browser tabs using the Nano, unplug/replug it, enter recovery mode again, and retry."
+    );
+    log("DFU device opened.");
 
     if(!device.configuration){
-      await device.selectConfiguration(iface.configurationValue);
+      log(`Selecting DFU configuration ${iface.configurationValue}…`);
+      await withTimeout(
+        device.selectConfiguration(iface.configurationValue),
+        DFU_STEP_TIMEOUT_MS,
+        `Timed out while selecting DFU configuration ${iface.configurationValue}. Close Arduino IDE and other browser tabs using the Nano, unplug/replug it, enter recovery mode again, and retry.`
+      );
+      log(`DFU configuration ${iface.configurationValue} selected.`);
+    }
+    else{
+      log(`DFU configuration ${device.configuration.configurationValue} already selected.`);
     }
 
-    await device.claimInterface(iface.interfaceNumber);
+    log(`Claiming DFU interface ${iface.interfaceNumber}…`);
+    await withTimeout(
+      device.claimInterface(iface.interfaceNumber),
+      DFU_STEP_TIMEOUT_MS,
+      `Timed out while claiming DFU interface ${iface.interfaceNumber}. Close Arduino IDE and other browser tabs using the Nano, unplug/replug it, enter recovery mode again, and retry.`
+    );
     claimed = true;
 
     log(`DFU interface ${iface.interfaceNumber} claimed.`);
