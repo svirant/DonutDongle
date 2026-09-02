@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.13",
-  "name": "Donut Dongle gameID v0.7.13",
-  "published_at": "2026-09-02T02:15:33Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.13",
-  "body": "**RT6X Support**\r\n- HD-15/2M transfer-reliability. Really only pertains to when using the Donut Dongle's 3.5mm aux serial port.\r\n- “Stage Latest Experimental” uses ACK Upload automatically with HD-15 serial.\r\n\r\n**File Transfer**\r\n- ACK mode is now split into separate Upload and Download controls with defaults chosen based on baud rate and serial used.\r\n- Download cancellation has been reworked and diagnostics removed.\r\n\r\n**Upload/Download Speeds**\r\nFor me, when setting the RT4K Input to \"Front CVBS\" and having my display powered on, results in the fastest speeds. (results in a low Loop Time in  \"Stats\")\r\n\r\nVacation starts tomorrow, so taking a break for a bit. :-)",
+  "tag": "v0.7.14",
+  "name": "Donut Dongle gameID v0.7.14",
+  "published_at": "2026-09-02T17:33:22Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.14",
+  "body": "**Mobile Client**\r\n- Remote OSD now has button navigation overlay\r\n- WebCtl is now cellphone friendly\r\n\r\n**Setup**\r\n- Hostname is now customizable during initial setup. ONLY \"a-z\", \"0-9\", and \"-\" (hyphen) characters are allowed. (edge hyphens not allowed)\r\n\r\n**UX**\r\n- progress bar is now cumulative for all bulk file operations",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.13_full.bin",
-    "size": 1927120,
-    "sha256": "baa6796bea61db4c816a3a6f603df3d2171bf776ca548229798eb8b5cf439ebf"
+    "name": "Donut_Dongle_gameID_v0.7.14_full.bin",
+    "size": 1964256,
+    "sha256": "f8023191b251a4c533e79779f6aadff4913cb56d1afcb938e5feb6bdaeecbc17"
   },
   "recovery": {
     "name": "nora_recovery.bin",
