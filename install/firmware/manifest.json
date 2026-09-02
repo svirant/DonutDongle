@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.14",
-  "name": "Donut Dongle gameID v0.7.14",
-  "published_at": "2026-09-02T17:33:22Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.14",
-  "body": "**Mobile Client**\r\n- Remote OSD now has button navigation overlay\r\n- WebCtl is now cellphone friendly\r\n\r\n**Setup**\r\n- Hostname is now customizable during initial setup. ONLY \"a-z\", \"0-9\", and \"-\" (hyphen) characters are allowed. (edge hyphens not allowed)\r\n\r\n**UX**\r\n- progress bar is now cumulative for all bulk file operations",
+  "tag": "v0.7.15",
+  "name": "Donut Dongle gameID v0.7.15",
+  "published_at": "2026-09-02T23:33:19Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.15",
+  "body": "**OSD Mirror**\r\n- New \"compact\" checkbox (enabled by default) sizes the desktop version of OSD Mirror nicely in your browser.\r\n  - unchecking restores the original unscaled version\r\n  - does not apply to mobile version\r\n\r\n**Misc**\r\n- New websocket checks prevent multiple WebCtl clients from interfering with a transfer",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.14_full.bin",
-    "size": 1964256,
-    "sha256": "f8023191b251a4c533e79779f6aadff4913cb56d1afcb938e5feb6bdaeecbc17"
+    "name": "Donut_Dongle_gameID_v0.7.15_full.bin",
+    "size": 1970608,
+    "sha256": "1a857c5dc133bba844d9252eaad8b4b64f5378d4a74433b2e164ddbbc2697408"
   },
   "recovery": {
     "name": "nora_recovery.bin",
