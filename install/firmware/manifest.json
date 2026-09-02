@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.12",
-  "name": "Donut Dongle gameID v0.7.12",
-  "published_at": "2026-08-31T16:13:41Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.12",
-  "body": "- fixed bug where .html file viewer would sometimes show all white instead of contents until a manual page refresh was performed",
+  "tag": "v0.7.13",
+  "name": "Donut Dongle gameID v0.7.13",
+  "published_at": "2026-09-02T02:15:33Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.13",
+  "body": "**RT6X Support**\r\n- HD-15/2M transfer-reliability. Really only pertains to when using the Donut Dongle's 3.5mm aux serial port.\r\n- “Stage Latest Experimental” uses ACK Upload automatically with HD-15 serial.\r\n\r\n**File Transfer**\r\n- ACK mode is now split into separate Upload and Download controls with defaults chosen based on baud rate and serial used.\r\n- Download cancellation has been reworked and diagnostics removed.\r\n\r\n**Upload/Download Speeds**\r\nFor me, when setting the RT4K Input to \"Front CVBS\" and having my display powered on, results in the fastest speeds. (results in a low Loop Time in  \"Stats\")\r\n\r\nVacation starts tomorrow, so taking a break for a bit. :-)",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.12_full.bin",
-    "size": 1918384,
-    "sha256": "e49207dd3ef132a813f732b0d62150705aa67cae3c418b1e1f64501edb197cfb"
+    "name": "Donut_Dongle_gameID_v0.7.13_full.bin",
+    "size": 1927120,
+    "sha256": "baa6796bea61db4c816a3a6f603df3d2171bf776ca548229798eb8b5cf439ebf"
   },
   "recovery": {
     "name": "nora_recovery.bin",
