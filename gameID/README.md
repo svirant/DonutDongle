@@ -23,7 +23,7 @@
 ## Flashing 
 1. Open the [Donut Dongle gameID Firmware Installer](https://svirant.github.io/DonutDongle/install/) in Brave/Chrome/Edge.
 2. Once complete, reconnect the USB cable of the device and continue **Setup** below...
-3. The previous Flashing steps are at the bottom of the page as a fallback.
+3. If you get an error, try the Alternative Flashing steps at the bottom of the page.
 
 ## Setup
 1. Upon reconnecting the USB cable, your board should **Successfully boot DonutShop** and leave you with an ORANGE led.
