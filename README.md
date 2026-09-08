@@ -206,6 +206,10 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 [<img width="400" src="./images/8.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
 [<img width="378" src="./images/8b.png" />](https://svirant.github.io/DonutDongle/images/ibom.html)
 
+# (2M) baud mod
+
+<img width="392" src="./images/mod1.JPG" /> <img width="350" src="./images/mod2.JPG" />
+
 # PCB
 **v1.0**
 
