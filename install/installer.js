@@ -5,6 +5,7 @@ const cfg = window.DONUTSHOP_INSTALLER_CONFIG;
 const $ = (id) => document.getElementById(id);
 const ui = {
   browserWarning: $("browserWarning"),
+  windowsDriverNotice: $("windowsDriverNotice"),
   releaseBadge: $("releaseBadge"),
   releaseVersion: $("releaseVersion"),
   releaseDate: $("releaseDate"),
@@ -925,6 +926,11 @@ async function handleJtagAction(){
 function init(){
   ui.startButton.addEventListener("click", handlePrimaryAction);
   ui.jtagButton.addEventListener("click", handleJtagAction);
+
+  const platform = String(navigator.userAgentData?.platform || navigator.platform || navigator.userAgent || "").toLowerCase();
+  if(platform.includes("win")){
+    ui.windowsDriverNotice.classList.remove("hidden");
+  }
 
   if(!("usb" in navigator) || !("serial" in navigator)){
     ui.browserWarning.classList.remove("hidden");

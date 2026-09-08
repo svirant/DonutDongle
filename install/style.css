@@ -120,6 +120,32 @@ button,a{font:inherit}
   background:#eceff1;
 }
 
+.windows-driver-notice{
+  width:100%;
+  margin:0 0 19px;
+  padding:11px 13px;
+  border:1px solid #c9d9e7;
+  border-radius:6px;
+  background:#f5f9fc;
+  color:#34434f;
+  text-align:left;
+  font-size:.86rem;
+  line-height:1.48;
+}
+
+.windows-driver-notice strong{
+  color:#25313a;
+}
+
+.windows-driver-notice a{
+  color:var(--primary);
+  font-weight:600;
+}
+
+.windows-driver-notice code{
+  font-size:.84em;
+}
+
 .install-steps{
   width:100%;
   margin:0;

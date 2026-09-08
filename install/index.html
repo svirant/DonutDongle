@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#ffffff">
   <title>Donut Dongle gameID Firmware Installer</title>
   <meta name="description" content="Install DonutShop firmware on an Arduino or Waveshare Nano ESP32.">
-  <link rel="stylesheet" href="./style.css?v=authorize-instructions-v1">
+  <link rel="stylesheet" href="./style.css?v=windows-driver-step-v2">
 </head>
 <body>
   <main class="page-shell">
@@ -30,6 +30,14 @@
       <div class="section-divider" aria-hidden="true"></div>
 
       <ol class="install-steps">
+        <li id="windowsDriverNotice" class="hidden">
+          <div class="windows-driver-notice" role="note">
+            <strong>Windows 10/11 first-time setup:</strong> Install Arduino’s official Nano ESP32 USB driver before continuing.
+            <a href="https://github.com/arduino/arduino-esp32/archive/refs/tags/v2.0.17-arduino.5.zip" target="_blank" rel="noopener noreferrer">Download the official Arduino ESP32 package</a>,
+            extract it, open the <code>drivers</code> folder, then run <code>dpinst-amd64.exe</code> on 64-bit Windows 10 or any Windows 11 PC.
+            Use <code>dpinst-x86.exe</code> only for 32-bit Windows 10. This is only required once.
+          </div>
+        </li>
         <li>Connect your Nano ESP32 via USB directly to your PC or Mac (not through a USB hub) and double click the Nano's RST button to enter <strong>recovery mode</strong> (a <strong>GREEN</strong> LED will strobe when successful).</li>
         <li>Click <strong>“Connect and Flash”</strong> and select <strong>“Nano ESP32 (bootloader)”</strong>. When <strong>“Authorize USB JTAG”</strong> appears, follow the instruction shown below the button.</li>
         <li>After installation, continue with the <strong>“Setup”</strong> steps listed on GitHub.</li>
@@ -66,6 +74,6 @@
   </main>
 
   <script src="./config.js?v=dfu-rst-v1"></script>
-  <script type="module" src="./installer.js?v=chooser-instructions-v2"></script>
+  <script type="module" src="./installer.js?v=windows-driver-step-v2"></script>
 </body>
 </html>
