@@ -208,7 +208,11 @@ There are plenty of options for PCB manufacturing but I prefer [JLCPCB](https://
 
 # (2M) baud mod
 
-<img width="392" src="./images/mod1.JPG" /> <img width="350" src="./images/mod2.JPG" />
+<img width="392" src="./images/mod1.JPG" /> <img width="350" src="./images/mod2.JPG" /> <br>
+- Replace R10 (10K) with a 2.2K resistor
+- Remove R9 and bridge pads
+- Connect R1 and R9 as shown with a 2.2K resistor
+<br><br>
 
 # PCB
 **v1.0**
