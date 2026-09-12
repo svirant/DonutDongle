@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.15",
-  "name": "Donut Dongle gameID v0.7.15",
-  "published_at": "2026-09-02T23:33:19Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.15",
-  "body": "**OSD Mirror**\r\n- New \"compact\" checkbox (enabled by default) sizes the desktop version of OSD Mirror nicely in your browser.\r\n  - unchecking restores the original unscaled version\r\n  - does not apply to mobile version\r\n\r\n**Misc**\r\n- New websocket checks prevent multiple WebCtl clients from interfering with a transfer",
+  "tag": "v0.7.16",
+  "name": "Donut Dongle gameID v0.7.16",
+  "published_at": "2026-09-12T05:25:17Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.16",
+  "body": " - WebCtl page changes title based on detected RetroTink\r\n - Firmware Updates can now be done with a single click\r\n - File transfers are now ~30% faster with CRC-16 only validation when using firmware 1.80\r\n - New Diagnostics tab shows the output of all diagnostic commands introduced in firmware 1.80 w/ option to copy results\r\n   - hidden by default, enable in Expert -> Options\r\n   - Struct tab now hidden by default ^^^\r\n   - Enable firmware test mode ^^^",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.15_full.bin",
-    "size": 1970608,
-    "sha256": "1a857c5dc133bba844d9252eaad8b4b64f5378d4a74433b2e164ddbbc2697408"
+    "name": "Donut_Dongle_gameID_v0.7.16_full.bin",
+    "size": 2072208,
+    "sha256": "bb4303ab2da31e9ce98d938e3a5dbbe01b5c051b28c895cfe2fa97aa344031b6"
   },
   "recovery": {
     "name": "nora_recovery.bin",
