@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.16",
-  "name": "Donut Dongle gameID v0.7.16",
-  "published_at": "2026-09-12T05:25:17Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.16",
-  "body": " - WebCtl page changes title based on detected RetroTink\r\n - Firmware Updates can now be done with a single click\r\n - File transfers are now ~30% faster with CRC-16 only validation when using firmware 1.80\r\n - New Diagnostics tab shows the output of all diagnostic commands introduced in firmware 1.80 w/ option to copy results\r\n   - hidden by default, enable in Expert -> Options\r\n   - Struct tab now hidden by default ^^^\r\n   - Enable firmware test mode ^^^",
+  "tag": "v0.7.17",
+  "name": "Donut Dongle gameID v0.7.17",
+  "published_at": "2026-09-12T19:16:01Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.17",
+  "body": "**HD-15 Serial**\r\n- HD-15 uploads/put now an additional **45% faster** with 2M baud. \r\n  - **50** -> 60KB/s with CRC-16 only validation in fw 1.80 alone.\r\n  - 60 -> **87KB/s** with local DonutShop optimizations.\r\n- HD-15 baud mod linked under Files, Recommended Settings. Mod allows for faster transfers with HD-15 Serial.\r\n\r\n**Misc** \r\n- Bulk file copy now prompts to create destination folder if it does not exist.\r\n- OSD Mirror in compact mode now has a min-width limit so stats still display properly.\r\n- WebCtl now lives mostly in PROGMEM freeing up RAM.\r\n- Fixed DonutShop's Firmware Update \"info\" popover in mobile mode. ",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.16_full.bin",
-    "size": 2021408,
-    "sha256": "d31ff97dcb3d2b19de5f90eac0d6e0342547278b65cd424b0a35836705505a68"
+    "name": "Donut_Dongle_gameID_v0.7.17_full.bin",
+    "size": 2031264,
+    "sha256": "671a09a0a684df81f2fe9f761f758484b44a3f658389c5b9532e726cc2bff0e3"
   },
   "recovery": {
     "name": "nora_recovery.bin",
