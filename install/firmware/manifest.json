@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.17",
-  "name": "Donut Dongle gameID v0.7.17",
-  "published_at": "2026-09-12T19:16:01Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.17",
-  "body": "**HD-15 Serial**\r\n- HD-15 uploads/put now an additional **45% faster** with 2M baud. \r\n  - **50** -> 60KB/s with CRC-16 only validation in fw 1.80 alone.\r\n  - 60 -> **87KB/s** with local DonutShop optimizations.\r\n- HD-15 baud mod linked under Files, Recommended Settings. Mod allows for faster transfers with HD-15 Serial.\r\n\r\n**Misc** \r\n- Bulk file copy now prompts to create destination folder if it does not exist.\r\n- OSD Mirror in compact mode now has a min-width limit so stats still display properly.\r\n- WebCtl now lives mostly in PROGMEM freeing up RAM.\r\n- Fixed DonutShop's Firmware Update \"info\" popover in mobile mode. ",
+  "tag": "v0.7.18",
+  "name": "Donut Dongle gameID v0.7.18",
+  "published_at": "2026-09-13T17:27:38Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.18",
+  "body": "- \"apply & state\" on Dashboard has been moved to the 'hidden by default' Struct tab\r\n  - Expert -> Options to show hidden tabs\r\n- new DonutShop Memory card on Dashboard now shows the overall state\r\n- gameID entries moved to PSRAM freeing up internal RAM\r\n- HD-15 serial now restores previous baud rate after wake\r\n- DonutShop can now detect when the IR Remote and the Auto-Sleep timer methods were used to sleep/wake and no longer requires a page refresh. Now all methods used to sleep/wake should be accounted for. Thanks to @haxman for bringing this to light. ",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.17_full.bin",
-    "size": 2032816,
-    "sha256": "cf4022f43e72241134c0d52cb73272a789ba68e68163e78c8cfa4305beae3658"
+    "name": "Donut_Dongle_gameID_v0.7.18_full.bin",
+    "size": 2048448,
+    "sha256": "9d1852a9ca9c8bc66b85d4b68631ec98e54acaa9ae0e7667065ae970a5c4b9c1"
   },
   "recovery": {
     "name": "nora_recovery.bin",
