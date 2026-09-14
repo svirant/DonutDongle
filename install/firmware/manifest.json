@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.19",
-  "name": "Donut Dongle gameID v0.7.19",
-  "published_at": "2026-09-14T02:35:22Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.19",
-  "body": "**Options** \r\n- new \"Glazed\" theme alternative to the default \"Dark\" theme.\r\n- Experimental Firmware update now resides on the Dashboard.\r\n- Options has moved from Expert to the gameID / Settings tab.\r\n- Expert and Console tabs can now also be hidden in gameID / Settings -> Options.\r\n- DonutShop Memory stats now hidden by default, enable in Options.",
+  "tag": "v0.7.20",
+  "name": "Donut Dongle gameID v0.7.20",
+  "published_at": "2026-09-14T15:06:58Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.20",
+  "body": "**Theme**\r\n- Dropdown has been replaced by a popover menu.\r\n- Glazed now has a slider to adjust tone. Most noticeable on Desktop vs Mobile.",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.19_full.bin",
-    "size": 2088256,
-    "sha256": "b3076b539b213e95511da9dad2fbb4ca8611dbe1ed3cd000b788df4f9203e22f"
+    "name": "Donut_Dongle_gameID_v0.7.20_full.bin",
+    "size": 2102032,
+    "sha256": "aeb739218bc10d38e0b41971af6a250956148e6b7d580cfd6a156878392b15a1"
   },
   "recovery": {
     "name": "nora_recovery.bin",
