@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.21",
-  "name": "Donut Dongle gameID v0.7.21",
-  "published_at": "2026-09-15T05:22:55Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.21",
-  "body": "**Bug fixes**\r\n- Fixed \"update/stage latest firmware\" regressions caused by moving it from Expert to Dashboard tab.\r\n- Deleting a single file would sometimes require a page refresh to show it being removed.\r\n\r\n**Dashboard**\r\n- Cleaned up Dashboard layout when cards expand.\r\n- fwup check button stays pressed while performing check.\r\n- fw tag removed from top bar.\r\n- Glazed theme is now the former middle option. Slider removed.",
+  "tag": "v0.7.22",
+  "name": "Donut Dongle gameID v0.7.22",
+  "published_at": "2026-09-15T16:16:37Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.22",
+  "body": "- **\"Experimental Firmware stage/flash\" now 3.3x faster**. Majority of process now happens in client browser vs on Nano. Falls back to previous Nano-based methods if browser-direct fails.\r\n  - Stage + Flash comparison\r\n    - Previously (v0.7.21) = 2m 40s\r\n    - Now only **54s**\r\n- All Options persist regardless of client viewing WebCtl. (Experimental Firmware Test Mode used to be session based)\r\n- Removed redundant confirmation when doing a manual fwup go.",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.21_full.bin",
-    "size": 2095760,
-    "sha256": "498e73efa4e42bbc063bebc9d76d801ee20a18fdda4be9aa9fe56f0a7b07f4c6"
+    "name": "Donut_Dongle_gameID_v0.7.22_full.bin",
+    "size": 2110192,
+    "sha256": "b363e814bc9f18e8251774867eb54a2f87af1c18b064a0428b6485a34720b471"
   },
   "recovery": {
     "name": "nora_recovery.bin",
