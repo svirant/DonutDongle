@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.20",
-  "name": "Donut Dongle gameID v0.7.20",
-  "published_at": "2026-09-14T15:06:58Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.20",
-  "body": "**Theme**\r\n- Dropdown has been replaced by a popover menu.\r\n- Glazed now has a slider to adjust tone. Most noticeable on Desktop vs Mobile.",
+  "tag": "v0.7.21",
+  "name": "Donut Dongle gameID v0.7.21",
+  "published_at": "2026-09-15T05:22:55Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.21",
+  "body": "**Bug fixes**\r\n- Fixed \"update/stage latest firmware\" regressions caused by moving it from Expert to Dashboard tab.\r\n- Deleting a single file would sometimes require a page refresh to show it being removed.\r\n\r\n**Dashboard**\r\n- Cleaned up Dashboard layout when cards expand.\r\n- fwup check button stays pressed while performing check.\r\n- fw tag removed from top bar.\r\n- Glazed theme is now the former middle option. Slider removed.",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.20_full.bin",
-    "size": 2102032,
-    "sha256": "aeb739218bc10d38e0b41971af6a250956148e6b7d580cfd6a156878392b15a1"
+    "name": "Donut_Dongle_gameID_v0.7.21_full.bin",
+    "size": 2095760,
+    "sha256": "498e73efa4e42bbc063bebc9d76d801ee20a18fdda4be9aa9fe56f0a7b07f4c6"
   },
   "recovery": {
     "name": "nora_recovery.bin",
