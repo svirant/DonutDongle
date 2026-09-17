@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.23",
-  "name": "Donut Dongle gameID v0.7.23",
-  "published_at": "2026-09-16T19:26:24Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.23",
-  "body": "**File Transfer**\r\n- a new faster http method is used for file transfers vs websockets. websockets is now used for control plane only.\r\n\r\n**Experimental Firmware stage/update**\r\n- \"Copy FPGA firmware\" and \"Copy updater\" steps are now even faster because of the reasoning above. \r\n  - firmware stage + update now only takes 45 seconds.\r\n\r\n**Misc**\r\n- gameID / Settings tab preloads in background upon opening DonutShop.\r\n- removed \"Bridge FIFO now\" from DonutShop stats. only Bridge FIFO peak is useful.\r\n- Last reset and Uptime now added to DonutShop Memory stats.\r\n- WebCtl is now labeled \"RT WebCtl\" until either a RT4K or RT6X has been detected; then labels itself as RT4K WebCtl or RT6X WebCtl.\r\n- tabs selected to show in Options no longer disappear / reappear when sleeping / waking.",
+  "tag": "v0.7.24",
+  "name": "Donut Dongle gameID v0.7.24",
+  "published_at": "2026-09-17T00:54:24Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.24",
+  "body": "**Firmware Updates**\r\n\r\n- DonutShop update badge now appears in upper right corner when a new version is available. Clicking shows release notes and \"Update\" button. Re-uses existing process.\r\n- When viewing the Dashboard on mobile, Experimental Firmware (update) card is shown first / at the top.\r\n- Renamed \"stage and flash latest firmware\" to \"update to latest firmware\"",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.23_full.bin",
-    "size": 2137328,
-    "sha256": "699b195626b9d7785f8ac46865b129d814a388882ca099db98536b014496cf65"
+    "name": "Donut_Dongle_gameID_v0.7.24_full.bin",
+    "size": 2147680,
+    "sha256": "5f09a63d7755f4eac92c381e7813a845e3222774ab92c86147f6de5dd2f84f7a"
   },
   "recovery": {
     "name": "nora_recovery.bin",
