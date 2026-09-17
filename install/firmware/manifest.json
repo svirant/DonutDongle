@@ -7,8 +7,8 @@
   "prerelease": false,
   "full": {
     "name": "Donut_Dongle_gameID_v0.7.24_full.bin",
-    "size": 2148576,
-    "sha256": "f1e29bd1d48070546ef13181059372b494061324de8c911f2660b246ed8340ef"
+    "size": 2148560,
+    "sha256": "f4ca2bd4b6ce5d7292522f762e8bce871bf2a10f6aef2476483a04be44af9547"
   },
   "recovery": {
     "name": "nora_recovery.bin",
