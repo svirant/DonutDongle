@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.25",
-  "name": "DonutShop v0.7.25",
-  "published_at": "2026-09-18T20:19:41Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.25",
-  "body": "**Files**\r\n- Same directory copy is now supported.\r\n  - Example: \"N64.rt4\" would be \"N64 copy.rt4\", the next copy would be \"N64 copy 2.rt4\", etc. This mirrors the way macOS handles same directory copies.\r\n- [clear] button is now [unselect] and # of files selected joins the button so its function is obvious. \r\n- Linux now represented in Files -> Notes for bulk copy selection operations. \r\n  - Cmd-click for macOS, Ctrl-click for all other Desktop OS.\r\n\r\n**Misc**\r\n- Cleaned up top bar button press and popover handling\r\n- 3 second status poll no longer shows in Console when updating. reduces clutter.\r\n\r\n**RESTful API beta**\r\n- GET /api/info | Device and firmware information\r\n- GET /api/status | Current RetroTink and DonutShop status\r\n- POST /api/command | Send a RetroTink serial command\r\n- GET /api/files/ | List the SD card root\r\n- GET /api/files/<path> | List a directory or download a file\r\n- PUT /api/files/<path> | Create or overwrite a file\r\n- DELETE /api/files/<path> | Delete a file or empty folder\r\n- POST /api/files/mkdir | Create a folder\r\n- POST /api/files/move | Move or rename a file or folder\r\n- Additional info/status fields very likely\r\n- Documentation still being worked on, but the framework is in place to tinker with for now...",
+  "tag": "v0.7.26",
+  "name": "Donut Dongle gameID v0.7.26",
+  "published_at": "2026-09-19T17:19:39Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.26",
+  "body": "**RetroTink Experimental Firmware**\r\n- Rollback to previous firmware versions now supported.\r\n- Release notes on mobile are now properly positioned, UI tweaks.\r\n\r\n**Mobile UX**\r\n- Double-tapping on the Menu icon jumps between top and bottom of that section. This allows you to quickly...\r\n  - Switch between both types of Remotes.\r\n  - Move to top and bottom of the File list, gameID / Settings, and Dashboard tabs.",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.25_full.bin",
-    "size": 2199680,
-    "sha256": "9a24565afb41241940a27fec92df510f4a7a18921826ffb712e44e08e35f6b40"
+    "name": "Donut_Dongle_gameID_v0.7.26_full.bin",
+    "size": 2230224,
+    "sha256": "32e2ec6c5aaeefe665b0bb9ccce3a63bf5a1395280c86f20210b7d56a15a1e8e"
   },
   "recovery": {
     "name": "nora_recovery.bin",
