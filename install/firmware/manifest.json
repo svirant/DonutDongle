@@ -1,14 +1,14 @@
 {
-  "tag": "v0.7.26",
-  "name": "Donut Dongle gameID v0.7.26",
-  "published_at": "2026-09-19T17:19:39Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.26",
-  "body": "**RetroTink Experimental Firmware**\r\n- Rollback to previous firmware versions now supported.\r\n- Release notes on mobile are now properly positioned, UI tweaks.\r\n\r\n**Mobile UX**\r\n- Double-tapping on the Menu icon jumps between top and bottom of that section. This allows you to quickly...\r\n  - Switch between both types of Remotes.\r\n  - Move to top and bottom of the File list, gameID / Settings, and Dashboard tabs.",
+  "tag": "v0.7.27",
+  "name": "Donut Dongle gameID v0.7.27",
+  "published_at": "2026-09-20T00:33:13Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.7.27",
+  "body": "**Mobile reliability/cleanup**\r\n- Fixed Remote Mirror button overlay responsiveness regression.\r\n- Reduced toast reconnect messages.",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.7.26_full.bin",
-    "size": 2230224,
-    "sha256": "32e2ec6c5aaeefe665b0bb9ccce3a63bf5a1395280c86f20210b7d56a15a1e8e"
+    "name": "Donut_Dongle_gameID_v0.7.27_full.bin",
+    "size": 2234512,
+    "sha256": "b55da5285d9b6066ad57b2ef3de5fa57cf8aee7d2685b8055fc045e114922efc"
   },
   "recovery": {
     "name": "nora_recovery.bin",
