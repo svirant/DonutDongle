@@ -1,14 +1,14 @@
 {
-  "tag": "v0.8.0",
-  "name": "Donut Dongle gameID v0.8.0",
-  "published_at": "2026-11-02T23:01:41Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.8.0",
-  "body": "- **Search** has been added to Files and profile pickers.\r\n- MiSTer is now supported in gameID Consoles. [mrext remote](https://github.com/wizzomafizzo/mrext/blob/main/docs/remote.md) must be installed on your MiSTer.\r\n  - Supports Cores by using the core name: ex: \"MegaDrive\"\r\n  - and/or Games by using Core name and game file name with a | inbetween: ex: \"MegaDrive|Streets of Rage 2 (USA)\"\r\n  - You do not have to use the exact name as long as it contains enough characters to match.\r\n  - Recommend turning off \"Auto Load DV1\" if using HDMI DV1 for the time being or else it will override. A RetroTink bug fix will soon allow both to work together.\r\n- gameID Consoles / gameDB now support \"any\" profile not just SVS based ones. Previous SVS-based config automatically gets migrated over to file based profiles.\r\n- New **HDMI Info Profiles** can load any \"HDMI Input\" profile based on HDMI SPD/VSIF metadata.\r\n  - Match on Product Description, Vendor Name, or Game ID with MakeMHz/Stellar XboxHD+ and Pixel-FX mods.\r\n- Update **HDMI Output** Custom1 - 4 modelines directly on Dashboard.\r\n- **HDMI Info** card replaces RT Superloop card on Dashboard.\r\n  - RT Superloop stats moved to RT Diagnostics tab\r\n- \"RT Diagnostics\" updated to support the new \"vmeas\" 224 byte / 113 fields map.\r\n- \"Extra Remote Button Profiles\" section now supports any profile, not just SVS.\r\n- \"Switch Fallback\" allows gameID / HDMI Info Profiles to return to Extron1/SW1 & Extron2/SW2 active inputs when there is no match.\r\n- Files now has cut/copy/paste vs move which also allows you to navigate to the destination vs providing the path.\r\n- Mobile \"double-tap\" navigation on each Menu item jumps between upper and lower sections.\r\n  - Remote + OSD will jump between both types of remotes.\r\n- gameID / Settings tab has been renamed to \"Profiles / Settings\"\r\n- Profile History and Diagnostic cards can be enabled for troubleshooting. \r\n- gameID Consoles / gameDB / HDMI Info Profiles tables can all be resized and re-ordered by dragging.\r\n- Updated internal WebServer library to the latest / more stable version. (3.3.12)\r\n- DonutShop firmware updates now use PSRAM for staging which is much faster than LittleFS.\r\n- Internal memory and profile arbitration optimizations.\r",
+  "tag": "v0.8.1",
+  "name": "Donut Dongle gameID v0.8.1",
+  "published_at": "2026-11-03T23:08:27Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.8.1",
+  "body": "- UI tweaks\r\n- **rollback firmware** now shows up to 100 previous Experimental firmwares.\r\n  - Allows you to jump to any version older or newer.\r\n  - v1.75.0 is oldest available for WebCtl compatibility",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.8.0_full.bin",
-    "size": 2224656,
-    "sha256": "48747bfc6bf8c880ab0d72c7ad44c45923944bf28fd54f0fd55f7194250e9530"
+    "name": "Donut_Dongle_gameID_v0.8.1_full.bin",
+    "size": 2227648,
+    "sha256": "8d6ba6d84e43e398933766e9c0d035feb7c3ebf8005f4b687eab0c0b40cbc912"
   },
   "recovery": {
     "name": "nora_recovery.bin",
