@@ -3,12 +3,12 @@
   "name": "Donut Dongle gameID v0.8.2",
   "published_at": "2026-11-04T07:36:51Z",
   "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.8.2",
-  "body": "- Dashboard cleanup of DonutShop Memory move remnants",
+  "body": "- Dashboard cleanup of DonutShop Memory move remnants\r\n- SAFE + AUX6 now correctly captures output screenshots.\r\n   - \"remote aux6\" was being sent instead of \"remote axu6\" which is needed to match a RetroTink firmware bug. ",
   "prerelease": false,
   "full": {
     "name": "Donut_Dongle_gameID_v0.8.2_full.bin",
-    "size": 2227600,
-    "sha256": "88dc7a83448b3690d81be99d129b4b78d33c4d67955a1411d9d0effbb65f501a"
+    "size": 2227648,
+    "sha256": "e88c275b894dda0d4cf60b60c2735978555f264b5b03d8c52b5aa8fab76f1b85"
   },
   "recovery": {
     "name": "nora_recovery.bin",
