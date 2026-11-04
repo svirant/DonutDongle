@@ -1,14 +1,14 @@
 {
-  "tag": "v0.8.1",
-  "name": "Donut Dongle gameID v0.8.1",
-  "published_at": "2026-11-03T23:08:27Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.8.1",
-  "body": "- UI tweaks\r\n- **rollback firmware** now shows up to 100 previous Experimental firmwares.\r\n  - Allows you to jump to any version older or newer.\r\n  - v1.75.0 is oldest available for WebCtl compatibility",
+  "tag": "v0.8.2",
+  "name": "Donut Dongle gameID v0.8.2",
+  "published_at": "2026-11-04T07:36:51Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.8.2",
+  "body": "- Dashboard cleanup of DonutShop Memory move remnants",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.8.1_full.bin",
-    "size": 2227648,
-    "sha256": "8d6ba6d84e43e398933766e9c0d035feb7c3ebf8005f4b687eab0c0b40cbc912"
+    "name": "Donut_Dongle_gameID_v0.8.2_full.bin",
+    "size": 2227600,
+    "sha256": "88dc7a83448b3690d81be99d129b4b78d33c4d67955a1411d9d0effbb65f501a"
   },
   "recovery": {
     "name": "nora_recovery.bin",
