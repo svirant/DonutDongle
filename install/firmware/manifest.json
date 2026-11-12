@@ -1,14 +1,14 @@
 {
-  "tag": "v0.8.4",
-  "name": "Donut Dongle gameID v0.8.4",
-  "published_at": "2026-11-10T18:27:56Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.8.4",
-  "body": "**MemCardPro**\r\n- MemCardPro gameID detection now also supports **WebUI v2** mode.\r\n   - Use a \"gameID Consoles\" Address of:\r\n      - mcp://IP-ADDRESS for WebUI v2\r\n      - http://IP-ADDRESS/api/currentState for Local WebUI\r\n   \r\n**Mobile layout**\r\n- Settings and RT Diag collapsed by default for a cleaner look.\r\n- IR Send Rules is now more friendly for mobile use.\r\n- UI refinement\r\n\r\n**Misc**\r\n- **IR Send Rules** now supports 16bit addresses and bonus \"tink off / on\" commands.\r\n- New **Wake RetroTink on detected Profile Change** option in Settings / \"Profile Rules\".\r\n- ESP32 reboot / WebCtl reconnection process is more robust w/ faster load times and refreshes.\r\n- Settings / Profiles page is always available even when the RetroTink is asleep.\r\n- Fixed bugs related to:\r\n  - table column resize.\r\n  - Search not updating when a new file was created.\r\n\r\n**Switch Arbitration rule change**\r\n- When the last physical switch that was King turns Off and nothing else is active, S0 is allowed to take control regardless of RMTuse = 1",
+  "tag": "v0.8.5",
+  "name": "DonutShop v0.8.5",
+  "published_at": "2026-11-12T00:41:06Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.8.5",
+  "body": "- Experimental Firmware Updates / Rollback can show a False \"Error\" message starting with RetroTink Firmware 1.99.14 when updating.\r\n  - 1.99.14 changed its response to a \"fwup go \\<token>\" command. This update recognizes the old and new response.\r\n  - The Firmware still gets applied regardless, this just prevents the False Error. \r\n- \"Update Available\" badge for Experimental Firmware shows w/o having to manually refresh the page when returning to an existing WebCtl session. (if an update is available of course)",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.8.4_full.bin",
-    "size": 2067328,
-    "sha256": "176fe8f71459b5b7f3bf63ff5b84761a9709caac4f21856b40bf36546985eb39"
+    "name": "Donut_Dongle_gameID_v0.8.5_full.bin",
+    "size": 2073200,
+    "sha256": "f3f0b048e3593d8e5a9d0154f3730ebab6a06eb1137fee8e9d53f102b35f8fcd"
   },
   "recovery": {
     "name": "nora_recovery.bin",
