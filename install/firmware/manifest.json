@@ -1,14 +1,14 @@
 {
-  "tag": "v0.8.5",
-  "name": "DonutShop v0.8.5",
-  "published_at": "2026-11-12T00:41:06Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.8.5",
-  "body": "- Experimental Firmware Updates / Rollback can show a False \"Error\" message starting with RetroTink Firmware 1.99.14 when updating.\r\n  - 1.99.14 changed its response to a \"fwup go \\<token>\" command. This update recognizes the old and new response.\r\n  - The Firmware still gets applied regardless, this just prevents the False Error. \r\n- \"Update Available\" badge for Experimental Firmware shows w/o having to manually refresh the page when returning to an existing WebCtl session. (if an update is available of course)",
+  "tag": "v0.8.6",
+  "name": "Donut Dongle gameID v0.8.6",
+  "published_at": "2026-11-13T15:13:43Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.8.6",
+  "body": "**Remote**\r\n- Overall responsiveness improvement. \r\n- OSD Mirror now updates while directional buttons are being held.\r\n- Highlighted green text is much more visible.\r\n \r\n**Experimental Firmware Updates**\r\n- Simplified progress status and layout.\r\n\r\n**Misc**\r\n- \"RT System Stack\" (serial command: stack) info is now parsed correctly with RetroTink Firmware 1.99.14+\r\n- HTTP performance tweaks \r\n- IndexDB / Search tweaks",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.8.5_full.bin",
-    "size": 2073200,
-    "sha256": "f3f0b048e3593d8e5a9d0154f3730ebab6a06eb1137fee8e9d53f102b35f8fcd"
+    "name": "Donut_Dongle_gameID_v0.8.6_full.bin",
+    "size": 2078736,
+    "sha256": "1f8483a93f9746491a61d0454eef0b0f9182e2884d3b3237a738b6e8b540a75b"
   },
   "recovery": {
     "name": "nora_recovery.bin",
