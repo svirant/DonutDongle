@@ -1,14 +1,14 @@
 {
-  "tag": "v0.8.7",
-  "name": "Donut Dongle gameID v0.8.7",
-  "published_at": "2026-11-15T18:57:29Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.8.7",
-  "body": "**WebCtl**\r\n- Toast message maintenance. Some were interfering with mobile remotes upon reconnect.\r\n- UI tweaks\r\n\r\n**Misc**\r\n- Memory optimizations.\r",
+  "tag": "v0.8.8",
+  "name": "Donut Dongle gameID v0.8.8",
+  "published_at": "2026-11-16T21:00:42Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.8.8",
+  "body": "**Experimental Firmware hotfix**\r\n- Added fallback sources of RetroTink firmware and metadata.\r\n- For faster copies, change Input to a non-HDMI source and hide the OSD.",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.8.7_full.bin",
-    "size": 2073744,
-    "sha256": "8668ababe8dc3cf6b6e7dcb7bb77b5f1ff6c479d96f34465d1cbd0c9ce8b18af"
+    "name": "Donut_Dongle_gameID_v0.8.8_full.bin",
+    "size": 2078128,
+    "sha256": "83ffc41b8cd35a27d546539c76b46b7fc80e5d662fb8da86a6feb2fad43d0cca"
   },
   "recovery": {
     "name": "nora_recovery.bin",
