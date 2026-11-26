@@ -6,9 +6,10 @@ Gerbers (.zip) files needed for PCB manufacturing listed above.
  - All remaining default options should be fine
  - Let me know if you have any questions!
 
-## 3D printed VGA Passthrough case
- - Courtesy of "HerraAAV3" from the RetroTink discord. Thank you so much for contributing to the project!
- - .3MF files listed above 
+## New 3D printed Split VGA Passthrough case
+ - New Split design allows easier assembly and removal once attached.
+ - Original design courtesy of "HerraAAV3" from the RetroTink discord.
+ - .3MF file listed above 
 
 
 ### VGAPassthrough_wSharedSerial "shared serial bus"
