@@ -1,14 +1,14 @@
 {
-  "tag": "v0.8.8",
-  "name": "Donut Dongle gameID v0.8.8",
-  "published_at": "2026-11-16T21:00:42Z",
-  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.8.8",
-  "body": "**Experimental Firmware hotfix**\r\n- Added fallback sources of RetroTink firmware and metadata.\r\n- For faster copies, change Input to a non-HDMI source and hide the OSD.",
+  "tag": "v0.8.9",
+  "name": "Donut Dongle gameID v0.8.9",
+  "published_at": "2026-11-27T21:01:08Z",
+  "html_url": "https://github.com/svirant/DonutDongle/releases/tag/v0.8.9",
+  "body": "**TV Control**\r\n- Currently supports LG webOS TVs over the Network.\r\n- LG and Sony TV Control via serial using Port1 or Port2. \r\n  - Must use a TRS crossover cable.\r\n  - Easiest method is to combine a \"3.5mm to RCA male\" <-> \"RCA female to 3.5mm\" cables together connecting red to white RCA ends.\r\n  - Retrieval of custom LG TV HDMI input names not supported over serial, only Network.\r\n- Power On supported by Wake On LAN packet sent when MAC Address provided.\r\n  - On your LG TV, Enable: Settings → All Settings → Connection → Mobile Connection Management → TV On With Mobile → Turn On via Wi-Fi. \r\n  - Also Enable \"Quick Start+\" for faster network wake-up.\r\n  - Power On / Wake On LAN may not work depending on your home network setup.\r\n- Basic remote controls such as d-pad, input selection, volume control, home, settings.\r\n- When enabled, shows up in the upper right top bar with a \"TV\" button.\r\n- AUX8 + Power now uses the configured TV Control method, when using the IR Receiver.\r\n\r\n**Automation**\r\n- With TV Control you can fully utilize the \"On detected Profile Change...\" setting to:\r\n  - Wake RetroTink\r\n  - Power On TV with option to change HDMI input on TV \r\n  - Do Both \r\n\r\n**IR Remote**\r\n- Native RetroTink-4K and RetroTink-6X CE IR Remote Support, including automatic management of the RetroTink's ir-remote.txt config file.",
   "prerelease": false,
   "full": {
-    "name": "Donut_Dongle_gameID_v0.8.8_full.bin",
-    "size": 2078128,
-    "sha256": "83ffc41b8cd35a27d546539c76b46b7fc80e5d662fb8da86a6feb2fad43d0cca"
+    "name": "Donut_Dongle_gameID_v0.8.9_full.bin",
+    "size": 2212480,
+    "sha256": "daaf94db80eb536c1ada700ca0380bcd35b6b499d53872fc4dccbad61968a142"
   },
   "recovery": {
     "name": "nora_recovery.bin",
